@@ -1,6 +1,11 @@
 {
   "name": "enem-adaptive-learning",
   "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "description": "",
   "main": "index.js",
   "scripts": {
