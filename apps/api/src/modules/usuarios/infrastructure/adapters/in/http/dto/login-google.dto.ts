@@ -1,1 +1,3 @@
-export class LoginGoogleDto {}
+export class LoginGoogleDto {
+  idToken!: string;
+}
