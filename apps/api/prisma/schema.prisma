@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RoleUsuario {
+  ALUNO
+  PROFESSOR
+  ADMIN
+}
+
+enum NivelAluno {
+  INICIANTE
+  INTERMEDIARIO
+  AVANCADO
+}
+
+enum PlanoTipo {
+  GRATUITO
+  APOIO
+}
+
+enum IdempotencyStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+/// Conta autenticada (Google OAuth). Índice único em email evita duplicatas no login.
+model Usuario {
+  id           String      @id @default(uuid()) @db.Uuid
+  nome         String      @db.VarChar(120)
+  email        String      @unique @db.VarChar(255)
+  fotoUrl      String?     @map("foto_url") @db.VarChar(500)
+  role         RoleUsuario @default(ALUNO)
+  googleSub    String?     @unique @map("google_sub") @db.VarChar(255)
+  criadoEm     DateTime    @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime    @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  perfilAluno     PerfilAluno?
+  planoAssinatura PlanoAssinatura?
+  proficiencias   ProficienciaArea[]
+  usoTokensIa     UsoTokenIa[]
+  idempotencyKeys IdempotencyKey[]
+
+  @@index([role])
+  @@map("usuarios")
+}
+
+/// Dados de onboarding e preferências do aluno (1:1 com Usuario).
+model PerfilAluno {
+  userId             String     @id @map("user_id") @db.Uuid
+  cursoObjetivo      String?    @map("curso_objetivo") @db.VarChar(200)
+  tempoDiarioMinutos Int        @default(120) @map("tempo_diario_minutos")
+  nivelAtual         NivelAluno @default(INICIANTE) @map("nivel_atual")
+  atualizadoEm       DateTime   @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  usuario Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("perfis_aluno")
+}
+
+/// Plano freemium / apoio — base para rate limit dinâmico de tokens de IA.
+model PlanoAssinatura {
+  userId           String    @id @map("user_id") @db.Uuid
+  tipo             PlanoTipo @default(GRATUITO)
+  tokensDiarios    Int       @default(10) @map("tokens_diarios")
+  mercadoPagoSubId String?   @map("mercado_pago_sub_id") @db.VarChar(120)
+  ativo            Boolean   @default(true)
+  criadoEm         DateTime  @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm     DateTime  @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  usuario Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tipo, ativo])
+  @@map("planos_assinatura")
+}
+
+/// Score pré-calculado por área — leitura rápida no dashboard (evita agregar milhares de respostas).
+model ProficienciaArea {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  area          String   @db.VarChar(80)
+  score         Decimal  @default(0) @db.Decimal(5, 2)
+  totalQuestoes Int      @default(0) @map("total_questoes")
+  acertos       Int      @default(0)
+  atualizadoEm  DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  usuario Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, area])
+  @@index([userId])
+  @@map("proficiencias_area")
+}
+
+/// Contador diário de consumo de IA — suporta rate limiting por plano.
+model UsoTokenIa {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  data         DateTime @db.Date
+  consumo      Int      @default(0)
+  limite       Int      @default(10)
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  usuario Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, data])
+  @@index([userId, data(sort: Desc)])
+  @@map("uso_tokens_ia")
+}
+
+/// Chaves de idempotência — evita cobrança/processamento duplicado em retries de rede.
+model IdempotencyKey {
+  id          String            @id @default(uuid()) @db.Uuid
+  chave       String            @unique @db.VarChar(255)
+  userId      String?           @map("user_id") @db.Uuid
+  endpoint    String            @db.VarChar(120)
+  requestHash String?           @map("request_hash") @db.VarChar(64)
+  status      IdempotencyStatus @default(PROCESSING)
+  response    Json?
+  httpStatus  Int?              @map("http_status")
+  expiresAt   DateTime          @map("expires_at") @db.Timestamptz(3)
+  criadoEm    DateTime          @default(now()) @map("criado_em") @db.Timestamptz(3)
+
+  usuario Usuario? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([expiresAt])
+  @@index([userId, endpoint])
+  @@map("idempotency_keys")
+}

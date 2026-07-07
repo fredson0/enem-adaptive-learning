@@ -16,4 +16,26 @@ src/modules/[modulo]/
 └── infrastructure/
     └── adapters/
         ├── in/http/         # Controllers NestJS (Recebem requisições do Next.js)
-        └── out/             # Implementações reais (Banco Postgres/Supabase, API Gemini)
+        └── out/             # Implementações reais (Prisma/Postgres, API Gemini)
+```
+
+## 🗄️ Banco de Dados (Prisma + Railway PostgreSQL)
+
+- Schema: `prisma/schema.prisma`
+- Client gerado: `generated/prisma`
+- Migrations: `prisma/migrations/`
+
+### Comandos úteis
+
+```bash
+# Gerar client após alterar o schema
+npm run prisma:generate -w apps/api
+
+# Criar/aplicar migration (dev)
+npm run prisma:migrate -w apps/api
+
+# Aplicar migrations em produção (Railway)
+npm run prisma:migrate:deploy -w apps/api
+```
+
+Copie `apps/api/.env.example` para `apps/api/.env` e configure `DATABASE_URL` com a URL do Railway.

@@ -21,7 +21,8 @@ apps/web/.env.local
 /apps/api/dist/
 /.next/
 /apps/web/.next/
-out/
+/out/
+/apps/web/out/
 build/
 
 # 🛠️ Ferramentas de Desenvolvimento e IDEs

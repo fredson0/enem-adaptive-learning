@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { SupabaseDatabaseService } from './infrastructure/database/supabase.client';
+import { PrismaModule } from './infrastructure/database/prisma.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 
 @Module({
@@ -11,10 +11,10 @@ import { UsuariosModule } from './modules/usuarios/usuarios.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    PrismaModule,
     UsuariosModule,
   ],
   controllers: [AppController],
-  providers: [AppService, SupabaseDatabaseService],
-  exports: [SupabaseDatabaseService],
+  providers: [AppService],
 })
 export class AppModule {}
