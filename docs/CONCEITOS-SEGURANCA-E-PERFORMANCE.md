@@ -4,6 +4,8 @@
 
 **Legenda de fases:** F1 · F2 · F3 · F4 · F5 (ver [CRONOGRAMA-IMPLEMENTACAO.md](./CRONOGRAMA-IMPLEMENTACAO.md))
 
+**Infraestrutura:** [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md) (PostgreSQL + Redis no Railway, sem Supabase) · **IA:** [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) (Gemini 2.5 Flash)
+
 ---
 
 ## Índice
@@ -226,7 +228,7 @@ score = (acertos / totalQuestoes) * 100
 |---|---|
 | **O que é** | Se API externa (Gemini) falha N vezes seguidas, para de chamar por X segundos. |
 | **Por quê** | Evita cascata de timeouts; economiza dinheiro; retorna erro rápido ao aluno. |
-| **Onde** | Adapter `GeminiIaEngine` · lib opcional: `opossum` |
+| **Onde** | Adapter `GeminiIaEngine` (`gemini-2.5-flash`) · lib opcional: `opossum` |
 | **Quando** | **F3** (IA em produção) |
 
 **Estados:** `CLOSED` (normal) → `OPEN` (bloqueado) → `HALF_OPEN` (testa 1 req)
@@ -345,7 +347,7 @@ score = (acertos / totalQuestoes) * 100
 | Idempotência | `IdempotencyServicePort` | `idempotency_keys` |
 | Rate limit IA | `RateLimitServicePort` | `uso_tokens_ia`, Redis |
 | Métricas | `ProficienciaRepositoryPort` | `proficiencias_area` |
-| IA | `IaEnginePort` | — (Gemini API) |
+| IA | `IaEnginePort` | Gemini API (`gemini-2.5-flash`) — ver [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) |
 | Pagamentos | `PagamentoServicePort` | `planos_assinatura` |
 | Cache | `CacheServicePort` | Redis |
 

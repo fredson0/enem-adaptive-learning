@@ -16,7 +16,7 @@ src/modules/[modulo]/
 └── infrastructure/
     └── adapters/
         ├── in/http/         # Controllers NestJS (Recebem requisições do Next.js)
-        └── out/             # Implementações reais (Prisma/Postgres, API Gemini)
+        └── out/             # Implementações reais (Prisma/Postgres/Railway, Gemini, Groq)
 ```
 
 ## 🗄️ Banco de Dados (Prisma + Railway PostgreSQL)
@@ -39,3 +39,8 @@ npm run prisma:migrate:deploy -w apps/api
 ```
 
 Copie `apps/api/.env.example` para `apps/api/.env` e configure `DATABASE_URL` com a URL do Railway.
+
+## Documentação relacionada
+
+- [Infraestrutura Railway](../../docs/INFRAESTRUTURA-RAILWAY.md)
+- [Escolha do Modelo de IA](../../docs/ESCOLHA-MODELO-IA.md)

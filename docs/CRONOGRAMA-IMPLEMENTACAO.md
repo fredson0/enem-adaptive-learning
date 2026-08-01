@@ -2,7 +2,7 @@
 
 > Roadmap do TCC em **5 fases**. Cada fase tem entregáveis claros, dependências e estimativa de duração para estudante em tempo parcial (~10–15h/semana).
 
-**Conceitos detalhados:** [CONCEITOS-SEGURANCA-E-PERFORMANCE.md](./CONCEITOS-SEGURANCA-E-PERFORMANCE.md)
+**Conceitos detalhados:** [CONCEITOS-SEGURANCA-E-PERFORMANCE.md](./CONCEITOS-SEGURANCA-E-PERFORMANCE.md) · **Infra:** [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md) · **IA:** [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md)
 
 ---
 
@@ -149,7 +149,7 @@ gantt
 |---|--------|-----------|---------------------|
 | 3.1 | `RedisService` + `CacheServicePort` | Cache-aside | `infrastructure/cache/` |
 | 3.2 | `RateLimitServicePort` + Adapter | Rate limiting | `uso_tokens_ia` + Redis |
-| 3.3 | `IaEnginePort` + `GeminiIaEngine` | Circuit breaker | `adapters/out/gemini-ia.engine.ts` |
+| 3.3 | `IaEnginePort` + `GeminiIaEngine` (`gemini-2.5-flash`) | Circuit breaker | `adapters/out/gemini-ia.engine.ts` |
 | 3.4 | `ExplicarErroUseCase` | Rate limit + idempotência | `explicar-erro.use-case.ts` |
 | 3.5 | `GerarPdfResumoUseCase` (opcional v1) | Rate limit | `gerar-pdf-resumo.use-case.ts` |
 | 3.6 | Guard `RateLimitGuard` no ia-tutor | Rate limiting | `rate-limit.guard.ts` |
@@ -272,6 +272,8 @@ F5:  Testes, Least Privilege (prod), documentação
 | Documento | Conteúdo |
 |-----------|----------|
 | [READ.md](../READ.md) | Visão geral do projeto |
+| [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md) | Railway (API, PostgreSQL, Redis) — sem Supabase |
+| [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) | Modelo de IA, APIs gratuitas, Gemini 2.5 Flash |
 | [apps/api/README.md](../apps/api/README.md) | Comandos Prisma e estrutura backend |
 | [CONCEITOS-SEGURANCA-E-PERFORMANCE.md](./CONCEITOS-SEGURANCA-E-PERFORMANCE.md) | Detalhamento dos 20 conceitos |
 | `apps/api/prisma/schema.prisma` | Modelo de dados atual |
