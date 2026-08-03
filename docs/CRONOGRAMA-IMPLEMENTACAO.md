@@ -2,7 +2,7 @@
 
 > Roadmap do TCC em **5 fases**. Cada fase tem entregáveis claros, dependências e estimativa de duração para estudante em tempo parcial (~10–15h/semana).
 
-**Conceitos detalhados:** [CONCEITOS-SEGURANCA-E-PERFORMANCE.md](./CONCEITOS-SEGURANCA-E-PERFORMANCE.md) · **Infra:** [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md) · **IA:** [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md)
+**Conceitos detalhados:** [CONCEITOS-SEGURANCA-E-PERFORMANCE.md](./CONCEITOS-SEGURANCA-E-PERFORMANCE.md) · **Infra:** [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md) · **IA:** [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) · **Workspace UI:** [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md)
 
 ---
 
@@ -51,12 +51,18 @@ gantt
 - [x] `PrismaService` + `PrismaModule`
 - [x] `PrismaUsuariosRepository` (adapter)
 
+### ✅ Já feito (Frontend)
+
+- [x] Landing page (`apps/web`) — hero, header OSMO, animações GSAP
+- [x] Esboço workspace OSMO — sidebar, rotas placeholder
+- [x] Documentação UI: [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md)
+
 ### ⬜ Pendente imediato
 
 - [ ] Aplicar migration no Railway (`prisma migrate deploy`)
 - [ ] Adapters: `GoogleOAuthService`, `JwtAuthTokenService`
 - [ ] `UsuariosController` + DTO com validação
-- [ ] Frontend (apps/web ainda não criado)
+- [ ] Login + middleware + integrar template de chat em `/tutor`
 
 ---
 
@@ -89,9 +95,13 @@ gantt
 | 1.12 | Cliente API (`lib/api.ts`) | JWT | `fetch` com Bearer token |
 | 1.13 | Middleware de auth Next.js | JWT | `middleware.ts` |
 | 1.14 | Página de onboarding (perfil aluno) | — | `app/onboarding/page.tsx` |
-| 1.15 | Layout autenticado (sidebar/header) | RBAC (visual) | `app/(dashboard)/layout.tsx` |
+| 1.15 | Layout workspace OSMO (sidebar) | RBAC (visual) | `app/(workspace)/layout.tsx` |
+| 1.16 | Shell tutor + chat list mock | — | `app/(workspace)/tutor/page.tsx` |
+| 1.17 | Placeholders: simulados, trilha, progresso, perfil, planos | — | ver [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md) |
 
-**Entregável F1 Frontend:** Login → onboarding → home vazia autenticada.
+**Entregável F1 Frontend:** Login → onboarding → `/tutor` autenticado com shell OSMO.
+
+> **Design:** sidebar esquerda = Tutor IA + lista de chats (topo), Simulados / Trilha / Progresso (meio), Perfil (rodapé). Canto superior direito = badge de plano/tokens. Detalhes em [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md).
 
 ### Dependências entre tarefas
 
@@ -128,11 +138,11 @@ gantt
 
 | # | Tarefa | Conceitos | Arquivos principais |
 |---|--------|-----------|---------------------|
-| 2.12 | Tela "Novo Simulado" (filtro área/dificuldade) | — | `app/simulados/novo/page.tsx` |
-| 2.13 | Tela de questão (alternativas A–E) | Idempotency-Key no header | `app/simulados/[id]/page.tsx` |
+| 2.12 | Tela "Novo Simulado" (filtro área/dificuldade) | — | `app/(workspace)/simulados/novo/page.tsx` |
+| 2.13 | Tela de questão (alternativas A–E) | Idempotency-Key no header | `app/(workspace)/simulados/[id]/page.tsx` |
 | 2.14 | Timer de simulado | — | componente `SimuladoTimer` |
-| 2.15 | Tela de resultado (acertos/erros) | — | `app/simulados/[id]/resultado/page.tsx` |
-| 2.16 | Histórico de simulados | Paginação | `app/simulados/page.tsx` |
+| 2.15 | Tela de resultado (acertos/erros) | — | `app/(workspace)/simulados/[id]/resultado/page.tsx` |
+| 2.16 | Histórico de simulados | Paginação | `app/(workspace)/simulados/page.tsx` |
 | 2.17 | Estados de loading/erro globais | Tratamento de erros | `components/ErrorBoundary` |
 
 **Entregável F2 Frontend:** Fluxo completo simulado sem IA.
@@ -165,10 +175,10 @@ gantt
 | # | Tarefa | Conceitos | Arquivos principais |
 |---|--------|-----------|---------------------|
 | 3.11 | Botão "Explicar erro" pós-simulado | Rate limit UX | componente na tela de resultado |
-| 3.12 | Chat/modal do tutor IA | — | `components/TutorIaPanel.tsx` |
-| 3.13 | Indicador "Tokens IA restantes" | Rate limit visual | `components/TokenBadge.tsx` |
-| 3.14 | Página de planos (Gratuito vs Apoio) | — | `app/planos/page.tsx` |
-| 3.15 | Checkout Mercado Pago | Webhook (aguardar confirmação) | `app/planos/checkout/page.tsx` |
+| 3.12 | Chat tutor IA na sidebar + área principal | — | `components/workspace/` + `/tutor` |
+| 3.13 | Indicador "Tokens IA restantes" | Rate limit visual | `components/workspace/plan-badge.tsx` |
+| 3.14 | Página de planos (Gratuito vs Apoio) | — | `app/(workspace)/planos/page.tsx` |
+| 3.15 | Checkout Mercado Pago | Webhook (aguardar confirmação) | `app/(workspace)/planos/checkout/page.tsx` |
 | 3.16 | Polling ou toast pós-pagamento | — | feedback de ativação |
 
 **Entregável F3 Frontend:** Aluno usa tutor IA; pode assinar plano de apoio.
@@ -200,9 +210,9 @@ gantt
 
 | # | Tarefa | Conceitos | Arquivos principais |
 |---|--------|-----------|---------------------|
-| 4.11 | Dashboard de proficiência (gráfico radar/bar) | — | `app/dashboard/page.tsx` |
+| 4.11 | Dashboard de proficiência (gráfico radar/bar) | — | `app/(workspace)/progresso/page.tsx` |
 | 4.12 | Gráfico de evolução temporal | — | Recharts ou Chart.js |
-| 4.13 | Página "Minha trilha" (áreas fracas) | — | `app/trilha/page.tsx` |
+| 4.13 | Página "Minha trilha" (áreas fracas) | — | `app/(workspace)/trilha/page.tsx` |
 | 4.14 | Painel professor (lista turma) — se houver tempo | RBAC | `app/professor/page.tsx` |
 | 4.15 | Responsividade mobile | Acessibilidade | testes em celular |
 | 4.16 | PWA básico (opcional) | Inclusão digital | `manifest.json` |
@@ -275,5 +285,5 @@ F5:  Testes, Least Privilege (prod), documentação
 | [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md) | Railway (API, PostgreSQL, Redis) — sem Supabase |
 | [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) | Modelo de IA, APIs gratuitas, Gemini 2.5 Flash |
 | [apps/api/README.md](../apps/api/README.md) | Comandos Prisma e estrutura backend |
-| [CONCEITOS-SEGURANCA-E-PERFORMANCE.md](./CONCEITOS-SEGURANCA-E-PERFORMANCE.md) | Detalhamento dos 20 conceitos |
+| [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md) | Layout OSMO, rotas, design tokens, checklist por tela |
 | `apps/api/prisma/schema.prisma` | Modelo de dados atual |

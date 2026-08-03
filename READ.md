@@ -139,6 +139,7 @@ Desenvolvido com 🩵 e foco em educação para o Trabalho de Conclusão de Curs
 |-----------|-----------|
 | [Infraestrutura Railway](docs/INFRAESTRUTURA-RAILWAY.md) | Setup Railway (API, PostgreSQL, Redis) — **sem Supabase** |
 | [Escolha do Modelo de IA](docs/ESCOLHA-MODELO-IA.md) | Gemini vs alternativas gratuitas, quotas e estratégia do tutor |
+| [Workspace UI (OSMO)](docs/WORKSPACE-UI-OSMO.md) | Área logada do aluno — sidebar, rotas, checklist |
 | [Conceitos de Segurança e Performance](docs/CONCEITOS-SEGURANCA-E-PERFORMANCE.md) | 20 conceitos (idempotência, rate limit, JWT, etc.) com quando e onde implementar |
 | [Cronograma de Implementação](docs/CRONOGRAMA-IMPLEMENTACAO.md) | Roadmap em 5 fases — backend e frontend sincronizados |
 | [Backend API](apps/api/README.md) | Prisma, migrations e estrutura hexagonal |

@@ -49,6 +49,13 @@
 }
 
 :root {
+  --osmo-canvas: #111111;
+  --osmo-sidebar: #181818;
+  --osmo-surface: #111111;
+  --osmo-active: #252525;
+  --osmo-hover: #1f1f1f;
+  --osmo-card: #161616;
+  --osmo-border: #2a2a2a;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -142,4 +149,22 @@
 
 .animate-marquee {
   animation: marquee 28s linear infinite;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Fundo Osmo — cinza escuro texturizado (não preto puro) */
+.osmo-canvas-bg {
+  background-color: var(--osmo-canvas);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 3px 3px;
 }
