@@ -2,7 +2,7 @@
 
 > Roadmap do TCC em **5 fases**. Cada fase tem entregáveis claros, dependências e estimativa de duração para estudante em tempo parcial (~10–15h/semana).
 
-**Conceitos detalhados:** [CONCEITOS-SEGURANCA-E-PERFORMANCE.md](./CONCEITOS-SEGURANCA-E-PERFORMANCE.md) · **Infra:** [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md) · **IA:** [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) · **Workspace UI:** [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md)
+**Conceitos detalhados:** [CONCEITOS-SEGURANCA-E-PERFORMANCE.md](./CONCEITOS-SEGURANCA-E-PERFORMANCE.md) · **Infra:** [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md) · **IA:** [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) · **Workspace UI:** [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md) · **Escopo:** [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md)
 
 ---
 
@@ -159,16 +159,20 @@ gantt
 |---|--------|-----------|---------------------|
 | 3.1 | `RedisService` + `CacheServicePort` | Cache-aside | `infrastructure/cache/` |
 | 3.2 | `RateLimitServicePort` + Adapter | Rate limiting | `uso_tokens_ia` + Redis |
-| 3.3 | `IaEnginePort` + `GeminiIaEngine` (`gemini-2.5-flash`) | Circuit breaker | `adapters/out/gemini-ia.engine.ts` |
-| 3.4 | `ExplicarErroUseCase` | Rate limit + idempotência | `explicar-erro.use-case.ts` |
-| 3.5 | `GerarPdfResumoUseCase` (opcional v1) | Rate limit | `gerar-pdf-resumo.use-case.ts` |
-| 3.6 | Guard `RateLimitGuard` no ia-tutor | Rate limiting | `rate-limit.guard.ts` |
-| 3.7 | `PagamentoServicePort` + Mercado Pago | Webhooks, idempotência | `adapters/out/mercadopago.service.ts` |
-| 3.8 | Webhook `POST /webhooks/mercadopago` | Webhooks seguros | `webhooks.controller.ts` |
-| 3.9 | `AtivarPlanoUseCase` | Transações | atualiza `planos_assinatura` |
-| 3.10 | Endpoint `GET /usuarios/plano` | — | tokens restantes |
+| 3.3 | `IaEnginePort` + `GeminiIaEngine` (`gemini-2.5-flash` + vision) | Circuit breaker | `adapters/out/gemini-ia.engine.ts` |
+| 3.4 | Schema: `conversas`, `mensagens` + migration | Persistência chat | `schema.prisma` |
+| 3.5 | `ObjectStoragePort` + `R2ObjectStorageAdapter` | Presign S3 | `adapters/out/r2-storage.adapter.ts` |
+| 3.6 | `EnviarMensagemTutorUseCase` (texto + imagem opcional) | Rate limit | `enviar-mensagem-tutor.use-case.ts` |
+| 3.7 | `ExplicarErroUseCase` (cria conversa com contexto questão) | Rate limit + idempotência | `explicar-erro.use-case.ts` |
+| 3.8 | `POST /ia-tutor/anexos/presign` | Upload direto R2 | `ia-tutor.controller.ts` |
+| 3.9 | `GerarPdfResumoUseCase` (opcional v1) | Rate limit | `gerar-pdf-resumo.use-case.ts` |
+| 3.10 | Guard `RateLimitGuard` no ia-tutor | Rate limiting | `rate-limit.guard.ts` |
+| 3.11 | `PagamentoServicePort` + Mercado Pago | Webhooks, idempotência | `adapters/out/mercadopago.service.ts` |
+| 3.12 | Webhook `POST /webhooks/mercadopago` | Webhooks seguros | `webhooks.controller.ts` |
+| 3.13 | `AtivarPlanoUseCase` | Transações | atualiza `planos_assinatura` |
+| 3.14 | Endpoint `GET /usuarios/plano` | — | tokens restantes |
 
-**Entregável F3 Backend:** Tutor IA com limite diário; upgrade de plano via Mercado Pago.
+**Entregável F3 Backend:** Tutor IA com chat persistido, upload de imagem via R2 + vision Gemini, limite diário; upgrade de plano via Mercado Pago.
 
 ### Frontend
 
@@ -176,12 +180,15 @@ gantt
 |---|--------|-----------|---------------------|
 | 3.11 | Botão "Explicar erro" pós-simulado | Rate limit UX | componente na tela de resultado |
 | 3.12 | Chat tutor IA na sidebar + área principal | — | `components/workspace/` + `/tutor` |
-| 3.13 | Indicador "Tokens IA restantes" | Rate limit visual | `components/workspace/plan-badge.tsx` |
-| 3.14 | Página de planos (Gratuito vs Apoio) | — | `app/(workspace)/planos/page.tsx` |
-| 3.15 | Checkout Mercado Pago | Webhook (aguardar confirmação) | `app/(workspace)/planos/checkout/page.tsx` |
-| 3.16 | Polling ou toast pós-pagamento | — | feedback de ativação |
+| 3.13 | **Upload de imagem no chat** (presign R2 + preview) | — | `components/workspace/chat-image-upload.tsx` |
+| 3.14 | Indicador "Tokens IA restantes" | Rate limit visual | `components/workspace/plan-badge.tsx` |
+| 3.15 | Página de planos (Gratuito vs Apoio) | — | `app/(workspace)/planos/page.tsx` |
+| 3.16 | Checkout Mercado Pago | Webhook (aguardar confirmação) | `app/(workspace)/planos/checkout/page.tsx` |
+| 3.17 | Polling ou toast pós-pagamento | — | feedback de ativação |
 
-**Entregável F3 Frontend:** Aluno usa tutor IA; pode assinar plano de apoio.
+**Entregável F3 Frontend:** Aluno usa tutor IA com texto e foto; pode assinar plano de apoio.
+
+> Escopo detalhado por tela: [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md)
 
 ---
 
@@ -202,7 +209,8 @@ gantt
 | 4.7 | Soft delete em usuários | LGPD | campo `deleted_at` |
 | 4.8 | Helmet + rate limit global (`@nestjs/throttler`) | Segurança | `main.ts` |
 | 4.9 | Health check `GET /health` | — | Railway monitoring |
-| 4.10 | Teste de carga (k6 ou Artillery) | Performance | `tests/load/` |
+| 4.10 | Job limpeza anexos R2 expirados | Lifecycle | cron + `ObjectStoragePort.delete` |
+| 4.11 | Teste de carga (k6 ou Artillery) | Performance | `tests/load/` |
 
 **Entregável F4 Backend:** API aguenta 50+ alunos simultâneos; métricas em < 200ms com cache.
 
@@ -286,4 +294,5 @@ F5:  Testes, Least Privilege (prod), documentação
 | [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) | Modelo de IA, APIs gratuitas, Gemini 2.5 Flash |
 | [apps/api/README.md](../apps/api/README.md) | Comandos Prisma e estrutura backend |
 | [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md) | Layout OSMO, rotas, design tokens, checklist por tela |
+| [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md) | Escopo oficial: telas, tutor vision, R2, fora do TCC |
 | `apps/api/prisma/schema.prisma` | Modelo de dados atual |

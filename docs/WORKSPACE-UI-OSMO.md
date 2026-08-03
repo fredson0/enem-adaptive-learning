@@ -2,7 +2,7 @@
 
 > Área autenticada onde o aluno estuda. Referência visual: **Osmo Supply / The Vault** (sidebar escura, tipografia limpa, cantos levemente arredondados, hierarquia forte).
 
-**Relacionado:** [CRONOGRAMA-IMPLEMENTACAO.md](./CRONOGRAMA-IMPLEMENTACAO.md) · [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md)
+**Relacionado:** [CRONOGRAMA-IMPLEMENTACAO.md](./CRONOGRAMA-IMPLEMENTACAO.md) · [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) · [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md)
 
 ---
 
@@ -51,7 +51,7 @@ A sidebar reflete essa ordem de importância na UX: **Tutor IA (chats) no topo**
 | **Sidebar — seção 1** | Tutor IA + lista de chats | Sempre visível; item ativo com fundo `#1c212b` |
 | **Sidebar — seção 2** | Simulados, Trilha, Progresso | Links de navegação com ícone + label |
 | **Sidebar — rodapé** | Avatar + nome do aluno | Fixo no bottom; abre `/perfil` |
-| **Topbar direita** | Badge de plano + tokens IA | Link para `/planos` |
+| **Topbar direita** | Badge de plano + tokens IA | Link para `/planos` (flutuante no `/tutor`, sem barra horizontal) |
 | **Conteúdo** | Página ativa | Fundo `#080b12`, padding generoso |
 
 ---
@@ -172,11 +172,17 @@ Reutiliza tokens da landing, adaptados ao workspace:
 
 - [x] Layout com sidebar de chats (mock)
 - [x] Área central com `HeroWave` (input + animação wave)
+- [x] Sem topbar horizontal — fundo contínuo com o chat
 - [ ] Lista de conversas da API
 - [ ] Nova conversa
 - [ ] Mensagens com streaming (opcional)
 - [ ] Contexto de questão quando veio do simulado
+- [ ] **Botão anexar imagem** (JPEG/PNG, max 2 MB, comprimir no client)
+- [ ] Preview thumbnail da imagem antes de enviar
+- [ ] Upload via presign R2 → `POST /ia-tutor/anexos/presign`
 - [ ] Indicador de tokens usados na sessão
+
+> Escopo completo do tutor (texto + vision + rate limit): [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md)
 
 ### `/simulados`
 
@@ -274,7 +280,7 @@ apps/web/
 
 | Aba | Endpoints |
 |-----|-----------|
-| Tutor IA | `POST /ia-tutor/explicar-erro`, `GET /ia-tutor/conversas` (futuro) |
+| Tutor IA | `POST /ia-tutor/conversas`, `POST /ia-tutor/conversas/:id/mensagens`, `POST /ia-tutor/anexos/presign`, `GET /ia-tutor/conversas`, `POST /ia-tutor/explicar-erro` |
 | Simulados | `POST /simulados`, `GET /simulados`, `POST /simulados/:id/resposta` |
 | Progresso | `GET /metricas/proficiencia`, `GET /metricas/evolucao` |
 | Trilha | Derivado de `proficiencias_area` (áreas abaixo de threshold) |

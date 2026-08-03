@@ -24,10 +24,11 @@
 | Adaptar explicação ao nível (iniciante vs avançado) | Média | Flash |
 | Responder em português brasileiro natural | Baixa | Flash |
 | Resumir tema de questão ENEM | Média | Flash |
+| **Interpretar foto de questão ou resolução (vision)** | Média | Flash (multimodal) |
 | Gerar trilha de estudo personalizada | Alta | Flash ou Pro |
 | Corrigir redação ENEM (competências) | Muito alta | Pro (fase 2) |
 
-**Conclusão:** Para o MVP do TCC (explicar erro + resumo), **Gemini 2.5 Flash é suficiente e recomendado.**
+**Conclusão:** Para o MVP do TCC (explicar erro + resumo + **foto no chat**), **Gemini 2.5 Flash é suficiente e recomendado.**
 
 ---
 
@@ -69,6 +70,34 @@
 | Latência variável | Circuit breaker + loading no front |
 | Dados usados p/ treino (free tier) | Não enviar PII; aviso na política de privacidade |
 | Modelos antigos deprecados | Usar `gemini-2.5-flash`, nunca `2.0-flash` |
+| Vision mais caro que texto | Mensagem com imagem = **2×** no rate limit; max 2 MB |
+
+---
+
+## Vision (upload de imagem no tutor)
+
+O Gemini 2.5 Flash aceita **texto + imagem** na mesma requisição. Casos de uso no ENEM+:
+
+| Caso | Exemplo |
+|------|---------|
+| Foto de questão impressa | Aluno não achou no banco — tira foto do caderno |
+| Foto da resolução | "Minha conta está certa?" |
+| Print de atividade | Material de sala de aula |
+
+**Storage:** imagens ficam no **Cloudflare R2** (não Railway). Ver [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md) e [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md#object-storage-cloudflare-r2).
+
+**Adapter:**
+
+```typescript
+interface IaEnginePort {
+  enviarMensagem(input: {
+    texto: string;
+    historico: Mensagem[];
+    contextoQuestao?: ContextoQuestao;
+    imagemUrl?: string; // URL assinada R2 → Gemini baixa e interpreta
+  }): Promise<string>;
+}
+```
 
 ---
 
@@ -129,6 +158,7 @@ interface IaEnginePort {
 | Fase | Entrega IA | Modelo |
 |------|-----------|--------|
 | **F3** | Explicar erro pós-simulado | `gemini-2.5-flash` |
+| **F3** | Chat com upload de imagem (vision) | `gemini-2.5-flash` |
 | **F3** | Rate limit + contador tokens | — |
 | **F4** | Resumo de tema fraco | `gemini-2.5-flash` |
 | **F5+** | Correção de redação (opcional) | `gemini-2.5-pro` (pago) |

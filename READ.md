@@ -8,7 +8,7 @@ O grande diferencial do projeto é o seu foco em acessibilidade social. Através
 
 🚀 Principais Funcionalidades
 
-🧠 Tutor Virtual IA: Integração com a API do **Gemini 2.5 Flash** (Google AI Studio) para explicar erros em questões do ENEM de forma didática e adaptada ao nível do aluno. Free tier disponível para desenvolvimento e piloto.
+🧠 Tutor Virtual IA: Integração com a API do **Gemini 2.5 Flash** (Google AI Studio) para explicar erros em questões do ENEM de forma didática e adaptada ao nível do aluno. Suporte a **upload de foto** (questão ou resolução no caderno) via **Gemini Vision**, com arquivos armazenados no **Cloudflare R2** (não no Railway). Free tier disponível para desenvolvimento e piloto.
 
 🔐 Autenticação Segura (Google Login): Acesso facilitado e seguro via OAuth2 com o Google, sem necessidade de gerenciamento local de senhas.
 
@@ -40,9 +40,9 @@ Banco de Dados (Relacional): PostgreSQL hospedado no **Railway** + ORM **Prisma*
 
 Cache & Rate Limit: Redis (Railway ou Upstash).
 
-Integrações Externas (Adapters): Google OAuth2, Gemini API (`gemini-2.5-flash`), Mercado Pago API.
+Integrações Externas (Adapters): Google OAuth2, Gemini API (`gemini-2.5-flash`, vision), **Cloudflare R2** (anexos do tutor), Mercado Pago API.
 
-Infraestrutura: **Vercel** (Frontend) + **Railway** (API, PostgreSQL e Redis).
+Infraestrutura: **Vercel** (Frontend) + **Railway** (API, PostgreSQL e Redis) + **Cloudflare R2** (object storage).
 
 📂 Estrutura de Diretórios (Backend Hexagonal)
 
@@ -137,7 +137,8 @@ Desenvolvido com 🩵 e foco em educação para o Trabalho de Conclusão de Curs
 
 | Documento | Descrição |
 |-----------|-----------|
-| [Infraestrutura Railway](docs/INFRAESTRUTURA-RAILWAY.md) | Setup Railway (API, PostgreSQL, Redis) — **sem Supabase** |
+| [Infraestrutura Railway](docs/INFRAESTRUTURA-RAILWAY.md) | Setup Railway (API, PostgreSQL, Redis) + R2 para imagens |
+| [Escopo do Produto](docs/ESCOPO-PRODUTO.md) | Telas, tutor vision, storage, fora do TCC |
 | [Escolha do Modelo de IA](docs/ESCOLHA-MODELO-IA.md) | Gemini vs alternativas gratuitas, quotas e estratégia do tutor |
 | [Workspace UI (OSMO)](docs/WORKSPACE-UI-OSMO.md) | Área logada do aluno — sidebar, rotas, checklist |
 | [Conceitos de Segurança e Performance](docs/CONCEITOS-SEGURANCA-E-PERFORMANCE.md) | 20 conceitos (idempotência, rate limit, JWT, etc.) com quando e onde implementar |

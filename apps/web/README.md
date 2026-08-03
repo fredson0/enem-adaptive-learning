@@ -42,3 +42,4 @@ app/(workspace)/        # Rotas autenticadas (shell OSMO)
 
 - [Cronograma](../../docs/CRONOGRAMA-IMPLEMENTACAO.md)
 - [Workspace UI OSMO](../../docs/WORKSPACE-UI-OSMO.md)
+- [Escopo do Produto](../../docs/ESCOPO-PRODUTO.md)
