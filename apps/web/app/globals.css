@@ -51,6 +51,7 @@
 :root {
   --osmo-canvas: #111111;
   --osmo-sidebar: #181818;
+  --osmo-sidebar-width: 320px;
   --osmo-surface: #111111;
   --osmo-active: #252525;
   --osmo-hover: #1f1f1f;

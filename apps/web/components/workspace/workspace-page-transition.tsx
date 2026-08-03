@@ -1,5 +1,7 @@
 "use client";
 
+import { WorkspaceChrome } from "@/components/workspace/workspace-chrome";
+import { cn } from "@/lib/utils";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import gsap from "gsap";
@@ -11,6 +13,7 @@ export function WorkspacePageTransition({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const isTutor = pathname.startsWith("/tutor");
 
   useEffect(() => {
     if (!ref.current) return;
@@ -25,9 +28,18 @@ export function WorkspacePageTransition({
   return (
     <div
       ref={ref}
-      className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[14px] bg-[var(--osmo-surface)] text-white"
+      className="absolute inset-0 flex min-h-0 flex-col overflow-hidden bg-[var(--osmo-surface)] text-white"
     >
-      {children}
+      <WorkspaceChrome />
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col",
+          !isTutor &&
+            "pl-[calc(var(--osmo-sidebar-width)+1.25rem)] md:pl-[calc(var(--osmo-sidebar-width)+1.5rem)]",
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 }

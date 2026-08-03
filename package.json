@@ -12,11 +12,18 @@
     "dev": "npm run dev -w apps/web",
     "dev:api": "npm run start:dev -w apps/api",
     "dev:web": "npm run dev -w apps/web",
+    "dev:web:clean": "npm run clean:all && npm install && npm run dev -w apps/web",
+    "clean:web": "node -e \"const fs=require('fs');const p='apps/web';['.next','node_modules/.cache'].forEach(d=>fs.rmSync(p+'/'+d,{recursive:true,force:true}));\"",
+    "clean:all": "npm run clean:web && node -e \"require('fs').rmSync('node_modules/.cache',{recursive:true,force:true})\"",
     "build:web": "npm run build -w apps/web",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "overrides": {
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  }
 }

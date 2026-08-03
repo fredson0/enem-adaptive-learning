@@ -6,6 +6,7 @@
 export const OSMO = {
   canvas: "#111111",
   sidebar: "#181818",
+  sidebarWidth: 320,
   surface: "#111111",
   active: "#252525",
   hover: "#1f1f1f",

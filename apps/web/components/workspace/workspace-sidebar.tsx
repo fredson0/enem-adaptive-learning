@@ -58,8 +58,8 @@ export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSi
   const isTutorExpanded = expandedSection === "tutor";
 
   return (
-    <aside className="flex h-full w-[260px] shrink-0 flex-col overflow-hidden rounded-[14px] border border-[var(--osmo-border)] bg-[var(--osmo-sidebar)]">
-      <div className="flex shrink-0 items-center justify-between px-5 py-5">
+    <aside className="absolute top-1.5 bottom-1.5 left-1.5 z-30 flex w-[var(--osmo-sidebar-width)] flex-col overflow-hidden rounded-[14px] border border-[var(--osmo-border)] bg-[var(--osmo-sidebar)]">
+      <div className="flex shrink-0 items-center justify-between px-6 py-6">
         <Link
           href={getNewTutorChatPath()}
           className="text-lg font-bold tracking-[0.18em] text-white uppercase"
@@ -69,18 +69,18 @@ export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSi
         <Asterisk className="size-4 text-[#b0ff57]" strokeWidth={2} />
       </div>
 
-      <div className="scrollbar-none flex min-h-0 flex-1 flex-col overflow-y-auto px-3 pb-3">
+      <div className="scrollbar-none flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4">
         <button
           type="button"
           onClick={() => handleSectionClick("tutor", TUTOR_NAV.href)}
           className={cn(
-            "flex w-full items-center justify-between rounded-[8px] px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-out",
+            "flex w-full items-center justify-between rounded-[10px] px-3.5 py-3 text-sm font-medium transition-all duration-300 ease-out",
             isTutorExpanded
               ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
               : "text-white/70 hover:bg-[var(--osmo-hover)] hover:text-white",
           )}
         >
-          <span className="inline-flex items-center gap-2.5">
+          <span className="inline-flex items-center gap-3">
             <TutorIcon
               className={cn(
                 "size-4 transition-colors duration-300",
@@ -100,7 +100,7 @@ export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSi
         </button>
 
         <SidebarAccordion open={isTutorExpanded} className="mb-2">
-          <div className="ml-4 border-l border-[var(--osmo-border)] pl-3">
+          <div className="ml-5 border-l border-[var(--osmo-border)] pl-3.5">
             <div className="scrollbar-none max-h-[240px] overflow-y-auto pt-1 pr-1">
               <ChatList
                 chats={MOCK_CHATS}
@@ -123,7 +123,7 @@ export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSi
                 type="button"
                 onClick={() => handleSectionClick(sectionId, item.href)}
                 className={cn(
-                  "flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2.5 text-left text-sm font-medium transition-all duration-300 ease-out",
+                  "flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm font-medium transition-all duration-300 ease-out",
                   isExpanded
                     ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
                     : "text-white/70 hover:bg-[var(--osmo-hover)] hover:text-white",
@@ -137,17 +137,17 @@ export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSi
         </nav>
       </div>
 
-      <div className="shrink-0 p-3">
+      <div className="shrink-0 p-4">
         <Link
           href={PROFILE_NAV.href}
           className={cn(
-            "flex items-center gap-3 rounded-[8px] px-2 py-2 transition-all duration-300 ease-out",
+            "flex items-center gap-3 rounded-[10px] px-2.5 py-2.5 transition-all duration-300 ease-out",
             isActivePath(pathname, PROFILE_NAV.href)
               ? "bg-[var(--osmo-active)]"
               : "hover:bg-[var(--osmo-hover)]",
           )}
         >
-          <div className="flex size-8 items-center justify-center rounded-full bg-[#2a2a2a] text-xs font-semibold text-white">
+          <div className="flex size-9 items-center justify-center rounded-full bg-[#2a2a2a] text-xs font-semibold text-white">
             {MOCK_USER.name
               .split(" ")
               .map((part) => part[0])

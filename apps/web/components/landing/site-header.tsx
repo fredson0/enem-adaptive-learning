@@ -336,6 +336,7 @@ export function SiteHeader() {
                     src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80"
                     alt="Estudantes estudando para o ENEM"
                     fill
+                    sizes="(max-width: 768px) 100vw, 220px"
                     className="rounded-[8px] object-cover ring-1 ring-white/10"
                   />
                 </div>

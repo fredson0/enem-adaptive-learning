@@ -881,7 +881,10 @@ export function HeroWave({
           alignItems: "center",
           justifyContent: "center",
           pointerEvents: "none",
-          padding: "24px",
+          padding:
+            variant === "workspace"
+              ? "24px 24px 24px calc(var(--osmo-sidebar-width) + 1.25rem + 24px)"
+              : "24px",
         }}
       >
         <div

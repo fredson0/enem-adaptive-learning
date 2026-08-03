@@ -2,29 +2,35 @@
 
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import UnicornScene from "unicornstudio-react";
+import UnicornScene from "unicornstudio-react/next";
 
-export const useWindowSize = () => {
-  const [windowSize, setWindowSize] = useState({
-    width: 0,
-    height: 0,
-  });
+function useWindowSize() {
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+
     const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setWindowSize({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      }, 150);
     };
 
     handleResize();
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   return windowSize;
-};
+}
 
 export function BloimAnimationBackground() {
   const { width, height } = useWindowSize();
@@ -54,6 +60,9 @@ export function BloimAnimationBackground() {
         projectId="9tVO0xGS8DIar1DF4Sqc"
         width={width}
         height={height}
+        lazyLoad
+        fps={30}
+        ariaLabel="Animação de fundo da plataforma ENEM+"
       />
     </div>
   );

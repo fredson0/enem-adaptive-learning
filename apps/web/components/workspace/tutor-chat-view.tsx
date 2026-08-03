@@ -19,6 +19,7 @@ export function TutorChatView({ chatTitle }: TutorChatViewProps) {
       variant="workspace"
       showNavbar={false}
       showHeader={!chatTitle}
+      extendLeftPx={0}
       title="Pergunte ao tutor ENEM+"
       subtitle="Explique dúvidas, revise erros de simulado ou peça resumo de qualquer tema do ENEM."
       basePlaceholder="Me explica"
