@@ -4,6 +4,7 @@ export interface GoogleUserInfo {
   email: string;
   nome: string;
   fotoUrl?: string | null;
+  googleSub?: string;
 }
 
 export interface OAuthServicePort {

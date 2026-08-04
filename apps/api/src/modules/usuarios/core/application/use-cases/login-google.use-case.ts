@@ -18,7 +18,7 @@ export class LoginGoogleUseCase {
     private readonly authTokenService: AuthTokenServicePort,
   ) {}
 
-  async execute(idToken: string): Promise<string> {
+  async execute(idToken: string): Promise<{ accessToken: string; userId: string }> {
     const googleUser = await this.oauthService.getUserInfo(idToken);
 
     let usuario = await this.usuariosRepository.buscarPorEmail(
@@ -31,9 +31,18 @@ export class LoginGoogleUseCase {
         email: googleUser.email,
         fotoUrl: googleUser.fotoUrl ?? null,
       });
-      usuario = await this.usuariosRepository.salvar(novoUsuario);
+      usuario = await this.usuariosRepository.salvar(novoUsuario, {
+        googleSub: googleUser.googleSub,
+      });
+    } else if (googleUser.fotoUrl && usuario.fotoUrl !== googleUser.fotoUrl) {
+      usuario.atualizarPerfil(usuario.nome, googleUser.fotoUrl);
+      usuario = await this.usuariosRepository.salvar(usuario, {
+        googleSub: googleUser.googleSub,
+      });
     }
 
-    return this.authTokenService.gerarToken(usuario);
+    const accessToken = await this.authTokenService.gerarToken(usuario);
+
+    return { accessToken, userId: usuario.id };
   }
 }

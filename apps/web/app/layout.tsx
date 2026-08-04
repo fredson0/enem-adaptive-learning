@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
+import { GoogleAuthProvider } from "@/components/providers/google-auth-provider";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import "./globals.css";
 
@@ -31,7 +32,9 @@ export default function RootLayout({
       className={`dark ${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full overflow-x-hidden bg-[#05070d] text-white">
-        <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <GoogleAuthProvider>
+          <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        </GoogleAuthProvider>
       </body>
     </html>
   );
