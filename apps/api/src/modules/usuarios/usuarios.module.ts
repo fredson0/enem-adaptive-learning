@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { AUTH_TOKEN_SERVICE } from './core/application/ports/auth-token.service.port';
 import { OAUTH_SERVICE } from './core/application/ports/oauth.service.port';
@@ -13,7 +14,16 @@ import { PrismaUsuariosRepository } from './infrastructure/adapters/out/persiste
 import { JwtAuthGuard } from '../../infrastructure/auth/jwt-auth.guard';
 
 @Module({
-  imports: [JwtModule.register({})],
+  imports: [
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.getOrThrow<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '7d' },
+      }),
+    }),
+  ],
   controllers: [UsuariosController],
   providers: [
     LoginGoogleUseCase,

@@ -122,13 +122,14 @@ Reutiliza tokens da landing, adaptados ao workspace:
 - [ ] Validar responsividade mobile (sidebar colapsável)
 - [x] Integrar template de chat (`ai-input-hero`) em `/tutor`
 
-### Fase 1 — Fundação (auth)
+### Fase 1 — Fundação (auth) ✅
 
-- [ ] `app/login/page.tsx` — botão Google
-- [ ] `lib/api.ts` — cliente com JWT
-- [ ] `middleware.ts` — proteger `(workspace)/*`
-- [ ] `app/onboarding/page.tsx` — nome, escola pública
-- [ ] Conectar perfil real em `WorkspaceSidebar`
+- [x] `app/login/page.tsx` — botão Google
+- [x] `lib/api.ts` — cliente com JWT
+- [x] `middleware.ts` — proteger `(workspace)/*`
+- [x] `app/onboarding/page.tsx` — nome, curso, ano escolar, tipo ensino médio
+- [x] Conectar perfil real em `WorkspaceSidebar`
+- [x] `/perfil` com dados reais da API
 - [ ] `GET /usuarios/plano` no `PlanBadge`
 
 ### Fase 2 — Simulados
@@ -234,9 +235,9 @@ Reutiliza tokens da landing, adaptados ao workspace:
 
 ### `/perfil`
 
-- [x] Placeholder avatar + campos
-- [ ] Editar nome, escola, série
-- [ ] Toggle escola pública (plano gratuito)
+- [x] Avatar + nome + email reais (API)
+- [x] Exibir plano, curso, ano escolar, tipo ensino médio, nível
+- [ ] Editar perfil inline
 - [ ] Logout
 
 ---

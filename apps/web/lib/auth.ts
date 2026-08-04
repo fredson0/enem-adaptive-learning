@@ -1,5 +1,7 @@
 export type UserPerfil = {
   cursoObjetivo: string | null;
+  serieEscolar: string | null;
+  tipoEnsinoMedio: string | null;
   nivelAtual: string;
   tempoDiarioMinutos: number;
   onboardingCompleto: boolean;
@@ -51,5 +53,9 @@ export function clearSession() {
 }
 
 export function isOnboardingComplete(user: User | null) {
-  return Boolean(user?.perfil?.onboardingCompleto);
+  if (!user?.perfil) return false;
+
+  const { cursoObjetivo, serieEscolar, tipoEnsinoMedio } = user.perfil;
+
+  return Boolean(cursoObjetivo && serieEscolar && tipoEnsinoMedio);
 }

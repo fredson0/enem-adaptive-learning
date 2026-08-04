@@ -46,29 +46,32 @@ gantt
 
 ## Estado atual do projeto (baseline)
 
-### ✅ Já feito (Backend)
+### ✅ Já feito (Backend) — atualizado 04/08/2026
 
 - [x] Estrutura hexagonal por módulos
 - [x] Entidades `Usuario`, `PerfilAluno`
 - [x] Ports: `UsuariosRepositoryPort`, `OAuthServicePort`, `AuthTokenServicePort`
-- [x] `LoginGoogleUseCase` (lógica)
-- [x] Prisma + schema otimizado (6 tabelas)
-- [x] Migration inicial SQL
-- [x] `PrismaService` + `PrismaModule`
-- [x] `PrismaUsuariosRepository` (adapter)
+- [x] `LoginGoogleUseCase`, `ObterPerfilUseCase`, `AtualizarPerfilUseCase`
+- [x] Prisma + schema (usuários, perfil, planos, proficiência, tokens)
+- [x] Migrations: init + perfil escolar (`serieEscolar`, `tipoEnsinoMedio`)
+- [x] `PrismaService` + `PrismaModule` + `PrismaUsuariosRepository`
+- [x] `GoogleOAuthService`, `JwtAuthTokenService`, `JwtAuthGuard`
+- [x] `UsuariosController` + DTOs com validação
+- [x] CORS + ValidationPipe; `docker-compose.yml` (Postgres porta **5433**)
 
-### ✅ Já feito (Frontend)
+### ✅ Já feito (Frontend) — atualizado 04/08/2026
 
 - [x] Landing page (`apps/web`) — hero, header OSMO, animações GSAP
-- [x] Esboço workspace OSMO — sidebar, rotas placeholder
+- [x] Workspace OSMO — sidebar overlay, páginas placeholder
+- [x] Login Google + onboarding + middleware + auth storage
+- [x] Sidebar e `/perfil` com usuário real da API
 - [x] Documentação UI: [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md)
 
-### ⬜ Pendente imediato
+### ⬜ Próximo (S1)
 
-- [ ] Aplicar migration no Railway (`prisma migrate deploy`)
-- [ ] Adapters: `GoogleOAuthService`, `JwtAuthTokenService`
-- [ ] `UsuariosController` + DTO com validação
-- [ ] Login + middleware + integrar template de chat em `/tutor`
+- [ ] Seed questões ENEM (`api.enem.dev`) + `GET /questoes`
+- [ ] Tela `/simulados/novo`
+- [ ] Checkpoint **E1**
 
 ---
 

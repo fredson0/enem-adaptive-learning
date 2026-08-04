@@ -1,9 +1,20 @@
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class LoginGoogleDto {
   @IsString()
   idToken!: string;
 }
+
+const SERIE_ESCOLAR = [
+  'PRIMEIRO_ANO',
+  'SEGUNDO_ANO',
+  'TERCEIRO_ANO',
+  'NAO_ESTUDA',
+] as const;
+
+const TIPO_ENSINO_MEDIO = ['PUBLICO', 'PRIVADO', 'MISTO'] as const;
+
+const NIVEL_ALUNO = ['INICIANTE', 'INTERMEDIARIO', 'AVANCADO'] as const;
 
 export class AtualizarPerfilDto {
   @IsOptional()
@@ -15,8 +26,16 @@ export class AtualizarPerfilDto {
   cursoObjetivo?: string;
 
   @IsOptional()
-  @IsString()
-  nivelAtual?: string;
+  @IsIn(SERIE_ESCOLAR)
+  serieEscolar?: (typeof SERIE_ESCOLAR)[number];
+
+  @IsOptional()
+  @IsIn(TIPO_ENSINO_MEDIO)
+  tipoEnsinoMedio?: (typeof TIPO_ENSINO_MEDIO)[number];
+
+  @IsOptional()
+  @IsIn(NIVEL_ALUNO)
+  nivelAtual?: (typeof NIVEL_ALUNO)[number];
 
   @IsOptional()
   @IsInt()

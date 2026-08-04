@@ -5,6 +5,8 @@ import type { UsuariosRepositoryPort } from '../ports/usuarios.repository.port';
 export type AtualizarPerfilInput = {
   nome?: string;
   cursoObjetivo?: string;
+  serieEscolar?: string;
+  tipoEnsinoMedio?: string;
   nivelAtual?: string;
   tempoDiarioMinutos?: number;
 };

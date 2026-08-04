@@ -21,18 +21,20 @@
 
 ---
 
-## S0 — Auth (AGORA)
+## S0 — Auth ✅ (concluído)
 
-| # | Tarefa | Prioridade |
-|---|--------|------------|
-| 0.1 | `GoogleOAuthService` (verificar idToken) | 🔴 |
-| 0.2 | `JwtAuthTokenService` | 🔴 |
-| 0.3 | `UsuariosController` login + perfil | 🔴 |
-| 0.4 | `JwtAuthGuard` + `@CurrentUser()` | 🔴 |
-| 0.5 | CORS + ValidationPipe no `main.ts` | 🔴 |
-| 0.6 | Migration deploy (local ou Railway) | 🟡 |
+| # | Tarefa | Prioridade | Status |
+|---|--------|------------|--------|
+| 0.1 | `GoogleOAuthService` (verificar idToken) | 🔴 | ✅ |
+| 0.2 | `JwtAuthTokenService` | 🔴 | ✅ |
+| 0.3 | `UsuariosController` login + perfil | 🔴 | ✅ |
+| 0.4 | `JwtAuthGuard` + `@CurrentUser()` | 🔴 | ✅ |
+| 0.5 | CORS + ValidationPipe no `main.ts` | 🔴 | ✅ |
+| 0.6 | Migration deploy (local Docker porta **5433**) | 🟡 | ✅ |
+| 0.7 | Campos perfil: `serieEscolar`, `tipoEnsinoMedio` | 🟡 | ✅ |
+| 0.8 | `start:dev` com `tsx` + `@Inject` explícito (DI) | 🟡 | ✅ |
 
-**Teste manual:** Postman/curl com idToken Google → JWT → `GET /usuarios/perfil`.
+**Teste manual:** Login Google → JWT → `GET /usuarios/perfil` → onboarding → `/tutor`.
 
 ---
 

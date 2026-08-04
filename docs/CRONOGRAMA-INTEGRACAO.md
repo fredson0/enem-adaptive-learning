@@ -18,33 +18,44 @@
 
 ---
 
-## E0 — Login E2E (AGORA)
+## E0 — Login E2E ✅ (concluído em 04/08/2026)
 
 ### Pré-requisitos
 
-| Serviço | Variável |
-|---------|----------|
-| API local | `PORT=3333`, `DATABASE_URL`, `JWT_SECRET`, `GOOGLE_CLIENT_ID` |
+| Serviço | Variável / porta |
+|---------|------------------|
+| API local | `PORT=3333`, `DATABASE_URL`, `JWT_SECRET`, `GOOGLE_CLIENT_ID`, `CORS_ORIGIN=http://localhost:3001` |
 | Web local | `NEXT_PUBLIC_API_URL=http://localhost:3333`, `NEXT_PUBLIC_GOOGLE_CLIENT_ID` |
+| PostgreSQL (Docker) | **porta host `5433`** → container `5432` (`docker compose up -d`) |
 | Google Cloud | OAuth Client ID (Web) com `http://localhost:3001` autorizado |
+
+**`DATABASE_URL` local (Docker):**
+
+```env
+DATABASE_URL=postgresql://enem:enem_dev_password@localhost:5433/enem_adaptive
+```
 
 ### Fluxo de teste
 
 ```
-1. npm run dev:api   (raiz ou apps/api)
-2. npm run dev:web
-3. Abrir http://localhost:3001/login
-4. Entrar com Google
-5. Se novo usuário → /onboarding → salvar
-6. Redirecionar /tutor
-7. DevTools → GET /usuarios/perfil com Bearer → 200
+1. docker compose up -d
+2. npm run prisma:migrate:deploy -w apps/api
+3. npm run dev:api   (raiz ou apps/api)
+4. npm run dev:web
+5. Abrir http://localhost:3001/login
+6. Entrar com Google
+7. /onboarding → nome, curso, ano escolar, tipo de ensino médio
+8. Redirecionar /tutor
+9. DevTools → GET /usuarios/perfil com Bearer → 200
 ```
 
 ### Critério de sucesso
 
-- [ ] Token persiste após refresh
-- [ ] `/tutor` sem token → redirect `/login`
-- [ ] Sidebar mostra nome do usuário (não mock)
+- [x] Token persiste após refresh
+- [x] `/tutor` sem token → redirect `/login`
+- [x] Sidebar mostra nome do usuário (não mock)
+- [x] `/perfil` com dados reais da API
+- [x] Onboarding com ano escolar + tipo de ensino médio (público/privado/misto)
 
 ---
 
@@ -100,7 +111,7 @@ PlanBadge → 30/200 IA (ou limite configurado)
 
 | Semana | Backend | Frontend | Integração |
 |--------|---------|----------|------------|
-| 1 | S0 Auth | S0 Login | **E0** |
+| 1 | S0 Auth ✅ | S0 Login ✅ | **E0** ✅ |
 | 2 | S1 Seed questões | S1 Novo simulado (mock) | E1 |
 | 3 | S2 Simulados API | S2 Fluxo simulado | **E2** |
 | 4 | S3 Tutor | S3 Chat | **E3** |
@@ -114,7 +125,7 @@ PlanBadge → 30/200 IA (ou limite configurado)
 
 | Ambiente | API | Web | DB |
 |----------|-----|-----|-----|
-| Dev | localhost:3333 | localhost:3001 | Docker/Railway |
+| Dev | localhost:3333 | localhost:3001 | Docker Postgres **localhost:5433** ou Railway |
 | Prod | Railway | Vercel | Railway Postgres |
 
 ---

@@ -1,6 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { NivelAluno, PlanoTipo, RoleUsuario } from '@generated/prisma';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  NivelAluno,
+  PlanoTipo,
+  RoleUsuario,
+  SerieEscolar,
+  TipoEnsinoMedio,
+} from '@generated/prisma';
 import { PrismaService } from '../../../../../../infrastructure/database/prisma.service';
+import { isPerfilOnboardingCompleto } from '../../../../core/application/helpers/perfil-onboarding';
 import type {
   PerfilAlunoData,
   UsuariosRepositoryPort,
@@ -10,7 +17,7 @@ import { UsuarioPrismaMapper } from './usuario.prisma.mapper';
 
 @Injectable()
 export class PrismaUsuariosRepository implements UsuariosRepositoryPort {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async buscarPorEmail(email: string): Promise<Usuario | null> {
     const row = await this.prisma.usuario.findUnique({
@@ -80,9 +87,11 @@ export class PrismaUsuariosRepository implements UsuariosRepositoryPort {
 
     return {
       cursoObjetivo: perfil.cursoObjetivo,
+      serieEscolar: perfil.serieEscolar,
+      tipoEnsinoMedio: perfil.tipoEnsinoMedio,
       nivelAtual: perfil.nivelAtual,
       tempoDiarioMinutos: perfil.tempoDiarioMinutos,
-      onboardingCompleto: Boolean(perfil.cursoObjetivo),
+      onboardingCompleto: isPerfilOnboardingCompleto(perfil),
     };
   }
 
@@ -92,6 +101,8 @@ export class PrismaUsuariosRepository implements UsuariosRepositoryPort {
       nome?: string;
       fotoUrl?: string | null;
       cursoObjetivo?: string;
+      serieEscolar?: string;
+      tipoEnsinoMedio?: string;
       nivelAtual?: string;
       tempoDiarioMinutos?: number;
     },
@@ -109,12 +120,20 @@ export class PrismaUsuariosRepository implements UsuariosRepositoryPort {
       create: {
         userId,
         cursoObjetivo: data.cursoObjetivo,
+        serieEscolar: data.serieEscolar as SerieEscolar | undefined,
+        tipoEnsinoMedio: data.tipoEnsinoMedio as TipoEnsinoMedio | undefined,
         nivelAtual: (data.nivelAtual as NivelAluno) ?? NivelAluno.INICIANTE,
         tempoDiarioMinutos: data.tempoDiarioMinutos ?? 120,
       },
       update: {
         ...(data.cursoObjetivo !== undefined
           ? { cursoObjetivo: data.cursoObjetivo }
+          : {}),
+        ...(data.serieEscolar !== undefined
+          ? { serieEscolar: data.serieEscolar as SerieEscolar }
+          : {}),
+        ...(data.tipoEnsinoMedio !== undefined
+          ? { tipoEnsinoMedio: data.tipoEnsinoMedio as TipoEnsinoMedio }
           : {}),
         ...(data.nivelAtual
           ? { nivelAtual: data.nivelAtual as NivelAluno }
@@ -129,9 +148,11 @@ export class PrismaUsuariosRepository implements UsuariosRepositoryPort {
       usuario: UsuarioPrismaMapper.toDomain(usuarioRow),
       perfil: {
         cursoObjetivo: perfilRow.cursoObjetivo,
+        serieEscolar: perfilRow.serieEscolar,
+        tipoEnsinoMedio: perfilRow.tipoEnsinoMedio,
         nivelAtual: perfilRow.nivelAtual,
         tempoDiarioMinutos: perfilRow.tempoDiarioMinutos,
-        onboardingCompleto: Boolean(perfilRow.cursoObjetivo),
+        onboardingCompleto: isPerfilOnboardingCompleto(perfilRow),
       },
     };
   }

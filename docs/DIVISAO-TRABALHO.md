@@ -13,31 +13,24 @@
 
 ---
 
-## Google Auth — implementação conjunta (Sprint S0)
+## Google Auth — implementação conjunta (Sprint S0) ✅
 
-### Já feito no código (scaffold)
+### Concluído
 
 - Backend: `GoogleOAuthService`, `JwtAuthTokenService`, `POST /usuarios/login-google`, `GET/PATCH /usuarios/perfil`, `JwtAuthGuard`
 - Frontend: `/login`, `/onboarding`, `lib/api.ts`, `lib/auth.ts`, middleware, `GoogleAuthProvider`
+- Infra local: `docker-compose.yml` (Postgres na porta **5433**)
+- Perfil: sidebar e `/perfil` com dados reais; onboarding com ano escolar e tipo de ensino médio
+- **Checkpoint E0** validado (login → onboarding → `/tutor`)
 
-### O que faremos **juntos** (não pular)
+### Referência — Google Cloud Console (já configurado)
 
-1. **Google Cloud Console**
-   - Criar projeto (ou usar existente)
-   - APIs & Services → Credentials → **OAuth 2.0 Client ID** (tipo **Web application**)
-   - Authorized JavaScript origins: `http://localhost:3001` (dev), URL da Vercel (prod)
-   - Authorized redirect URIs: não obrigatório para fluxo `@react-oauth/google` com idToken, mas manter origins corretas
-
-2. **Variáveis de ambiente**
-   - `apps/api/.env`: `GOOGLE_CLIENT_ID`, `JWT_SECRET`, `DATABASE_URL`
+1. **OAuth 2.0 Client ID** (Web application)
+2. Authorized JavaScript origins: `http://localhost:3001` (dev)
+3. Variáveis:
+   - `apps/api/.env`: `GOOGLE_CLIENT_ID`, `JWT_SECRET`, `DATABASE_URL` (porta **5433** no Docker)
    - `apps/web/.env.local`: `NEXT_PUBLIC_GOOGLE_CLIENT_ID`, `NEXT_PUBLIC_API_URL`
-
-3. **Banco**
-   - `npm run prisma:migrate -w apps/api` (local ou Railway)
-
-4. **Teste E0** (ver [CRONOGRAMA-INTEGRACAO.md](./CRONOGRAMA-INTEGRACAO.md))
-   - Login → onboarding → `/tutor`
-   - Confirmar `GET /usuarios/perfil` com Bearer 200
+4. Banco: `docker compose up -d` + `npm run prisma:migrate:deploy -w apps/api`
 
 ### Quando pedir ajuda
 

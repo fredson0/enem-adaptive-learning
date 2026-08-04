@@ -21,18 +21,19 @@
 
 ---
 
-## S0 — Auth (AGORA)
+## S0 — Auth ✅ (concluído)
 
-| # | Tarefa | Arquivo |
-|---|--------|---------|
-| 0.1 | Cliente API (`fetch` + Bearer) | `lib/api.ts` |
-| 0.2 | Storage token (cookie ou localStorage) | `lib/auth.ts` |
-| 0.3 | Tela login Google | `app/login/page.tsx` |
-| 0.4 | Onboarding (nome, escola, série) | `app/onboarding/page.tsx` |
-| 0.5 | Middleware protege `(workspace)/*` | `middleware.ts` |
-| 0.6 | Landing CTA → `/login` | `app/page.tsx` |
-
-**Não fazer agora:** redesign do workspace.
+| # | Tarefa | Arquivo | Status |
+|---|--------|---------|--------|
+| 0.1 | Cliente API (`fetch` + Bearer) | `lib/api.ts` | ✅ |
+| 0.2 | Storage token (cookie + localStorage) | `lib/auth.ts` | ✅ |
+| 0.3 | Tela login Google | `app/login/page.tsx` | ✅ |
+| 0.4 | Onboarding (nome, curso, ano escolar, ensino médio) | `app/onboarding/page.tsx` | ✅ |
+| 0.5 | Middleware protege `(workspace)/*` | `middleware.ts` | ✅ |
+| 0.6 | Landing CTA → `/login` | `app/page.tsx` | ✅ |
+| 0.7 | Perfil real na sidebar | `workspace-sidebar.tsx` | ✅ |
+| 0.8 | Página `/perfil` com dados da API | `app/(workspace)/perfil/page.tsx` | ✅ |
+| 0.9 | Guard de onboarding incompleto | `onboarding-guard.tsx` | ✅ |
 
 ---
 

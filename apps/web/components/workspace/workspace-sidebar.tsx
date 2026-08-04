@@ -9,7 +9,8 @@ import {
   TUTOR_NAV,
   WORKSPACE_NAV,
 } from "@/lib/workspace-nav";
-import { MOCK_CHATS, MOCK_USER } from "@/lib/workspace-mock";
+import { getStoredUser, type User } from "@/lib/auth";
+import { MOCK_CHATS } from "@/lib/workspace-mock";
 import { getNewTutorChatPath, isNewTutorChatPath } from "@/lib/tutor-navigation";
 import { Asterisk, ChevronRight, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
@@ -30,6 +31,15 @@ type WorkspaceSidebarProps = {
   activeChatId?: string;
 };
 
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
 export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -40,9 +50,14 @@ export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSi
   const [expandedSection, setExpandedSection] = useState<SectionId | null>(
     () => getSectionFromPath(pathname),
   );
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     setExpandedSection(getSectionFromPath(pathname));
+  }, [pathname]);
+
+  useEffect(() => {
+    setUser(getStoredUser());
   }, [pathname]);
 
   const handleSectionClick = (id: SectionId, href: string) => {
@@ -147,18 +162,25 @@ export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSi
               : "hover:bg-[var(--osmo-hover)]",
           )}
         >
-          <div className="flex size-9 items-center justify-center rounded-full bg-[#2a2a2a] text-xs font-semibold text-white">
-            {MOCK_USER.name
-              .split(" ")
-              .map((part) => part[0])
-              .join("")
-              .slice(0, 2)}
-          </div>
+          {user?.fotoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={user.fotoUrl}
+              alt=""
+              className="size-9 shrink-0 rounded-full object-cover"
+            />
+          ) : (
+            <div className="flex size-9 items-center justify-center rounded-full bg-[#2a2a2a] text-xs font-semibold text-white">
+              {getInitials(user?.nome ?? "U")}
+            </div>
+          )}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-white">
-              {MOCK_USER.name}
+              {user?.nome ?? "Usuário"}
             </p>
-            <p className="truncate text-xs text-white/40">{MOCK_USER.email}</p>
+            <p className="truncate text-xs text-white/40">
+              {user?.email ?? ""}
+            </p>
           </div>
           <MoreHorizontal
             className="size-4 shrink-0 text-white/30"

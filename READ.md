@@ -91,11 +91,15 @@ npm install
 
 Configure as Variáveis de Ambiente (apps/api/.env):
 
-# Database (Railway)
-DATABASE_URL="postgresql://user:password@containers-us-west-XX.railway.app:5432/railway"
+```env
+# Database — Docker local (porta 5433) ou Railway
+DATABASE_URL="postgresql://enem:enem_dev_password@localhost:5433/enem_adaptive"
 
 # JWT Auth
 JWT_SECRET="sua_chave_secreta_super_segura"
+
+# CORS (frontend)
+CORS_ORIGIN="http://localhost:3001"
 
 # Externals
 GOOGLE_CLIENT_ID="seu_client_id.apps.googleusercontent.com"
@@ -103,7 +107,14 @@ GEMINI_API_KEY="sua_chave_do_google_ai_studio"
 GEMINI_MODEL="gemini-2.5-flash"
 MERCADOPAGO_ACCESS_TOKEN="seu_token_do_mercado_pago"
 REDIS_URL="redis://localhost:6379"
+```
 
+Suba o banco e aplique migrations:
+
+```bash
+docker compose up -d
+npm run prisma:migrate:deploy -w apps/api
+```
 
 Execute o ambiente de desenvolvimento:
 
@@ -121,8 +132,9 @@ npm run dev:api
 |-----|-------|---------|
 | Frontend (`apps/web`) | **3001** | `npm run dev:web` |
 | Backend (`apps/api`) | **3333** | `npm run dev:api` |
+| PostgreSQL (Docker) | **5433** | `docker compose up -d` |
 
-> Evita conflito com projetos nas portas 3000 e 4200.
+> A porta **5433** evita conflito com Postgres local na 5432. O frontend usa 3001 para não colidir com outros apps na 3000.
 
 
 📈 Impacto Acadêmico e Social

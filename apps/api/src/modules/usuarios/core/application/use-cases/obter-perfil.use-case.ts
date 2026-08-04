@@ -27,6 +27,8 @@ export class ObterPerfilUseCase {
       role: usuario.role,
       perfil: perfil ?? {
         cursoObjetivo: null,
+        serieEscolar: null,
+        tipoEnsinoMedio: null,
         nivelAtual: 'INICIANTE',
         tempoDiarioMinutos: 120,
         onboardingCompleto: false,

@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: enem-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: enem
+      POSTGRES_PASSWORD: enem_dev_password
+      POSTGRES_DB: enem_adaptive
+    volumes:
+      - enem_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U enem -d enem_adaptive"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  enem_postgres_data:

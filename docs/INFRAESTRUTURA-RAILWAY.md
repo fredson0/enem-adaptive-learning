@@ -119,14 +119,39 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=<mesmo-client-id>
 | **Produção** | Railway PostgreSQL | Railway Redis | Railway deploy |
 | **TCC demo** | Railway (mesmo de prod) | Railway | Railway |
 
-### Dev local com Docker (opcional)
+### Dev local com Docker (recomendado)
+
+Na raiz do monorepo:
+
+```bash
+docker compose up -d
+```
+
+| Serviço | Porta no host | Credenciais |
+|---------|---------------|-------------|
+| PostgreSQL | **5433** | user `enem`, senha `enem_dev_password`, db `enem_adaptive` |
+
+`.env` em `apps/api/.env`:
+
+```env
+DATABASE_URL="postgresql://enem:enem_dev_password@localhost:5433/enem_adaptive"
+CORS_ORIGIN="http://localhost:3001"
+```
+
+Migrations:
+
+```bash
+npm run prisma:migrate:deploy -w apps/api
+```
+
+### Dev local manual (alternativa)
 
 ```bash
 docker run -d --name enem-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:16
 docker run -d --name enem-redis -p 6379:6379 redis:7
 ```
 
-`.env` local:
+`.env` local (sem compose):
 
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres?schema=public"

@@ -19,6 +19,19 @@ enum NivelAluno {
   AVANCADO
 }
 
+enum SerieEscolar {
+  PRIMEIRO_ANO
+  SEGUNDO_ANO
+  TERCEIRO_ANO
+  NAO_ESTUDA
+}
+
+enum TipoEnsinoMedio {
+  PUBLICO
+  PRIVADO
+  MISTO
+}
+
 enum PlanoTipo {
   GRATUITO
   APOIO
@@ -53,11 +66,13 @@ model Usuario {
 
 /// Dados de onboarding e preferências do aluno (1:1 com Usuario).
 model PerfilAluno {
-  userId             String     @id @map("user_id") @db.Uuid
-  cursoObjetivo      String?    @map("curso_objetivo") @db.VarChar(200)
-  tempoDiarioMinutos Int        @default(120) @map("tempo_diario_minutos")
-  nivelAtual         NivelAluno @default(INICIANTE) @map("nivel_atual")
-  atualizadoEm       DateTime   @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+  userId             String           @id @map("user_id") @db.Uuid
+  cursoObjetivo      String?          @map("curso_objetivo") @db.VarChar(200)
+  serieEscolar       SerieEscolar?    @map("serie_escolar")
+  tipoEnsinoMedio    TipoEnsinoMedio? @map("tipo_ensino_medio")
+  tempoDiarioMinutos Int              @default(120) @map("tempo_diario_minutos")
+  nivelAtual         NivelAluno       @default(INICIANTE) @map("nivel_atual")
+  atualizadoEm       DateTime         @updatedAt @map("atualizado_em") @db.Timestamptz(3)
 
   usuario Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
 

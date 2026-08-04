@@ -4,6 +4,8 @@ export const USUARIOS_REPOSITORY = Symbol('USUARIOS_REPOSITORY');
 
 export type PerfilAlunoData = {
   cursoObjetivo: string | null;
+  serieEscolar: string | null;
+  tipoEnsinoMedio: string | null;
   nivelAtual: string;
   tempoDiarioMinutos: number;
   onboardingCompleto: boolean;
@@ -23,6 +25,8 @@ export interface UsuariosRepositoryPort {
       nome?: string;
       fotoUrl?: string | null;
       cursoObjetivo?: string;
+      serieEscolar?: string;
+      tipoEnsinoMedio?: string;
       nivelAtual?: string;
       tempoDiarioMinutos?: number;
     },

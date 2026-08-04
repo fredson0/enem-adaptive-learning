@@ -8,6 +8,12 @@ import {
   setSession,
   type User,
 } from "@/lib/auth";
+import {
+  SERIE_ESCOLAR_OPTIONS,
+  TIPO_ENSINO_MEDIO_OPTIONS,
+  type SerieEscolar,
+  type TipoEnsinoMedio,
+} from "@/lib/profile-labels";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -15,6 +21,10 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [nome, setNome] = useState("");
   const [cursoObjetivo, setCursoObjetivo] = useState("");
+  const [serieEscolar, setSerieEscolar] = useState<SerieEscolar | "">("");
+  const [tipoEnsinoMedio, setTipoEnsinoMedio] = useState<TipoEnsinoMedio | "">(
+    "",
+  );
   const [nivelAtual, setNivelAtual] = useState("INICIANTE");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +44,12 @@ export default function OnboardingPage() {
     }
 
     setNome(user.nome);
+    setCursoObjetivo(user.perfil.cursoObjetivo ?? "");
+    setSerieEscolar((user.perfil.serieEscolar as SerieEscolar | null) ?? "");
+    setTipoEnsinoMedio(
+      (user.perfil.tipoEnsinoMedio as TipoEnsinoMedio | null) ?? "",
+    );
+    setNivelAtual(user.perfil.nivelAtual ?? "INICIANTE");
   }, [router]);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -42,6 +58,11 @@ export default function OnboardingPage() {
 
     if (!token) {
       router.replace("/login");
+      return;
+    }
+
+    if (!serieEscolar || !tipoEnsinoMedio) {
+      setError("Preencha a série escolar e o tipo de ensino médio.");
       return;
     }
 
@@ -55,6 +76,8 @@ export default function OnboardingPage() {
         body: {
           nome,
           cursoObjetivo,
+          serieEscolar,
+          tipoEnsinoMedio,
           nivelAtual,
         },
       });
@@ -103,6 +126,54 @@ export default function OnboardingPage() {
               required
             />
           </label>
+
+          <label className="block">
+            <span className="text-sm text-white/55">Ano escolar</span>
+            <select
+              value={serieEscolar}
+              onChange={(e) =>
+                setSerieEscolar(e.target.value as SerieEscolar | "")
+              }
+              className="mt-2 w-full rounded-[10px] border border-white/10 bg-[#111] px-4 py-3 text-white outline-none focus:border-white/20"
+              required
+            >
+              <option value="" disabled>
+                Selecione
+              </option>
+              {SERIE_ESCOLAR_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <fieldset className="block">
+            <legend className="text-sm text-white/55">
+              Seu ensino médio foi predominantemente
+            </legend>
+            <div className="mt-3 space-y-2">
+              {TIPO_ENSINO_MEDIO_OPTIONS.map((option) => (
+                <label
+                  key={option.value}
+                  className="flex cursor-pointer items-start gap-3 rounded-[10px] border border-white/10 bg-[#111] px-4 py-3 text-sm text-white transition hover:border-white/20"
+                >
+                  <input
+                    type="radio"
+                    name="tipoEnsinoMedio"
+                    value={option.value}
+                    checked={tipoEnsinoMedio === option.value}
+                    onChange={(e) =>
+                      setTipoEnsinoMedio(e.target.value as TipoEnsinoMedio)
+                    }
+                    className="mt-0.5"
+                    required
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
           <label className="block">
             <span className="text-sm text-white/55">Nível atual</span>
