@@ -125,22 +125,32 @@ Cenário: **50 alunos**, cada um usa o tutor **3 vezes/dia**, ~800 tokens por ex
 ```
 ExplicarErroUseCase
        ↓
-  IaEnginePort          ← interface no core (não sabe se é Gemini ou Groq)
+  IaEnginePort          ← interface no core (não sabe qual provedor)
        ↓
-GeminiIaEngineAdapter   ← implementação primária (F3)
+GeminiIaEngineAdapter   ← implementação primária (F3) — Google AI Studio
+       ou
+NvidiaIaEngineAdapter   ← alternativa (build.nvidia.com) — mesmo contrato
        ou
 GroqIaEngineAdapter     ← fallback opcional (F3+)
 ```
 
-**Variáveis de ambiente:**
+**Variáveis de ambiente (F3):**
 
 ```env
-IA_PROVIDER=gemini          # gemini | groq
+IA_PROVIDER=gemini          # gemini | nvidia | groq
 GEMINI_API_KEY=sua-chave
 GEMINI_MODEL=gemini-2.5-flash
-GROQ_API_KEY=sua-chave      # opcional, fallback
+
+# NVIDIA (adicionar depois — mesma interface IaEnginePort)
+NVIDIA_API_KEY=sua-chave
+NVIDIA_MODEL=google/gemini-2.5-flash   # slug do modelo na NVIDIA
+
+# Fallback opcional
+GROQ_API_KEY=sua-chave
 GROQ_MODEL=llama-3.3-70b-versatile
 ```
+
+> **Estratégia do projeto:** começar com **Gemini direto** (Google AI Studio, grátis, simples). Na F3, o adapter `IaEnginePort` permite trocar para **NVIDIA** sem mudar use cases — útil se a NVIDIA oferecer cota generosa ou acesso multi-modelo. O rate limit (`uso_tokens_ia`) continua no backend independente do provedor.
 
 O Use Case **nunca** importa SDK do Gemini. Só chama:
 

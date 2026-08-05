@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -43,6 +44,18 @@ enum IdempotencyStatus {
   FAILED
 }
 
+enum AreaEnem {
+  LINGUAGENS
+  HUMANAS
+  NATUREZA
+  MATEMATICA
+}
+
+enum StatusSimulado {
+  EM_ANDAMENTO
+  CONCLUIDO
+}
+
 /// Conta autenticada (Google OAuth). Índice único em email evita duplicatas no login.
 model Usuario {
   id           String      @id @default(uuid()) @db.Uuid
@@ -59,9 +72,102 @@ model Usuario {
   proficiencias   ProficienciaArea[]
   usoTokensIa     UsoTokenIa[]
   idempotencyKeys IdempotencyKey[]
+  refreshTokens   RefreshToken[]
+  simulados       Simulado[]
 
   @@index([role])
   @@map("usuarios")
+}
+
+/// Banco local de questões ENEM (seed via api.enem.dev).
+model Questao {
+  id                     String   @id @default(uuid()) @db.Uuid
+  enemDevId              String   @unique @map("enem_dev_id") @db.VarChar(120)
+  ano                    Int
+  area                   AreaEnem
+  indice                 Int
+  disciplina             String   @db.VarChar(80)
+  contexto               String   @db.Text
+  introducaoAlternativas String?  @map("introducao_alternativas") @db.Text
+  alternativas           Json
+  gabarito               String   @db.VarChar(1)
+  imagemUrl              String?  @map("imagem_url") @db.VarChar(500)
+  criadoEm               DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+
+  simuladoQuestoes SimuladoQuestao[]
+  respostas        RespostaSimulado[]
+
+  @@index([area, ano])
+  @@index([ano])
+  @@map("questoes")
+}
+
+/// Simulado gerado para um aluno.
+model Simulado {
+  id              String         @id @default(uuid()) @db.Uuid
+  userId          String         @map("user_id") @db.Uuid
+  area            AreaEnem?
+  totalQuestoes   Int            @map("total_questoes")
+  respondidas     Int            @default(0)
+  acertos         Int            @default(0)
+  status          StatusSimulado @default(EM_ANDAMENTO)
+  questaoAtualIdx Int            @default(0) @map("questao_atual_idx")
+  iniciadoEm      DateTime       @default(now()) @map("iniciado_em") @db.Timestamptz(3)
+  finalizadoEm    DateTime?      @map("finalizado_em") @db.Timestamptz(3)
+
+  usuario  Usuario           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questoes SimuladoQuestao[]
+  respostas RespostaSimulado[]
+
+  @@index([userId, status])
+  @@map("simulados")
+}
+
+/// Ordem das questões dentro de um simulado.
+model SimuladoQuestao {
+  id         String @id @default(uuid()) @db.Uuid
+  simuladoId String @map("simulado_id") @db.Uuid
+  questaoId  String @map("questao_id") @db.Uuid
+  ordem      Int
+
+  simulado Simulado @relation(fields: [simuladoId], references: [id], onDelete: Cascade)
+  questao  Questao  @relation(fields: [questaoId], references: [id], onDelete: Restrict)
+
+  @@unique([simuladoId, ordem])
+  @@unique([simuladoId, questaoId])
+  @@map("simulado_questoes")
+}
+
+/// Resposta do aluno a uma questão do simulado.
+model RespostaSimulado {
+  id           String   @id @default(uuid()) @db.Uuid
+  simuladoId   String   @map("simulado_id") @db.Uuid
+  questaoId    String   @map("questao_id") @db.Uuid
+  alternativa  String   @db.VarChar(1)
+  correto      Boolean
+  respondidoEm DateTime @default(now()) @map("respondido_em") @db.Timestamptz(3)
+
+  simulado Simulado @relation(fields: [simuladoId], references: [id], onDelete: Cascade)
+  questao  Questao  @relation(fields: [questaoId], references: [id], onDelete: Restrict)
+
+  @@unique([simuladoId, questaoId])
+  @@map("respostas_simulado")
+}
+
+/// Refresh tokens opacos — só hash no banco; raw token vai em cookie HttpOnly.
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash") @db.VarChar(64)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(3)
+  criadoEm  DateTime  @default(now()) @map("criado_em") @db.Timestamptz(3)
+
+  usuario Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
 }
 
 /// Dados de onboarding e preferências do aluno (1:1 com Usuario).

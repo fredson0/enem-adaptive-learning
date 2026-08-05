@@ -11,7 +11,7 @@
 
 | Sprint | Foco | Entregável | Estimativa |
 |--------|------|------------|------------|
-| **S0** | Auth + perfil | `POST /usuarios/login-google`, `GET/PATCH /usuarios/perfil` + JWT | 3–5 dias |
+| **S0** | Auth + perfil | `POST /usuarios/login-google`, refresh, perfil + JWT | 3–5 dias |
 | **S1** | Questões | Seed enem.dev + `GET /questoes` | 3–5 dias |
 | **S2** | Simulados | Gerar, responder, finalizar, listar | 5–7 dias |
 | **S3** | Tutor IA | Conversas, mensagens, Gemini, rate limit | 5–7 dias |
@@ -26,41 +26,42 @@
 | # | Tarefa | Prioridade | Status |
 |---|--------|------------|--------|
 | 0.1 | `GoogleOAuthService` (verificar idToken) | 🔴 | ✅ |
-| 0.2 | `JwtAuthTokenService` | 🔴 | ✅ |
-| 0.3 | `UsuariosController` login + perfil | 🔴 | ✅ |
+| 0.2 | `JwtAuthTokenService` (access + refresh rotativo) | 🔴 | ✅ |
+| 0.3 | `UsuariosController` login + perfil + refresh/logout | 🔴 | ✅ |
 | 0.4 | `JwtAuthGuard` + `@CurrentUser()` | 🔴 | ✅ |
-| 0.5 | CORS + ValidationPipe no `main.ts` | 🔴 | ✅ |
+| 0.5 | CORS + ValidationPipe + Helmet no `main.ts` | 🔴 | ✅ |
 | 0.6 | Migration deploy (local Docker porta **5433**) | 🟡 | ✅ |
 | 0.7 | Campos perfil: `serieEscolar`, `tipoEnsinoMedio` | 🟡 | ✅ |
-| 0.8 | `start:dev` com `tsx` + `@Inject` explícito (DI) | 🟡 | ✅ |
+| 0.8 | `start:dev` com `tsx` | 🟡 | ✅ |
+| 0.9 | BFF Next.js: cookies HttpOnly (`auth-server.ts`) | 🟡 | ✅ |
 
-**Teste manual:** Login Google → JWT → `GET /usuarios/perfil` → onboarding → `/tutor`.
-
----
-
-## S1 — Questões (banco ENEM)
-
-| # | Tarefa |
-|---|--------|
-| 1.1 | Migration: tabela `questoes` |
-| 1.2 | Script `prisma/seed-enem.ts` (api.enem.dev, anos 2009–2023) |
-| 1.3 | `GET /questoes?area=&ano=&limit=&offset=` |
-| 1.4 | Mapear `discipline` → área ENEM (5 áreas) |
-
-**Não fazer agora:** buscar enem.dev em tempo real no simulado.
+**Teste manual:** Login Google → cookies HttpOnly → onboarding → `/tutor`.
 
 ---
 
-## S2 — Simulados
+## S1 — Questões ✅ (concluído)
 
-| # | Tarefa |
-|---|--------|
-| 2.1 | Migration: `simulados`, `respostas_simulado`, `simulado_questoes` |
-| 2.2 | `POST /simulados` — N questões aleatórias por área |
-| 2.3 | `GET /simulados` — histórico do aluno |
-| 2.4 | `GET /simulados/:id` — questão atual + progresso |
-| 2.5 | `POST /simulados/:id/respostas` — idempotente |
-| 2.6 | `POST /simulados/:id/finalizar` — score + erros |
+| # | Tarefa | Status |
+|---|--------|--------|
+| 1.1 | Migration: tabela `questoes` | ✅ |
+| 1.2 | Script `prisma/seed-enem.ts` (api.enem.dev) | ✅ |
+| 1.3 | `GET /questoes?area=&ano=&limit=&offset=` | ✅ |
+| 1.4 | Mapear `discipline` → área ENEM | ✅ |
+
+**Comando seed:** `npm run prisma:seed -w apps/api` (opcional: `SEED_YEARS=2022,2023`)
+
+---
+
+## S2 — Simulados ✅ (concluído)
+
+| # | Tarefa | Status |
+|---|--------|--------|
+| 2.1 | Migration: `simulados`, `respostas_simulado`, `simulado_questoes` | ✅ |
+| 2.2 | `POST /simulados` — N questões aleatórias por área | ✅ |
+| 2.3 | `GET /simulados` — histórico do aluno | ✅ |
+| 2.4 | `GET /simulados/:id` — questão atual + progresso | ✅ |
+| 2.5 | `POST /simulados/:id/respostas` — idempotente | ✅ |
+| 2.6 | `POST /simulados/:id/finalizar` — score + erros | ✅ |
 
 **Algoritmo v1:** aleatório por filtro. Adaptativo = pós-TCC.
 

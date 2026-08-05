@@ -1,8 +1,9 @@
 "use client";
 
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
-import { apiFetch } from "@/lib/api";
-import { getAccessToken, getStoredUser, setSession, type User } from "@/lib/auth";
+import { LogoutButton } from "@/components/workspace/logout-button";
+import { apiFetch, fetchMe } from "@/lib/api";
+import { type User } from "@/lib/auth";
 import {
   formatNivelAtual,
   formatSerieEscolar,
@@ -26,26 +27,30 @@ export default function PerfilPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = getAccessToken();
+    let cancelled = false;
 
-    if (!token) {
-      router.replace("/login");
-      return;
-    }
+    (async () => {
+      try {
+        const me = await fetchMe();
+        if (cancelled) return;
 
-    const stored = getStoredUser();
-
-    apiFetch<User>("/usuarios/perfil", { token })
-      .then((profile) => {
-        setUser(profile);
-        setSession(token, profile);
-      })
-      .catch(() => {
-        if (stored) {
-          setUser(stored);
+        if (!me) {
+          router.replace("/login");
+          return;
         }
-      })
-      .finally(() => setLoading(false));
+
+        const profile = await apiFetch<User>("/usuarios/perfil", { auth: true });
+        if (!cancelled) setUser(profile);
+      } catch {
+        if (!cancelled) router.replace("/login");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   if (loading) {
@@ -116,6 +121,8 @@ export default function PerfilPage() {
             </p>
           </div>
         </div>
+
+        <LogoutButton />
       </div>
     </WorkspaceSection>
   );

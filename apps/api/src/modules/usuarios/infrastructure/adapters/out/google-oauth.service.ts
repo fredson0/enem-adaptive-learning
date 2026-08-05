@@ -37,7 +37,7 @@ export class GoogleOAuthService implements OAuthServicePort {
         throw error;
       }
 
-      throw new UnauthorizedException('Token Google inválido');
+      throw new UnauthorizedException('Token Google inválido ou expirado');
     }
   }
 }

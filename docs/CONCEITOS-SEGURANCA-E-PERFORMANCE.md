@@ -97,7 +97,13 @@ HTTP Body → LoginGoogleDto (valida) → useCase.execute(dto.idToken)
 
 **Tabelas:** opcional `refresh_tokens` (userId, tokenHash, expiresAt, revokedAt).
 
-**Frontend (F1):** Guardar access token em memória ou cookie `httpOnly`; refresh em cookie `httpOnly` + rota `/api/auth/refresh`.
+**Frontend (F1):** Cookies `HttpOnly` no BFF Next (`/api/auth/*`); access 15min + refresh rotativo. Ver [SEGURANCA-AUTH.md](./SEGURANCA-AUTH.md).
+
+**Fluxo atual:**
+1. Front obtém `idToken` do Google
+2. Front → `POST /api/auth/login` (BFF) → Nest valida Google
+3. BFF seta cookies HttpOnly; browser **não** recebe JWT no JSON
+4. Chamadas autenticadas via `/api/backend/*` (cookie → Bearer)
 
 ---
 
@@ -111,11 +117,12 @@ HTTP Body → LoginGoogleDto (valida) → useCase.execute(dto.idToken)
 | **Quando** | **F1** |
 
 **Fluxo:**
-1. Front obtém `idToken` do Google (NextAuth ou Google Identity Services)
-2. Front envia para `POST /usuarios/login-google`
-3. API valida token → busca/cria usuário → retorna JWT
+1. Front obtém `idToken` do Google (GIS / `@react-oauth/google`)
+2. Front → BFF `POST /api/auth/login` → Nest `POST /usuarios/login-google`
+3. API valida token (`aud`, assinatura Google) → busca/cria usuário → emite access+refresh
+4. BFF seta cookies HttpOnly; JSON ao browser só com `{ user }`
 
-**Segurança:** Validar `aud` (client_id), `iss`, expiração. Nunca confiar no payload sem validar com Google.
+**Segurança:** Validar `aud` (client_id), `iss`, expiração. Nunca confiar no payload sem validar com Google. Detalhes: [SEGURANCA-AUTH.md](./SEGURANCA-AUTH.md).
 
 ---
 

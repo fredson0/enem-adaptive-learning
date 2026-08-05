@@ -18,7 +18,11 @@ export class LoginGoogleUseCase {
     private readonly authTokenService: AuthTokenServicePort,
   ) {}
 
-  async execute(idToken: string): Promise<{ accessToken: string; userId: string }> {
+  async execute(idToken: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    userId: string;
+  }> {
     const googleUser = await this.oauthService.getUserInfo(idToken);
 
     let usuario = await this.usuariosRepository.buscarPorEmail(
@@ -41,8 +45,9 @@ export class LoginGoogleUseCase {
       });
     }
 
-    const accessToken = await this.authTokenService.gerarToken(usuario);
+    const { accessToken, refreshToken } =
+      await this.authTokenService.emitirParTokens(usuario);
 
-    return { accessToken, userId: usuario.id };
+    return { accessToken, refreshToken, userId: usuario.id };
   }
 }

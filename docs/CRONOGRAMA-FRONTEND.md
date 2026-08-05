@@ -11,9 +11,9 @@
 
 | Sprint | Foco | Entregável |
 |--------|------|------------|
-| **S0** | Auth | Login Google → onboarding → `/tutor` protegido |
-| **S1** | Simulados (criar) | `/simulados/novo` + formulário |
-| **S2** | Simulados (fluxo) | Questão → resultado → histórico real |
+| **S0** | Auth | Login Google → onboarding → `/tutor` protegido | ✅ |
+| **S1** | Simulados (criar) | `/simulados/novo` + formulário | ✅ |
+| **S2** | Simulados (fluxo) | Questão → resultado → histórico real | ✅ |
 | **S3** | Tutor | Chat real + sidebar de conversas |
 | **S4** | Métricas | Progresso + trilha com API |
 | **S5** | Planos + perfil | Checkout + editar perfil |
@@ -25,11 +25,11 @@
 
 | # | Tarefa | Arquivo | Status |
 |---|--------|---------|--------|
-| 0.1 | Cliente API (`fetch` + Bearer) | `lib/api.ts` | ✅ |
-| 0.2 | Storage token (cookie + localStorage) | `lib/auth.ts` | ✅ |
+| 0.1 | Cliente API (BFF + cookies HttpOnly) | `lib/api.ts` | ✅ |
+| 0.2 | Cookies HttpOnly (sem localStorage) | `lib/auth.ts`, `lib/auth-server.ts` | ✅ |
 | 0.3 | Tela login Google | `app/login/page.tsx` | ✅ |
 | 0.4 | Onboarding (nome, curso, ano escolar, ensino médio) | `app/onboarding/page.tsx` | ✅ |
-| 0.5 | Middleware protege `(workspace)/*` | `middleware.ts` | ✅ |
+| 0.5 | Proxy protege `(workspace)/*` | `proxy.ts` | ✅ |
 | 0.6 | Landing CTA → `/login` | `app/page.tsx` | ✅ |
 | 0.7 | Perfil real na sidebar | `workspace-sidebar.tsx` | ✅ |
 | 0.8 | Página `/perfil` com dados da API | `app/(workspace)/perfil/page.tsx` | ✅ |
@@ -37,25 +37,25 @@
 
 ---
 
-## S1 — Novo simulado
+## S1 — Novo simulado ✅ (concluído)
 
-| # | Tarefa |
-|---|--------|
-| 1.1 | `/simulados/novo` — select área, qtd (10/20), ano opcional |
-| 1.2 | Submit → `POST /simulados` → redirect `/simulados/[id]` |
-| 1.3 | Loading + erro |
+| # | Tarefa | Status |
+|---|--------|--------|
+| 1.1 | `/simulados/novo` — select área, qtd (5/10/20), ano opcional | ✅ |
+| 1.2 | Submit → `POST /simulados` → redirect `/simulados/[id]` | ✅ |
+| 1.3 | Loading + erro | ✅ |
 
 ---
 
-## S2 — Fluxo simulado
+## S2 — Fluxo simulado ✅ (concluído)
 
-| # | Tarefa |
-|---|--------|
-| 2.1 | `/simulados/[id]` — enunciado, A–E, próxima |
-| 2.2 | Barra de progresso (3/20) |
-| 2.3 | Finalizar → `/simulados/[id]/resultado` |
-| 2.4 | Resultado: score + lista erros + **Explicar com IA** |
-| 2.5 | `/simulados` — lista da API (substituir mock) |
+| # | Tarefa | Status |
+|---|--------|--------|
+| 2.1 | `/simulados/[id]` — enunciado, A–E, próxima | ✅ |
+| 2.2 | Barra de progresso (N/total) | ✅ |
+| 2.3 | Finalizar → `/simulados/[id]/resultado` | ✅ |
+| 2.4 | Resultado: score + lista erros (CTA IA → S3) | ✅ |
+| 2.5 | `/simulados` — lista da API (substituir mock) | ✅ |
 
 ---
 

@@ -10,7 +10,9 @@ O grande diferencial do projeto é o seu foco em acessibilidade social. Através
 
 🧠 Tutor Virtual IA: Integração com a API do **Gemini 2.5 Flash** (Google AI Studio) para explicar erros em questões do ENEM de forma didática e adaptada ao nível do aluno. Suporte a **upload de foto** (questão ou resolução no caderno) via **Gemini Vision**, com arquivos armazenados no **Cloudflare R2** (não no Railway). Free tier disponível para desenvolvimento e piloto.
 
-🔐 Autenticação Segura (Google Login): Acesso facilitado e seguro via OAuth2 com o Google, sem necessidade de gerenciamento local de senhas.
+🔐 Autenticação Segura (Google Login): Acesso facilitado via OAuth2 com o Google. Sessão com **cookies HttpOnly** no frontend (BFF Next.js) e **refresh tokens** rotativos na API.
+
+📝 Simulados ENEM: Banco de questões reais (seed via api.enem.dev). Criar simulado por área, responder questões A–E e ver resultado com gabarito.
 
 📊 Métricas de Proficiência: Algoritmos que calculam o nível de domínio do aluno em cada área do conhecimento com base no histórico de simulados.
 
@@ -109,11 +111,13 @@ MERCADOPAGO_ACCESS_TOKEN="seu_token_do_mercado_pago"
 REDIS_URL="redis://localhost:6379"
 ```
 
-Suba o banco e aplique migrations:
+Suba o banco, aplique migrations e popule questões ENEM:
 
 ```bash
 docker compose up -d
 npm run prisma:migrate:deploy -w apps/api
+npm run prisma:seed -w apps/api
+# Opcional: limitar anos — SEED_YEARS=2022,2023 npm run prisma:seed -w apps/api
 ```
 
 Execute o ambiente de desenvolvimento:
@@ -151,6 +155,7 @@ Desenvolvido com 🩵 e foco em educação para o Trabalho de Conclusão de Curs
 |-----------|-----------|
 | [Infraestrutura Railway](docs/INFRAESTRUTURA-RAILWAY.md) | Setup Railway (API, PostgreSQL, Redis) + R2 para imagens |
 | [Escopo do Produto](docs/ESCOPO-PRODUTO.md) | Telas, tutor vision, storage, fora do TCC |
+| [Segurança Auth](docs/SEGURANCA-AUTH.md) | HttpOnly, refresh, rate limit, anti privilege-escalation |
 | [Escolha do Modelo de IA](docs/ESCOLHA-MODELO-IA.md) | Gemini vs alternativas gratuitas, quotas e estratégia do tutor |
 | [Workspace UI (OSMO)](docs/WORKSPACE-UI-OSMO.md) | Área logada do aluno — sidebar, rotas, checklist |
 | [Conceitos de Segurança e Performance](docs/CONCEITOS-SEGURANCA-E-PERFORMANCE.md) | 20 conceitos (idempotência, rate limit, JWT, etc.) com quando e onde implementar |

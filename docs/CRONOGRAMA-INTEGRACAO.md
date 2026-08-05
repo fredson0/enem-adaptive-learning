@@ -8,7 +8,7 @@
 
 | # | Nome | Quando | O que provar |
 |---|------|--------|--------------|
-| **E0** | Login E2E | Sprint S0 | Google → JWT → perfil → `/tutor` |
+| **E0** | Login E2E | Sprint S0 | Google → cookies → perfil → `/tutor` |
 | **E1** | Questões | Sprint S1 | Seed rodou; API lista questões |
 | **E2** | Simulado E2E | Sprint S2 | Criar → responder 3+ → resultado |
 | **E3** | Tutor E2E | Sprint S3 | Pergunta → resposta Gemini; explicar erro |
@@ -59,22 +59,33 @@ DATABASE_URL=postgresql://enem:enem_dev_password@localhost:5433/enem_adaptive
 
 ---
 
-## E1 — Questões
+## E1 — Questões ✅ (concluído em 05/08/2026)
 
-```
-curl http://localhost:3333/questoes?area=matematica&limit=5
-→ 5 questões com alternativas
+```bash
+npm run prisma:seed -w apps/api
+# via BFF autenticado:
+curl -H "Authorization: Bearer <token>" http://localhost:3333/questoes?area=matematica&limit=5
+→ questões com alternativas e gabarito (catálogo)
 ```
 
 ---
 
-## E2 — Simulado E2E
+## E2 — Simulado E2E ✅ (concluído em 05/08/2026)
 
 ```
-/login → /simulados/novo → escolher Matemática, 10 questões
-→ responder todas → resultado com score
-→ clicar "Explicar com IA" em 1 erro → abre /tutor com contexto
+/login → /simulados/novo → Matemática, 10 questões
+→ responder todas → resultado com score e lista de erros
+→ "Explicar com IA" (botão placeholder — E3)
 ```
+
+### Critério de sucesso
+
+- [x] Seed popula banco local (`prisma/seed-enem.ts`)
+- [x] `GET /questoes` com filtros
+- [x] Criar simulado via UI
+- [x] Responder questões com feedback imediato
+- [x] Resultado com acertos/erros e gabarito
+- [ ] "Explicar com IA" funcional (E3)
 
 ---
 
@@ -112,8 +123,8 @@ PlanBadge → 30/200 IA (ou limite configurado)
 | Semana | Backend | Frontend | Integração |
 |--------|---------|----------|------------|
 | 1 | S0 Auth ✅ | S0 Login ✅ | **E0** ✅ |
-| 2 | S1 Seed questões | S1 Novo simulado (mock) | E1 |
-| 3 | S2 Simulados API | S2 Fluxo simulado | **E2** |
+| 2 | S1 Seed questões ✅ | S1 Novo simulado ✅ | **E1** ✅ |
+| 3 | S2 Simulados API ✅ | S2 Fluxo simulado ✅ | **E2** ✅ |
 | 4 | S3 Tutor | S3 Chat | **E3** |
 | 5 | S4 Métricas | S4 Dashboard | **E4** |
 | 6 | S5 Planos | S5 Checkout | **E5** |

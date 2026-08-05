@@ -46,32 +46,35 @@ gantt
 
 ## Estado atual do projeto (baseline)
 
-### ✅ Já feito (Backend) — atualizado 04/08/2026
+### ✅ Já feito (Backend) — atualizado 05/08/2026
 
 - [x] Estrutura hexagonal por módulos
-- [x] Entidades `Usuario`, `PerfilAluno`
-- [x] Ports: `UsuariosRepositoryPort`, `OAuthServicePort`, `AuthTokenServicePort`
-- [x] `LoginGoogleUseCase`, `ObterPerfilUseCase`, `AtualizarPerfilUseCase`
-- [x] Prisma + schema (usuários, perfil, planos, proficiência, tokens)
-- [x] Migrations: init + perfil escolar (`serieEscolar`, `tipoEnsinoMedio`)
-- [x] `PrismaService` + `PrismaModule` + `PrismaUsuariosRepository`
-- [x] `GoogleOAuthService`, `JwtAuthTokenService`, `JwtAuthGuard`
-- [x] `UsuariosController` + DTOs com validação
-- [x] CORS + ValidationPipe; `docker-compose.yml` (Postgres porta **5433**)
+- [x] Entidades `Usuario`, `PerfilAluno`, `Questao`
+- [x] Ports: `UsuariosRepositoryPort`, `OAuthServicePort`, `AuthTokenServicePort`, `QuestoesRepositoryPort`, `SimuladosRepositoryPort`
+- [x] `LoginGoogleUseCase`, refresh/logout, `ObterPerfilUseCase`, `AtualizarPerfilUseCase`
+- [x] Prisma + schema (usuários, perfil, planos, proficiência, tokens, **questões, simulados**)
+- [x] Migrations: init + perfil escolar + refresh tokens + **questoes_simulados**
+- [x] `PrismaService` + adapters Prisma (usuários, questões, simulados)
+- [x] `GoogleOAuthService`, `JwtAuthTokenService` (access 15min + refresh rotativo), `JwtAuthGuard`
+- [x] `QuestoesController` — `GET /questoes`
+- [x] `SimuladosController` — CRUD fluxo completo
+- [x] Seed `prisma/seed-enem.ts` (api.enem.dev)
+- [x] CORS + ValidationPipe + Helmet; `docker-compose.yml` (Postgres **5433**)
 
-### ✅ Já feito (Frontend) — atualizado 04/08/2026
+### ✅ Já feito (Frontend) — atualizado 05/08/2026
 
 - [x] Landing page (`apps/web`) — hero, header OSMO, animações GSAP
-- [x] Workspace OSMO — sidebar overlay, páginas placeholder
-- [x] Login Google + onboarding + middleware + auth storage
+- [x] Workspace OSMO — sidebar overlay
+- [x] Login Google + onboarding + **proxy** + **cookies HttpOnly** (BFF)
 - [x] Sidebar e `/perfil` com usuário real da API
+- [x] **Simulados**: `/simulados`, `/novo`, `/[id]`, `/[id]/resultado` com API real
 - [x] Documentação UI: [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md)
 
-### ⬜ Próximo (S1)
+### ⬜ Próximo (S3)
 
-- [ ] Seed questões ENEM (`api.enem.dev`) + `GET /questoes`
-- [ ] Tela `/simulados/novo`
-- [ ] Checkpoint **E1**
+- [ ] `IaEnginePort` + adapter Gemini (`gemini-2.5-flash`)
+- [ ] `POST /ia-tutor/explicar-erro` + botão no resultado do simulado
+- [ ] Checkpoint **E3**
 
 ---
 
@@ -102,7 +105,7 @@ gantt
 | 1.10 | Tailwind + Shadcn UI setup | — | `components/ui/` |
 | 1.11 | Tela de Login com Google | OAuth2 | `app/login/page.tsx` |
 | 1.12 | Cliente API (`lib/api.ts`) | JWT | `fetch` com Bearer token |
-| 1.13 | Middleware de auth Next.js | JWT | `middleware.ts` |
+| 1.13 | Proxy de auth Next.js | JWT | `proxy.ts` |
 | 1.14 | Página de onboarding (perfil aluno) | — | `app/onboarding/page.tsx` |
 | 1.15 | Layout workspace OSMO (sidebar) | RBAC (visual) | `app/(workspace)/layout.tsx` |
 | 1.16 | Shell tutor + chat list mock | — | `app/(workspace)/tutor/page.tsx` |
@@ -301,6 +304,7 @@ F5:  Testes, Least Privilege (prod), documentação
 | [READ.md](../READ.md) | Visão geral do projeto |
 | [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md) | Railway (API, PostgreSQL, Redis) — sem Supabase |
 | [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) | Modelo de IA, APIs gratuitas, Gemini 2.5 Flash |
+| [SEGURANCA-AUTH.md](./SEGURANCA-AUTH.md) | HttpOnly, refresh, rate limit, anti privilege-escalation |
 | [apps/api/README.md](../apps/api/README.md) | Comandos Prisma e estrutura backend |
 | [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md) | Layout OSMO, rotas, design tokens, checklist por tela |
 | [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md) | Escopo oficial: telas, tutor vision, R2, fora do TCC |

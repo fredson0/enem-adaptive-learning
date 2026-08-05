@@ -83,7 +83,7 @@ Reutiliza tokens da landing, adaptados ao workspace:
 | `PlanBadge` | `components/workspace/plan-badge.tsx` | ✅ Mock |
 | `WorkspaceNavItem` | inline na sidebar | ✅ |
 | `TutorChatPanel` | `components/workspace/tutor-chat-view.tsx` + `ai-input-hero.tsx` | ✅ Esboço |
-| `SimuladoCard` | `components/workspace/simulado-card.tsx` | ⬜ F2 |
+| `SimuladoCard` | `components/workspace/simulado-card.tsx` | ✅ F2 (lista inline) |
 | `ProficienciaChart` | `components/workspace/proficiencia-chart.tsx` | ⬜ F4 |
 | `TrilhaTopicList` | `components/workspace/trilha-topic-list.tsx` | ⬜ F4 |
 
@@ -95,10 +95,10 @@ Reutiliza tokens da landing, adaptados ao workspace:
 |------|------|----------------|------|
 | `/tutor` | Chat tutor IA (default) | `ia-tutor` | F3 |
 | `/tutor/[chatId]` | Conversa específica | `ia-tutor` | F3 |
-| `/simulados` | Histórico + novo simulado | `simulados` | F2 |
-| `/simulados/novo` | Configurar simulado | `simulados` | F2 |
-| `/simulados/[id]` | Questões A–E + timer | `simulados` | F2 |
-| `/simulados/[id]/resultado` | Acertos/erros + explicar IA | `simulados` + `ia-tutor` | F2–F3 |
+| `/simulados` | Histórico + novo simulado | `simulados` | F2 ✅ |
+| `/simulados/novo` | Configurar simulado | `simulados` | F2 ✅ |
+| `/simulados/[id]` | Questões A–E + progresso | `simulados` | F2 ✅ |
+| `/simulados/[id]/resultado` | Acertos/erros + explicar IA | `simulados` + `ia-tutor` | F2 ✅ / F3 |
 | `/trilha` | Áreas fracas + próximos tópicos | `metricas` | F4 |
 | `/progresso` | Gráficos de proficiência | `metricas` | F4 |
 | `/planos` | Gratuito vs Apoio + checkout | `usuarios` + MP | F3 |
@@ -125,21 +125,21 @@ Reutiliza tokens da landing, adaptados ao workspace:
 ### Fase 1 — Fundação (auth) ✅
 
 - [x] `app/login/page.tsx` — botão Google
-- [x] `lib/api.ts` — cliente com JWT
-- [x] `middleware.ts` — proteger `(workspace)/*`
+- [x] `lib/api.ts` — BFF com cookies HttpOnly
+- [x] `proxy.ts` — proteger `(workspace)/*`
 - [x] `app/onboarding/page.tsx` — nome, curso, ano escolar, tipo ensino médio
 - [x] Conectar perfil real em `WorkspaceSidebar`
 - [x] `/perfil` com dados reais da API
 - [ ] `GET /usuarios/plano` no `PlanBadge`
 
-### Fase 2 — Simulados
+### Fase 2 — Simulados ✅
 
-- [ ] `/simulados` — lista com paginação
-- [ ] `/simulados/novo` — filtro área + dificuldade
-- [ ] `/simulados/[id]` — questão + timer + idempotency-key
-- [ ] `/simulados/[id]/resultado` — gabarito visual
-- [ ] Botão "Explicar com IA" → cria chat em `/tutor/[chatId]`
-- [ ] Estados loading/erro globais
+- [x] `/simulados` — lista do histórico (API)
+- [x] `/simulados/novo` — filtro área + quantidade + ano opcional
+- [x] `/simulados/[id]` — questão A–E + progresso
+- [x] `/simulados/[id]/resultado` — score + gabarito + erros
+- [ ] Botão "Explicar com IA" → cria chat em `/tutor/[chatId]` (F3)
+- [x] Estados loading/erro básicos
 
 ### Fase 3 — Tutor IA + Planos
 
@@ -187,30 +187,30 @@ Reutiliza tokens da landing, adaptados ao workspace:
 
 ### `/simulados`
 
-- [x] Placeholder com CTA "Novo simulado"
-- [ ] Cards de simulados (status: em andamento, concluído)
+- [x] Lista de simulados da API (status: em andamento, concluído)
+- [x] CTA "Novo simulado"
 - [ ] Filtro por área
-- [ ] Empty state para primeiro simulado
+- [x] Empty state para primeiro simulado
 
 ### `/simulados/novo`
 
-- [ ] Seleção de área (CN, CH, LC, MT, RED)
-- [ ] Dificuldade adaptativa (automática v1)
-- [ ] Preview: N questões
+- [x] Seleção de área (CN, CH, LC, MT, RED)
+- [x] Quantidade (5/10/20 questões)
+- [x] Ano opcional + preview N questões
 
 ### `/simulados/[id]`
 
-- [ ] Enunciado + imagem (se houver)
-- [ ] Alternativas A–E
+- [x] Enunciado + alternativas A–E
+- [x] Barra de progresso
 - [ ] Timer
-- [ ] Navegação entre questões
-- [ ] Finalizar simulado
+- [ ] Navegação entre questões (só sequencial v1)
+- [x] Finalizar simulado
 
 ### `/simulados/[id]/resultado`
 
-- [ ] Score + breakdown por área
-- [ ] Lista de erros clicáveis
-- [ ] "Explicar erro com IA" por questão
+- [x] Score + lista de erros
+- [x] Gabarito por questão errada
+- [ ] "Explicar erro com IA" funcional (placeholder → F3)
 
 ### `/trilha`
 
@@ -282,7 +282,7 @@ apps/web/
 | Aba | Endpoints |
 |-----|-----------|
 | Tutor IA | `POST /ia-tutor/conversas`, `POST /ia-tutor/conversas/:id/mensagens`, `POST /ia-tutor/anexos/presign`, `GET /ia-tutor/conversas`, `POST /ia-tutor/explicar-erro` |
-| Simulados | `POST /simulados`, `GET /simulados`, `POST /simulados/:id/resposta` |
+| Simulados | `POST /simulados`, `GET /simulados`, `GET /simulados/:id`, `POST /simulados/:id/respostas`, `POST /simulados/:id/finalizar` |
 | Progresso | `GET /metricas/proficiencia`, `GET /metricas/evolucao` |
 | Trilha | Derivado de `proficiencias_area` (áreas abaixo de threshold) |
 | Planos | `GET /usuarios/plano`, webhook Mercado Pago |
@@ -292,10 +292,10 @@ apps/web/
 
 ## Próximos passos imediatos
 
-1. Rodar `npm run dev:web` e abrir `/tutor`, `/simulados`, etc.
-2. Validar navegação e visual com você
-3. Integrar seu **template de chat** em `/tutor`
-4. Retomar backend F1 (auth) em paralelo
+1. Rodar seed: `npm run prisma:seed -w apps/api` (opcional: `SEED_YEARS=2022,2023`)
+2. Testar fluxo: `/simulados/novo` → responder → `/resultado`
+3. **S3:** `IaEnginePort` + `POST /ia-tutor/explicar-erro` + botão no resultado
+4. Integrar template de chat em `/tutor` com contexto da questão errada
 
 ---
 

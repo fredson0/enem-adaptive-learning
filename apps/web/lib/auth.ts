@@ -1,3 +1,10 @@
+/** Nomes dos cookies HttpOnly (só o servidor Next lê/escreve). */
+export const ACCESS_COOKIE = "enem_access_token";
+export const REFRESH_COOKIE = "enem_refresh_token";
+
+export const ACCESS_MAX_AGE_SEC = 60 * 15; // 15 min
+export const REFRESH_MAX_AGE_SEC = 60 * 60 * 24 * 7; // 7 dias
+
 export type UserPerfil = {
   cursoObjetivo: string | null;
   serieEscolar: string | null;
@@ -16,41 +23,10 @@ export type User = {
   perfil: UserPerfil;
 };
 
-export type LoginResponse = {
+export type AuthTokens = {
   accessToken: string;
-  user: User;
+  refreshToken: string;
 };
-
-const TOKEN_KEY = "enem_access_token";
-const USER_KEY = "enem_user";
-
-export function getAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setSession(accessToken: string, user: User) {
-  localStorage.setItem(TOKEN_KEY, accessToken);
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
-  document.cookie = `enem_access_token=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-}
-
-export function getStoredUser(): User | null {
-  if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem(USER_KEY);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as User;
-  } catch {
-    return null;
-  }
-}
-
-export function clearSession() {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
-  document.cookie = "enem_access_token=; path=/; max-age=0; SameSite=Lax";
-}
 
 export function isOnboardingComplete(user: User | null) {
   if (!user?.perfil) return false;
@@ -58,4 +34,16 @@ export function isOnboardingComplete(user: User | null) {
   const { cursoObjetivo, serieEscolar, tipoEnsinoMedio } = user.perfil;
 
   return Boolean(cursoObjetivo && serieEscolar && tipoEnsinoMedio);
+}
+
+/** Cookie options para Set-Cookie no Route Handler (domínio do Next). */
+export function authCookieOptions(maxAge: number) {
+  const secure = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    secure,
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge,
+  };
 }

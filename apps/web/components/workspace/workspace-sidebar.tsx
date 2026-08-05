@@ -9,7 +9,8 @@ import {
   TUTOR_NAV,
   WORKSPACE_NAV,
 } from "@/lib/workspace-nav";
-import { getStoredUser, type User } from "@/lib/auth";
+import { fetchMe } from "@/lib/api";
+import { type User } from "@/lib/auth";
 import { MOCK_CHATS } from "@/lib/workspace-mock";
 import { getNewTutorChatPath, isNewTutorChatPath } from "@/lib/tutor-navigation";
 import { Asterisk, ChevronRight, MoreHorizontal } from "lucide-react";
@@ -57,7 +58,19 @@ export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSi
   }, [pathname]);
 
   useEffect(() => {
-    setUser(getStoredUser());
+    let cancelled = false;
+
+    fetchMe()
+      .then((profile) => {
+        if (!cancelled) setUser(profile);
+      })
+      .catch(() => {
+        if (!cancelled) setUser(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [pathname]);
 
   const handleSectionClick = (id: SectionId, href: string) => {

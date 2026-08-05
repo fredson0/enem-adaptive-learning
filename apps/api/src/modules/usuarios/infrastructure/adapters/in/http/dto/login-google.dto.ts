@@ -1,7 +1,17 @@
-import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 export class LoginGoogleDto {
   @IsString()
+  @MinLength(20)
   idToken!: string;
 }
 
@@ -16,13 +26,33 @@ const TIPO_ENSINO_MEDIO = ['PUBLICO', 'PRIVADO', 'MISTO'] as const;
 
 const NIVEL_ALUNO = ['INICIANTE', 'INTERMEDIARIO', 'AVANCADO'] as const;
 
+export class RefreshTokenDto {
+  @IsString()
+  @MinLength(20)
+  refreshToken!: string;
+}
+
+export class LogoutDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(20)
+  refreshToken?: string;
+}
+
+/**
+ * Campos permitidos no perfil. role, plano, tokensDiarios etc. são
+ * rejeitados pelo ValidationPipe (forbidNonWhitelisted).
+ */
 export class AtualizarPerfilDto {
   @IsOptional()
   @IsString()
+  @MinLength(2)
+  @MaxLength(120)
   nome?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   cursoObjetivo?: string;
 
   @IsOptional()

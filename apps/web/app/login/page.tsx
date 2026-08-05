@@ -1,11 +1,7 @@
 "use client";
 
-import { apiFetch } from "@/lib/api";
-import {
-  isOnboardingComplete,
-  setSession,
-  type LoginResponse,
-} from "@/lib/auth";
+import { loginWithGoogleIdToken } from "@/lib/api";
+import { isOnboardingComplete } from "@/lib/auth";
 import { GoogleLogin } from "@react-oauth/google";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -26,14 +22,9 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const data = await apiFetch<LoginResponse>("/usuarios/login-google", {
-        method: "POST",
-        body: { idToken: credential },
-      });
+      const { user } = await loginWithGoogleIdToken(credential);
 
-      setSession(data.accessToken, data.user);
-
-      if (!isOnboardingComplete(data.user)) {
+      if (!isOnboardingComplete(user)) {
         router.push("/onboarding");
         return;
       }
@@ -70,7 +61,6 @@ export default function LoginPage() {
               theme="filled_black"
               shape="pill"
               text="continue_with"
-              locale="pt-BR"
             />
           ) : (
             <p className="text-sm text-amber-300/90">

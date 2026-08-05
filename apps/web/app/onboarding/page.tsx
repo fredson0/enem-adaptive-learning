@@ -1,13 +1,7 @@
 "use client";
 
-import { apiFetch } from "@/lib/api";
-import {
-  getAccessToken,
-  getStoredUser,
-  isOnboardingComplete,
-  setSession,
-  type User,
-} from "@/lib/auth";
+import { apiFetch, fetchMe } from "@/lib/api";
+import { isOnboardingComplete, type User } from "@/lib/auth";
 import {
   SERIE_ESCOLAR_OPTIONS,
   TIPO_ENSINO_MEDIO_OPTIONS,
@@ -27,39 +21,48 @@ export default function OnboardingPage() {
   );
   const [nivelAtual, setNivelAtual] = useState("INICIANTE");
   const [loading, setLoading] = useState(false);
+  const [bootstrapping, setBootstrapping] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getAccessToken();
-    const user = getStoredUser();
+    let cancelled = false;
 
-    if (!token || !user) {
-      router.replace("/login");
-      return;
-    }
+    (async () => {
+      try {
+        const user = await fetchMe();
+        if (cancelled) return;
 
-    if (isOnboardingComplete(user)) {
-      router.replace("/tutor");
-      return;
-    }
+        if (!user) {
+          router.replace("/login");
+          return;
+        }
 
-    setNome(user.nome);
-    setCursoObjetivo(user.perfil.cursoObjetivo ?? "");
-    setSerieEscolar((user.perfil.serieEscolar as SerieEscolar | null) ?? "");
-    setTipoEnsinoMedio(
-      (user.perfil.tipoEnsinoMedio as TipoEnsinoMedio | null) ?? "",
-    );
-    setNivelAtual(user.perfil.nivelAtual ?? "INICIANTE");
+        if (isOnboardingComplete(user)) {
+          router.replace("/tutor");
+          return;
+        }
+
+        setNome(user.nome);
+        setCursoObjetivo(user.perfil.cursoObjetivo ?? "");
+        setSerieEscolar((user.perfil.serieEscolar as SerieEscolar | null) ?? "");
+        setTipoEnsinoMedio(
+          (user.perfil.tipoEnsinoMedio as TipoEnsinoMedio | null) ?? "",
+        );
+        setNivelAtual(user.perfil.nivelAtual ?? "INICIANTE");
+      } catch {
+        if (!cancelled) router.replace("/login");
+      } finally {
+        if (!cancelled) setBootstrapping(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const token = getAccessToken();
-
-    if (!token) {
-      router.replace("/login");
-      return;
-    }
 
     if (!serieEscolar || !tipoEnsinoMedio) {
       setError("Preencha a série escolar e o tipo de ensino médio.");
@@ -70,9 +73,9 @@ export default function OnboardingPage() {
     setError(null);
 
     try {
-      const updated = await apiFetch<User>("/usuarios/perfil", {
+      await apiFetch<User>("/usuarios/perfil", {
         method: "PATCH",
-        token,
+        auth: true,
         body: {
           nome,
           cursoObjetivo,
@@ -82,7 +85,6 @@ export default function OnboardingPage() {
         },
       });
 
-      setSession(token, updated);
       router.push("/tutor");
     } catch (err) {
       setError(
@@ -92,6 +94,14 @@ export default function OnboardingPage() {
       setLoading(false);
     }
   };
+
+  if (bootstrapping) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#111111] px-6">
+        <p className="text-sm text-white/45">Carregando…</p>
+      </main>
+    );
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#111111] px-6">

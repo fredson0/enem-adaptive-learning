@@ -1,6 +1,7 @@
 "use client";
 
-import { getStoredUser, isOnboardingComplete } from "@/lib/auth";
+import { fetchMe } from "@/lib/api";
+import { isOnboardingComplete } from "@/lib/auth";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -9,15 +10,20 @@ export function OnboardingGuard() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const user = getStoredUser();
+    let cancelled = false;
 
-    if (!user) {
-      return;
-    }
+    (async () => {
+      const user = await fetchMe();
+      if (cancelled || !user) return;
 
-    if (!isOnboardingComplete(user) && pathname !== "/onboarding") {
-      router.replace("/onboarding");
-    }
+      if (!isOnboardingComplete(user) && pathname !== "/onboarding") {
+        router.replace("/onboarding");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [pathname, router]);
 
   return null;
