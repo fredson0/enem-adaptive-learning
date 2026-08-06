@@ -23,14 +23,14 @@ export function TutorChatView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setTokens } = useTokensIa();
-  const { saveMessages } = useTutorSession();
+  const { saveMessages, sessionKey, activeSession } = useTutorSession();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const hasMessages = messages.length > 0;
 
   useEffect(() => {
-    setMessages(initialMessages);
+    setMessages(activeSession?.messages ?? initialMessages);
     setError(null);
-  }, [initialMessages]);
+  }, [sessionKey, activeSession, initialMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,7 +70,7 @@ export function TutorChatView({
   };
 
   return (
-    <div className="relative h-full min-h-0">
+    <div className="relative flex h-full min-h-0 flex-col">
       {hasMessages && (
         <div
           className={cn(

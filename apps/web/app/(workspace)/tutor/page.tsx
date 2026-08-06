@@ -1,10 +1,4 @@
-import { TutorPageClient } from "@/components/workspace/tutor-page-client";
-import { Suspense } from "react";
-
+/** Conteúdo renderizado via keep-alive em `WorkspacePageTransition`. */
 export default function TutorPage() {
-  return (
-    <Suspense>
-      <TutorPageClient />
-    </Suspense>
-  );
+  return null;
 }

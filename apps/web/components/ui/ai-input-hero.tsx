@@ -98,9 +98,37 @@ export function HeroWave({
     const textarea = textareaRef.current;
     if (!panel) return;
 
+    if (variant === "workspace") {
+      gsap.set(panel, { clearProps: "transform" });
+      if (header) {
+        if (animate) {
+          gsap.to(header, {
+            opacity: nextDocked ? 0 : 1,
+            height: nextDocked ? 0 : "auto",
+            marginBottom: nextDocked ? 0 : 24,
+            duration: 0.34,
+            ease: "power2.out",
+          });
+        } else {
+          gsap.set(header, {
+            opacity: nextDocked ? 0 : 1,
+            height: nextDocked ? 0 : "auto",
+            marginBottom: nextDocked ? 0 : 0,
+            overflow: "hidden",
+          });
+        }
+      }
+      return;
+    }
+
     const { centerY, bottomY } = getPanelOffsets();
     const targetY = nextDocked ? bottomY : centerY;
-    const heroTextareaHeight = variant === "workspace" ? 128 : 144;
+    const heroTextareaHeight = 144;
+
+    if (panel.offsetHeight < 8 && overlayRef.current?.clientHeight) {
+      requestAnimationFrame(() => applyDockState(nextDocked, animate));
+      return;
+    }
 
     if (!animate) {
       gsap.set(panel, { y: targetY });
@@ -112,7 +140,7 @@ export function HeroWave({
           overflow: "hidden",
         });
       }
-      if (textarea && variant !== "workspace") {
+      if (textarea) {
         gsap.set(textarea, { height: heroTextareaHeight });
       }
       return;
@@ -137,7 +165,7 @@ export function HeroWave({
       );
     }
 
-    if (textarea && variant !== "workspace") {
+    if (textarea) {
       timeline.to(textarea, { height: heroTextareaHeight, duration: 0.38 }, 0.04);
     }
   };
@@ -988,6 +1016,11 @@ export function HeroWave({
       {showNavbar && <Navbar />}
       <div
         ref={overlayRef}
+        className={cn(
+          variant === "workspace" && "flex flex-col",
+          variant === "workspace" && (docked ? "justify-end" : "justify-center"),
+          variant === "hero" && "flex items-center justify-center",
+        )}
         style={{
           position: "absolute",
           inset: 0,
@@ -1001,8 +1034,14 @@ export function HeroWave({
       >
         <div
           ref={panelRef}
-          className="absolute right-0 left-0 mx-auto w-full max-w-3xl"
-          style={{ pointerEvents: "auto", willChange: "transform" }}
+          className={cn(
+            "mx-auto w-full max-w-3xl",
+            variant === "workspace" ? "relative" : "absolute right-0 left-0",
+          )}
+          style={{
+            pointerEvents: "auto",
+            willChange: variant === "workspace" ? undefined : "transform",
+          }}
         >
           {variant === "workspace" ? (
             <div ref={headerRef} className="overflow-hidden text-center">

@@ -42,7 +42,7 @@ function getInitials(name: string) {
 export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { startNewChat } = useTutorSession();
+  const { goToTutor } = useTutorSession();
 
   const [expandedSection, setExpandedSection] = useState<SectionId | null>(
     () => getSectionFromPath(pathname),
@@ -72,7 +72,7 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
   const handleSectionClick = (id: SectionId, href: string) => {
     setExpandedSection(id);
     if (id === "tutor") {
-      startNewChat();
+      goToTutor();
       return;
     }
     router.push(href);
@@ -88,7 +88,7 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
           href={TUTOR_CHAT_PATH}
           onClick={(event) => {
             event.preventDefault();
-            startNewChat();
+            goToTutor();
           }}
           className="text-lg font-bold tracking-[0.18em] text-white uppercase"
         >

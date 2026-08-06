@@ -4,12 +4,13 @@ import { TutorChatView } from "@/components/workspace/tutor-chat-view";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
 
 export function TutorPageClient() {
-  const { sessionKey, activeSession } = useTutorSession();
+  const { activeSession, activeSessionId, sessionKey } = useTutorSession();
+  const chatKey = activeSessionId ?? `new-${sessionKey}`;
 
   return (
-    <div className="relative min-h-0 flex-1">
+    <div className="relative flex h-full min-h-0 w-full flex-1 flex-col">
       <TutorChatView
-        key={sessionKey}
+        key={chatKey}
         initialMessages={activeSession?.messages ?? []}
       />
     </div>

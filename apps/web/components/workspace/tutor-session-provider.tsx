@@ -34,6 +34,7 @@ type TutorSessionContextValue = {
   sessionKey: number;
   isNewChat: boolean;
   startNewChat: () => void;
+  goToTutor: () => void;
   openSession: (id: string) => void;
   saveMessages: (messages: MensagemHistorico[]) => void;
 };
@@ -99,6 +100,12 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
     router.push(TUTOR_CHAT_PATH);
   }, [persist, router, sessions]);
 
+  const goToTutor = useCallback(() => {
+    if (pathname !== TUTOR_CHAT_PATH) {
+      router.push(TUTOR_CHAT_PATH);
+    }
+  }, [pathname, router]);
+
   const openSession = useCallback(
     (id: string) => {
       const exists = sessions.some((session) => session.id === id);
@@ -108,10 +115,11 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
       }
 
       persist(sessions, id);
-      setSessionKey((key) => key + 1);
-      router.push(TUTOR_CHAT_PATH);
+      if (pathname !== TUTOR_CHAT_PATH) {
+        router.push(TUTOR_CHAT_PATH);
+      }
     },
-    [persist, router, sessions, startNewChat],
+    [pathname, persist, router, sessions, startNewChat],
   );
 
   const saveMessages = useCallback(
@@ -162,6 +170,7 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
       sessionKey: hydrated ? sessionKey : 0,
       isNewChat,
       startNewChat,
+      goToTutor,
       openSession,
       saveMessages,
     }),
@@ -173,6 +182,7 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
       sessionKey,
       isNewChat,
       startNewChat,
+      goToTutor,
       openSession,
       saveMessages,
     ],
