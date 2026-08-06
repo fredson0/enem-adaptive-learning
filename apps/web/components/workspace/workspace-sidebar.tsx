@@ -11,8 +11,8 @@ import {
 } from "@/lib/workspace-nav";
 import { fetchMe } from "@/lib/api";
 import { type User } from "@/lib/auth";
-import { MOCK_CHATS } from "@/lib/workspace-mock";
-import { getNewTutorChatPath, isNewTutorChatPath } from "@/lib/tutor-navigation";
+import { TUTOR_CHAT_PATH } from "@/lib/tutor-navigation";
+import { useTutorSession } from "@/components/workspace/tutor-session-provider";
 import { Asterisk, ChevronRight, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -28,9 +28,7 @@ function getSectionFromPath(pathname: string): SectionId | null {
   return null;
 }
 
-type WorkspaceSidebarProps = {
-  activeChatId?: string;
-};
+type WorkspaceSidebarProps = Record<string, never>;
 
 function getInitials(name: string) {
   return name
@@ -41,12 +39,10 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSidebarProps) {
+export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const chatIdMatch = pathname.match(/^\/tutor\/([^/]+)/);
-  const activeChatId = activeChatIdProp ?? chatIdMatch?.[1];
-  const isNewChat = isNewTutorChatPath(pathname);
+  const { startNewChat } = useTutorSession();
 
   const [expandedSection, setExpandedSection] = useState<SectionId | null>(
     () => getSectionFromPath(pathname),
@@ -76,7 +72,7 @@ export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSi
   const handleSectionClick = (id: SectionId, href: string) => {
     setExpandedSection(id);
     if (id === "tutor") {
-      router.push(getNewTutorChatPath());
+      startNewChat();
       return;
     }
     router.push(href);
@@ -89,7 +85,11 @@ export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSi
     <aside className="absolute top-1.5 bottom-1.5 left-1.5 z-30 flex w-[var(--osmo-sidebar-width)] flex-col overflow-hidden rounded-[14px] border border-[var(--osmo-border)] bg-[var(--osmo-sidebar)]">
       <div className="flex shrink-0 items-center justify-between px-6 py-6">
         <Link
-          href={getNewTutorChatPath()}
+          href={TUTOR_CHAT_PATH}
+          onClick={(event) => {
+            event.preventDefault();
+            startNewChat();
+          }}
           className="text-lg font-bold tracking-[0.18em] text-white uppercase"
         >
           ENEM+
@@ -130,11 +130,7 @@ export function WorkspaceSidebar({ activeChatId: activeChatIdProp }: WorkspaceSi
         <SidebarAccordion open={isTutorExpanded} className="mb-2">
           <div className="ml-5 border-l border-[var(--osmo-border)] pl-3.5">
             <div className="scrollbar-none max-h-[240px] overflow-y-auto pt-1 pr-1">
-              <ChatList
-                chats={MOCK_CHATS}
-                activeChatId={activeChatId}
-                isNewChat={isNewChat}
-              />
+              <ChatList />
             </div>
           </div>
         </SidebarAccordion>

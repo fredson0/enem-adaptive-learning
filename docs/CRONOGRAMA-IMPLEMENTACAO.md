@@ -70,10 +70,31 @@ gantt
 - [x] **Simulados**: `/simulados`, `/novo`, `/[id]`, `/[id]/resultado` com API real
 - [x] Documentação UI: [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md)
 
-### ⬜ Próximo (S3)
+### ✅ Em andamento (S3) — atualizado 05/08/2026
 
-- [ ] `IaEnginePort` + adapter Gemini (`gemini-2.5-flash`)
-- [ ] `POST /ia-tutor/explicar-erro` + botão no resultado do simulado
+**Backend**
+- [x] `IaEnginePort` + `GeminiIaAdapter` (`GEMINI_API_KEY`, modelo `gemini-flash-latest`)
+- [x] `POST /ia-tutor/mensagens` — chat + histórico + limite diário de tokens
+- [x] `POST /ia-tutor/explicar-erro` — use case + endpoint (aguarda integração no frontend)
+- [x] `UsoTokensIaService` — consumo em `uso_tokens_ia`
+- [x] `IaTutorModule` registrado no `AppModule`
+- [x] Correções DI (`@Inject` explícito) em controllers e `JwtAuthTokenService`
+
+**Frontend**
+- [x] Chat real em `/tutor` via BFF → `POST /ia-tutor/mensagens`
+- [x] `TutorPromptInput` — Enter envia, Shift+Enter quebra linha, auto-resize, scroll suave, tela cheia
+- [x] Botão `+` anexar imagem (preview + remover); envio vision ainda pendente
+- [x] Sessões de chat no `sessionStorage` (sidebar + nova conversa sem URL estranha)
+- [x] `PlanBadge` atualiza tokens após cada resposta da API
+- [x] Animação suave: input desce após 1ª mensagem; modal tela cheia via portal
+
+### ⬜ Próximo (S3 — fechar E3)
+
+- [ ] Testar Gemini em produção (billing/quota Google Cloud se 429)
+- [ ] `POST /ia-tutor/explicar-erro` — botão no resultado do simulado
+- [ ] Upload imagem → presign R2 + vision Gemini
+- [ ] `GET /ia-tutor/conversas` — persistir chats no Postgres (substituir sessionStorage)
+- [ ] `PlanBadge` com saldo inicial ao abrir o workspace (sem depender da 1ª mensagem)
 - [ ] Checkpoint **E3**
 
 ---

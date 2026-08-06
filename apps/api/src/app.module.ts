@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './infrastructure/database/prisma.module';
 import { QuestoesModule } from './modules/questoes/questoes.module';
 import { SimuladosModule } from './modules/simulados/simulados.module';
+import { IaTutorModule } from './modules/ia-tutor/ia-tutor.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 
 @Module({
@@ -29,6 +30,7 @@ import { UsuariosModule } from './modules/usuarios/usuarios.module';
     UsuariosModule,
     QuestoesModule,
     SimuladosModule,
+    IaTutorModule,
   ],
   controllers: [AppController],
   providers: [

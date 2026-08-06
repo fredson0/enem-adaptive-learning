@@ -61,13 +61,15 @@
 
 ## S3 — Tutor IA
 
-| # | Tarefa |
-|---|--------|
-| 3.1 | Chat com mensagens reais (user/assistant) |
-| 3.2 | Sidebar: `GET /ia-tutor/conversas` |
-| 3.3 | Nova conversa / continuar `[chatId]` |
-| 3.4 | Upload imagem (presign) — se backend S3 pronto |
-| 3.5 | `PlanBadge` com tokens da API |
+| # | Tarefa | Status |
+|---|--------|--------|
+| 3.1 | Chat com mensagens reais (user/assistant) | ✅ |
+| 3.2 | Sidebar: `GET /ia-tutor/conversas` | ⬜ (hoje: `sessionStorage`) |
+| 3.3 | Nova conversa / continuar chat | ✅ |
+| 3.4 | Upload imagem (presign + vision) | ⬜ (UI `+` pronta) |
+| 3.5 | `PlanBadge` com tokens da API | 🟡 (atualiza após enviar msg) |
+| 3.6 | Input estilo Gemini (resize, Enter, tela cheia) | ✅ |
+| 3.7 | `POST /ia-tutor/explicar-erro` no resultado simulado | ⬜ |
 
 ---
 

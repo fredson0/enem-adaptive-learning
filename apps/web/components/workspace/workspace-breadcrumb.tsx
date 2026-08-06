@@ -1,7 +1,7 @@
 "use client";
 
+import { useTutorSession } from "@/components/workspace/tutor-session-provider";
 import { cn } from "@/lib/utils";
-import { MOCK_CHATS } from "@/lib/workspace-mock";
 import {
   PROFILE_NAV,
   TUTOR_NAV,
@@ -16,17 +16,15 @@ type Crumb = {
   href?: string;
 };
 
-function getCrumbs(pathname: string): Crumb[] {
+function getCrumbs(
+  pathname: string,
+  activeSessionTitle: string | null,
+): Crumb[] {
   if (pathname.startsWith("/tutor")) {
-    const chatId = pathname.match(/^\/tutor\/([^/]+)/)?.[1];
-    const chat = chatId
-      ? MOCK_CHATS.find((item) => item.id === chatId)
-      : undefined;
-
-    if (chat) {
+    if (activeSessionTitle) {
       return [
         { label: TUTOR_NAV.label, href: TUTOR_NAV.href },
-        { label: chat.title },
+        { label: activeSessionTitle },
       ];
     }
 
@@ -53,7 +51,8 @@ function getCrumbs(pathname: string): Crumb[] {
 
 export function WorkspaceBreadcrumb() {
   const pathname = usePathname();
-  const crumbs = getCrumbs(pathname);
+  const { activeSession } = useTutorSession();
+  const crumbs = getCrumbs(pathname, activeSession?.title ?? null);
 
   if (crumbs.length === 0) return null;
 

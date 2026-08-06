@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Inject,
   Patch,
   Post,
   UseGuards,
@@ -33,10 +34,15 @@ import {
 @Controller('usuarios')
 export class UsuariosController {
   constructor(
+    @Inject(LoginGoogleUseCase)
     private readonly loginGoogleUseCase: LoginGoogleUseCase,
+    @Inject(RefreshSessionUseCase)
     private readonly refreshSessionUseCase: RefreshSessionUseCase,
+    @Inject(LogoutUseCase)
     private readonly logoutUseCase: LogoutUseCase,
+    @Inject(ObterPerfilUseCase)
     private readonly obterPerfilUseCase: ObterPerfilUseCase,
+    @Inject(AtualizarPerfilUseCase)
     private readonly atualizarPerfilUseCase: AtualizarPerfilUseCase,
   ) {}
 

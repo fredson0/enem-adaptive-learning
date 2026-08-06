@@ -47,6 +47,12 @@ import { PrismaUsuariosRepository } from './infrastructure/adapters/out/persiste
       useClass: JwtAuthTokenService,
     },
   ],
-  exports: [LoginGoogleUseCase, JwtAuthGuard, JwtModule, AUTH_TOKEN_SERVICE],
+  exports: [
+    LoginGoogleUseCase,
+    JwtAuthGuard,
+    JwtModule,
+    AUTH_TOKEN_SERVICE,
+    USUARIOS_REPOSITORY,
+  ],
 })
 export class UsuariosModule {}

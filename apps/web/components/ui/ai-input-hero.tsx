@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -9,6 +9,7 @@ import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import gsap from "gsap";
 import { ArrowUpRight } from "lucide-react";
 import { Navbar } from "@/components/ui/mini-navbar";
+import { TutorPromptInput } from "@/components/workspace/tutor-prompt-input";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_SUGGESTIONS = [
@@ -33,6 +34,9 @@ export type HeroWaveProps = {
   suggestions?: string[];
   placeholder?: string;
   buttonText?: string;
+  loading?: boolean;
+  /** Fixa o input na parte inferior (modo chat) com animação suave. */
+  docked?: boolean;
   onPromptSubmit?: (value: string) => void;
 };
 
@@ -48,10 +52,17 @@ export function HeroWave({
   basePlaceholder = "Make me a",
   suggestions = DEFAULT_SUGGESTIONS,
   buttonText = "Generate",
+  loading = false,
+  docked = false,
   onPromptSubmit,
 }: HeroWaveProps) {
   const [prompt, setPrompt] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const dockedRef = useRef(docked);
   const waveRef = useRef<HTMLDivElement | null>(null);
   const suggestionsRef = useRef<string[]>(suggestions);
   const [animatedPlaceholder, setAnimatedPlaceholder] =
@@ -63,6 +74,109 @@ export function HeroWave({
     running: true,
   });
   const timersRef = useRef<number[]>([]);
+
+  const getPanelOffsets = () => {
+    const overlay = overlayRef.current;
+    const panel = panelRef.current;
+    if (!overlay || !panel) {
+      return { centerY: 0, bottomY: 0 };
+    }
+
+    const overlayHeight = overlay.clientHeight;
+    const panelHeight = panel.offsetHeight;
+    const bottomPadding = variant === "workspace" ? 20 : 24;
+
+    return {
+      centerY: Math.max(0, (overlayHeight - panelHeight) / 2),
+      bottomY: Math.max(0, overlayHeight - panelHeight - bottomPadding),
+    };
+  };
+
+  const applyDockState = (nextDocked: boolean, animate: boolean) => {
+    const panel = panelRef.current;
+    const header = headerRef.current;
+    const textarea = textareaRef.current;
+    if (!panel) return;
+
+    const { centerY, bottomY } = getPanelOffsets();
+    const targetY = nextDocked ? bottomY : centerY;
+    const heroTextareaHeight = variant === "workspace" ? 128 : 144;
+
+    if (!animate) {
+      gsap.set(panel, { y: targetY });
+      if (header) {
+        gsap.set(header, {
+          opacity: nextDocked ? 0 : 1,
+          height: nextDocked ? 0 : "auto",
+          marginBottom: nextDocked ? 0 : undefined,
+          overflow: "hidden",
+        });
+      }
+      if (textarea && variant !== "workspace") {
+        gsap.set(textarea, { height: heroTextareaHeight });
+      }
+      return;
+    }
+
+    const timeline = gsap.timeline({
+      defaults: { ease: "power2.out", duration: 0.42 },
+    });
+
+    timeline.to(panel, { y: targetY }, 0);
+
+    if (header) {
+      timeline.to(
+        header,
+        {
+          opacity: nextDocked ? 0 : 1,
+          height: nextDocked ? 0 : "auto",
+          marginBottom: nextDocked ? 0 : 24,
+          duration: 0.34,
+        },
+        0,
+      );
+    }
+
+    if (textarea && variant !== "workspace") {
+      timeline.to(textarea, { height: heroTextareaHeight, duration: 0.38 }, 0.04);
+    }
+  };
+
+  const repositionDockedPanel = useCallback(() => {
+    if (!dockedRef.current) return;
+    applyDockState(true, false);
+  }, [variant]);
+
+  useLayoutEffect(() => {
+    const wasDocked = dockedRef.current;
+    const shouldAnimate = docked !== wasDocked;
+    applyDockState(docked, shouldAnimate);
+    dockedRef.current = docked;
+  }, [docked, showHeader, variant]);
+
+  useEffect(() => {
+    const overlay = overlayRef.current;
+    const panel = panelRef.current;
+    if (!overlay) return;
+
+    const handleResize = () => {
+      applyDockState(dockedRef.current, false);
+    };
+
+    const overlayObserver = new ResizeObserver(handleResize);
+    overlayObserver.observe(overlay);
+
+    let panelObserver: ResizeObserver | undefined;
+    if (panel) {
+      panelObserver = new ResizeObserver(handleResize);
+      panelObserver.observe(panel);
+    }
+
+    return () => {
+      overlayObserver.disconnect();
+      panelObserver?.disconnect();
+    };
+  }, [variant]);
 
   useEffect(() => {
     typingStateRef.current.running = true;
@@ -873,13 +987,11 @@ export function HeroWave({
     >
       {showNavbar && <Navbar />}
       <div
+        ref={overlayRef}
         style={{
           position: "absolute",
           inset: 0,
-          zIndex: 3,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          zIndex: docked ? 15 : 3,
           pointerEvents: "none",
           padding:
             variant === "workspace"
@@ -888,47 +1000,81 @@ export function HeroWave({
         }}
       >
         <div
-          className="w-full max-w-3xl text-center"
-          style={{ pointerEvents: "auto" }}
+          ref={panelRef}
+          className="absolute right-0 left-0 mx-auto w-full max-w-3xl"
+          style={{ pointerEvents: "auto", willChange: "transform" }}
         >
-          {showHeader && (
-            <>
+          {variant === "workspace" ? (
+            <div ref={headerRef} className="overflow-hidden text-center">
               <h1 className="text-3xl font-semibold tracking-tight text-white drop-shadow-[0_1px_8px_rgba(31,61,188,0.25)] sm:text-5xl">
                 {title}
               </h1>
               <p className="mt-3 text-sm text-gray-300/90 sm:mt-4 sm:text-base">
                 {subtitle}
               </p>
-            </>
+            </div>
+          ) : (
+            showHeader && (
+              <div ref={headerRef} className="overflow-hidden text-center">
+                <h1 className="text-3xl font-semibold tracking-tight text-white drop-shadow-[0_1px_8px_rgba(31,61,188,0.25)] sm:text-5xl">
+                  {title}
+                </h1>
+                <p className="mt-3 text-sm text-gray-300/90 sm:mt-4 sm:text-base">
+                  {subtitle}
+                </p>
+              </div>
+            )
           )}
           <form
             className={cn(
               "flex items-center justify-center",
-              showHeader ? "mt-6 sm:mt-8" : "mt-0",
+              (showHeader || variant === "workspace") && !docked
+                ? "mt-6 sm:mt-8"
+                : "mt-0",
             )}
             onSubmit={(e) => {
               e.preventDefault();
-              onPromptSubmit?.(prompt);
+              const value = prompt.trim();
+              if (!value || loading) return;
+              onPromptSubmit?.(value);
+              setPrompt("");
             }}
           >
-            <div className="relative w-full sm:w-[720px]">
-              <div className="relative rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-black/20 p-[2px] shadow-[0_1px_2px_0_rgba(0,0,0,0.06)]">
-                <textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder={animatedPlaceholder}
-                  rows={5}
-                  className="h-32 w-full resize-none rounded-2xl border border-white/10 bg-[rgba(15,15,20,0.55)] px-4 py-4 pr-16 text-white outline-none backdrop-blur-md placeholder:text-white/40 focus:border-[#1f3dbc]/40 focus:ring-2 focus:ring-[#1f3dbc]/40 sm:h-36"
-                />
+            {variant === "workspace" ? (
+              <TutorPromptInput
+                value={prompt}
+                onChange={setPrompt}
+                onSubmit={(value) => onPromptSubmit?.(value)}
+                placeholder={animatedPlaceholder}
+                loading={loading}
+                docked={docked}
+                buttonText={buttonText}
+                textareaRef={textareaRef}
+                onLayoutChange={repositionDockedPanel}
+              />
+            ) : (
+              <div className="relative w-full sm:w-[720px]">
+                <div className="relative rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-black/20 p-[2px] shadow-[0_1px_2px_0_rgba(0,0,0,0.06)]">
+                  <textarea
+                    ref={textareaRef}
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder={animatedPlaceholder}
+                    rows={5}
+                    disabled={loading}
+                    className="h-32 w-full resize-none rounded-2xl border border-white/10 bg-[rgba(15,15,20,0.55)] px-4 py-4 pr-16 text-white outline-none backdrop-blur-md placeholder:text-white/40 focus:border-[#1f3dbc]/40 focus:ring-2 focus:ring-[#1f3dbc]/40 disabled:cursor-not-allowed disabled:opacity-60 sm:h-36"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  aria-label={buttonText}
+                  disabled={loading || !prompt.trim()}
+                  className="absolute right-3 bottom-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#f0f2ff] text-black transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <ArrowUpRight className="h-5 w-5" />
+                </button>
               </div>
-              <button
-                type="submit"
-                aria-label={buttonText}
-                className="absolute right-3 bottom-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#f0f2ff] text-black transition-colors hover:bg-white"
-              >
-                <ArrowUpRight className="h-5 w-5" />
-              </button>
-            </div>
+            )}
           </form>
         </div>
       </div>

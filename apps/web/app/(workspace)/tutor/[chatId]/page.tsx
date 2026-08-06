@@ -1,6 +1,4 @@
-import { TutorChatView } from "@/components/workspace/tutor-chat-view";
-import { MOCK_CHATS } from "@/lib/workspace-mock";
-import { notFound } from "next/navigation";
+import { TutorChatLegacyRedirect } from "@/components/workspace/tutor-chat-legacy-redirect";
 
 type TutorChatPageProps = {
   params: Promise<{ chatId: string }>;
@@ -8,15 +6,5 @@ type TutorChatPageProps = {
 
 export default async function TutorChatPage({ params }: TutorChatPageProps) {
   const { chatId } = await params;
-  const chat = MOCK_CHATS.find((item) => item.id === chatId);
-
-  if (!chat) {
-    notFound();
-  }
-
-  return (
-    <div className="relative min-h-0 flex-1">
-      <TutorChatView key={chatId} chatTitle={chat.title} />
-    </div>
-  );
+  return <TutorChatLegacyRedirect chatId={chatId} />;
 }

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { createHash, randomBytes } from 'crypto';
@@ -13,9 +13,9 @@ import { Usuario } from '../../../core/domain/entities/usuario.entity';
 @Injectable()
 export class JwtAuthTokenService implements AuthTokenServicePort {
   constructor(
-    private readonly jwtService: JwtService,
-    private readonly config: ConfigService,
-    private readonly prisma: PrismaService,
+    @Inject(JwtService) private readonly jwtService: JwtService,
+    @Inject(ConfigService) private readonly config: ConfigService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
   ) {}
 
   async gerarAccessToken(usuario: Usuario): Promise<string> {

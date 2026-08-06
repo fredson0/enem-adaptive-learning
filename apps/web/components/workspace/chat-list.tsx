@@ -1,30 +1,18 @@
 "use client";
 
+import { useTutorSession } from "@/components/workspace/tutor-session-provider";
 import { cn } from "@/lib/utils";
-import { getNewTutorChatPath } from "@/lib/tutor-navigation";
-import type { MockChat } from "@/lib/workspace-mock";
 import { Plus } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
-type ChatListProps = {
-  chats: MockChat[];
-  activeChatId?: string;
-  isNewChat?: boolean;
-};
-
-export function ChatList({ chats, activeChatId, isNewChat }: ChatListProps) {
-  const router = useRouter();
-
-  const handleNewChat = () => {
-    router.push(getNewTutorChatPath());
-  };
+export function ChatList() {
+  const { sessions, activeSessionId, isNewChat, startNewChat, openSession } =
+    useTutorSession();
 
   return (
     <div className="space-y-1">
       <button
         type="button"
-        onClick={handleNewChat}
+        onClick={startNewChat}
         className={cn(
           "flex w-full items-center gap-2 rounded-[6px] border px-3 py-2 text-left text-sm transition-all duration-300",
           isNewChat
@@ -36,28 +24,28 @@ export function ChatList({ chats, activeChatId, isNewChat }: ChatListProps) {
         Nova conversa
       </button>
 
-      {chats.map((chat) => {
-        const isActive = activeChatId === chat.id;
+      {sessions.map((chat) => {
+        const isActive = activeSessionId === chat.id;
+        const preview =
+          chat.messages.find((message) => message.role === "assistant")?.texto ??
+          chat.messages.find((message) => message.role === "user")?.texto ??
+          "Sem mensagens";
 
         return (
-          <Link
+          <button
             key={chat.id}
-            href={`/tutor/${chat.id}`}
+            type="button"
+            onClick={() => openSession(chat.id)}
             className={cn(
-              "block rounded-[6px] px-3 py-2.5 transition-all duration-300 ease-out",
+              "block w-full rounded-[6px] px-3 py-2.5 text-left transition-all duration-300 ease-out",
               isActive
                 ? "bg-[var(--osmo-active)] text-white"
                 : "text-white/60 hover:bg-[var(--osmo-hover)] hover:text-white",
             )}
           >
             <p className="truncate text-sm font-medium">{chat.title}</p>
-            <p className="mt-0.5 truncate text-xs text-white/40">
-              {chat.preview}
-            </p>
-            <p className="mt-1 text-[10px] tracking-wide text-white/25 uppercase">
-              {chat.updatedAt}
-            </p>
-          </Link>
+            <p className="mt-0.5 truncate text-xs text-white/40">{preview}</p>
+          </button>
         );
       })}
     </div>

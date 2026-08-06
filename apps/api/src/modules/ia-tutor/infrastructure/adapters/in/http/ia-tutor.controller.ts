@@ -1,4 +1,55 @@
-import { Controller } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Inject,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
+import { CurrentUser } from '../../../../../../infrastructure/auth/current-user.decorator';
+import { JwtAuthGuard } from '../../../../../../infrastructure/auth/jwt-auth.guard';
+import type { JwtPayload } from '../../../../../../infrastructure/auth/jwt-auth.guard';
+import { EnviarMensagemTutorUseCase } from '../../../../core/application/use-cases/enviar-mensagem-tutor.use-case';
+import { ExplicarErroUseCase } from '../../../../core/application/use-cases/explicar-erro.use-case';
+import {
+  EnviarMensagemTutorDto,
+  ExplicarErroDto,
+} from './dto/ia-tutor.dto';
 
 @Controller('ia-tutor')
-export class IaTutorController {}
+@UseGuards(JwtAuthGuard)
+export class IaTutorController {
+  constructor(
+    @Inject(EnviarMensagemTutorUseCase)
+    private readonly enviarMensagemUseCase: EnviarMensagemTutorUseCase,
+    @Inject(ExplicarErroUseCase)
+    private readonly explicarErroUseCase: ExplicarErroUseCase,
+  ) {}
+
+  @Post('mensagens')
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  enviarMensagem(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: EnviarMensagemTutorDto,
+  ) {
+    return this.enviarMensagemUseCase.execute({
+      userId: user.sub,
+      mensagem: dto.mensagem,
+      historico: dto.historico,
+    });
+  }
+
+  @Post('explicar-erro')
+  @Throttle({ default: { limit: 15, ttl: 60_000 } })
+  explicarErro(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: ExplicarErroDto,
+  ) {
+    return this.explicarErroUseCase.execute({
+      userId: user.sub,
+      questaoId: dto.questaoId,
+      alternativaMarcada: dto.alternativaMarcada,
+      perguntaExtra: dto.perguntaExtra,
+    });
+  }
+}

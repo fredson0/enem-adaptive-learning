@@ -143,10 +143,14 @@ Reutiliza tokens da landing, adaptados ao workspace:
 
 ### Fase 3 — Tutor IA + Planos
 
-- [ ] Integrar template de chat (lista + mensagens)
-- [ ] `POST /ia-tutor/explicar-erro`
-- [ ] Persistir conversas (lista na sidebar)
-- [ ] `PlanBadge` com tokens restantes em tempo real
+- [x] Integrar chat real (`POST /ia-tutor/mensagens` + BFF)
+- [x] Sessões locais na sidebar (`sessionStorage`) + nova conversa
+- [x] `TutorPromptInput` (auto-resize, Enter, tela cheia, anexo UI)
+- [x] Animação input docked após 1ª mensagem
+- [ ] `POST /ia-tutor/explicar-erro` no resultado do simulado
+- [ ] Persistir conversas no Postgres (`GET /ia-tutor/conversas`)
+- [ ] Upload imagem → presign R2 + vision Gemini
+- [🟡] `PlanBadge` com tokens restantes (após 1ª msg; falta saldo inicial)
 - [ ] `/planos` — cards Gratuito / Apoio
 - [ ] Checkout Mercado Pago + feedback pós-pagamento
 - [ ] Rate limit UX (toast quando tokens acabam)
@@ -171,17 +175,20 @@ Reutiliza tokens da landing, adaptados ao workspace:
 
 ### `/tutor` — Tutor IA
 
-- [x] Layout com sidebar de chats (mock)
+- [x] Layout com sidebar de chats
 - [x] Área central com `HeroWave` (input + animação wave)
 - [x] Sem topbar horizontal — fundo contínuo com o chat
-- [ ] Lista de conversas da API
-- [ ] Nova conversa
+- [x] Chat real com API (`lib/ia-tutor.ts` + `TutorChatView`)
+- [x] Nova conversa (sem `?r=` na URL; `TutorSessionProvider`)
+- [x] Sessões na sidebar via `sessionStorage`
+- [ ] Lista de conversas da API (Postgres)
 - [ ] Mensagens com streaming (opcional)
 - [ ] Contexto de questão quando veio do simulado
-- [ ] **Botão anexar imagem** (JPEG/PNG, max 2 MB, comprimir no client)
-- [ ] Preview thumbnail da imagem antes de enviar
+- [x] **Botão anexar imagem** (UI + preview + remover)
 - [ ] Upload via presign R2 → `POST /ia-tutor/anexos/presign`
-- [ ] Indicador de tokens usados na sessão
+- [ ] Vision Gemini no envio com foto
+- [🟡] Indicador de tokens (`PlanBadge` após 1ª resposta)
+- [x] Enter envia · Shift+Enter nova linha · tela cheia · auto-resize
 
 > Escopo completo do tutor (texto + vision + rate limit): [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md)
 

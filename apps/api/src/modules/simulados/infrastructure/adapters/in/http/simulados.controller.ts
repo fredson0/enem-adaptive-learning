@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Inject,
   Param,
   Post,
   UseGuards,
@@ -25,10 +26,15 @@ import { CriarSimuladoDto, EnviarRespostaDto } from './dto/simulados.dto';
 @UseGuards(JwtAuthGuard)
 export class SimuladosController {
   constructor(
+    @Inject(GerarSimuladoUseCase)
     private readonly gerarSimuladoUseCase: GerarSimuladoUseCase,
+    @Inject(ListarSimuladosUseCase)
     private readonly listarSimuladosUseCase: ListarSimuladosUseCase,
+    @Inject(ObterSimuladoUseCase)
     private readonly obterSimuladoUseCase: ObterSimuladoUseCase,
+    @Inject(EnviarRespostaUseCase)
     private readonly enviarRespostaUseCase: EnviarRespostaUseCase,
+    @Inject(FinalizarSimuladoUseCase)
     private readonly finalizarSimuladoUseCase: FinalizarSimuladoUseCase,
   ) {}
 
