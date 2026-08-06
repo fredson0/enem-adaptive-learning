@@ -5,20 +5,24 @@ import {
   FinalizarSimuladoUseCase,
 } from './core/application/use-cases/enviar-resposta.use-case';
 import { GerarSimuladoUseCase } from './core/application/use-cases/gerar-simulado.use-case';
+import { GerarSimuladoComIaUseCase } from './core/application/use-cases/gerar-simulado-com-ia.use-case';
 import {
   ListarSimuladosUseCase,
   ObterSimuladoUseCase,
 } from './core/application/use-cases/obter-simulado.use-case';
 import { SimuladosController } from './infrastructure/adapters/in/http/simulados.controller';
 import { PrismaSimuladosRepository } from './infrastructure/adapters/out/persistence/prisma-simulados.repository';
+import { IaTutorModule } from '../ia-tutor/ia-tutor.module';
 import { QuestoesModule } from '../questoes/questoes.module';
+import { MetricasModule } from '../metricas/metricas.module';
 import { UsuariosModule } from '../usuarios/usuarios.module';
 
 @Module({
-  imports: [UsuariosModule, QuestoesModule],
+  imports: [UsuariosModule, QuestoesModule, MetricasModule, IaTutorModule],
   controllers: [SimuladosController],
   providers: [
     GerarSimuladoUseCase,
+    GerarSimuladoComIaUseCase,
     ListarSimuladosUseCase,
     ObterSimuladoUseCase,
     EnviarRespostaUseCase,

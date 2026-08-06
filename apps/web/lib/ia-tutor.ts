@@ -21,9 +21,39 @@ export type EnviarMensagemTutorResponse = {
   tokens: TokensIa;
 };
 
+export type ExplicarErroBody = {
+  questaoId: string;
+  alternativaMarcada: string;
+  perguntaExtra?: string;
+};
+
+export type ExplicarErroResponse = {
+  resposta: string;
+  questaoId: string;
+  tokens: TokensIa;
+};
+
+export function obterSaldoTokens() {
+  return apiFetch<TokensIa>("/ia-tutor/tokens", { auth: true });
+}
+
 export function enviarMensagemTutor(body: EnviarMensagemTutorBody) {
   return apiFetch<EnviarMensagemTutorResponse>("/ia-tutor/mensagens", {
     method: "POST",
     body,
+  });
+}
+
+export function explicarErroQuestao(body: ExplicarErroBody) {
+  return apiFetch<ExplicarErroResponse>("/ia-tutor/explicar-erro", {
+    method: "POST",
+    body,
+  });
+}
+
+export function pedirDicaQuestao(questaoId: string) {
+  return apiFetch<ExplicarErroResponse>("/ia-tutor/dica", {
+    method: "POST",
+    body: { questaoId },
   });
 }

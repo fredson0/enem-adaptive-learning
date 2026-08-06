@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './infrastructure/database/prisma.module';
+import { MetricasModule } from './modules/metricas/metricas.module';
 import { QuestoesModule } from './modules/questoes/questoes.module';
 import { SimuladosModule } from './modules/simulados/simulados.module';
 import { IaTutorModule } from './modules/ia-tutor/ia-tutor.module';
@@ -31,6 +32,7 @@ import { UsuariosModule } from './modules/usuarios/usuarios.module';
     QuestoesModule,
     SimuladosModule,
     IaTutorModule,
+    MetricasModule,
   ],
   controllers: [AppController],
   providers: [

@@ -11,14 +11,20 @@ import type {
 } from '../../../../core/application/ports/ia-engine.port';
 import { buildTutorSystemPrompt } from '../../../../core/application/helpers/tutor-prompts';
 
+/** Modelos estáveis no Google AI Studio (ver docs/ESCOLHA-MODELO-IA.md). */
+const MODEL_FALLBACKS = [
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-2.0-flash',
+] as const;
+
+const REQUEST_TIMEOUT_MS = 45_000;
+
 @Injectable()
 export class GeminiIaAdapter implements IaEnginePort {
   private client: GoogleGenerativeAI | null = null;
-  private readonly modelName: string;
 
-  constructor(@Inject(ConfigService) private readonly config: ConfigService) {
-    this.modelName = config.get<string>('GEMINI_MODEL') ?? 'gemini-2.5-flash';
-  }
+  constructor(@Inject(ConfigService) private readonly config: ConfigService) {}
 
   private getClient(): GoogleGenerativeAI {
     if (this.client) {
@@ -36,51 +42,130 @@ export class GeminiIaAdapter implements IaEnginePort {
     return this.client;
   }
 
-  async enviarMensagem(input: EnviarMensagemIaInput): Promise<string> {
+  private getModelCandidates(): string[] {
+    const configured = this.config.get<string>('GEMINI_MODEL');
+    if (!configured) {
+      return [...MODEL_FALLBACKS];
+    }
+
+    return [
+      configured,
+      ...MODEL_FALLBACKS.filter((model) => model !== configured),
+    ];
+  }
+
+  private isRetryableError(message: string): boolean {
+    const lower = message.toLowerCase();
+    return (
+      lower.includes('404') ||
+      lower.includes('not found') ||
+      lower.includes('no longer available') ||
+      lower.includes('fetch failed') ||
+      lower.includes('econnreset') ||
+      lower.includes('etimedout') ||
+      lower.includes('socket hang up') ||
+      lower.includes('network') ||
+      lower.includes('503') ||
+      lower.includes('502') ||
+      lower.includes('500')
+    );
+  }
+
+  private async withTimeout<T>(promise: Promise<T>, modelName: string): Promise<T> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const timeout = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(
+          new Error(
+            `Timeout após ${REQUEST_TIMEOUT_MS / 1000}s ao chamar ${modelName}`,
+          ),
+        );
+      }, REQUEST_TIMEOUT_MS);
+    });
+
     try {
-      const model = this.getClient().getGenerativeModel({
-        model: this.modelName,
-        systemInstruction: buildTutorSystemPrompt(input.nivelAluno),
-      });
+      return await Promise.race([promise, timeout]);
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
+    }
+  }
 
-      const contents = [
-        ...(input.historico ?? []).map((msg) => ({
-          role: msg.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: msg.texto }],
-        })),
-        {
-          role: 'user' as const,
-          parts: [{ text: input.texto }],
-        },
-      ];
+  private async generateWithModel(
+    modelName: string,
+    input: EnviarMensagemIaInput,
+  ): Promise<string> {
+    const model = this.getClient().getGenerativeModel({
+      model: modelName,
+      systemInstruction: buildTutorSystemPrompt(
+        input.nivelAluno,
+        input.contextoMetricas,
+      ),
+      generationConfig: {
+        maxOutputTokens: 2048,
+      },
+    });
 
-      const result = await model.generateContent({ contents });
-      const text = result.response.text()?.trim();
+    const contents = [
+      ...(input.historico ?? []).map((msg) => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.texto }],
+      })),
+      {
+        role: 'user' as const,
+        parts: [{ text: input.texto }],
+      },
+    ];
 
-      if (!text) {
-        throw new ServiceUnavailableException(
-          'O tutor não retornou uma resposta. Tente novamente.',
-        );
-      }
+    const result = await this.withTimeout(
+      model.generateContent({ contents }),
+      modelName,
+    );
+    const text = result.response.text()?.trim();
 
-      return text;
-    } catch (error) {
-      if (error instanceof ServiceUnavailableException) {
-        throw error;
-      }
-
-      const message =
-        error instanceof Error ? error.message : 'Erro desconhecido';
-
-      if (message.includes('429') || message.toLowerCase().includes('quota')) {
-        throw new ServiceUnavailableException(
-          'Limite da API Gemini atingido. Tente novamente mais tarde.',
-        );
-      }
-
+    if (!text) {
       throw new ServiceUnavailableException(
-        `Falha ao consultar o tutor IA: ${message}`,
+        'O tutor não retornou uma resposta. Tente novamente.',
       );
     }
+
+    return text;
+  }
+
+  async enviarMensagem(input: EnviarMensagemIaInput): Promise<string> {
+    const candidates = this.getModelCandidates();
+    let lastError: Error | null = null;
+
+    for (const modelName of candidates) {
+      try {
+        return await this.generateWithModel(modelName, input);
+      } catch (error) {
+        if (error instanceof ServiceUnavailableException) {
+          throw error;
+        }
+
+        const message =
+          error instanceof Error ? error.message : 'Erro desconhecido';
+
+        if (this.isRetryableError(message)) {
+          lastError = error instanceof Error ? error : new Error(message);
+          continue;
+        }
+
+        if (message.includes('429') || message.toLowerCase().includes('quota')) {
+          throw new ServiceUnavailableException(
+            'Limite da API Gemini atingido. Tente novamente mais tarde.',
+          );
+        }
+
+        throw new ServiceUnavailableException(
+          `Falha ao consultar o tutor IA: ${message}`,
+        );
+      }
+    }
+
+    throw new ServiceUnavailableException(
+      'Não foi possível conectar ao tutor IA. Verifique GEMINI_API_KEY e GEMINI_MODEL em apps/api/.env (use gemini-2.5-flash) e tente novamente.',
+    );
   }
 }

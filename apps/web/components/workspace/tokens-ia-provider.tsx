@@ -1,10 +1,12 @@
 "use client";
 
 import type { TokensIa } from "@/lib/ia-tutor";
+import { obterSaldoTokens } from "@/lib/ia-tutor";
 import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -28,6 +30,22 @@ export function TokensIaProvider({ children }: { children: ReactNode }) {
 
   const setTokens = useCallback((next: TokensIa) => {
     setTokensState(next);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    obterSaldoTokens()
+      .then((saldo) => {
+        if (!cancelled) setTokensState(saldo);
+      })
+      .catch(() => {
+        /* mantém default até primeira mensagem */
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const value = useMemo(

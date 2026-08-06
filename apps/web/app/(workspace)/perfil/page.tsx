@@ -2,6 +2,7 @@
 
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
 import { LogoutButton } from "@/components/workspace/logout-button";
+import { UserAvatar } from "@/components/workspace/user-avatar";
 import { apiFetch, fetchMe } from "@/lib/api";
 import { type User } from "@/lib/auth";
 import {
@@ -11,15 +12,6 @@ import {
 } from "@/lib/profile-labels";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 export default function PerfilPage() {
   const router = useRouter();
@@ -73,18 +65,12 @@ export default function PerfilPage() {
     <WorkspaceSection title="Perfil">
       <div className="max-w-xl rounded-[14px] border border-white/[0.06] bg-[#161616] p-6 md:p-8">
         <div className="mb-8 flex items-center gap-4">
-          {user.fotoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={user.fotoUrl}
-              alt=""
-              className="size-14 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex size-14 items-center justify-center rounded-full bg-[#252525] text-lg font-semibold text-white">
-              {getInitials(user.nome)}
-            </div>
-          )}
+          <UserAvatar
+            name={user.nome}
+            fotoUrl={user.fotoUrl}
+            className="size-14"
+            initialsClassName="text-lg"
+          />
           <div>
             <p className="text-lg font-medium text-white">{user.nome}</p>
             <p className="text-sm text-white/45">{user.email}</p>

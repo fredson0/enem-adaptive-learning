@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { AreaEnem, Prisma } from '@generated/prisma';
 import { PrismaService } from '../../../../../../infrastructure/database/prisma.service';
 import type {
   BuscarQuestoesFiltro,
@@ -7,24 +6,18 @@ import type {
   QuestoesRepositoryPort,
 } from '../../../../core/application/ports/questoes.repository.port';
 import { QuestaoPrismaMapper } from './questao.prisma.mapper';
+import { buildQuestaoWhere } from './questao-filtro.builder';
 
 @Injectable()
 export class PrismaQuestoesRepository implements QuestoesRepositoryPort {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  private buildWhere(filtro?: {
-    area?: AreaEnem;
-    ano?: number;
-  }): Prisma.QuestaoWhereInput {
-    if (!filtro) return {};
-    return {
-      ...(filtro.area ? { area: filtro.area } : {}),
-      ...(filtro.ano ? { ano: filtro.ano } : {}),
-    };
+  private buildWhere(filtro?: Parameters<typeof buildQuestaoWhere>[0]) {
+    return buildQuestaoWhere(filtro);
   }
 
   async buscarComFiltro(filtro: BuscarQuestoesFiltro): Promise<BuscarQuestoesResultado> {
-    const where = this.buildWhere({ area: filtro.area, ano: filtro.ano });
+    const where = this.buildWhere(filtro);
 
     const [rows, total] = await Promise.all([
       this.prisma.questao.findMany({
@@ -44,13 +37,8 @@ export class PrismaQuestoesRepository implements QuestoesRepositoryPort {
     };
   }
 
-  async buscarAleatorias(filtro: {
-    area?: AreaEnem;
-    ano?: number;
-    quantidade: number;
-    excluirIds?: string[];
-  }) {
-    const where = this.buildWhere({ area: filtro.area, ano: filtro.ano });
+  async buscarAleatorias(filtro: Parameters<QuestoesRepositoryPort['buscarAleatorias']>[0]) {
+    const where = this.buildWhere(filtro);
 
     if (filtro.excluirIds?.length) {
       Object.assign(where, { id: { notIn: filtro.excluirIds } });
@@ -92,7 +80,7 @@ export class PrismaQuestoesRepository implements QuestoesRepositoryPort {
     return ids.map((id) => map.get(id)).filter((q): q is NonNullable<typeof q> => Boolean(q));
   }
 
-  async contar(filtro?: { area?: AreaEnem; ano?: number }) {
+  async contar(filtro?: Parameters<typeof buildQuestaoWhere>[0]) {
     return this.prisma.questao.count({ where: this.buildWhere(filtro) });
   }
 }

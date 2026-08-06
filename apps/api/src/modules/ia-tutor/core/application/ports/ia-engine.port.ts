@@ -18,6 +18,7 @@ export type EnviarMensagemIaInput = {
   texto: string;
   historico?: MensagemHistorico[];
   contextoQuestao?: ContextoQuestao;
+  contextoMetricas?: import('../helpers/tutor-prompts').ContextoAlunoMetricas;
   nivelAluno?: string;
 };
 

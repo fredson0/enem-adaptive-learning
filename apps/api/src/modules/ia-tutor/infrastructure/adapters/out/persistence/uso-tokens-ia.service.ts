@@ -10,14 +10,41 @@ import { PrismaService } from '../../../../../../infrastructure/database/prisma.
 export class UsoTokensIaService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  async consumir(userId: string, custo = 1) {
+  private startOfToday() {
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
+    return hoje;
+  }
 
+  private async getLimiteDiario(userId: string) {
     const plano = await this.prisma.planoAssinatura.findUnique({
       where: { userId },
     });
-    const limite = plano?.tokensDiarios ?? 10;
+    return plano?.tokensDiarios ?? 10;
+  }
+
+  async obterSaldo(userId: string) {
+    const hoje = this.startOfToday();
+    const limite = await this.getLimiteDiario(userId);
+
+    const existente = await this.prisma.usoTokenIa.findUnique({
+      where: {
+        userId_data: { userId, data: hoje },
+      },
+    });
+
+    const consumo = existente?.consumo ?? 0;
+
+    return {
+      consumo,
+      limite,
+      restantes: Math.max(limite - consumo, 0),
+    };
+  }
+
+  async consumir(userId: string, custo = 1) {
+    const hoje = this.startOfToday();
+    const limite = await this.getLimiteDiario(userId);
 
     const existente = await this.prisma.usoTokenIa.findUnique({
       where: {

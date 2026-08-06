@@ -16,11 +16,12 @@ import {
   FinalizarSimuladoUseCase,
 } from '../../../../core/application/use-cases/enviar-resposta.use-case';
 import { GerarSimuladoUseCase } from '../../../../core/application/use-cases/gerar-simulado.use-case';
+import { GerarSimuladoComIaUseCase } from '../../../../core/application/use-cases/gerar-simulado-com-ia.use-case';
 import {
   ListarSimuladosUseCase,
   ObterSimuladoUseCase,
 } from '../../../../core/application/use-cases/obter-simulado.use-case';
-import { CriarSimuladoDto, EnviarRespostaDto } from './dto/simulados.dto';
+import { CriarSimuladoDto, EnviarRespostaDto, GerarSimuladoComIaDto } from './dto/simulados.dto';
 
 @Controller('simulados')
 @UseGuards(JwtAuthGuard)
@@ -28,6 +29,8 @@ export class SimuladosController {
   constructor(
     @Inject(GerarSimuladoUseCase)
     private readonly gerarSimuladoUseCase: GerarSimuladoUseCase,
+    @Inject(GerarSimuladoComIaUseCase)
+    private readonly gerarSimuladoComIaUseCase: GerarSimuladoComIaUseCase,
     @Inject(ListarSimuladosUseCase)
     private readonly listarSimuladosUseCase: ListarSimuladosUseCase,
     @Inject(ObterSimuladoUseCase)
@@ -43,8 +46,21 @@ export class SimuladosController {
     return this.gerarSimuladoUseCase.execute({
       userId: user.sub,
       area: dto.areaEnum ?? undefined,
-      ano: dto.ano,
+      ano: dto.anos?.length ? undefined : dto.ano,
+      anos: dto.anos,
+      termosBusca: dto.termosBusca,
       quantidade: dto.quantidade,
+    });
+  }
+
+  @Post('gerar-com-ia')
+  gerarComIa(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: GerarSimuladoComIaDto,
+  ) {
+    return this.gerarSimuladoComIaUseCase.execute({
+      userId: user.sub,
+      pedido: dto.pedido,
     });
   }
 

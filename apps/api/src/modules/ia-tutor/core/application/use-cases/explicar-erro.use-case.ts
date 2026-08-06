@@ -11,6 +11,7 @@ import { buildExplicarErroUserPrompt } from '../helpers/tutor-prompts';
 import { IA_ENGINE } from '../ports/ia-engine.port';
 import type { IaEnginePort } from '../ports/ia-engine.port';
 import { UsoTokensIaService } from '../../../infrastructure/adapters/out/persistence/uso-tokens-ia.service';
+import { ObterContextoTutorUseCase } from '../../../../metricas/core/application/use-cases/obter-metricas.use-case';
 
 export type ExplicarErroInput = {
   userId: string;
@@ -29,6 +30,8 @@ export class ExplicarErroUseCase {
     private readonly usuariosRepository: UsuariosRepositoryPort,
     @Inject(UsoTokensIaService)
     private readonly usoTokens: UsoTokensIaService,
+    @Inject(ObterContextoTutorUseCase)
+    private readonly obterContextoTutorUseCase: ObterContextoTutorUseCase,
   ) {}
 
   async execute(input: ExplicarErroInput) {
@@ -55,6 +58,9 @@ export class ExplicarErroUseCase {
     const resposta = await this.iaEngine.enviarMensagem({
       texto,
       nivelAluno: perfil?.nivelAtual ?? 'INICIANTE',
+      contextoMetricas: await this.obterContextoTutorUseCase.execute(
+        input.userId,
+      ),
     });
 
     return {

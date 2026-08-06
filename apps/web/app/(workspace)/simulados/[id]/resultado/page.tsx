@@ -1,22 +1,36 @@
 "use client";
 
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
-import { apiFetch } from "@/lib/api";
-import {
-  formatArea,
-  type SimuladoResultado,
-} from "@/lib/simulados";
+import { useTokensIa } from "@/components/workspace/tokens-ia-provider";
+import { useTutorSession } from "@/components/workspace/tutor-session-provider";
+import { ApiError, apiFetch } from "@/lib/api";
+import { explicarErroQuestao } from "@/lib/ia-tutor";
+import { formatArea, type SimuladoResultado } from "@/lib/simulados";
+import { Loader2, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+function buildPerguntaErro(
+  ano: number,
+  indice: number,
+  alternativaMarcada: string | null,
+  gabarito: string,
+) {
+  return `Por que errei a questão ENEM ${ano} #${indice}? Marquei a alternativa ${alternativaMarcada ?? "—"} e o gabarito é ${gabarito}.`;
+}
+
 export default function SimuladoResultadoPage() {
   const params = useParams<{ id: string }>();
   const simuladoId = params.id;
+  const { setTokens } = useTokensIa();
+  const { startChatWithSeed } = useTutorSession();
 
   const [resultado, setResultado] = useState<SimuladoResultado | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [explicandoId, setExplicandoId] = useState<string | null>(null);
+  const [explicarErro, setExplicarErro] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -35,6 +49,43 @@ export default function SimuladoResultadoPage() {
       }
     })();
   }, [simuladoId]);
+
+  const handleExplicarErro = async (questao: SimuladoResultado["questoes"][number]) => {
+    if (!questao.alternativaMarcada) return;
+
+    setExplicandoId(questao.id);
+    setExplicarErro(null);
+
+    try {
+      const response = await explicarErroQuestao({
+        questaoId: questao.id,
+        alternativaMarcada: questao.alternativaMarcada,
+      });
+
+      setTokens(response.tokens);
+
+      startChatWithSeed([
+        {
+          role: "user",
+          texto: buildPerguntaErro(
+            questao.ano,
+            questao.indice,
+            questao.alternativaMarcada,
+            questao.gabarito,
+          ),
+        },
+        { role: "assistant", texto: response.resposta },
+      ]);
+    } catch (err) {
+      setExplicarErro(
+        err instanceof ApiError
+          ? err.message
+          : "Não foi possível explicar o erro. Tente novamente.",
+      );
+    } finally {
+      setExplicandoId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -68,6 +119,12 @@ export default function SimuladoResultadoPage() {
           </p>
         </div>
 
+        {explicarErro ? (
+          <p className="rounded-[10px] border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {explicarErro}
+          </p>
+        ) : null}
+
         {erros.length > 0 ? (
           <section className="space-y-4">
             <h2 className="text-lg font-medium text-white">
@@ -94,11 +151,21 @@ export default function SimuladoResultadoPage() {
                 </p>
                 <button
                   type="button"
-                  disabled
-                  className="mt-4 rounded-full border border-white/10 px-4 py-2 text-xs text-white/35"
-                  title="Disponível na Fase 3 (Tutor IA)"
+                  disabled={explicandoId === q.id || !q.alternativaMarcada}
+                  onClick={() => handleExplicarErro(q)}
+                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#b0ff57]/30 bg-[#b0ff57]/10 px-4 py-2 text-xs font-medium text-[#b0ff57] transition hover:bg-[#b0ff57]/15 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Explicar com IA (em breve)
+                  {explicandoId === q.id ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" />
+                      Explicando…
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="size-3.5" />
+                      Explicar com IA
+                    </>
+                  )}
                 </button>
               </div>
             ))}

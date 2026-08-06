@@ -38,8 +38,10 @@ export class LoginGoogleUseCase {
       usuario = await this.usuariosRepository.salvar(novoUsuario, {
         googleSub: googleUser.googleSub,
       });
-    } else if (googleUser.fotoUrl && usuario.fotoUrl !== googleUser.fotoUrl) {
-      usuario.atualizarPerfil(usuario.nome, googleUser.fotoUrl);
+    } else {
+      if (googleUser.fotoUrl) {
+        usuario.atualizarPerfil(usuario.nome, googleUser.fotoUrl);
+      }
       usuario = await this.usuariosRepository.salvar(usuario, {
         googleSub: googleUser.googleSub,
       });

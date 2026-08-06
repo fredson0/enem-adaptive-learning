@@ -34,6 +34,7 @@ type TutorSessionContextValue = {
   sessionKey: number;
   isNewChat: boolean;
   startNewChat: () => void;
+  startChatWithSeed: (messages: MensagemHistorico[]) => void;
   goToTutor: () => void;
   openSession: (id: string) => void;
   saveMessages: (messages: MensagemHistorico[]) => void;
@@ -99,6 +100,23 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
     setSessionKey((key) => key + 1);
     router.push(TUTOR_CHAT_PATH);
   }, [persist, router, sessions]);
+
+  const startChatWithSeed = useCallback(
+    (messages: MensagemHistorico[]) => {
+      const now = Date.now();
+      const newSession: TutorChatSession = {
+        id: crypto.randomUUID(),
+        title: buildTitle(messages),
+        messages,
+        updatedAt: now,
+      };
+
+      persist([newSession, ...sessions], newSession.id);
+      setSessionKey((key) => key + 1);
+      router.push(TUTOR_CHAT_PATH);
+    },
+    [persist, router, sessions],
+  );
 
   const goToTutor = useCallback(() => {
     if (pathname !== TUTOR_CHAT_PATH) {
@@ -170,6 +188,7 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
       sessionKey: hydrated ? sessionKey : 0,
       isNewChat,
       startNewChat,
+      startChatWithSeed,
       goToTutor,
       openSession,
       saveMessages,
@@ -182,6 +201,7 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
       sessionKey,
       isNewChat,
       startNewChat,
+      startChatWithSeed,
       goToTutor,
       openSession,
       saveMessages,

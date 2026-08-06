@@ -35,3 +35,8 @@ export class ExplicarErroDto {
   @MaxLength(1000)
   perguntaExtra?: string;
 }
+
+export class PedirDicaDto {
+  @IsUUID()
+  questaoId!: string;
+}

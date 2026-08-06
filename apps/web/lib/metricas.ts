@@ -1,0 +1,80 @@
+import { apiFetch } from "@/lib/api";
+import type { AreaEnemSlug } from "@/lib/simulados";
+
+export type ProficienciaArea = {
+  area: string;
+  slug: string;
+  label: string;
+  score: number;
+  totalQuestoes: number;
+  acertos: number;
+  atualizadoEm: string | null;
+};
+
+export type ProficienciaResponse = {
+  areas: ProficienciaArea[];
+  resumo: {
+    simuladosConcluidos: number;
+    questoesRespondidas: number;
+    mediaGeralPercentual: number | null;
+  };
+  ultimoSimulado: {
+    id: string;
+    area: string | null;
+    slug: string | null;
+    label: string | null;
+    acertos: number;
+    totalQuestoes: number;
+    percentual: number;
+    finalizadoEm: string | null;
+  } | null;
+};
+
+export type PontoEvolucao = {
+  simuladoId: string;
+  area: string | null;
+  slug: string | null;
+  label: string | null;
+  acertos: number;
+  totalQuestoes: number;
+  percentual: number;
+  finalizadoEm: string;
+};
+
+export type LacunaTrilha = {
+  area: string;
+  slug: string;
+  label: string;
+  score: number;
+  totalQuestoes: number;
+  acertos: number;
+  prioridade: "Alta" | "Média" | "Baixa";
+  mensagem: string;
+  simuladoSugerido: {
+    area: AreaEnemSlug;
+    quantidade: number;
+  };
+  perguntaTutor: string;
+};
+
+export type LacunasResponse = {
+  metaSemanal: string;
+  lacunas: LacunaTrilha[];
+  checklist: {
+    id: string;
+    texto: string;
+    concluido: boolean;
+  }[];
+};
+
+export function fetchProficiencia() {
+  return apiFetch<ProficienciaResponse>("/metricas/proficiencia");
+}
+
+export function fetchEvolucao() {
+  return apiFetch<{ pontos: PontoEvolucao[] }>("/metricas/evolucao");
+}
+
+export function fetchLacunas() {
+  return apiFetch<LacunasResponse>("/metricas/lacunas");
+}

@@ -99,8 +99,8 @@ Reutiliza tokens da landing, adaptados ao workspace:
 | `/simulados/novo` | Configurar simulado | `simulados` | F2 ✅ |
 | `/simulados/[id]` | Questões A–E + progresso | `simulados` | F2 ✅ |
 | `/simulados/[id]/resultado` | Acertos/erros + explicar IA | `simulados` + `ia-tutor` | F2 ✅ / F3 |
-| `/trilha` | Áreas fracas + próximos tópicos | `metricas` | F4 |
-| `/progresso` | Gráficos de proficiência | `metricas` | F4 |
+| `/trilha` | Áreas fracas + próximos tópicos | `metricas` | F4 ✅ |
+| `/progresso` | Gráficos de proficiência | `metricas` | F4 ✅ |
 | `/planos` | Gratuito vs Apoio + checkout | `usuarios` + MP | F3 |
 | `/perfil` | Dados do aluno + escola | `usuarios` | F1 |
 | `/login` | Google OAuth | `usuarios` | F1 |
@@ -138,7 +138,7 @@ Reutiliza tokens da landing, adaptados ao workspace:
 - [x] `/simulados/novo` — filtro área + quantidade + ano opcional
 - [x] `/simulados/[id]` — questão A–E + progresso
 - [x] `/simulados/[id]/resultado` — score + gabarito + erros
-- [ ] Botão "Explicar com IA" → cria chat em `/tutor/[chatId]` (F3)
+- [x] Botão "Explicar com IA" → abre `/tutor` com explicação da questão
 - [x] Estados loading/erro básicos
 
 ### Fase 3 — Tutor IA + Planos
@@ -147,19 +147,21 @@ Reutiliza tokens da landing, adaptados ao workspace:
 - [x] Sessões locais na sidebar (`sessionStorage`) + nova conversa
 - [x] `TutorPromptInput` (auto-resize, Enter, tela cheia, anexo UI)
 - [x] Animação input docked após 1ª mensagem
-- [ ] `POST /ia-tutor/explicar-erro` no resultado do simulado
+- [x] `POST /ia-tutor/explicar-erro` no resultado do simulado
+- [x] `POST /ia-tutor/dica` durante simulado (sem revelar gabarito)
+- [x] `NvidiaIaAdapter` + `IaEngineRouter` (fallback Gemini ↔ NVIDIA)
 - [ ] Persistir conversas no Postgres (`GET /ia-tutor/conversas`)
 - [ ] Upload imagem → presign R2 + vision Gemini
-- [🟡] `PlanBadge` com tokens restantes (após 1ª msg; falta saldo inicial)
+- [x] `PlanBadge` com tokens restantes (saldo inicial + após cada msg)
 - [ ] `/planos` — cards Gratuito / Apoio
 - [ ] Checkout Mercado Pago + feedback pós-pagamento
 - [ ] Rate limit UX (toast quando tokens acabam)
 
-### Fase 4 — Trilha + Progresso
+### Fase 4 — Trilha + Progresso ✅
 
-- [ ] `/progresso` — radar ou barras por área ENEM
-- [ ] Gráfico evolução temporal (Recharts)
-- [ ] `/trilha` — lacunas + CTA "Simulado focado"
+- [x] `/progresso` — barras por área ENEM + evolução + último simulado
+- [x] `/trilha` — lacunas + meta semanal + CTA "Simulado focado" + tutor
+- [x] `/simulados/novo` — gerar com IA + filtros (multi-ano, termos no enunciado)
 - [ ] Cache visual (skeleton enquanto carrega métricas)
 
 ### Fase 5 — Piloto TCC
@@ -201,34 +203,33 @@ Reutiliza tokens da landing, adaptados ao workspace:
 
 ### `/simulados/novo`
 
-- [x] Seleção de área (CN, CH, LC, MT, RED)
-- [x] Quantidade (5/10/20 questões)
-- [x] Ano opcional + preview N questões
+- [x] Aba **Pedir à IA** — descrição em linguagem natural → `POST /simulados/gerar-com-ia`
+- [x] Aba **Filtros manuais** — área, quantidade, multi-ano, assunto no enunciado
+- [x] Query params `?area=&quantidade=` (vindo da Trilha)
 
 ### `/simulados/[id]`
 
 - [x] Enunciado + alternativas A–E
-- [x] Barra de progresso
-- [ ] Timer
-- [ ] Navegação entre questões (só sequencial v1)
+- [x] Scroll corrigido (`WorkspaceLenisGuard` + área rolável)
+- [x] **Pedir dica** — `POST /ia-tutor/dica` (1 token, sem gabarito)
 - [x] Finalizar simulado
 
 ### `/simulados/[id]/resultado`
 
 - [x] Score + lista de erros
 - [x] Gabarito por questão errada
-- [ ] "Explicar erro com IA" funcional (placeholder → F3)
+- [x] "Explicar erro com IA" no resultado
 
 ### `/trilha`
 
-- [x] Placeholder com áreas mock
-- [ ] Top 3 lacunas do aluno
-- [ ] Sugestão semanal de estudo
-- [ ] Link para simulado focado
+- [x] Top 3 lacunas do aluno (`GET /metricas/lacunas`)
+- [x] Meta semanal + checklist
+- [x] Link para simulado focado + pergunta ao tutor
 
 ### `/progresso`
 
-- [x] Placeholder com cards de proficiência mock
+- [x] Proficiência por área + resumo (`GET /metricas/proficiencia`)
+- [x] Gráfico de evolução (`GET /metricas/evolucao`)
 - [ ] Gráfico radar 5 áreas
 - [ ] Linha do tempo (últimos 30 dias)
 - [ ] Comparativo "vs. semana passada"

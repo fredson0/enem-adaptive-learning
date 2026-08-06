@@ -2,19 +2,19 @@
 
 📖 Sobre o Projeto
 
-Este projeto é o produto final de um Trabalho de Conclusão de Curso (TCC) focado em Inclusão Digital e Democratização do Estudo para o ENEM. Trata-se de uma Plataforma Educacional Adaptativa que utiliza Inteligência Artificial (**Google Gemini 2.5 Flash**) para identificar lacunas de conhecimento do aluno e gerar trilhas de estudo personalizadas.
+Este projeto é o produto final de um Trabalho de Conclusão de Curso (TCC) focado em Inclusão Digital e Democratização do Estudo para o ENEM. Trata-se de uma Plataforma Educacional Adaptativa que utiliza Inteligência Artificial (**NVIDIA NIM** com fallback **Gemini 2.5 Flash**) para identificar lacunas de conhecimento do aluno e gerar trilhas de estudo personalizadas.
 
 O grande diferencial do projeto é o seu foco em acessibilidade social. Através de um modelo Freemium sustentável, alunos pagantes de planos com valor simbólico subsidiam o custo da infraestrutura e da Inteligência Artificial para alunos de baixa renda oriundos de escolas públicas.
 
 🚀 Principais Funcionalidades
 
-🧠 Tutor Virtual IA: Integração com a API do **Gemini 2.5 Flash** (Google AI Studio) para explicar erros em questões do ENEM de forma didática e adaptada ao nível do aluno. Suporte a **upload de foto** (questão ou resolução no caderno) via **Gemini Vision**, com arquivos armazenados no **Cloudflare R2** (não no Railway). Free tier disponível para desenvolvimento e piloto.
+🧠 Tutor Virtual IA: Integração com **NVIDIA NIM** (`meta/llama-3.1-8b-instruct`) e fallback **Gemini 2.5 Flash** via `IaEngineRouter`. Chat livre com contexto de métricas reais, explicação de erros pós-simulado e dicas durante o simulado (sem revelar gabarito). Suporte futuro a **upload de foto** (questão ou resolução no caderno) via **Gemini Vision**, com arquivos armazenados no **Cloudflare R2** (não no Railway).
 
 🔐 Autenticação Segura (Google Login): Acesso facilitado via OAuth2 com o Google. Sessão com **cookies HttpOnly** no frontend (BFF Next.js) e **refresh tokens** rotativos na API.
 
-📝 Simulados ENEM: Banco de questões reais (seed via api.enem.dev). Criar simulado por área, responder questões A–E e ver resultado com gabarito.
+📝 Simulados ENEM: Banco de ~10 mil questões reais (seed via api.enem.dev). Criar simulado por área, **pedir à IA em linguagem natural** (`POST /simulados/gerar-com-ia`), filtros multi-ano e termos no enunciado. Responder questões A–E e ver resultado com gabarito + explicação IA.
 
-📊 Métricas de Proficiência: Algoritmos que calculam o nível de domínio do aluno em cada área do conhecimento com base no histórico de simulados.
+📊 Métricas de Proficiência: API de proficiência, evolução e lacunas por área ENEM. Telas **Progresso** e **Trilha** conectadas ao backend; recálculo automático ao finalizar simulado.
 
 💳 Sistema de Sustentabilidade (Planos e Tokens): - Plano Gratuito: Focado em alunos de escolas públicas, com um limite de tokens de IA diários para garantir a viabilidade financeira do projeto.
 
@@ -42,7 +42,7 @@ Banco de Dados (Relacional): PostgreSQL hospedado no **Railway** + ORM **Prisma*
 
 Cache & Rate Limit: Redis (Railway ou Upstash).
 
-Integrações Externas (Adapters): Google OAuth2, Gemini API (`gemini-2.5-flash`, vision), **Cloudflare R2** (anexos do tutor), Mercado Pago API.
+Integrações Externas (Adapters): Google OAuth2, **NVIDIA NIM** + Gemini API (`gemini-2.5-flash`, vision), **Cloudflare R2** (anexos do tutor), Mercado Pago API.
 
 Infraestrutura: **Vercel** (Frontend) + **Railway** (API, PostgreSQL e Redis) + **Cloudflare R2** (object storage).
 
@@ -76,7 +76,7 @@ PostgreSQL (Local ou URL do Railway)
 
 Redis (Opcional para ambiente de dev)
 
-Contas ativas: Google Cloud Console (OAuth), Gemini API Studio, Mercado Pago Developers.
+Contas ativas: Google Cloud Console (OAuth), **NVIDIA Build** (NIM) e/ou Google AI Studio (Gemini), Mercado Pago Developers.
 
 Passo a Passo
 
@@ -107,6 +107,9 @@ CORS_ORIGIN="http://localhost:3001"
 GOOGLE_CLIENT_ID="seu_client_id.apps.googleusercontent.com"
 GEMINI_API_KEY="sua_chave_do_google_ai_studio"
 GEMINI_MODEL="gemini-2.5-flash"
+IA_PROVIDER="nvidia"
+NVIDIA_API_KEY="sua_chave_build.nvidia.com"
+NVIDIA_MODEL="meta/llama-3.1-8b-instruct"
 MERCADOPAGO_ACCESS_TOKEN="seu_token_do_mercado_pago"
 REDIS_URL="redis://localhost:6379"
 ```
@@ -157,6 +160,7 @@ Desenvolvido com 🩵 e foco em educação para o Trabalho de Conclusão de Curs
 | [Escopo do Produto](docs/ESCOPO-PRODUTO.md) | Telas, tutor vision, storage, fora do TCC |
 | [Segurança Auth](docs/SEGURANCA-AUTH.md) | HttpOnly, refresh, rate limit, anti privilege-escalation |
 | [Escolha do Modelo de IA](docs/ESCOLHA-MODELO-IA.md) | Gemini vs alternativas gratuitas, quotas e estratégia do tutor |
+| [Tutor IA — Perguntas e Endpoints](docs/TUTOR-IA-PERGUNTAS-E-ENDPOINTS.md) | Tipos de pergunta do aluno, o que funciona hoje e endpoints futuros |
 | [Workspace UI (OSMO)](docs/WORKSPACE-UI-OSMO.md) | Área logada do aluno — sidebar, rotas, checklist |
 | [Conceitos de Segurança e Performance](docs/CONCEITOS-SEGURANCA-E-PERFORMANCE.md) | 20 conceitos (idempotência, rate limit, JWT, etc.) com quando e onde implementar |
 | [Cronograma de Implementação](docs/CRONOGRAMA-IMPLEMENTACAO.md) | Roadmap em 5 fases — backend e frontend sincronizados |

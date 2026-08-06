@@ -9,6 +9,20 @@ export const AREA_OPTIONS: { value: AreaEnemSlug; label: string }[] = [
 
 export const QUANTIDADE_OPTIONS = [5, 10, 20] as const;
 
+export const ANOS_ENEM = Array.from({ length: 2023 - 2009 + 1 }, (_, i) => 2009 + i);
+
+export type PlanoSimuladoIa = {
+  titulo: string;
+  resumo: string;
+  termosBusca: string[];
+  anos: number[] | null;
+};
+
+export type SimuladoGeradoComIa = {
+  id: string;
+  plano: PlanoSimuladoIa;
+};
+
 export type SimuladoResumo = {
   id: string;
   area: string | null;

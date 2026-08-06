@@ -22,9 +22,10 @@ export function WorkspaceSection({
   return (
     <div
       className={cn(
-        "scrollbar-none flex min-h-0 flex-1 flex-col overflow-y-auto",
+        "scrollbar-none flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain",
         className,
       )}
+      data-lenis-prevent
     >
       <div className="px-6 pt-24 md:px-10 md:pt-28 lg:px-12">
         {title ? (

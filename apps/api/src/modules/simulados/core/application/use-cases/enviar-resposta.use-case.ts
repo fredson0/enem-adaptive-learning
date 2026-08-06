@@ -10,6 +10,7 @@ import {
   SIMULADOS_REPOSITORY,
   type SimuladosRepositoryPort,
 } from '../ports/simulados.repository.port';
+import { CalcularProficienciaUseCase } from '../../../../metricas/core/application/use-cases/calcular-proficiencia.use-case';
 
 export type EnviarRespostaInput = {
   simuladoId: string;
@@ -103,6 +104,8 @@ export class FinalizarSimuladoUseCase {
     private readonly simuladosRepository: SimuladosRepositoryPort,
     @Inject(QUESTOES_REPOSITORY)
     private readonly questoesRepository: QuestoesRepositoryPort,
+    @Inject(CalcularProficienciaUseCase)
+    private readonly calcularProficienciaUseCase: CalcularProficienciaUseCase,
   ) {}
 
   async execute(simuladoId: string, userId: string) {
@@ -116,6 +119,8 @@ export class FinalizarSimuladoUseCase {
       simulado.status === 'CONCLUIDO'
         ? simulado
         : await this.simuladosRepository.finalizar(simuladoId, userId);
+
+    await this.calcularProficienciaUseCase.execute(userId);
 
     const questoes = await this.questoesRepository.buscarPorIds(finalizado.questaoIds);
     const respostasMap = new Map(

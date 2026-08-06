@@ -137,20 +137,20 @@ GroqIaEngineAdapter     ← fallback opcional (F3+)
 **Variáveis de ambiente (F3):**
 
 ```env
-IA_PROVIDER=gemini          # gemini | nvidia | groq
+IA_PROVIDER=nvidia          # nvidia | gemini (com fallback automático)
 GEMINI_API_KEY=sua-chave
 GEMINI_MODEL=gemini-2.5-flash
 
-# NVIDIA (adicionar depois — mesma interface IaEnginePort)
+# NVIDIA NIM (build.nvidia.com) — free tier ~40 req/min
 NVIDIA_API_KEY=sua-chave
-NVIDIA_MODEL=google/gemini-2.5-flash   # slug do modelo na NVIDIA
+NVIDIA_MODEL=meta/llama-3.1-8b-instruct
 
 # Fallback opcional
 GROQ_API_KEY=sua-chave
 GROQ_MODEL=llama-3.3-70b-versatile
 ```
 
-> **Estratégia do projeto:** começar com **Gemini direto** (Google AI Studio, grátis, simples). Na F3, o adapter `IaEnginePort` permite trocar para **NVIDIA** sem mudar use cases — útil se a NVIDIA oferecer cota generosa ou acesso multi-modelo. O rate limit (`uso_tokens_ia`) continua no backend independente do provedor.
+> **Estratégia do projeto (atualizado 06/08/2026):** primário **NVIDIA NIM** (`meta/llama-3.1-8b-instruct`) com fallback **Gemini 2.5 Flash** via `IaEngineRouter`. O rate limit (`uso_tokens_ia`) continua no backend independente do provedor.
 
 O Use Case **nunca** importa SDK do Gemini. Só chama:
 

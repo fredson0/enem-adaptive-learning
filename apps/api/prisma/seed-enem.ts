@@ -5,6 +5,8 @@
  * Variáveis opcionais:
  * - SEED_YEARS=2022,2023 (default)
  * - SEED_DISCIPLINES=matematica,linguagens,ciencias-humanas,ciencias-natureza
+ *
+ * Idempotente: enemDevId é único no banco — reexecutar não duplica.
  */
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -12,6 +14,10 @@ import { AreaEnem, PrismaClient } from '../generated/prisma/client';
 import { Pool } from 'pg';
 
 const API_BASE = 'https://api.enem.dev/v1';
+const PAGE_LIMIT = 50;
+const PAGE_DELAY_MS = 900;
+const BATCH_DELAY_MS = 700;
+const MAX_RETRIES = 6;
 
 const DISCIPLINE_TO_AREA: Record<string, AreaEnem> = {
   linguagens: AreaEnem.LINGUAGENS,
@@ -37,9 +43,20 @@ type EnemQuestion = {
   files?: { src?: string }[];
 };
 
-function extractImageUrl(context: string, files?: EnemQuestion['files']): string | null {
+type EnemPageResponse = {
+  questions: EnemQuestion[];
+  metadata?: { hasMore?: boolean; total?: number };
+};
+
+function buildEnemDevId(year: number, discipline: string, index: number) {
+  return `${year}-${discipline}-${index}`;
+}
+
+function extractImageUrl(context: string | null | undefined, files?: EnemQuestion['files']): string | null {
   const fromFile = files?.find((f) => f.src)?.src;
   if (fromFile) return fromFile;
+
+  if (!context) return null;
 
   const match = context.match(/!\[[^\]]*]\(([^)]+)\)/);
   return match?.[1] ?? null;
@@ -49,36 +66,56 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchQuestions(year: number, discipline: string) {
-  const all: EnemQuestion[] = [];
-  let offset = 0;
-  const limit = 50;
-
-  while (true) {
-    const url = `${API_BASE}/exams/${year}/questions?discipline=${discipline}&limit=${limit}&offset=${offset}`;
+async function fetchPage(url: string): Promise<EnemPageResponse> {
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     const res = await fetch(url);
 
+    if (res.status === 429 || res.status >= 500) {
+      const wait = 1500 * (attempt + 1);
+      console.warn(`⏳ HTTP ${res.status} — nova tentativa em ${wait}ms...`);
+      await sleep(wait);
+      continue;
+    }
+
     if (!res.ok) {
-      console.warn(`⚠️  ${year}/${discipline} offset ${offset}: HTTP ${res.status}`);
-      break;
+      throw new Error(`HTTP ${res.status}`);
     }
 
-    const data = (await res.json()) as {
-      questions: EnemQuestion[];
-      metadata?: { hasMore?: boolean; total?: number };
-    };
-
-    all.push(...(data.questions ?? []));
-
-    if (!data.metadata?.hasMore || (data.questions?.length ?? 0) < limit) {
-      break;
-    }
-
-    offset += limit;
-    await sleep(300);
+    return (await res.json()) as EnemPageResponse;
   }
 
-  return all;
+  throw new Error(`HTTP 429/5xx após ${MAX_RETRIES} tentativas`);
+}
+
+async function fetchQuestions(year: number, discipline: string) {
+  const byKey = new Map<string, EnemQuestion>();
+  let offset = 0;
+
+  while (true) {
+    const url = `${API_BASE}/exams/${year}/questions?discipline=${discipline}&limit=${PAGE_LIMIT}&offset=${offset}`;
+
+    try {
+      const data = await fetchPage(url);
+      const batch = data.questions ?? [];
+
+      for (const q of batch) {
+        byKey.set(buildEnemDevId(year, discipline, q.index), q);
+      }
+
+      if (!data.metadata?.hasMore || batch.length < PAGE_LIMIT) {
+        break;
+      }
+
+      offset += PAGE_LIMIT;
+      await sleep(PAGE_DELAY_MS);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'erro desconhecido';
+      console.warn(`⚠️  ${year}/${discipline} offset ${offset}: ${message}`);
+      break;
+    }
+  }
+
+  return [...byKey.values()];
 }
 
 async function main() {
@@ -103,8 +140,9 @@ async function main() {
     .map((d) => d.trim())
     .filter(Boolean);
 
-  let inseridas = 0;
-  let ignoradas = 0;
+  let novas = 0;
+  let jaExistiam = 0;
+  let erros = 0;
 
   for (const year of years) {
     for (const discipline of disciplines) {
@@ -116,21 +154,30 @@ async function main() {
 
       console.log(`📥 Buscando ${discipline} ${year}...`);
       const questions = await fetchQuestions(year, discipline);
-      console.log(`   ${questions.length} questões encontradas`);
+      console.log(`   ${questions.length} questões únicas na API`);
 
       for (const q of questions) {
-        const enemDevId = `${year}-${discipline}-${q.index}`;
+        const enemDevId = buildEnemDevId(year, discipline, q.index);
 
         try {
-          await prisma.questao.upsert({
+          const existente = await prisma.questao.findUnique({
             where: { enemDevId },
-            create: {
+            select: { id: true },
+          });
+
+          if (existente) {
+            jaExistiam++;
+            continue;
+          }
+
+          await prisma.questao.create({
+            data: {
               enemDevId,
               ano: year,
               area,
               indice: q.index,
               disciplina: discipline,
-              contexto: q.context,
+              contexto: q.context ?? '',
               introducaoAlternativas: q.alternativesIntroduction ?? null,
               alternativas: q.alternatives.map((alt) => ({
                 letra: alt.letter,
@@ -139,20 +186,23 @@ async function main() {
               gabarito: q.correctAlternative,
               imagemUrl: extractImageUrl(q.context, q.files),
             },
-            update: {},
           });
-          inseridas++;
-        } catch {
-          ignoradas++;
+          novas++;
+        } catch (error) {
+          erros++;
+          const message = error instanceof Error ? error.message : 'erro desconhecido';
+          console.warn(`⚠️  Falha ao salvar ${enemDevId}: ${message}`);
         }
       }
 
-      await sleep(400);
+      await sleep(BATCH_DELAY_MS);
     }
   }
 
   const total = await prisma.questao.count();
-  console.log(`\n✅ Seed concluído: ${inseridas} upserts, ${ignoradas} ignoradas, ${total} no banco`);
+  console.log(
+    `\n✅ Seed concluído: ${novas} novas, ${jaExistiam} já existiam (sem duplicar), ${erros} erros, ${total} no banco`,
+  );
 
   await prisma.$disconnect();
   await pool.end();

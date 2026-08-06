@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { QUESTOES_REPOSITORY } from '../../../../questoes/core/application/ports/questoes.repository.port';
 import type { QuestoesRepositoryPort } from '../../../../questoes/core/application/ports/questoes.repository.port';
-import type { AreaEnem } from '@generated/prisma';
+import type { FiltroQuestoes } from '../../../../questoes/core/application/types/filtro-questoes';
 import {
   SIMULADOS_REPOSITORY,
   type SimuladosRepositoryPort,
@@ -13,10 +13,8 @@ import {
 
 export type GerarSimuladoInput = {
   userId: string;
-  area?: AreaEnem;
-  ano?: number;
   quantidade: number;
-};
+} & FiltroQuestoes;
 
 @Injectable()
 export class GerarSimuladoUseCase {
@@ -30,26 +28,29 @@ export class GerarSimuladoUseCase {
   async execute(input: GerarSimuladoInput) {
     const quantidade = Math.min(Math.max(input.quantidade, 1), 45);
 
-    const questoes = await this.questoesRepository.buscarAleatorias({
+    const filtro: FiltroQuestoes = {
       area: input.area,
-      ano: input.ano,
+      ano: input.anos?.length ? undefined : input.ano,
+      anos: input.anos?.length ? input.anos : undefined,
+      termosBusca: input.termosBusca,
+    };
+
+    const questoes = await this.questoesRepository.buscarAleatorias({
+      ...filtro,
       quantidade,
     });
 
     if (questoes.length < quantidade) {
-      const total = await this.questoesRepository.contar({
-        area: input.area,
-        ano: input.ano,
-      });
+      const total = await this.questoesRepository.contar(filtro);
 
       if (total === 0) {
         throw new BadRequestException(
-          'Não há questões no banco para os filtros selecionados. Rode o seed primeiro.',
+          'Não há questões no banco para esses filtros. Tente outros termos ou rode o seed.',
         );
       }
 
       throw new BadRequestException(
-        `Só há ${questoes.length} questão(ões) disponíveis para esses filtros.`,
+        `Só há ${questoes.length} questão(ões) disponíveis para esses filtros (total no banco: ${total}).`,
       );
     }
 

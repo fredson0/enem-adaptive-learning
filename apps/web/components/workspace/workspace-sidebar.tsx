@@ -2,6 +2,7 @@
 
 import { ChatList } from "@/components/workspace/chat-list";
 import { SidebarAccordion } from "@/components/workspace/sidebar-accordion";
+import { UserAvatar } from "@/components/workspace/user-avatar";
 import { cn } from "@/lib/utils";
 import {
   isActivePath,
@@ -29,15 +30,6 @@ function getSectionFromPath(pathname: string): SectionId | null {
 }
 
 type WorkspaceSidebarProps = Record<string, never>;
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
   const pathname = usePathname();
@@ -171,18 +163,11 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
               : "hover:bg-[var(--osmo-hover)]",
           )}
         >
-          {user?.fotoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={user.fotoUrl}
-              alt=""
-              className="size-9 shrink-0 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex size-9 items-center justify-center rounded-full bg-[#2a2a2a] text-xs font-semibold text-white">
-              {getInitials(user?.nome ?? "U")}
-            </div>
-          )}
+          <UserAvatar
+            name={user?.nome ?? "Usuário"}
+            fotoUrl={user?.fotoUrl}
+            className="size-9"
+          />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-white">
               {user?.nome ?? "Usuário"}

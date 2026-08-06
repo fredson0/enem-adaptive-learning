@@ -2,7 +2,7 @@
 
 > Roadmap do TCC em **5 fases**. Cada fase tem entregáveis claros, dependências e estimativa de duração para estudante em tempo parcial (~10–15h/semana).
 
-**Conceitos detalhados:** [CONCEITOS-SEGURANCA-E-PERFORMANCE.md](./CONCEITOS-SEGURANCA-E-PERFORMANCE.md) · **Infra:** [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md) · **IA:** [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) · **Workspace UI:** [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md) · **Escopo:** [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md)
+**Conceitos detalhados:** [CONCEITOS-SEGURANCA-E-PERFORMANCE.md](./CONCEITOS-SEGURANCA-E-PERFORMANCE.md) · **Infra:** [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md) · **IA:** [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) · **Tutor (perguntas):** [TUTOR-IA-PERGUNTAS-E-ENDPOINTS.md](./TUTOR-IA-PERGUNTAS-E-ENDPOINTS.md) · **Workspace UI:** [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md) · **Escopo:** [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md)
 
 **Cronogramas vibe coding (separados):**
 - [CRONOGRAMA-BACKEND.md](./CRONOGRAMA-BACKEND.md)
@@ -46,56 +46,67 @@ gantt
 
 ## Estado atual do projeto (baseline)
 
-### ✅ Já feito (Backend) — atualizado 05/08/2026
+### ✅ Já feito (Backend) — atualizado 06/08/2026
 
 - [x] Estrutura hexagonal por módulos
 - [x] Entidades `Usuario`, `PerfilAluno`, `Questao`
-- [x] Ports: `UsuariosRepositoryPort`, `OAuthServicePort`, `AuthTokenServicePort`, `QuestoesRepositoryPort`, `SimuladosRepositoryPort`
+- [x] Ports: `UsuariosRepositoryPort`, `OAuthServicePort`, `AuthTokenServicePort`, `QuestoesRepositoryPort`, `SimuladosRepositoryPort`, `MetricasRepositoryPort`
 - [x] `LoginGoogleUseCase`, refresh/logout, `ObterPerfilUseCase`, `AtualizarPerfilUseCase`
 - [x] Prisma + schema (usuários, perfil, planos, proficiência, tokens, **questões, simulados**)
 - [x] Migrations: init + perfil escolar + refresh tokens + **questoes_simulados**
-- [x] `PrismaService` + adapters Prisma (usuários, questões, simulados)
+- [x] `PrismaService` + adapters Prisma (usuários, questões, simulados, métricas)
 - [x] `GoogleOAuthService`, `JwtAuthTokenService` (access 15min + refresh rotativo), `JwtAuthGuard`
 - [x] `QuestoesController` — `GET /questoes`
-- [x] `SimuladosController` — CRUD fluxo completo
-- [x] Seed `prisma/seed-enem.ts` (api.enem.dev)
+- [x] `SimuladosController` — CRUD fluxo completo + `POST /simulados/gerar-com-ia`
+- [x] Seed `prisma/seed-enem.ts` (api.enem.dev, retry anti-duplicata)
 - [x] CORS + ValidationPipe + Helmet; `docker-compose.yml` (Postgres **5433**)
 
-### ✅ Já feito (Frontend) — atualizado 05/08/2026
+### ✅ Já feito (Frontend) — atualizado 06/08/2026
 
 - [x] Landing page (`apps/web`) — hero, header OSMO, animações GSAP
 - [x] Workspace OSMO — sidebar overlay
 - [x] Login Google + onboarding + **proxy** + **cookies HttpOnly** (BFF)
-- [x] Sidebar e `/perfil` com usuário real da API
-- [x] **Simulados**: `/simulados`, `/novo`, `/[id]`, `/[id]/resultado` com API real
+- [x] Sidebar e `/perfil` com usuário real da API + `UserAvatar`
+- [x] **Simulados**: `/simulados`, `/novo` (IA + filtros avançados), `/[id]` (scroll + dica IA), `/[id]/resultado` com API real
+- [x] **Progresso** e **Trilha** com API de métricas (sem mock)
 - [x] Documentação UI: [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md)
 
-### ✅ Em andamento (S3) — atualizado 05/08/2026
+### ✅ S3 Tutor IA — atualizado 06/08/2026
 
 **Backend**
-- [x] `IaEnginePort` + `GeminiIaAdapter` (`GEMINI_API_KEY`, modelo `gemini-flash-latest`)
-- [x] `POST /ia-tutor/mensagens` — chat + histórico + limite diário de tokens
-- [x] `POST /ia-tutor/explicar-erro` — use case + endpoint (aguarda integração no frontend)
-- [x] `UsoTokensIaService` — consumo em `uso_tokens_ia`
+- [x] `IaEnginePort` + `GeminiIaAdapter` + `NvidiaIaAdapter` + `IaEngineRouter` (fallback automático)
+- [x] `POST /ia-tutor/mensagens` — chat + histórico + contexto de métricas no prompt
+- [x] `POST /ia-tutor/explicar-erro` + `POST /ia-tutor/dica` (dica sem gabarito durante simulado)
+- [x] `GET /ia-tutor/tokens` + `UsoTokensIaService`
 - [x] `IaTutorModule` registrado no `AppModule`
-- [x] Correções DI (`@Inject` explícito) em controllers e `JwtAuthTokenService`
 
 **Frontend**
-- [x] Chat real em `/tutor` via BFF → `POST /ia-tutor/mensagens`
-- [x] `TutorPromptInput` — Enter envia, Shift+Enter quebra linha, auto-resize, scroll suave, tela cheia
-- [x] Botão `+` anexar imagem (preview + remover); envio vision ainda pendente
-- [x] Sessões de chat no `sessionStorage` (sidebar + nova conversa sem URL estranha)
-- [x] `PlanBadge` atualiza tokens após cada resposta da API
-- [x] Animação suave: input desce após 1ª mensagem; modal tela cheia via portal
+- [x] Chat real em `/tutor` via BFF
+- [x] Sessões de chat no `sessionStorage` + `startChatWithSeed` (resultado simulado / trilha)
+- [x] `PlanBadge` com saldo inicial (`GET /ia-tutor/tokens`)
+- [x] Botão **Explicar com IA** no resultado do simulado
 
-### ⬜ Próximo (S3 — fechar E3)
+### ✅ S4 Métricas + simulados adaptativos — atualizado 06/08/2026
 
-- [ ] Testar Gemini em produção (billing/quota Google Cloud se 429)
-- [ ] `POST /ia-tutor/explicar-erro` — botão no resultado do simulado
+**Backend**
+- [x] `MetricasModule` — `GET /metricas/proficiencia`, `/evolucao`, `/lacunas`, `POST /recalcular`
+- [x] `CalcularProficienciaUseCase` após finalizar simulado
+- [x] `ObterContextoTutorUseCase` — dados reais de simulados no prompt do tutor
+- [x] Filtros flexíveis de questões: `anos[]`, `termosBusca[]` no enunciado
+- [x] `GerarSimuladoComIaUseCase` — `POST /simulados/gerar-com-ia`
+
+**Frontend**
+- [x] `/progresso` — proficiência, resumo, evolução, último simulado
+- [x] `/trilha` — lacunas, meta semanal, CTA simulado focado + tutor
+- [x] `/simulados/novo` — aba **Pedir à IA** + filtros manuais (multi-ano, assunto)
+
+### ⬜ Próximo (S3/S5)
+
 - [ ] Upload imagem → presign R2 + vision Gemini
-- [ ] `GET /ia-tutor/conversas` — persistir chats no Postgres (substituir sessionStorage)
-- [ ] `PlanBadge` com saldo inicial ao abrir o workspace (sem depender da 1ª mensagem)
-- [ ] Checkpoint **E3**
+- [ ] `GET /ia-tutor/conversas` — persistir chats no Postgres
+- [ ] Cache Redis nas métricas (F4 performance)
+- [ ] `/planos` — checkout Mercado Pago
+- [ ] Tags de assunto nas questões (melhorar busca por tema)
 
 ---
 
@@ -233,11 +244,14 @@ gantt
 
 | # | Tarefa | Conceitos | Arquivos principais |
 |---|--------|-----------|---------------------|
-| 4.1 | `CalcularProficienciaUseCase` | Agregações pré-calculadas | atualiza `proficiencias_area` |
-| 4.2 | Hook pós-resposta (chamar cálculo) | Transações | dentro de `EnviarRespostaUseCase` |
-| 4.3 | `ProficienciaRepositoryPort` + cache Redis | Cache-aside | adapter com cache |
-| 4.4 | `GET /metricas/proficiencia` | — | `metricas.controller.ts` |
-| 4.5 | `GET /metricas/evolucao` (série temporal) | Paginação | query otimizada |
+| 4.1 | `CalcularProficienciaUseCase` | Agregações pré-calculadas | atualiza `proficiencias_area` | ✅ |
+| 4.2 | Hook pós-resposta (chamar cálculo) | Transações | `FinalizarSimuladoUseCase` | ✅ |
+| 4.3 | `MetricasRepositoryPort` + endpoints | — | `metricas.controller.ts` | ✅ |
+| 4.4 | `GET /metricas/proficiencia` | — | `metricas.controller.ts` | ✅ |
+| 4.5 | `GET /metricas/evolucao` + `GET /metricas/lacunas` | — | `obter-metricas.use-case.ts` | ✅ |
+| 4.6 | Contexto de simulados no tutor IA | Prompt engineering | `ObterContextoTutorUseCase` | ✅ |
+| 4.7 | `POST /simulados/gerar-com-ia` | IA → filtros → sorteio | `GerarSimuladoComIaUseCase` | ✅ |
+| 4.8 | Filtros `anos[]` + `termosBusca[]` em questões | Busca no enunciado | `questao-filtro.builder.ts` | ✅ |
 | 4.6 | Audit log em ações sensíveis | Audit log | tabela `audit_logs` + migration |
 | 4.7 | Soft delete em usuários | LGPD | campo `deleted_at` |
 | 4.8 | Helmet + rate limit global (`@nestjs/throttler`) | Segurança | `main.ts` |
@@ -251,10 +265,10 @@ gantt
 
 | # | Tarefa | Conceitos | Arquivos principais |
 |---|--------|-----------|---------------------|
-| 4.11 | Dashboard de proficiência (gráfico radar/bar) | — | `app/(workspace)/progresso/page.tsx` |
-| 4.12 | Gráfico de evolução temporal | — | Recharts ou Chart.js |
-| 4.13 | Página "Minha trilha" (áreas fracas) | — | `app/(workspace)/trilha/page.tsx` |
-| 4.14 | Painel professor (lista turma) — se houver tempo | RBAC | `app/professor/page.tsx` |
+| 4.11 | Dashboard de proficiência (gráfico radar/bar) | — | `app/(workspace)/progresso/page.tsx` | ✅ |
+| 4.12 | Gráfico de evolução temporal | — | barras últimos simulados | ✅ |
+| 4.13 | Página "Minha trilha" (áreas fracas) | — | `app/(workspace)/trilha/page.tsx` | ✅ |
+| 4.14 | Novo simulado com IA + filtros avançados | — | `app/(workspace)/simulados/novo/page.tsx` | ✅ |
 | 4.15 | Responsividade mobile | Acessibilidade | testes em celular |
 | 4.16 | PWA básico (opcional) | Inclusão digital | `manifest.json` |
 

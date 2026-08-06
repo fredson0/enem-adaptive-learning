@@ -14,8 +14,8 @@
 | **S0** | Auth | Login Google → onboarding → `/tutor` protegido | ✅ |
 | **S1** | Simulados (criar) | `/simulados/novo` + formulário | ✅ |
 | **S2** | Simulados (fluxo) | Questão → resultado → histórico real | ✅ |
-| **S3** | Tutor | Chat real + sidebar de conversas |
-| **S4** | Métricas | Progresso + trilha com API |
+| **S3** | Tutor | Chat real + NVIDIA fallback + dica no simulado | 🟡 |
+| **S4** | Métricas | Progresso + trilha + simulado por IA | ✅ |
 | **S5** | Planos + perfil | Checkout + editar perfil |
 | **S6** | Polish | Loading, erros, mobile |
 
@@ -67,18 +67,22 @@
 | 3.2 | Sidebar: `GET /ia-tutor/conversas` | ⬜ (hoje: `sessionStorage`) |
 | 3.3 | Nova conversa / continuar chat | ✅ |
 | 3.4 | Upload imagem (presign + vision) | ⬜ (UI `+` pronta) |
-| 3.5 | `PlanBadge` com tokens da API | 🟡 (atualiza após enviar msg) |
+| 3.5 | `PlanBadge` com tokens da API | ✅ |
 | 3.6 | Input estilo Gemini (resize, Enter, tela cheia) | ✅ |
-| 3.7 | `POST /ia-tutor/explicar-erro` no resultado simulado | ⬜ |
+| 3.7 | `POST /ia-tutor/explicar-erro` no resultado simulado | ✅ |
+| 3.8 | `POST /ia-tutor/dica` durante simulado (sem gabarito) | ✅ |
+| 3.9 | `NvidiaIaAdapter` + fallback Gemini (`IA_PROVIDER`) | ✅ |
 
 ---
 
-## S4 — Dashboard
+## S4 — Dashboard ✅ (concluído)
 
-| # | Tarefa |
-|---|--------|
-| 4.1 | `/progresso` — barras da API |
-| 4.2 | `/trilha` — lacunas + CTA simulado focado |
+| # | Tarefa | Status |
+|---|--------|--------|
+| 4.1 | `/progresso` — proficiência, resumo, evolução, último simulado | ✅ |
+| 4.2 | `/trilha` — lacunas + meta semanal + CTA simulado/tutor | ✅ |
+| 4.3 | `/simulados/novo` — **Pedir à IA** + filtros (multi-ano, assunto) | ✅ |
+| 4.4 | `lib/metricas.ts` — cliente API | ✅ |
 
 ---
 
@@ -108,11 +112,10 @@
 | `/tutor` | Chat vazio + input |
 | `/tutor/[id]` | Histórico + input |
 | `/simulados` | Cards histórico |
-| `/simulados/novo` | Form 3 campos |
-| `/simulados/[id]` | 1 questão por vez |
-| `/simulados/[id]/resultado` | Nota + erros + CTA IA |
-| `/progresso` | 5 barras % |
-| `/trilha` | 3 lacunas + botão |
+| `/simulados/novo` | IA (pedido natural) ou filtros manuais | ✅ |
+| `/simulados/[id]` | 1 questão + scroll + **Pedir dica** | ✅ |
+| `/progresso` | Proficiência + evolução (API) | ✅ |
+| `/trilha` | Top 3 lacunas + CTAs | ✅ |
 | `/perfil` | Dados + editar |
 | `/planos` | 2 planos |
 
