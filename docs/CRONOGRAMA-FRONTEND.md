@@ -64,9 +64,11 @@
 | # | Tarefa | Status |
 |---|--------|--------|
 | 3.1 | Chat com mensagens reais (user/assistant) | ✅ |
-| 3.2 | Sidebar: `GET /ia-tutor/conversas` | ⬜ (hoje: `sessionStorage`) |
+| 3.2 | Sidebar: `GET /ia-tutor/conversas` | ✅ (Postgres) |
 | 3.3 | Nova conversa / continuar chat | ✅ |
-| 3.4 | Upload imagem (presign + vision) | ⬜ (UI `+` pronta) |
+| 3.4 | Upload imagem (presign + vision) | ✅ (local dev) |
+| 3.4a | **Produção:** Railway Bucket S3 + credenciais na API | ⬜ |
+| 3.4b | **Dev:** adapter local (`STORAGE_PROVIDER=local`) | ✅ |
 | 3.5 | `PlanBadge` com tokens da API | ✅ |
 | 3.6 | Input estilo Gemini (resize, Enter, tela cheia) | ✅ |
 | 3.7 | `POST /ia-tutor/explicar-erro` no resultado simulado | ✅ |

@@ -26,7 +26,7 @@ const HERO_MAX_HEIGHT = 280;
 export type TutorPromptInputProps = {
   value: string;
   onChange: (value: string) => void;
-  onSubmit: (value: string) => void;
+  onSubmit: (value: string, attachment?: File) => void;
   placeholder?: string;
   loading?: boolean;
   docked?: boolean;
@@ -113,7 +113,7 @@ export function TutorPromptInput({
   const handleSubmit = () => {
     const trimmed = value.trim();
     if (!trimmed || loading) return;
-    onSubmit(trimmed);
+    onSubmit(trimmed, attachment ?? undefined);
     onChange("");
     setAttachment(null);
     if (fullscreen) setFullscreen(false);
@@ -136,6 +136,7 @@ export function TutorPromptInput({
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) return;
+    if (file.size > 8 * 1024 * 1024) return;
     setAttachment(file);
     event.target.value = "";
   };

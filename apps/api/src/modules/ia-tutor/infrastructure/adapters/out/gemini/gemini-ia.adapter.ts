@@ -113,7 +113,17 @@ export class GeminiIaAdapter implements IaEnginePort {
       })),
       {
         role: 'user' as const,
-        parts: [{ text: input.texto }],
+        parts: input.imagem
+          ? [
+              { text: input.texto },
+              {
+                inlineData: {
+                  mimeType: input.imagem.mimeType,
+                  data: input.imagem.base64,
+                },
+              },
+            ]
+          : [{ text: input.texto }],
       },
     ];
 

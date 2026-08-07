@@ -82,7 +82,7 @@ gantt
 
 **Frontend**
 - [x] Chat real em `/tutor` via BFF
-- [x] Sessões de chat no `sessionStorage` + `startChatWithSeed` (resultado simulado / trilha)
+- [x] Sessões de chat persistidas no Postgres (`GET /ia-tutor/conversas`) + `startChatWithSeed`
 - [x] `PlanBadge` com saldo inicial (`GET /ia-tutor/tokens`)
 - [x] Botão **Explicar com IA** no resultado do simulado
 
@@ -102,8 +102,10 @@ gantt
 
 ### ⬜ Próximo (S3/S5)
 
-- [ ] Upload imagem → presign R2 + vision Gemini
-- [ ] `GET /ia-tutor/conversas` — persistir chats no Postgres
+- [x] Upload imagem → `ObjectStoragePort` + presign (local dev; S3/Railway Bucket em prod)
+- [x] Vision Gemini na mensagem com anexo (`POST /ia-tutor/anexos/presign`)
+- [x] `GET /ia-tutor/conversas` — persistir chats no Postgres
+- [ ] **Produção:** criar Railway Bucket `enem-tutor-anexos` + credenciais na API
 - [ ] Cache Redis nas métricas (F4 performance)
 - [ ] `/planos` — checkout Mercado Pago
 - [ ] Tags de assunto nas questões (melhorar busca por tema)

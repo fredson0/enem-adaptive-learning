@@ -1,6 +1,11 @@
 "use client";
 
 import type { MensagemHistorico } from "@/lib/ia-tutor";
+import {
+  criarConversaTutor,
+  listarConversasTutor,
+  obterConversaTutor,
+} from "@/lib/ia-tutor";
 import { TUTOR_CHAT_PATH } from "@/lib/tutor-navigation";
 import {
   createContext,
@@ -13,18 +18,12 @@ import {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-const STORAGE_KEY = "enem-tutor-sessions";
-
 export type TutorChatSession = {
   id: string;
   title: string;
   messages: MensagemHistorico[];
   updatedAt: number;
-};
-
-type StoredState = {
-  sessions: TutorChatSession[];
-  activeSessionId: string | null;
+  preview?: string;
 };
 
 type TutorSessionContextValue = {
@@ -33,42 +32,30 @@ type TutorSessionContextValue = {
   activeSession: TutorChatSession | null;
   sessionKey: number;
   isNewChat: boolean;
+  loading: boolean;
   startNewChat: () => void;
-  startChatWithSeed: (messages: MensagemHistorico[]) => void;
+  startChatWithSeed: (messages: MensagemHistorico[]) => Promise<void>;
   goToTutor: () => void;
-  openSession: (id: string) => void;
-  saveMessages: (messages: MensagemHistorico[]) => void;
+  openSession: (id: string) => Promise<void>;
+  registerConversation: (session: TutorChatSession) => void;
 };
 
 const TutorSessionContext = createContext<TutorSessionContextValue | null>(null);
 
-function loadStoredState(): StoredState {
-  if (typeof window === "undefined") {
-    return { sessions: [], activeSessionId: null };
-  }
-
-  try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return { sessions: [], activeSessionId: null };
-    const parsed = JSON.parse(raw) as StoredState;
-    return {
-      sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
-      activeSessionId: parsed.activeSessionId ?? null,
-    };
-  } catch {
-    return { sessions: [], activeSessionId: null };
-  }
-}
-
-function persistState(state: StoredState) {
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-function buildTitle(messages: MensagemHistorico[]) {
-  const firstUser = messages.find((message) => message.role === "user");
-  if (!firstUser) return "Nova conversa";
-  const text = firstUser.texto.trim();
-  return text.length > 42 ? `${text.slice(0, 42)}…` : text;
+function toSession(conversa: {
+  id: string;
+  titulo: string;
+  preview?: string;
+  mensagens?: MensagemHistorico[];
+  atualizadoEm: string;
+}): TutorChatSession {
+  return {
+    id: conversa.id,
+    title: conversa.titulo,
+    messages: conversa.mensagens ?? [],
+    preview: conversa.preview,
+    updatedAt: new Date(conversa.atualizadoEm).getTime(),
+  };
 }
 
 export function TutorSessionProvider({ children }: { children: ReactNode }) {
@@ -77,45 +64,52 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
   const [sessions, setSessions] = useState<TutorChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [sessionKey, setSessionKey] = useState(0);
-  const [hydrated, setHydrated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const stored = loadStoredState();
-    setSessions(stored.sessions);
-    setActiveSessionId(stored.activeSessionId);
-    setHydrated(true);
+  const refreshSessions = useCallback(async () => {
+    const conversas = await listarConversasTutor();
+    setSessions(
+      conversas.map((conversa) =>
+        toSession({
+          id: conversa.id,
+          titulo: conversa.titulo,
+          preview: conversa.preview,
+          atualizadoEm: conversa.atualizadoEm,
+        }),
+      ),
+    );
   }, []);
 
-  const persist = useCallback(
-    (nextSessions: TutorChatSession[], nextActiveId: string | null) => {
-      setSessions(nextSessions);
-      setActiveSessionId(nextActiveId);
-      persistState({ sessions: nextSessions, activeSessionId: nextActiveId });
-    },
-    [],
-  );
+  useEffect(() => {
+    (async () => {
+      try {
+        await refreshSessions();
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [refreshSessions]);
 
   const startNewChat = useCallback(() => {
-    persist(sessions, null);
+    setActiveSessionId(null);
     setSessionKey((key) => key + 1);
     router.push(TUTOR_CHAT_PATH);
-  }, [persist, router, sessions]);
+  }, [router]);
 
   const startChatWithSeed = useCallback(
-    (messages: MensagemHistorico[]) => {
-      const now = Date.now();
-      const newSession: TutorChatSession = {
-        id: crypto.randomUUID(),
-        title: buildTitle(messages),
-        messages,
-        updatedAt: now,
-      };
+    async (messages: MensagemHistorico[]) => {
+      const conversa = await criarConversaTutor(messages);
+      const session = toSession(conversa);
 
-      persist([newSession, ...sessions], newSession.id);
+      setSessions((current) => {
+        const without = current.filter((item) => item.id !== session.id);
+        return [session, ...without];
+      });
+      setActiveSessionId(session.id);
       setSessionKey((key) => key + 1);
       router.push(TUTOR_CHAT_PATH);
     },
-    [persist, router, sessions],
+    [router],
   );
 
   const goToTutor = useCallback(() => {
@@ -125,53 +119,40 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
   }, [pathname, router]);
 
   const openSession = useCallback(
-    (id: string) => {
-      const exists = sessions.some((session) => session.id === id);
-      if (!exists) {
+    async (id: string) => {
+      try {
+        const cached = sessions.find((session) => session.id === id);
+
+        if (!cached || cached.messages.length === 0) {
+          const conversa = await obterConversaTutor(id);
+          const session = toSession(conversa);
+
+          setSessions((current) => {
+            const without = current.filter((item) => item.id !== session.id);
+            return [session, ...without];
+          });
+        }
+
+        setActiveSessionId(id);
+        setSessionKey((key) => key + 1);
+
+        if (pathname !== TUTOR_CHAT_PATH) {
+          router.push(TUTOR_CHAT_PATH);
+        }
+      } catch {
         startNewChat();
-        return;
-      }
-
-      persist(sessions, id);
-      if (pathname !== TUTOR_CHAT_PATH) {
-        router.push(TUTOR_CHAT_PATH);
       }
     },
-    [pathname, persist, router, sessions, startNewChat],
+    [pathname, router, sessions, startNewChat],
   );
 
-  const saveMessages = useCallback(
-    (messages: MensagemHistorico[]) => {
-      const now = Date.now();
-
-      if (activeSessionId) {
-        const nextSessions = sessions.map((session) =>
-          session.id === activeSessionId
-            ? {
-                ...session,
-                messages,
-                title: buildTitle(messages),
-                updatedAt: now,
-              }
-            : session,
-        );
-        persist(nextSessions, activeSessionId);
-        return;
-      }
-
-      if (messages.length === 0) return;
-
-      const newSession: TutorChatSession = {
-        id: crypto.randomUUID(),
-        title: buildTitle(messages),
-        messages,
-        updatedAt: now,
-      };
-
-      persist([newSession, ...sessions], newSession.id);
-    },
-    [activeSessionId, persist, sessions],
-  );
+  const registerConversation = useCallback((session: TutorChatSession) => {
+    setSessions((current) => {
+      const without = current.filter((item) => item.id !== session.id);
+      return [session, ...without];
+    });
+    setActiveSessionId(session.id);
+  }, []);
 
   const activeSession = useMemo(
     () => sessions.find((session) => session.id === activeSessionId) ?? null,
@@ -185,26 +166,27 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
       sessions,
       activeSessionId,
       activeSession,
-      sessionKey: hydrated ? sessionKey : 0,
+      sessionKey,
       isNewChat,
+      loading,
       startNewChat,
       startChatWithSeed,
       goToTutor,
       openSession,
-      saveMessages,
+      registerConversation,
     }),
     [
       sessions,
       activeSessionId,
       activeSession,
-      hydrated,
       sessionKey,
       isNewChat,
+      loading,
       startNewChat,
       startChatWithSeed,
       goToTutor,
       openSession,
-      saveMessages,
+      registerConversation,
     ],
   );
 

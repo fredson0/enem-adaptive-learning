@@ -56,8 +56,10 @@ flowchart TB
 | `POST /ia-tutor/dica` | ✅ Funcionando | Dica pedagógica **sem gabarito** (durante simulado) |
 | `GET /ia-tutor/tokens` | ✅ Funcionando | Saldo diário de tokens IA |
 | `POST /simulados/gerar-com-ia` | ✅ Funcionando | IA interpreta pedido → filtros → sorteia questões |
-| `GET /ia-tutor/conversas` | ⬜ Planejado | Persistência no Postgres (hoje: `sessionStorage`) |
-| `POST /ia-tutor/anexos/presign` | ⬜ Planejado | Foto → R2 → vision Gemini |
+| `GET /ia-tutor/conversas` | ✅ Funcionando | Lista conversas do aluno (Postgres) |
+| `GET /ia-tutor/conversas/:id` | ✅ Funcionando | Histórico completo de uma conversa |
+| `POST /ia-tutor/conversas` | ✅ Funcionando | Criar conversa (ex.: após explicar erro) |
+| `POST /ia-tutor/anexos/presign` | ✅ Funcionando | Foto → storage local (dev) ou S3 (prod) → vision Gemini |
 
 ---
 

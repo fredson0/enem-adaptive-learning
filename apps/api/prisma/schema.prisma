@@ -56,6 +56,11 @@ enum StatusSimulado {
   CONCLUIDO
 }
 
+enum PapelMensagemTutor {
+  USER
+  ASSISTANT
+}
+
 /// Conta autenticada (Google OAuth). Índice único em email evita duplicatas no login.
 model Usuario {
   id           String      @id @default(uuid()) @db.Uuid
@@ -74,6 +79,7 @@ model Usuario {
   idempotencyKeys IdempotencyKey[]
   refreshTokens   RefreshToken[]
   simulados       Simulado[]
+  conversasTutor  ConversaTutor[]
 
   @@index([role])
   @@map("usuarios")
@@ -253,4 +259,36 @@ model IdempotencyKey {
   @@index([expiresAt])
   @@index([userId, endpoint])
   @@map("idempotency_keys")
+}
+
+/// Conversa do tutor IA — persistida no Postgres (substitui sessionStorage).
+model ConversaTutor {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  titulo       String   @default("Nova conversa") @db.VarChar(120)
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  usuario   Usuario         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mensagens MensagemTutor[]
+
+  @@index([userId, atualizadoEm(sort: Desc)])
+  @@map("conversas_tutor")
+}
+
+/// Mensagem de uma conversa do tutor (ordem sequencial).
+model MensagemTutor {
+  id         String              @id @default(uuid()) @db.Uuid
+  conversaId String              @map("conversa_id") @db.Uuid
+  papel      PapelMensagemTutor
+  texto      String              @db.Text
+  anexoUrl   String?             @map("anexo_url") @db.VarChar(500)
+  ordem      Int
+  criadoEm   DateTime            @default(now()) @map("criado_em") @db.Timestamptz(3)
+
+  conversa ConversaTutor @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+
+  @@unique([conversaId, ordem])
+  @@index([conversaId])
+  @@map("mensagens_tutor")
 }

@@ -16,10 +16,32 @@ export class EnviarMensagemTutorDto {
   mensagem!: string;
 
   @IsOptional()
+  @IsUUID()
+  conversaId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  anexoUrl?: string;
+}
+
+export class PresignAnexoDto {
+  @IsString()
+  @MaxLength(80)
+  contentType!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  fileName?: string;
+}
+
+export class CriarConversaDto {
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => MensagemHistoricoDto)
-  historico?: MensagemHistoricoDto[];
+  mensagens?: MensagemHistoricoDto[];
 }
 
 export class ExplicarErroDto {

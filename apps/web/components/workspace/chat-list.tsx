@@ -27,6 +27,7 @@ export function ChatList() {
       {sessions.map((chat) => {
         const isActive = activeSessionId === chat.id;
         const preview =
+          chat.preview ??
           chat.messages.find((message) => message.role === "assistant")?.texto ??
           chat.messages.find((message) => message.role === "user")?.texto ??
           "Sem mensagens";

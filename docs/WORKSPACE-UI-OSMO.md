@@ -144,14 +144,14 @@ Reutiliza tokens da landing, adaptados ao workspace:
 ### Fase 3 — Tutor IA + Planos
 
 - [x] Integrar chat real (`POST /ia-tutor/mensagens` + BFF)
-- [x] Sessões locais na sidebar (`sessionStorage`) + nova conversa
+- [x] Sessões na sidebar via `GET /ia-tutor/conversas` (Postgres)
 - [x] `TutorPromptInput` (auto-resize, Enter, tela cheia, anexo UI)
 - [x] Animação input docked após 1ª mensagem
 - [x] `POST /ia-tutor/explicar-erro` no resultado do simulado
 - [x] `POST /ia-tutor/dica` durante simulado (sem revelar gabarito)
 - [x] `NvidiaIaAdapter` + `IaEngineRouter` (fallback Gemini ↔ NVIDIA)
 - [ ] Persistir conversas no Postgres (`GET /ia-tutor/conversas`)
-- [ ] Upload imagem → presign R2 + vision Gemini
+- [x] Upload imagem → presign local (dev) / S3 Railway Bucket (prod) + vision Gemini
 - [x] `PlanBadge` com tokens restantes (saldo inicial + após cada msg)
 - [ ] `/planos` — cards Gratuito / Apoio
 - [ ] Checkout Mercado Pago + feedback pós-pagamento
@@ -182,12 +182,12 @@ Reutiliza tokens da landing, adaptados ao workspace:
 - [x] Sem topbar horizontal — fundo contínuo com o chat
 - [x] Chat real com API (`lib/ia-tutor.ts` + `TutorChatView`)
 - [x] Nova conversa (sem `?r=` na URL; `TutorSessionProvider`)
-- [x] Sessões na sidebar via `sessionStorage`
+- [x] Sessões na sidebar via API (`GET /ia-tutor/conversas`)
 - [ ] Lista de conversas da API (Postgres)
 - [ ] Mensagens com streaming (opcional)
 - [ ] Contexto de questão quando veio do simulado
 - [x] **Botão anexar imagem** (UI + preview + remover)
-- [ ] Upload via presign R2 → `POST /ia-tutor/anexos/presign`
+- [x] Upload via presign → `POST /ia-tutor/anexos/presign` (local dev / S3 prod)
 - [ ] Vision Gemini no envio com foto
 - [🟡] Indicador de tokens (`PlanBadge` após 1ª resposta)
 - [x] Enter envia · Shift+Enter nova linha · tela cheia · auto-resize

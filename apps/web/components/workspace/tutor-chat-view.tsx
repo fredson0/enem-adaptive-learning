@@ -4,8 +4,11 @@ import { HeroWave } from "@/components/ui/ai-input-hero";
 import { useTokensIa } from "@/components/workspace/tokens-ia-provider";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
 import { ApiError } from "@/lib/api";
+import { compressImageForUpload } from "@/lib/image-compress";
 import {
   enviarMensagemTutor,
+  presignAnexoTutor,
+  uploadAnexoTutor,
   type MensagemHistorico,
 } from "@/lib/ia-tutor";
 import { cn } from "@/lib/utils";
@@ -23,7 +26,8 @@ export function TutorChatView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setTokens } = useTokensIa();
-  const { saveMessages, sessionKey, activeSession } = useTutorSession();
+  const { registerConversation, sessionKey, activeSession, activeSessionId } =
+    useTutorSession();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const hasMessages = messages.length > 0;
 
@@ -36,7 +40,7 @@ export function TutorChatView({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  const handleSubmit = async (value: string) => {
+  const handleSubmit = async (value: string, attachment?: File) => {
     const mensagem = value.trim();
     if (!mensagem || loading) return;
 
@@ -44,22 +48,49 @@ export function TutorChatView({
     setLoading(true);
 
     const historico = [...messages];
-    const withUser = [...historico, { role: "user" as const, texto: mensagem }];
-    setMessages(withUser);
+    let anexoUrl: string | undefined;
 
     try {
-      const response = await enviarMensagemTutor({ mensagem, historico });
+      if (attachment) {
+        const compressed = await compressImageForUpload(attachment);
+        const presign = await presignAnexoTutor(
+          compressed.type,
+          attachment.name,
+        );
+        anexoUrl = await uploadAnexoTutor(compressed, presign);
+      }
+
+      const withUser: MensagemHistorico = {
+        role: "user",
+        texto: mensagem,
+        anexoUrl,
+      };
+      setMessages([...historico, withUser]);
+
+      const response = await enviarMensagemTutor({
+        mensagem,
+        conversaId: activeSessionId ?? undefined,
+        anexoUrl,
+      });
       setTokens(response.tokens);
 
-      const withAssistant = [
-        ...withUser,
-        { role: "assistant" as const, texto: response.resposta },
+      const withAssistant: MensagemHistorico[] = [
+        ...historico,
+        withUser,
+        { role: "assistant", texto: response.resposta },
       ];
       setMessages(withAssistant);
-      saveMessages(withAssistant);
+      registerConversation({
+        id: response.conversaId,
+        title: activeSession?.title ?? mensagem.slice(0, 42),
+        messages: withAssistant,
+        updatedAt: Date.now(),
+      });
     } catch (err) {
       setMessages(historico);
       if (err instanceof ApiError) {
+        setError(err.message);
+      } else if (err instanceof Error) {
         setError(err.message);
       } else {
         setError("Não foi possível enviar a mensagem. Tente novamente.");
@@ -90,6 +121,16 @@ export function TutorChatView({
                     : "mr-auto border border-white/10 bg-[rgba(15,15,20,0.75)] text-white/90 backdrop-blur-md",
                 )}
               >
+                {message.anexoUrl ? (
+                  <div className="mb-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={message.anexoUrl}
+                      alt="Anexo enviado"
+                      className="max-h-48 rounded-xl border border-white/15 object-cover"
+                    />
+                  </div>
+                ) : null}
                 <p className="whitespace-pre-wrap">{message.texto}</p>
               </div>
             ))}

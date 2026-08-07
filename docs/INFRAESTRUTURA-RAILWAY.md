@@ -28,7 +28,7 @@
 | **Cache / Rate limit** | Railway Redis ou Upstash | Tokens IA, dashboard de proficiência |
 | **ORM** | Prisma | Migrations, tipagem, adapters de persistência |
 | **IA** | Google AI Studio (Gemini) | Tutor virtual — ver [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) |
-| **Object storage** | **Cloudflare R2** | Fotos enviadas no tutor IA — **não usar Railway para arquivos** |
+| **Object storage** | **Railway Bucket** (S3) ou Cloudflare R2 | Fotos do tutor IA — **não** usar PostgreSQL/Volumes |
 | **Auth social** | Google Cloud Console | OAuth2 — sem auth gerenciado por terceiros |
 | **Pagamentos** | Mercado Pago | Planos freemium |
 
@@ -170,42 +170,86 @@ REDIS_URL="redis://localhost:6379"
 
 ---
 
-## Object Storage — Cloudflare R2
+## Object Storage — Railway Bucket (produção) ou R2 (alternativa)
 
-> **Decisão:** imagens do tutor (foto de questão, resolução no caderno) **não** ficam no Railway.  
-> PostgreSQL guarda só a URL e metadados. O binário vai para R2 (API S3-compatible, 10 GB free).
+> **Decisão atualizada:** imagens do tutor **não** ficam no PostgreSQL nem em Volumes.  
+> PostgreSQL guarda só a URL e metadados. O binário vai para **object storage S3-compatible**.
 
-### Por que não Railway?
+| Ambiente | Provedor recomendado | Por quê |
+|----------|---------------------|---------|
+| **Produção** | **Railway Bucket** | S3-compatible, no mesmo canvas da API, credenciais auto-injetadas, ~10 GB free |
+| **Dev local** | Adapter `local` (pasta `.uploads/`) | Zero config externa; mesmo fluxo presign mockado |
+| **Alternativa** | Cloudflare R2 | Mesmo adapter S3; útil se já tiver conta Cloudflare |
+
+### Por que não PostgreSQL / Volumes?
 
 | Opção | Problema |
 |-------|----------|
 | BYTEA no PostgreSQL | Backup pesado, queries lentas, não escala |
-| Railway Volumes | Sem CDN, acoplado a uma instância, difícil em multi-réplica |
+| Railway Volumes | Block storage, acoplado a uma instância, difícil em multi-réplica |
 | Disco efêmero do container | Perde arquivos a cada deploy |
 
-### Setup R2 (resumo)
+### Setup Railway Bucket (produção)
+
+1. No canvas do projeto Railway → **+ New** → **Bucket**
+2. Nome: `enem-tutor-anexos`, região próxima ao usuário
+3. Na API → **Variables** → auto-inject credenciais do bucket (S3)
+4. Variáveis na API:
+
+```env
+STORAGE_PROVIDER=s3
+S3_ENDPOINT=<injetado pelo Railway>
+S3_ACCESS_KEY_ID=<injetado pelo Railway>
+S3_SECRET_ACCESS_KEY=<injetado pelo Railway>
+S3_BUCKET_NAME=enem-tutor-anexos
+S3_REGION=auto
+S3_PRESIGN_EXPIRES_SEC=300
+ANEXO_RETENTION_DAYS=30
+```
+
+5. Adapter hexagonal: `ObjectStoragePort` → `S3ObjectStorageAdapter` (`@aws-sdk/client-s3`)
+
+> Buckets Railway são **privados** (sem URL pública). Upload e download via **presigned URLs** — igual ao fluxo abaixo.
+
+### Setup dev local (agora)
+
+Sem criar bucket na nuvem ainda:
+
+```env
+STORAGE_PROVIDER=local
+LOCAL_UPLOAD_DIR=./.uploads
+LOCAL_UPLOAD_BASE_URL=http://localhost:3333/dev-uploads
+```
+
+- API salva arquivos em `apps/api/.uploads/` (gitignored)
+- `POST /ia-tutor/anexos/presign` retorna URL local em vez de S3
+- Mesmo fluxo no frontend: comprimir → presign → PUT → enviar mensagem com `anexoUrl`
+- Vision: Gemini lê a URL local (ou base64 no dev, se necessário)
+
+**Opcional:** usar o mesmo Railway Bucket em dev (credenciais no `.env` local) — zero diferença entre ambientes.
+
+### Setup R2 (alternativa)
 
 1. Criar bucket `enem-tutor-anexos` no [Cloudflare Dashboard](https://dash.cloudflare.com) → R2
 2. Criar API token com permissão Read/Write no bucket
 3. Configurar CORS no bucket (origem: domínio Vercel + `localhost:3001`)
-4. Variáveis na API (Railway):
+4. Variáveis na API:
 
 ```env
-R2_ACCOUNT_ID=<cloudflare-account-id>
-R2_ACCESS_KEY_ID=<r2-access-key>
-R2_SECRET_ACCESS_KEY=<r2-secret>
-R2_BUCKET_NAME=enem-tutor-anexos
-R2_PUBLIC_BASE_URL=https://<account-id>.r2.dev/<bucket>   # ou domínio custom
-R2_PRESIGN_EXPIRES_SEC=300
+STORAGE_PROVIDER=s3
+S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+S3_ACCESS_KEY_ID=<r2-access-key>
+S3_SECRET_ACCESS_KEY=<r2-secret>
+S3_BUCKET_NAME=enem-tutor-anexos
+S3_PUBLIC_BASE_URL=https://<account-id>.r2.dev/<bucket>
+S3_PRESIGN_EXPIRES_SEC=300
 ANEXO_RETENTION_DAYS=30
 ```
-
-5. Adapter hexagonal: `ObjectStoragePort` → `R2ObjectStorageAdapter` (`@aws-sdk/client-s3` com endpoint R2)
 
 ### Fluxo presign (upload direto)
 
 ```
-Frontend                    API (Railway)              R2
+Frontend                    API (Railway)              Bucket S3 (Railway / R2)
    │ POST /anexos/presign ──────►│ gera presigned PUT URL │
    │◄──── { uploadUrl, key } ────│                        │
    │ PUT uploadUrl (arquivo) ─────────────────────────────►│

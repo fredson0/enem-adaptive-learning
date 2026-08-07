@@ -37,7 +37,7 @@ export type HeroWaveProps = {
   loading?: boolean;
   /** Fixa o input na parte inferior (modo chat) com animação suave. */
   docked?: boolean;
-  onPromptSubmit?: (value: string) => void;
+  onPromptSubmit?: (value: string, attachment?: File) => void;
 };
 
 export function HeroWave({
@@ -1083,7 +1083,9 @@ export function HeroWave({
               <TutorPromptInput
                 value={prompt}
                 onChange={setPrompt}
-                onSubmit={(value) => onPromptSubmit?.(value)}
+                onSubmit={(value, attachment) =>
+                  onPromptSubmit?.(value, attachment)
+                }
                 placeholder={animatedPlaceholder}
                 loading={loading}
                 docked={docked}

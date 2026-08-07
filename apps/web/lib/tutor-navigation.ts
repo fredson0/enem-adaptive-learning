@@ -1,4 +1,4 @@
-/** Rota única do tutor — sessões ficam no client (sessionStorage). */
+/** Rota única do tutor — conversas persistidas na API (`GET /ia-tutor/conversas`). */
 export const TUTOR_CHAT_PATH = "/tutor";
 
 export function isNewTutorChatPath(pathname: string) {

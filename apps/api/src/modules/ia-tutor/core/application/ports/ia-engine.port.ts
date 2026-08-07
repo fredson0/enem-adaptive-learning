@@ -3,6 +3,12 @@ export const IA_ENGINE = Symbol('IA_ENGINE');
 export type MensagemHistorico = {
   role: 'user' | 'assistant';
   texto: string;
+  anexoUrl?: string;
+};
+
+export type ImagemAnexo = {
+  mimeType: string;
+  base64: string;
 };
 
 export type ContextoQuestao = {
@@ -20,6 +26,7 @@ export type EnviarMensagemIaInput = {
   contextoQuestao?: ContextoQuestao;
   contextoMetricas?: import('../helpers/tutor-prompts').ContextoAlunoMetricas;
   nivelAluno?: string;
+  imagem?: ImagemAnexo;
 };
 
 export interface IaEnginePort {

@@ -33,6 +33,10 @@ export class IaEngineRouter implements IaEnginePort {
   ) {}
 
   async enviarMensagem(input: EnviarMensagemIaInput): Promise<string> {
+    if (input.imagem) {
+      return this.gemini.enviarMensagem(input);
+    }
+
     const provider = (this.config.get<string>('IA_PROVIDER') ?? 'gemini').toLowerCase();
     const primary = provider === 'nvidia' ? this.nvidia : this.gemini;
     const fallback = provider === 'nvidia' ? this.gemini : this.nvidia;

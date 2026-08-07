@@ -57,16 +57,30 @@ async function proxy(
 
   const url = new URL(request.url);
   const search = url.search;
-  const body =
-    method === "GET" || method === "DELETE"
-      ? undefined
-      : await request.text();
+  const isBinaryUpload =
+    method === "PUT" && nestPath.includes("/ia-tutor/anexos/upload");
+
+  let body: BodyInit | undefined;
+  let forwardHeaders: HeadersInit | undefined;
+
+  if (method !== "GET" && method !== "DELETE") {
+    if (isBinaryUpload) {
+      body = await request.arrayBuffer();
+      const contentType = request.headers.get("content-type");
+      forwardHeaders = contentType
+        ? { "Content-Type": contentType }
+        : undefined;
+    } else {
+      body = await request.text();
+    }
+  }
 
   const run = (token: string) =>
     nestFetch<unknown>(`${nestPath}${search}`, {
       method,
       body,
       accessToken: token,
+      headers: forwardHeaders,
     });
 
   let { data, status } = await run(accessToken);

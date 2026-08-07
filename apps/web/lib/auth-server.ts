@@ -47,7 +47,11 @@ export async function nestFetch<T>(
 ): Promise<{ data: T; status: number }> {
   const { accessToken, ...rest } = init;
   const headers = new Headers(rest.headers);
-  if (!headers.has("Content-Type") && rest.body) {
+  if (
+    !headers.has("Content-Type") &&
+    rest.body &&
+    typeof rest.body === "string"
+  ) {
     headers.set("Content-Type", "application/json");
   }
   if (accessToken) {
