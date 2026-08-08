@@ -104,8 +104,9 @@ export function TutorChatView({
     <div className="relative flex h-full min-h-0 flex-col">
       {hasMessages && (
         <div
+          data-lenis-prevent
           className={cn(
-            "absolute inset-x-0 top-20 bottom-44 z-10 overflow-y-auto md:top-24 md:bottom-48",
+            "absolute inset-x-0 top-20 bottom-44 z-10 overflow-y-auto overscroll-contain md:top-24 md:bottom-48",
             "pl-[calc(var(--osmo-sidebar-width)+1.25rem)] pr-4 md:pl-[calc(var(--osmo-sidebar-width)+1.5rem)] md:pr-6",
             "tutor-prompt-scroll",
           )}

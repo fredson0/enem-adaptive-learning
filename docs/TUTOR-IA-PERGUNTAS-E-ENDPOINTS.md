@@ -59,7 +59,7 @@ flowchart TB
 | `GET /ia-tutor/conversas` | ✅ Funcionando | Lista conversas do aluno (Postgres) |
 | `GET /ia-tutor/conversas/:id` | ✅ Funcionando | Histórico completo de uma conversa |
 | `POST /ia-tutor/conversas` | ✅ Funcionando | Criar conversa (ex.: após explicar erro) |
-| `POST /ia-tutor/anexos/presign` | ✅ Funcionando | Foto → storage local (dev) ou S3 (prod) → vision Gemini |
+| `POST /ia-tutor/anexos/presign` | ✅ Funcionando | Foto → storage local (dev) ou S3 (prod) → vision NVIDIA/Groq/Gemini |
 
 ---
 
@@ -162,7 +162,7 @@ Legenda:
 | Explicar erro pós-simulado | 🔌 Backend ✅, UI ⬜ | Botão no `/resultado` → `explicar-erro` |
 | Estatísticas reais do banco | ⬜ | S4: agregar `questoes` + `respostas_simulado` |
 | Trilha personalizada | ⬜ | S4: `GET /metricas/lacunas` injetado no prompt |
-| Foto no chat | ⬜ | Presign R2 + Gemini vision |
+| Foto no chat | ✅ | Presign + NVIDIA Vision (fallback Groq/Gemini) |
 | Histórico persistente | ⬜ | `conversas` + `mensagens` no Postgres |
 
 ---

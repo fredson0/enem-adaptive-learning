@@ -14,6 +14,7 @@ import { ObterSaldoTokensUseCase } from './core/application/use-cases/obter-sald
 import { DevUploadsController } from './infrastructure/adapters/in/http/dev-uploads.controller';
 import { IaTutorController } from './infrastructure/adapters/in/http/ia-tutor.controller';
 import { GeminiIaAdapter } from './infrastructure/adapters/out/gemini/gemini-ia.adapter';
+import { GroqIaAdapter } from './infrastructure/adapters/out/groq/groq-ia.adapter';
 import { IaEngineRouter } from './infrastructure/adapters/out/ia-engine.router';
 import { NvidiaIaAdapter } from './infrastructure/adapters/out/nvidia/nvidia-ia.adapter';
 import { PrismaConversasTutorRepository } from './infrastructure/adapters/out/persistence/prisma-conversas-tutor.repository';
@@ -39,6 +40,7 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
     UsoTokensIaService,
     GeminiIaAdapter,
     NvidiaIaAdapter,
+    GroqIaAdapter,
     IaEngineRouter,
     LocalObjectStorageAdapter,
     S3ObjectStorageAdapter,

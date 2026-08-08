@@ -205,6 +205,7 @@ export function TutorPromptInput({
 
       <textarea
         ref={textareaRef}
+        data-lenis-prevent
         value={value}
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={handleKeyDown}

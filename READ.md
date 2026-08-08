@@ -8,7 +8,7 @@ O grande diferencial do projeto é o seu foco em acessibilidade social. Através
 
 🚀 Principais Funcionalidades
 
-🧠 Tutor Virtual IA: Integração com **NVIDIA NIM** (`meta/llama-3.1-8b-instruct`) e fallback **Gemini 2.5 Flash** via `IaEngineRouter`. Chat livre com contexto de métricas reais, explicação de erros pós-simulado e dicas durante o simulado (sem revelar gabarito). Suporte futuro a **upload de foto** (questão ou resolução no caderno) via **Gemini Vision**, com arquivos armazenados no **Cloudflare R2** (não no Railway).
+🧠 Tutor Virtual IA: Integração com **NVIDIA NIM** (`meta/llama-3.1-8b-instruct`) para texto e **NVIDIA Llama 3.2 Vision** para fotos, com fallback **Groq** → **Gemini 2.5 Flash** via `IaEngineRouter`. Chat persistido no Postgres, contexto de métricas reais, explicação de erros pós-simulado e dicas durante o simulado. **Upload de foto** (questão ou resolução no caderno) com compressão no frontend e storage local (dev) / S3 Railway Bucket (prod).
 
 🔐 Autenticação Segura (Google Login): Acesso facilitado via OAuth2 com o Google. Sessão com **cookies HttpOnly** no frontend (BFF Next.js) e **refresh tokens** rotativos na API.
 
@@ -42,9 +42,9 @@ Banco de Dados (Relacional): PostgreSQL hospedado no **Railway** + ORM **Prisma*
 
 Cache & Rate Limit: Redis (Railway ou Upstash).
 
-Integrações Externas (Adapters): Google OAuth2, **NVIDIA NIM** + Gemini API (`gemini-2.5-flash`, vision), **Cloudflare R2** (anexos do tutor), Mercado Pago API.
+Integrações Externas (Adapters): Google OAuth2, **NVIDIA NIM** (texto + vision) + Groq/Gemini (fallback), object storage local/S3 (anexos do tutor), Mercado Pago API.
 
-Infraestrutura: **Vercel** (Frontend) + **Railway** (API, PostgreSQL e Redis) + **Cloudflare R2** (object storage).
+Infraestrutura: **Vercel** (Frontend) + **Railway** (API, PostgreSQL e Redis) + **Railway Bucket / S3** (anexos em produção).
 
 📂 Estrutura de Diretórios (Backend Hexagonal)
 
@@ -110,6 +110,11 @@ GEMINI_MODEL="gemini-2.5-flash"
 IA_PROVIDER="nvidia"
 NVIDIA_API_KEY="sua_chave_build.nvidia.com"
 NVIDIA_MODEL="meta/llama-3.1-8b-instruct"
+NVIDIA_VISION_MODEL="meta/llama-3.2-11b-vision-instruct"
+# GROQ_API_KEY="opcional_fallback_vision"
+STORAGE_PROVIDER="local"
+LOCAL_UPLOAD_DIR="./.uploads"
+LOCAL_UPLOAD_BASE_URL="http://localhost:3333/dev-uploads"
 MERCADOPAGO_ACCESS_TOKEN="seu_token_do_mercado_pago"
 REDIS_URL="redis://localhost:6379"
 ```

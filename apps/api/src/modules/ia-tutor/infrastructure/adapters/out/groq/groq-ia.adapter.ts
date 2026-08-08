@@ -13,31 +13,30 @@ import {
   type OpenAiChatMessage,
 } from '../openai-chat.builder';
 
-const NVIDIA_BASE_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
+const GROQ_BASE_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 const TEXT_MODEL_FALLBACKS = [
-  'meta/llama-3.1-8b-instruct',
-  'meta/llama-3.1-70b-instruct',
-  'meta/llama-3.3-70b-instruct',
+  'llama-3.3-70b-versatile',
+  'llama-3.1-8b-instant',
 ] as const;
 
 const VISION_MODEL_FALLBACKS = [
-  'meta/llama-3.2-11b-vision-instruct',
-  'microsoft/phi-3-vision-128k-instruct',
+  'llama-3.2-11b-vision-preview',
+  'llama-3.2-90b-vision-preview',
 ] as const;
 
 const TEXT_TIMEOUT_MS = 30_000;
-const VISION_TIMEOUT_MS = 90_000;
+const VISION_TIMEOUT_MS = 60_000;
 
 @Injectable()
-export class NvidiaIaAdapter implements IaEnginePort {
+export class GroqIaAdapter implements IaEnginePort {
   constructor(@Inject(ConfigService) private readonly config: ConfigService) {}
 
   private getApiKey(): string {
-    const apiKey = this.config.get<string>('NVIDIA_API_KEY');
+    const apiKey = this.config.get<string>('GROQ_API_KEY');
     if (!apiKey) {
       throw new ServiceUnavailableException(
-        'NVIDIA_API_KEY não configurada em apps/api/.env',
+        'GROQ_API_KEY não configurada em apps/api/.env',
       );
     }
     return apiKey;
@@ -45,7 +44,7 @@ export class NvidiaIaAdapter implements IaEnginePort {
 
   private getModelCandidates(input: EnviarMensagemIaInput): string[] {
     if (input.imagem) {
-      const configured = this.config.get<string>('NVIDIA_VISION_MODEL');
+      const configured = this.config.get<string>('GROQ_VISION_MODEL');
       if (!configured) return [...VISION_MODEL_FALLBACKS];
       return [
         configured,
@@ -53,7 +52,7 @@ export class NvidiaIaAdapter implements IaEnginePort {
       ];
     }
 
-    const configured = this.config.get<string>('NVIDIA_MODEL');
+    const configured = this.config.get<string>('GROQ_MODEL');
     if (!configured) return [...TEXT_MODEL_FALLBACKS];
     return [
       configured,
@@ -67,9 +66,6 @@ export class NvidiaIaAdapter implements IaEnginePort {
       lower.includes('404') ||
       lower.includes('not found') ||
       lower.includes('fetch failed') ||
-      lower.includes('econnreset') ||
-      lower.includes('etimedout') ||
-      lower.includes('socket hang up') ||
       lower.includes('timeout') ||
       lower.includes('abort') ||
       lower.includes('503') ||
@@ -87,7 +83,7 @@ export class NvidiaIaAdapter implements IaEnginePort {
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      const response = await fetch(NVIDIA_BASE_URL, {
+      const response = await fetch(GROQ_BASE_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +107,7 @@ export class NvidiaIaAdapter implements IaEnginePort {
 
       if (!response.ok) {
         const detail =
-          data?.error?.message ?? `HTTP ${response.status} da API NVIDIA`;
+          data?.error?.message ?? `HTTP ${response.status} da API Groq`;
         throw new Error(detail);
       }
 
@@ -130,7 +126,7 @@ export class NvidiaIaAdapter implements IaEnginePort {
 
       if (error instanceof Error && error.name === 'AbortError') {
         throw new Error(
-          `Timeout após ${timeoutMs / 1000}s ao chamar ${modelName}`,
+          `Timeout após ${timeoutMs / 1000}s ao chamar ${modelName} (Groq)`,
         );
       }
 
@@ -164,20 +160,20 @@ export class NvidiaIaAdapter implements IaEnginePort {
 
         if (message.includes('429') || message.toLowerCase().includes('rate')) {
           throw new ServiceUnavailableException(
-            'Limite da API NVIDIA atingido. Tente novamente em alguns minutos.',
+            'Limite da API Groq atingido. Tente novamente em alguns minutos.',
           );
         }
 
         throw new ServiceUnavailableException(
-          `Falha ao consultar o tutor IA (NVIDIA): ${message}`,
+          `Falha ao consultar o tutor IA (Groq): ${message}`,
         );
       }
     }
 
     throw new ServiceUnavailableException(
-      `Não foi possível conectar à API NVIDIA: ${
+      `Não foi possível conectar à API Groq: ${
         lastError?.message ??
-        'Verifique NVIDIA_API_KEY e modelos em apps/api/.env'
+        'Verifique GROQ_API_KEY e modelos em apps/api/.env'
       }`,
     );
   }

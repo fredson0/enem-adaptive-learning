@@ -16,7 +16,7 @@ src/modules/[modulo]/
 └── infrastructure/
     └── adapters/
         ├── in/http/         # Controllers NestJS (Recebem requisições do Next.js)
-        └── out/             # Implementações reais (Prisma/Postgres/Railway, Gemini, Groq)
+        └── out/             # Implementações reais (Prisma/Postgres, NVIDIA NIM, Groq, Gemini)
 ```
 
 ## 🗄️ Banco de Dados (Prisma + Railway PostgreSQL)
@@ -38,7 +38,9 @@ npm run prisma:migrate -w apps/api
 npm run prisma:migrate:deploy -w apps/api
 ```
 
-Copie `apps/api/.env.example` para `apps/api/.env` e configure `DATABASE_URL` com a URL do Railway.
+Copie `apps/api/.env.example` para `apps/api/.env` e configure `DATABASE_URL`, `NVIDIA_API_KEY`, `NVIDIA_VISION_MODEL` (fotos) e opcionalmente `GROQ_API_KEY` / `GEMINI_API_KEY` como fallback.
+
+Ver [Escolha do Modelo de IA](../../docs/ESCOLHA-MODELO-IA.md) para a cadeia texto (NVIDIA → Gemini) e vision (NVIDIA → Groq → Gemini).
 
 ## Documentação relacionada
 

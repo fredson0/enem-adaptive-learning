@@ -151,7 +151,7 @@ Reutiliza tokens da landing, adaptados ao workspace:
 - [x] `POST /ia-tutor/dica` durante simulado (sem revelar gabarito)
 - [x] `NvidiaIaAdapter` + `IaEngineRouter` (fallback Gemini ↔ NVIDIA)
 - [ ] Persistir conversas no Postgres (`GET /ia-tutor/conversas`)
-- [x] Upload imagem → presign local (dev) / S3 Railway Bucket (prod) + vision Gemini
+- [x] Upload imagem → presign local (dev) / S3 Railway Bucket (prod) + vision NVIDIA → Groq → Gemini
 - [x] `PlanBadge` com tokens restantes (saldo inicial + após cada msg)
 - [ ] `/planos` — cards Gratuito / Apoio
 - [ ] Checkout Mercado Pago + feedback pós-pagamento

@@ -122,10 +122,11 @@ export class IaTutorController {
     }
 
     const key = `${userId}/${file}`;
-    const rawBody = req.rawBody ?? req.body;
-    const buffer = Buffer.isBuffer(rawBody)
-      ? rawBody
-      : Buffer.from(rawBody ?? []);
+    const buffer = Buffer.isBuffer(req.body)
+      ? req.body
+      : Buffer.isBuffer(req.rawBody)
+        ? req.rawBody
+        : Buffer.alloc(0);
 
     if (buffer.length === 0) {
       throw new ForbiddenException('Arquivo vazio');

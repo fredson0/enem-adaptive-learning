@@ -205,7 +205,7 @@ gantt
 |---|--------|-----------|---------------------|
 | 3.1 | `RedisService` + `CacheServicePort` | Cache-aside | `infrastructure/cache/` |
 | 3.2 | `RateLimitServicePort` + Adapter | Rate limiting | `uso_tokens_ia` + Redis |
-| 3.3 | `IaEnginePort` + `GeminiIaEngine` (`gemini-2.5-flash` + vision) | Circuit breaker | `adapters/out/gemini-ia.engine.ts` |
+| 3.3 | `IaEnginePort` + adapters NVIDIA/Groq/Gemini + `IaEngineRouter` (texto + vision) | Circuit breaker | `adapters/out/ia-engine.router.ts` |
 | 3.4 | Schema: `conversas`, `mensagens` + migration | Persistência chat | `schema.prisma` |
 | 3.5 | `ObjectStoragePort` + `R2ObjectStorageAdapter` | Presign S3 | `adapters/out/r2-storage.adapter.ts` |
 | 3.6 | `EnviarMensagemTutorUseCase` (texto + imagem opcional) | Rate limit | `enviar-mensagem-tutor.use-case.ts` |
@@ -218,7 +218,7 @@ gantt
 | 3.13 | `AtivarPlanoUseCase` | Transações | atualiza `planos_assinatura` |
 | 3.14 | Endpoint `GET /usuarios/plano` | — | tokens restantes |
 
-**Entregável F3 Backend:** Tutor IA com chat persistido, upload de imagem via R2 + vision Gemini, limite diário; upgrade de plano via Mercado Pago.
+**Entregável F3 Backend:** Tutor IA com chat persistido, upload de imagem (local/S3) + vision NVIDIA/Groq/Gemini, limite diário; upgrade de plano via Mercado Pago.
 
 ### Frontend
 

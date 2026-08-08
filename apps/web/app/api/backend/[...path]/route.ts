@@ -65,7 +65,11 @@ async function proxy(
 
   if (method !== "GET" && method !== "DELETE") {
     if (isBinaryUpload) {
-      body = await request.arrayBuffer();
+      const arrayBuffer = await request.arrayBuffer();
+      if (arrayBuffer.byteLength === 0) {
+        return NextResponse.json({ message: "Arquivo vazio" }, { status: 400 });
+      }
+      body = Buffer.from(arrayBuffer);
       const contentType = request.headers.get("content-type");
       forwardHeaders = contentType
         ? { "Content-Type": contentType }

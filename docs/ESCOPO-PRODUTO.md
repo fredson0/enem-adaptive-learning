@@ -66,7 +66,8 @@ Login → Tutor IA (dúvidas livres ou foto)
 | **Railway PostgreSQL** | Metadados: `conversas`, `mensagens`, `url` do anexo, `userId`, `expiresAt` |
 | **Railway Redis** | Rate limit de tokens IA |
 | **Cloudflare R2** | Arquivos binários (fotos enviadas pelo aluno) |
-| **Gemini API** | Processa texto + imagem (vision); não persiste |
+| **NVIDIA NIM** | Texto + vision (primário); não persiste |
+| **Groq / Gemini** | Fallback vision e texto |
 
 ### Fluxo de upload
 
@@ -76,7 +77,7 @@ Login → Tutor IA (dúvidas livres ou foto)
 3. API gera URL pré-assinada do R2 (upload direto, sem passar pelo servidor)
 4. Frontend faz PUT na URL do R2
 5. Aluno envia mensagem com { texto, anexoUrl }
-6. API baixa URL (ou passa URL pública assinada) → Gemini 2.5 Flash (vision)
+6. API baixa a imagem do storage → **NVIDIA Llama 3.2 Vision** (fallback Groq → Gemini)
 7. Resposta salva em mensagens; URL fica no Postgres até expiresAt
 8. Job/cron (F4) remove objetos R2 expirados
 ```

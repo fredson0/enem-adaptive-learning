@@ -8,13 +8,40 @@
 
 | Pergunta | Resposta |
 |----------|----------|
-| **Qual modelo usar?** | **`gemini-2.5-flash`** (primário) |
-| **Existe API gratuita?** | **Sim** — Google AI Studio, sem cartão |
-| **Gemini atende o TCC?** | **Sim** — explicar erros, adaptar linguagem, português BR |
-| **E se estourar o free tier?** | Rate limit no app + plano pago barato ou fallback Groq |
+| **Texto (chat livre)?** | **NVIDIA NIM** `meta/llama-3.1-8b-instruct` → fallback Gemini |
+| **Foto (vision)?** | **NVIDIA** `llama-3.2-11b-vision` → Groq → Gemini (último recurso) |
+| **Existe API gratuita?** | **Sim** — NVIDIA NIM + Groq + Google AI Studio |
+| **Gemini ainda é usado?** | **Sim** — fallback de texto e vision (não primário) |
 | **Modelo antigo 1.5 / 2.0?** | **Não usar** — 2.0 Flash está em depreciação |
 
+> **Estratégia atualizada (08/08/2026):** texto via NVIDIA; **fotos via NVIDIA Vision** para não esgotar cota Gemini. Gemini só entra se NVIDIA/Groq falharem.
+
 ---
+
+## Roteamento por tipo de mensagem
+
+| Tipo | Cadeia de fallback (`IaEngineRouter`) |
+|------|----------------------------------------|
+| **Só texto** | `IA_PROVIDER` (NVIDIA) → Gemini |
+| **Com foto** | NVIDIA Vision → Groq Vision* → Gemini Vision |
+
+\*Groq entra na cadeia se `GROQ_API_KEY` estiver configurada.
+
+### Variáveis `.env`
+
+```env
+IA_PROVIDER=nvidia
+NVIDIA_MODEL=meta/llama-3.1-8b-instruct
+NVIDIA_VISION_MODEL=meta/llama-3.2-11b-vision-instruct
+
+# Opcional — fallback vision
+GROQ_API_KEY=sua_chave
+GROQ_VISION_MODEL=llama-3.2-11b-vision-preview
+
+# Fallback final
+GEMINI_API_KEY=sua_chave
+GEMINI_MODEL=gemini-2.5-flash
+```
 
 ## O que o tutor precisa fazer (requisitos)
 
@@ -24,11 +51,11 @@
 | Adaptar explicação ao nível (iniciante vs avançado) | Média | Flash |
 | Responder em português brasileiro natural | Baixa | Flash |
 | Resumir tema de questão ENEM | Média | Flash |
-| **Interpretar foto de questão ou resolução (vision)** | Média | Flash (multimodal) |
+| **Interpretar foto de questão ou resolução (vision)** | Média | Llama 3.2 Vision (NVIDIA NIM) |
 | Gerar trilha de estudo personalizada | Alta | Flash ou Pro |
 | Corrigir redação ENEM (competências) | Muito alta | Pro (fase 2) |
 
-**Conclusão:** Para o MVP do TCC (explicar erro + resumo + **foto no chat**), **Gemini 2.5 Flash é suficiente e recomendado.**
+**Conclusão:** Texto via **NVIDIA NIM**; fotos via **NVIDIA Llama 3.2 Vision** (Groq/Gemini como fallback). Erros de simulado continuam **sem vision** (enunciado já está no banco).
 
 ---
 
@@ -38,10 +65,12 @@
 
 | Provedor | Modelo free | Cartão? | Limite típico free | Português | Melhor para |
 |----------|-------------|---------|-------------------|-----------|-------------|
-| **Google AI Studio** ⭐ | `gemini-2.5-flash` | Não | ~250–1.500 req/dia* | Excelente | **Tutor ENEM (escolha do projeto)** |
+| **NVIDIA NIM** ⭐ | `llama-3.1-8b-instruct` (texto) | Não | ~40 RPM | Bom | **Chat texto (primário)** |
+| **NVIDIA NIM** ⭐ | `llama-3.2-11b-vision-instruct` | Não | ~40 RPM | Bom | **Foto no tutor (primário)** |
+| **Groq** | `llama-3.2-11b-vision-preview` | Não | ~30 RPM | Bom | Fallback vision |
+| **Google AI Studio** | `gemini-2.5-flash` | Não | ~250–1.500 req/dia* | Excelente | Fallback texto + vision |
 | Google AI Studio | `gemini-2.5-flash-lite` | Não | ~1.000 req/dia* | Bom | Alto volume, respostas curtas |
-| Google AI Studio | `gemini-2.5-pro` | Não | ~50–100 req/dia* | Excelente | Raciocínio complexo (caro em escala) |
-| **Groq** | `llama-3.3-70b` | Não | ~1.000 req/dia | Bom | Velocidade extrema (fallback) |
+| **Groq** | `llama-3.3-70b` | Não | ~1.000 req/dia | Bom | Velocidade extrema |
 | OpenRouter | Vários free | Não | 50 req/dia (sem top-up) | Varia | Prototipagem multi-modelo |
 | OpenAI | GPT (trial) | Sim | Créditos limitados | Excelente | Não recomendado para TCC free |
 | Anthropic | Claude (trial) | Sim | Créditos limitados | Excelente | Não recomendado para TCC free |
@@ -76,7 +105,10 @@
 
 ## Vision (upload de imagem no tutor)
 
-O Gemini 2.5 Flash aceita **texto + imagem** na mesma requisição. Casos de uso no ENEM+:
+**Primário:** NVIDIA `meta/llama-3.2-11b-vision-instruct` (mesma API key do texto).  
+**Fallback:** Groq `llama-3.2-11b-vision-preview` → Gemini `gemini-2.5-flash`.
+
+Casos de uso no ENEM+:
 
 | Caso | Exemplo |
 |------|---------|
@@ -84,20 +116,11 @@ O Gemini 2.5 Flash aceita **texto + imagem** na mesma requisição. Casos de uso
 | Foto da resolução | "Minha conta está certa?" |
 | Print de atividade | Material de sala de aula |
 
-**Storage:** imagens ficam no **Cloudflare R2** (não Railway). Ver [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md) e [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md#object-storage-cloudflare-r2).
+**Storage:** imagens em **storage local (dev)** ou **Railway Bucket / R2 (prod)**. Ver [INFRAESTRUTURA-RAILWAY.md](./INFRAESTRUTURA-RAILWAY.md#object-storage-railway-bucket-produção-ou-r2-alternativa).
 
-**Adapter:**
+**Quando NÃO usar vision:** erro de simulado (enunciado já no Postgres), busca no banco de ~10k questões (futuro: OCR + match).
 
-```typescript
-interface IaEnginePort {
-  enviarMensagem(input: {
-    texto: string;
-    historico: Mensagem[];
-    contextoQuestao?: ContextoQuestao;
-    imagemUrl?: string; // URL assinada R2 → Gemini baixa e interpreta
-  }): Promise<string>;
-}
-```
+**Adapter:** `IaEngineRouter` detecta `imagem` no input e aciona a cadeia vision automaticamente.
 
 ---
 
@@ -150,7 +173,7 @@ GROQ_API_KEY=sua-chave
 GROQ_MODEL=llama-3.3-70b-versatile
 ```
 
-> **Estratégia do projeto (atualizado 06/08/2026):** primário **NVIDIA NIM** (`meta/llama-3.1-8b-instruct`) com fallback **Gemini 2.5 Flash** via `IaEngineRouter`. O rate limit (`uso_tokens_ia`) continua no backend independente do provedor.
+> **Estratégia do projeto (atualizado 08/08/2026):** texto via **NVIDIA NIM**; **fotos via NVIDIA Llama 3.2 Vision** → Groq Vision → Gemini. Rate limit (`uso_tokens_ia`) no backend; mensagem com imagem = **2×** tokens.
 
 O Use Case **nunca** importa SDK do Gemini. Só chama:
 
@@ -168,7 +191,7 @@ interface IaEnginePort {
 | Fase | Entrega IA | Modelo |
 |------|-----------|--------|
 | **F3** | Explicar erro pós-simulado | `gemini-2.5-flash` |
-| **F3** | Chat com upload de imagem (vision) | `gemini-2.5-flash` |
+| **F3** | Chat com upload de imagem (vision) | NVIDIA Llama 3.2 Vision (+ fallback) |
 | **F3** | Rate limit + contador tokens | — |
 | **F4** | Resumo de tema fraco | `gemini-2.5-flash` |
 | **F5+** | Correção de redação (opcional) | `gemini-2.5-pro` (pago) |

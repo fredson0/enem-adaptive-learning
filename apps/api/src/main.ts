@@ -4,11 +4,26 @@ import 'tsconfig-paths/register';
 import '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { json, raw } from 'express';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { rawBody: true });
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
+
+  app.use(json({ limit: '1mb' }));
+  app.use(
+    '/ia-tutor/anexos/upload',
+    raw({
+      type: [
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'application/octet-stream',
+      ],
+      limit: '2mb',
+    }),
+  );
 
   app.use(helmet());
 

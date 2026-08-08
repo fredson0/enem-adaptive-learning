@@ -253,7 +253,7 @@ Frontend                    API (Railway)              Bucket S3 (Railway / R2)
    │ POST /anexos/presign ──────►│ gera presigned PUT URL │
    │◄──── { uploadUrl, key } ────│                        │
    │ PUT uploadUrl (arquivo) ─────────────────────────────►│
-   │ POST /mensagens { anexoUrl }►│ lê URL → Gemini vision │
+   │ POST /mensagens { anexoUrl }►│ lê imagem → NVIDIA Vision (fallback Groq/Gemini) │
 ```
 
 O arquivo **nunca** passa pelo body da API NestJS — só a URL assinada. Isso reduz memória e timeout no Railway.
