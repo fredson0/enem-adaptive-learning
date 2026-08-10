@@ -26,6 +26,9 @@ export type SimuladoGeradoComIa = {
 export type SimuladoResumo = {
   id: string;
   area: string | null;
+  modo: 'TREINO' | 'MODALIDADE' | 'CRONOMETRADO';
+  revelarGabaritoImediato: boolean;
+  tempoLimiteSegundos: number | null;
   totalQuestoes: number;
   respondidas: number;
   acertos: number;
@@ -53,6 +56,9 @@ export type QuestaoPublica = {
 export type SimuladoDetalhe = {
   id: string;
   area: string | null;
+  modo: 'TREINO' | 'MODALIDADE' | 'CRONOMETRADO';
+  revelarGabaritoImediato: boolean;
+  tempoLimiteSegundos: number | null;
   totalQuestoes: number;
   respondidas: number;
   acertos: number;
@@ -73,6 +79,9 @@ export type SimuladoDetalhe = {
 export type SimuladoResultado = {
   id: string;
   area: string | null;
+  modo: 'TREINO' | 'MODALIDADE' | 'CRONOMETRADO';
+  revelarGabaritoImediato: boolean;
+  tempoLimiteSegundos: number | null;
   totalQuestoes: number;
   respondidas: number;
   acertos: number;

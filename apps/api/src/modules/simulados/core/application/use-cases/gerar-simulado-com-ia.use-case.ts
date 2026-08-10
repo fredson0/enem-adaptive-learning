@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { IA_ENGINE } from '../../../../ia-tutor/core/application/ports/ia-engine.port';
 import type { IaEnginePort } from '../../../../ia-tutor/core/application/ports/ia-engine.port';
+import { MODO_SIMULADO_CONFIG } from '../helpers/modo-simulado.config';
 import {
   buildInterpretarPedidoSimuladoPrompt,
   parsePedidoSimuladoJson,
@@ -14,6 +15,7 @@ import { GerarSimuladoUseCase } from './gerar-simulado.use-case';
 export type GerarSimuladoComIaInput = {
   userId: string;
   pedido: string;
+  modo?: import('@generated/prisma').ModoSimulado;
 };
 
 @Injectable()
@@ -25,6 +27,14 @@ export class GerarSimuladoComIaUseCase {
   ) {}
 
   async execute(input: GerarSimuladoComIaInput) {
+    const modo = input.modo ?? 'TREINO';
+
+    if (!MODO_SIMULADO_CONFIG[modo].permitePedidoIa) {
+      throw new BadRequestException(
+        'Este modo de simulado não aceita pedido em linguagem natural. Use os filtros manuais.',
+      );
+    }
+
     const pedido = input.pedido.trim();
     if (pedido.length < 10) {
       throw new BadRequestException(
@@ -41,6 +51,7 @@ export class GerarSimuladoComIaUseCase {
 
     const simulado = await this.gerarSimuladoUseCase.execute({
       userId: input.userId,
+      modo,
       area: plano.area ?? undefined,
       anos: plano.anos ?? undefined,
       termosBusca: plano.termosBusca.length ? plano.termosBusca : undefined,

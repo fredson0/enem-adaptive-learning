@@ -3,8 +3,10 @@
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
 import { useTokensIa } from "@/components/workspace/tokens-ia-provider";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
-import { ApiError, apiFetch } from "@/lib/api";
+import { ApiError } from "@/lib/api";
 import { explicarErroQuestao } from "@/lib/ia-tutor";
+import { formatModoSimulado } from "@/lib/simulado-modos";
+import { obterResultadoSimulado } from "@/lib/simulados-api";
 import { formatArea, type SimuladoResultado } from "@/lib/simulados";
 import { Loader2, Sparkles } from "lucide-react";
 import Link from "next/link";
@@ -33,21 +35,14 @@ export default function SimuladoResultadoPage() {
   const [explicarErro, setExplicarErro] = useState<string | null>(null);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await apiFetch<SimuladoResultado>(
-          `/simulados/${simuladoId}/finalizar`,
-          { method: "POST", auth: true },
-        );
-        setResultado(data);
-      } catch (err) {
+    obterResultadoSimulado(simuladoId)
+      .then(setResultado)
+      .catch((err) =>
         setError(
           err instanceof Error ? err.message : "Não foi possível carregar o resultado.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    })();
+        ),
+      )
+      .finally(() => setLoading(false));
   }, [simuladoId]);
 
   const handleExplicarErro = async (questao: SimuladoResultado["questoes"][number]) => {
@@ -90,7 +85,7 @@ export default function SimuladoResultadoPage() {
   if (loading) {
     return (
       <WorkspaceSection title="Resultado">
-        <p className="text-sm text-white/45">Calculando resultado…</p>
+        <p className="text-sm text-white/45">Carregando resultado…</p>
       </WorkspaceSection>
     );
   }
@@ -104,19 +99,27 @@ export default function SimuladoResultadoPage() {
   }
 
   const erros = resultado.questoes.filter((q) => q.correto === false);
+  const acertos = resultado.questoes.filter((q) => q.correto === true);
+  const percentual = Math.round((resultado.acertos / resultado.totalQuestoes) * 100);
 
   return (
     <WorkspaceSection title="Resultado">
       <div className="mx-auto max-w-3xl space-y-8">
         <div className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-8 text-center">
-          <p className="text-5xl font-medium tracking-tight text-white">
+          <p className="text-xs uppercase tracking-wide text-white/40">
+            {formatModoSimulado(resultado.modo)}
+          </p>
+          <p className="mt-3 text-5xl font-medium tracking-tight text-white">
             {resultado.acertos}/{resultado.totalQuestoes}
           </p>
           <p className="mt-2 text-sm text-white/45">
-            {formatArea(resultado.area)} ·{" "}
-            {Math.round((resultado.acertos / resultado.totalQuestoes) * 100)}% de
-            acertos
+            {formatArea(resultado.area)} · {percentual}% de acertos
           </p>
+          {percentual >= 70 ? (
+            <p className="mt-4 text-sm text-emerald-400">
+              Ótimo desempenho! Continue na trilha para consolidar.
+            </p>
+          ) : null}
         </div>
 
         {explicarErro ? (
@@ -139,8 +142,7 @@ export default function SimuladoResultadoPage() {
                   ENEM {q.ano} · Questão {q.indice}
                 </p>
                 <p className="mt-2 line-clamp-3 text-sm text-white/75">
-                  {q.contexto.replace(/!\[[^\]]*]\([^)]+\)/g, "").slice(0, 200)}
-                  …
+                  {q.contexto.replace(/!\[[^\]]*]\([^)]+\)/g, "").slice(0, 200)}…
                 </p>
                 <p className="mt-3 text-sm">
                   <span className="text-red-400">
@@ -176,18 +178,42 @@ export default function SimuladoResultadoPage() {
           </p>
         )}
 
+        {acertos.length > 0 ? (
+          <section className="space-y-3">
+            <h2 className="text-sm font-medium text-white/70">
+              Acertos ({acertos.length})
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {acertos.map((q) => (
+                <span
+                  key={q.id}
+                  className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200"
+                >
+                  ENEM {q.ano} · Q{q.indice}
+                </span>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
         <div className="flex flex-wrap gap-3">
           <Link
-            href="/simulados/novo"
+            href="/trilha"
             className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90"
           >
-            Novo simulado
+            Ver minha trilha
+          </Link>
+          <Link
+            href="/progresso"
+            className="rounded-full border border-white/15 px-6 py-3 text-sm text-white/70 transition hover:border-white/25"
+          >
+            Ver progresso
           </Link>
           <Link
             href="/simulados"
             className="rounded-full border border-white/15 px-6 py-3 text-sm text-white/70 transition hover:border-white/25"
           >
-            Ver histórico
+            Outros simulados
           </Link>
         </div>
       </div>

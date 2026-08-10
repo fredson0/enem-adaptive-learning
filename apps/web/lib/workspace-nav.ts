@@ -1,9 +1,8 @@
 import {
   BarChart3,
   BookOpen,
-  ClipboardList,
-  MessageSquare,
   Route,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -15,12 +14,6 @@ export type WorkspaceNavItem = {
 };
 
 export const WORKSPACE_NAV: WorkspaceNavItem[] = [
-  {
-    label: "Simulados",
-    href: "/simulados",
-    icon: ClipboardList,
-    description: "Histórico e novos simulados adaptativos",
-  },
   {
     label: "Trilha",
     href: "/trilha",

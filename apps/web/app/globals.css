@@ -192,3 +192,51 @@
     linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
   background-size: 3px 3px;
 }
+
+/* Sidebar tree — conectores em L (padrão Osmo Vault) */
+.osmo-sidebar-tree {
+  margin-left: 1.25rem;
+  padding-top: 0.25rem;
+}
+
+.osmo-sidebar-tree__list {
+  position: relative;
+  margin: 0;
+  padding: 0 0 0 0.875rem;
+  list-style: none;
+}
+
+.osmo-sidebar-tree__item {
+  position: relative;
+}
+
+.osmo-sidebar-tree__item + .osmo-sidebar-tree__item {
+  margin-top: 2px;
+}
+
+/* Ramo horizontal com canto arredondado */
+.osmo-sidebar-tree__item::before {
+  content: "";
+  position: absolute;
+  left: -0.875rem;
+  top: 50%;
+  width: 0.875rem;
+  height: 0.5rem;
+  border-left: 1px solid var(--osmo-border);
+  border-bottom: 1px solid var(--osmo-border);
+  border-bottom-left-radius: 6px;
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+/* Continuação vertical entre itens (altura variável) */
+.osmo-sidebar-tree__item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: -0.875rem;
+  top: 50%;
+  width: 1px;
+  height: calc(100% + 2px);
+  background: var(--osmo-border);
+  pointer-events: none;
+}

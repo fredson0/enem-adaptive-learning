@@ -6,8 +6,8 @@ import {
 } from './core/application/use-cases/enviar-resposta.use-case';
 import { GerarSimuladoUseCase } from './core/application/use-cases/gerar-simulado.use-case';
 import { GerarSimuladoComIaUseCase } from './core/application/use-cases/gerar-simulado-com-ia.use-case';
+import { ListarSimuladosUseCase } from './core/application/use-cases/listar-simulados.use-case';
 import {
-  ListarSimuladosUseCase,
   ObterSimuladoUseCase,
 } from './core/application/use-cases/obter-simulado.use-case';
 import { SimuladosController } from './infrastructure/adapters/in/http/simulados.controller';

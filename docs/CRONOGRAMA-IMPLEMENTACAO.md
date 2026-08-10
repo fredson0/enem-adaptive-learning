@@ -100,15 +100,16 @@ gantt
 - [x] `/trilha` — lacunas, meta semanal, CTA simulado focado + tutor
 - [x] `/simulados/novo` — aba **Pedir à IA** + filtros manuais (multi-ano, assunto)
 
-### ⬜ Próximo (S3/S5)
+### ⬜ Próximo (Fase A — Simulados polish) — em andamento 10/08/2026
 
-- [x] Upload imagem → `ObjectStoragePort` + presign (local dev; S3/Railway Bucket em prod)
-- [x] Vision Gemini na mensagem com anexo (`POST /ia-tutor/anexos/presign`)
-- [x] `GET /ia-tutor/conversas` — persistir chats no Postgres
-- [ ] **Produção:** criar Railway Bucket `enem-tutor-anexos` + credenciais na API
-- [ ] Cache Redis nas métricas (F4 performance)
+- [x] Três modos: treino / modalidade / cronometrado (sidebar + rotas)
+- [x] Polish histórico, criar, questão, resultado — ver [SIMULADOS-POLISH.md](./SIMULADOS-POLISH.md)
+- [ ] Mobile sidebar drawer + polish responsivo geral
+
+### ⬜ Depois (produção / monetização — por último)
+
+- [ ] Railway Bucket `enem-tutor-anexos` + self-host seed ([BANCO-QUESTOES-ENEM.md](./BANCO-QUESTOES-ENEM.md))
 - [ ] `/planos` — checkout Mercado Pago
-- [ ] Tags de assunto nas questões (melhorar busca por tema)
 
 ---
 

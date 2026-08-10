@@ -2,8 +2,8 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { StatusSimulado } from '@generated/prisma';
 import { PrismaService } from '../../../../../../infrastructure/database/prisma.service';
 import type {
+  ListarSimuladosFiltro,
   SimuladoDetalhe,
-  SimuladoResumo,
   SimuladosRepositoryPort,
 } from '../../../../core/application/ports/simulados.repository.port';
 
@@ -22,6 +22,9 @@ export class PrismaSimuladosRepository implements SimuladosRepositoryPort {
       id: row.id,
       userId: row.userId,
       area: row.area,
+      modo: row.modo,
+      revelarGabaritoImediato: row.revelarGabaritoImediato,
+      tempoLimiteSegundos: row.tempoLimiteSegundos,
       totalQuestoes: row.totalQuestoes,
       respondidas: row.respondidas,
       acertos: row.acertos,
@@ -58,11 +61,17 @@ export class PrismaSimuladosRepository implements SimuladosRepositoryPort {
     userId: string;
     area: SimuladoDetalhe['area'];
     questaoIds: string[];
+    modo: SimuladoDetalhe['modo'];
+    revelarGabaritoImediato: boolean;
+    tempoLimiteSegundos: number | null;
   }): Promise<SimuladoDetalhe> {
     const row = await this.prisma.simulado.create({
       data: {
         userId: input.userId,
         area: input.area ?? undefined,
+        modo: input.modo,
+        revelarGabaritoImediato: input.revelarGabaritoImediato,
+        tempoLimiteSegundos: input.tempoLimiteSegundos ?? undefined,
         totalQuestoes: input.questaoIds.length,
         questoes: {
           create: input.questaoIds.map((questaoId, ordem) => ({
@@ -80,24 +89,47 @@ export class PrismaSimuladosRepository implements SimuladosRepositoryPort {
     return this.mapDetalhe(row);
   }
 
-  async listarPorUsuario(userId: string): Promise<SimuladoResumo[]> {
-    const rows = await this.prisma.simulado.findMany({
-      where: { userId },
-      orderBy: { iniciadoEm: 'desc' },
-    });
+  async listarPorUsuario(
+    userId: string,
+    filtro: ListarSimuladosFiltro = {},
+  ) {
+    const limit = Math.min(Math.max(filtro.limit ?? 50, 1), 100);
+    const offset = Math.max(filtro.offset ?? 0, 0);
 
-    return rows.map((row) => ({
-      id: row.id,
-      userId: row.userId,
-      area: row.area,
-      totalQuestoes: row.totalQuestoes,
-      respondidas: row.respondidas,
-      acertos: row.acertos,
-      status: row.status,
-      questaoAtualIdx: row.questaoAtualIdx,
-      iniciadoEm: row.iniciadoEm,
-      finalizadoEm: row.finalizadoEm,
-    }));
+    const where = {
+      userId,
+      ...(filtro.modo ? { modo: filtro.modo } : {}),
+      ...(filtro.status ? { status: filtro.status } : {}),
+    };
+
+    const [rows, total] = await Promise.all([
+      this.prisma.simulado.findMany({
+        where,
+        orderBy: { iniciadoEm: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      this.prisma.simulado.count({ where }),
+    ]);
+
+    return {
+      total,
+      items: rows.map((row) => ({
+        id: row.id,
+        userId: row.userId,
+        area: row.area,
+        modo: row.modo,
+        revelarGabaritoImediato: row.revelarGabaritoImediato,
+        tempoLimiteSegundos: row.tempoLimiteSegundos,
+        totalQuestoes: row.totalQuestoes,
+        respondidas: row.respondidas,
+        acertos: row.acertos,
+        status: row.status,
+        questaoAtualIdx: row.questaoAtualIdx,
+        iniciadoEm: row.iniciadoEm,
+        finalizadoEm: row.finalizadoEm,
+      })),
+    };
   }
 
   async buscarPorId(id: string, userId: string): Promise<SimuladoDetalhe | null> {
@@ -167,7 +199,7 @@ export class PrismaSimuladosRepository implements SimuladosRepositoryPort {
 
   async finalizar(simuladoId: string, userId: string): Promise<SimuladoDetalhe> {
     await this.prisma.simulado.updateMany({
-      where: { id: simuladoId, userId },
+      where: { id: simuladoId, userId, status: StatusSimulado.EM_ANDAMENTO },
       data: {
         status: StatusSimulado.CONCLUIDO,
         finalizadoEm: new Date(),

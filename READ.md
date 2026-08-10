@@ -126,6 +126,7 @@ docker compose up -d
 npm run prisma:migrate:deploy -w apps/api
 npm run prisma:seed -w apps/api
 # Opcional: limitar anos — SEED_YEARS=2022,2023 npm run prisma:seed -w apps/api
+# Ver self-hosting da API ENEM (evitar rate limit no seed): docs/BANCO-QUESTOES-ENEM.md
 ```
 
 Execute o ambiente de desenvolvimento:
@@ -164,7 +165,8 @@ Desenvolvido com 🩵 e foco em educação para o Trabalho de Conclusão de Curs
 | [Infraestrutura Railway](docs/INFRAESTRUTURA-RAILWAY.md) | Setup Railway (API, PostgreSQL, Redis) + R2 para imagens |
 | [Escopo do Produto](docs/ESCOPO-PRODUTO.md) | Telas, tutor vision, storage, fora do TCC |
 | [Segurança Auth](docs/SEGURANCA-AUTH.md) | HttpOnly, refresh, rate limit, anti privilege-escalation |
-| [Escolha do Modelo de IA](docs/ESCOLHA-MODELO-IA.md) | Gemini vs alternativas gratuitas, quotas e estratégia do tutor |
+| [Simulados — modos e polish](docs/SIMULADOS-POLISH.md) | Treino, modalidade, cronômetro, UX e API |
+| [Banco de questões ENEM](docs/BANCO-QUESTOES-ENEM.md) | api.enem.dev, rate limit, self-hosting e seed |
 | [Tutor IA — Perguntas e Endpoints](docs/TUTOR-IA-PERGUNTAS-E-ENDPOINTS.md) | Tipos de pergunta do aluno, o que funciona hoje e endpoints futuros |
 | [Workspace UI (OSMO)](docs/WORKSPACE-UI-OSMO.md) | Área logada do aluno — sidebar, rotas, checklist |
 | [Conceitos de Segurança e Performance](docs/CONCEITOS-SEGURANCA-E-PERFORMANCE.md) | 20 conceitos (idempotência, rate limit, JWT, etc.) com quando e onde implementar |

@@ -14,6 +14,8 @@ type RequestOptions = {
   body?: unknown;
   /** Se true, chama Nest via BFF /api/backend (cookie HttpOnly → Bearer). */
   auth?: boolean;
+  /** Evita duplo envio em POST (ex.: resposta de simulado). */
+  idempotencyKey?: string;
 };
 
 /**
@@ -24,11 +26,15 @@ type RequestOptions = {
  */
 export async function apiFetch<T>(
   path: string,
-  { method = "GET", body, auth = true }: RequestOptions = {},
+  { method = "GET", body, auth = true, idempotencyKey }: RequestOptions = {},
 ): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
+
+  if (idempotencyKey) {
+    headers["Idempotency-Key"] = idempotencyKey;
+  }
 
   const url = auth
     ? `/api/backend${path.startsWith("/") ? path : `/${path}`}`

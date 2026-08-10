@@ -56,6 +56,12 @@ enum StatusSimulado {
   CONCLUIDO
 }
 
+enum ModoSimulado {
+  TREINO
+  MODALIDADE
+  CRONOMETRADO
+}
+
 enum PapelMensagemTutor {
   USER
   ASSISTANT
@@ -117,6 +123,9 @@ model Simulado {
   respondidas     Int            @default(0)
   acertos         Int            @default(0)
   status          StatusSimulado @default(EM_ANDAMENTO)
+  modo            ModoSimulado   @default(TREINO)
+  revelarGabaritoImediato Boolean @default(true) @map("revelar_gabarito_imediato")
+  tempoLimiteSegundos     Int?    @map("tempo_limite_segundos")
   questaoAtualIdx Int            @default(0) @map("questao_atual_idx")
   iniciadoEm      DateTime       @default(now()) @map("iniciado_em") @db.Timestamptz(3)
   finalizadoEm    DateTime?      @map("finalizado_em") @db.Timestamptz(3)
@@ -126,6 +135,7 @@ model Simulado {
   respostas RespostaSimulado[]
 
   @@index([userId, status])
+  @@index([userId, modo, status])
   @@map("simulados")
 }
 

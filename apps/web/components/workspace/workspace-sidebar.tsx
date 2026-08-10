@@ -1,6 +1,10 @@
 "use client";
 
 import { ChatList } from "@/components/workspace/chat-list";
+import {
+  SidebarTree,
+  SidebarTreeLink,
+} from "@/components/workspace/sidebar-tree-nav";
 import { SidebarAccordion } from "@/components/workspace/sidebar-accordion";
 import { UserAvatar } from "@/components/workspace/user-avatar";
 import { cn } from "@/lib/utils";
@@ -10,11 +14,12 @@ import {
   TUTOR_NAV,
   WORKSPACE_NAV,
 } from "@/lib/workspace-nav";
+import { SIMULADO_MODOS } from "@/lib/simulado-modos";
 import { fetchMe } from "@/lib/api";
 import { type User } from "@/lib/auth";
 import { TUTOR_CHAT_PATH } from "@/lib/tutor-navigation";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
-import { Asterisk, ChevronRight, MoreHorizontal } from "lucide-react";
+import { Asterisk, ChevronRight, ClipboardList, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -72,6 +77,8 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
 
   const TutorIcon = TUTOR_NAV.icon;
   const isTutorExpanded = expandedSection === "tutor";
+  const isSimuladosExpanded = expandedSection === "simulados";
+  const isSimuladosActive = pathname.startsWith("/simulados");
 
   return (
     <aside className="absolute top-1.5 bottom-1.5 left-1.5 z-30 flex w-[var(--osmo-sidebar-width)] flex-col overflow-hidden rounded-[14px] border border-[var(--osmo-border)] bg-[var(--osmo-sidebar)]">
@@ -89,7 +96,10 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
         <Asterisk className="size-4 text-[#b0ff57]" strokeWidth={2} />
       </div>
 
-      <div className="scrollbar-none flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4">
+      <div
+        className="scrollbar-none flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4"
+        data-lenis-prevent
+      >
         <button
           type="button"
           onClick={() => handleSectionClick("tutor", TUTOR_NAV.href)}
@@ -120,11 +130,55 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
         </button>
 
         <SidebarAccordion open={isTutorExpanded} className="mb-2">
-          <div className="ml-5 border-l border-[var(--osmo-border)] pl-3.5">
-            <div className="scrollbar-none max-h-[240px] overflow-y-auto pt-1 pr-1">
-              <ChatList />
-            </div>
-          </div>
+          <ChatList />
+        </SidebarAccordion>
+
+        <button
+          type="button"
+          onClick={() => handleSectionClick("simulados", "/simulados")}
+          className={cn(
+            "mb-1 flex w-full items-center justify-between rounded-[10px] px-3.5 py-3 text-sm font-medium transition-all duration-300 ease-out",
+            isSimuladosExpanded || isSimuladosActive
+              ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
+              : "text-white/70 hover:bg-[var(--osmo-hover)] hover:text-white",
+          )}
+        >
+          <span className="inline-flex items-center gap-3">
+            <ClipboardList
+              className={cn(
+                "size-4 transition-colors duration-300",
+                isSimuladosExpanded || isSimuladosActive
+                  ? "text-[#60a5fa]"
+                  : "text-white/60",
+              )}
+              strokeWidth={1.75}
+            />
+            Simulados
+          </span>
+          <ChevronRight
+            className={cn(
+              "size-3.5 text-white/40 transition-transform duration-300 ease-out",
+              isSimuladosExpanded && "rotate-90",
+            )}
+            strokeWidth={1.75}
+          />
+        </button>
+
+        <SidebarAccordion open={isSimuladosExpanded} className="mb-2">
+          <SidebarTree>
+            <SidebarTreeLink href="/simulados" active={pathname === "/simulados"}>
+              Visão geral
+            </SidebarTreeLink>
+            {SIMULADO_MODOS.map((modo) => (
+              <SidebarTreeLink
+                key={modo.slug}
+                href={modo.href}
+                active={pathname.startsWith(modo.href)}
+              >
+                {modo.shortLabel}
+              </SidebarTreeLink>
+            ))}
+          </SidebarTree>
         </SidebarAccordion>
 
         <nav className="space-y-1">

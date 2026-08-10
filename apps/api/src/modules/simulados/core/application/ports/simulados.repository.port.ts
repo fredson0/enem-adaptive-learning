@@ -1,4 +1,4 @@
-import type { AreaEnem, StatusSimulado } from '@generated/prisma';
+import type { AreaEnem, ModoSimulado, StatusSimulado } from '@generated/prisma';
 import type { Questao } from '../../../../questoes/core/domain/entities/questao.entity';
 
 export type RespostaSimuladoData = {
@@ -12,6 +12,9 @@ export type SimuladoResumo = {
   id: string;
   userId: string;
   area: AreaEnem | null;
+  modo: ModoSimulado;
+  revelarGabaritoImediato: boolean;
+  tempoLimiteSegundos: number | null;
   totalQuestoes: number;
   respondidas: number;
   acertos: number;
@@ -26,6 +29,13 @@ export type SimuladoDetalhe = SimuladoResumo & {
   respostas: RespostaSimuladoData[];
 };
 
+export type ListarSimuladosFiltro = {
+  modo?: ModoSimulado;
+  status?: StatusSimulado;
+  limit?: number;
+  offset?: number;
+};
+
 export const SIMULADOS_REPOSITORY = Symbol('SIMULADOS_REPOSITORY');
 
 export interface SimuladosRepositoryPort {
@@ -33,9 +43,15 @@ export interface SimuladosRepositoryPort {
     userId: string;
     area: AreaEnem | null;
     questaoIds: string[];
+    modo: ModoSimulado;
+    revelarGabaritoImediato: boolean;
+    tempoLimiteSegundos: number | null;
   }): Promise<SimuladoDetalhe>;
 
-  listarPorUsuario(userId: string): Promise<SimuladoResumo[]>;
+  listarPorUsuario(
+    userId: string,
+    filtro?: ListarSimuladosFiltro,
+  ): Promise<{ items: SimuladoResumo[]; total: number }>;
 
   buscarPorId(id: string, userId: string): Promise<SimuladoDetalhe | null>;
 

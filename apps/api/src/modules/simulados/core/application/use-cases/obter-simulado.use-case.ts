@@ -8,28 +8,6 @@ import {
 } from '../ports/simulados.repository.port';
 
 @Injectable()
-export class ListarSimuladosUseCase {
-  constructor(
-    @Inject(SIMULADOS_REPOSITORY)
-    private readonly simuladosRepository: SimuladosRepositoryPort,
-  ) {}
-
-  async execute(userId: string) {
-    const simulados = await this.simuladosRepository.listarPorUsuario(userId);
-    return simulados.map((s) => ({
-      id: s.id,
-      area: s.area,
-      totalQuestoes: s.totalQuestoes,
-      respondidas: s.respondidas,
-      acertos: s.acertos,
-      status: s.status,
-      iniciadoEm: s.iniciadoEm,
-      finalizadoEm: s.finalizadoEm,
-    }));
-  }
-}
-
-@Injectable()
 export class ObterSimuladoUseCase {
   constructor(
     @Inject(SIMULADOS_REPOSITORY)

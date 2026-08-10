@@ -61,6 +61,7 @@ export class EnviarRespostaUseCase {
       return {
         correto: existente?.correto ?? false,
         gabarito: null,
+        revelarGabaritoImediato: simulado.revelarGabaritoImediato,
         proximaQuestaoIdx: simulado.questaoAtualIdx,
         finalizado: false,
       };
@@ -88,7 +89,8 @@ export class EnviarRespostaUseCase {
 
     return {
       correto,
-      gabarito: questao.gabarito,
+      gabarito: simulado.revelarGabaritoImediato ? questao.gabarito : null,
+      revelarGabaritoImediato: simulado.revelarGabaritoImediato,
       proximaQuestaoIdx: atualizado.questaoAtualIdx,
       respondidas: atualizado.respondidas,
       acertos: atualizado.acertos,
@@ -120,7 +122,9 @@ export class FinalizarSimuladoUseCase {
         ? simulado
         : await this.simuladosRepository.finalizar(simuladoId, userId);
 
-    await this.calcularProficienciaUseCase.execute(userId);
+    if (simulado.status !== 'CONCLUIDO') {
+      await this.calcularProficienciaUseCase.execute(userId);
+    }
 
     const questoes = await this.questoesRepository.buscarPorIds(finalizado.questaoIds);
     const respostasMap = new Map(
@@ -130,6 +134,9 @@ export class FinalizarSimuladoUseCase {
     return {
       id: finalizado.id,
       area: finalizado.area,
+      modo: finalizado.modo,
+      revelarGabaritoImediato: finalizado.revelarGabaritoImediato,
+      tempoLimiteSegundos: finalizado.tempoLimiteSegundos,
       totalQuestoes: finalizado.totalQuestoes,
       respondidas: finalizado.respondidas,
       acertos: finalizado.acertos,

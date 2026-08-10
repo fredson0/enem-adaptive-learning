@@ -6,6 +6,7 @@ import {
   Inject,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser } from '../../../../../../infrastructure/auth/current-user.decorator';
@@ -17,11 +18,14 @@ import {
 } from '../../../../core/application/use-cases/enviar-resposta.use-case';
 import { GerarSimuladoUseCase } from '../../../../core/application/use-cases/gerar-simulado.use-case';
 import { GerarSimuladoComIaUseCase } from '../../../../core/application/use-cases/gerar-simulado-com-ia.use-case';
+import { ListarSimuladosUseCase } from '../../../../core/application/use-cases/listar-simulados.use-case';
+import { ObterSimuladoUseCase } from '../../../../core/application/use-cases/obter-simulado.use-case';
 import {
-  ListarSimuladosUseCase,
-  ObterSimuladoUseCase,
-} from '../../../../core/application/use-cases/obter-simulado.use-case';
-import { CriarSimuladoDto, EnviarRespostaDto, GerarSimuladoComIaDto } from './dto/simulados.dto';
+  CriarSimuladoDto,
+  EnviarRespostaDto,
+  GerarSimuladoComIaDto,
+  ListarSimuladosQueryDto,
+} from './dto/simulados.dto';
 
 @Controller('simulados')
 @UseGuards(JwtAuthGuard)
@@ -45,6 +49,7 @@ export class SimuladosController {
   criar(@CurrentUser() user: JwtPayload, @Body() dto: CriarSimuladoDto) {
     return this.gerarSimuladoUseCase.execute({
       userId: user.sub,
+      modo: dto.modoEnum,
       area: dto.areaEnum ?? undefined,
       ano: dto.anos?.length ? undefined : dto.ano,
       anos: dto.anos,
@@ -61,12 +66,24 @@ export class SimuladosController {
     return this.gerarSimuladoComIaUseCase.execute({
       userId: user.sub,
       pedido: dto.pedido,
+      modo: dto.modoEnum,
     });
   }
 
   @Get()
-  listar(@CurrentUser() user: JwtPayload) {
-    return this.listarSimuladosUseCase.execute(user.sub);
+  listar(@CurrentUser() user: JwtPayload, @Query() query: ListarSimuladosQueryDto) {
+    return this.listarSimuladosUseCase.execute({
+      userId: user.sub,
+      modo: query.modoEnum,
+      status: query.status,
+      limit: query.limit,
+      offset: query.offset,
+    });
+  }
+
+  @Get(':id/resultado')
+  obterResultado(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.finalizarSimuladoUseCase.execute(id, user.sub);
   }
 
   @Get(':id')
@@ -76,6 +93,9 @@ export class SimuladosController {
     return {
       id: resultado.simulado.id,
       area: resultado.simulado.area,
+      modo: resultado.simulado.modo,
+      revelarGabaritoImediato: resultado.simulado.revelarGabaritoImediato,
+      tempoLimiteSegundos: resultado.simulado.tempoLimiteSegundos,
       totalQuestoes: resultado.simulado.totalQuestoes,
       respondidas: resultado.simulado.respondidas,
       acertos: resultado.simulado.acertos,

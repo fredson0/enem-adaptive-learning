@@ -3,9 +3,15 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
+import type { ModoSimulado } from '@generated/prisma';
 import { QUESTOES_REPOSITORY } from '../../../../questoes/core/application/ports/questoes.repository.port';
 import type { QuestoesRepositoryPort } from '../../../../questoes/core/application/ports/questoes.repository.port';
 import type { FiltroQuestoes } from '../../../../questoes/core/application/types/filtro-questoes';
+import {
+  MODO_SIMULADO_CONFIG,
+  resolverConfigModo,
+  validarQuantidadeModo,
+} from '../helpers/modo-simulado.config';
 import {
   SIMULADOS_REPOSITORY,
   type SimuladosRepositoryPort,
@@ -14,6 +20,7 @@ import {
 export type GerarSimuladoInput = {
   userId: string;
   quantidade: number;
+  modo?: ModoSimulado;
 } & FiltroQuestoes;
 
 @Injectable()
@@ -26,7 +33,18 @@ export class GerarSimuladoUseCase {
   ) {}
 
   async execute(input: GerarSimuladoInput) {
+    const modo = input.modo ?? 'TREINO';
+    const config = MODO_SIMULADO_CONFIG[modo];
+    validarQuantidadeModo(modo, input.quantidade);
+
+    if (config.areaObrigatoria && !input.area) {
+      throw new BadRequestException(
+        'Selecione a área do ENEM para este modo de simulado.',
+      );
+    }
+
     const quantidade = Math.min(Math.max(input.quantidade, 1), 45);
+    const modoRuntime = resolverConfigModo(modo, quantidade);
 
     const filtro: FiltroQuestoes = {
       area: input.area,
@@ -58,6 +76,9 @@ export class GerarSimuladoUseCase {
       userId: input.userId,
       area: input.area ?? null,
       questaoIds: questoes.map((q) => q.id),
+      modo,
+      revelarGabaritoImediato: modoRuntime.revelarGabaritoImediato,
+      tempoLimiteSegundos: modoRuntime.tempoLimiteSegundos,
     });
 
     return this.toResponse(simulado);
@@ -67,6 +88,9 @@ export class GerarSimuladoUseCase {
     return {
       id: simulado.id,
       area: simulado.area,
+      modo: simulado.modo,
+      revelarGabaritoImediato: simulado.revelarGabaritoImediato,
+      tempoLimiteSegundos: simulado.tempoLimiteSegundos,
       totalQuestoes: simulado.totalQuestoes,
       respondidas: simulado.respondidas,
       acertos: simulado.acertos,
