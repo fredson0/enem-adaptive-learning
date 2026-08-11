@@ -1,11 +1,14 @@
 "use client";
 
+import { SimuladoDicaPanel } from "@/components/simulados/simulado-dica-panel";
+import { SimuladoFinalizarDialog } from "@/components/simulados/simulado-finalizar-dialog";
 import { SimuladoProgressBar } from "@/components/simulados/simulado-progress-bar";
 import { SimuladoTimer } from "@/components/simulados/simulado-timer";
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
 import { useTokensIa } from "@/components/workspace/tokens-ia-provider";
 import { apiFetch } from "@/lib/api";
 import { pedirDicaQuestao } from "@/lib/ia-tutor";
+import { cn } from "@/lib/utils";
 import { formatModoSimulado } from "@/lib/simulado-modos";
 import type { SimuladoDetalhe } from "@/lib/simulados";
 import { Lightbulb, Loader2 } from "lucide-react";
@@ -33,9 +36,13 @@ export default function SimuladoQuestaoPage() {
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [dica, setDica] = useState<string | null>(null);
+  const [dicasPorQuestao, setDicasPorQuestao] = useState<Record<string, string>>(
+    {},
+  );
+  const [painelDicaVisivel, setPainelDicaVisivel] = useState(false);
   const [carregandoDica, setCarregandoDica] = useState(false);
   const [erroDica, setErroDica] = useState<string | null>(null);
+  const [dialogFinalizarAberto, setDialogFinalizarAberto] = useState(false);
 
   const carregar = useCallback(async () => {
     try {
@@ -51,7 +58,7 @@ export default function SimuladoQuestaoPage() {
       setSimulado(data);
       setSelecionada(null);
       setFeedback(null);
-      setDica(null);
+      setPainelDicaVisivel(false);
       setErroDica(null);
     } catch (err) {
       setError(
@@ -70,6 +77,7 @@ export default function SimuladoQuestaoPage() {
     if (finalizandoRef.current) return;
     finalizandoRef.current = true;
     setSubmitting(true);
+    setDialogFinalizarAberto(false);
 
     try {
       await apiFetch(`/simulados/${simuladoId}/finalizar`, {
@@ -89,13 +97,25 @@ export default function SimuladoQuestaoPage() {
   const handlePedirDica = async () => {
     if (!simulado?.questaoAtual) return;
 
-    setCarregandoDica(true);
+    const questaoId = simulado.questaoAtual.id;
+    const dicaEmCache = dicasPorQuestao[questaoId];
+
+    setPainelDicaVisivel(true);
     setErroDica(null);
 
+    if (dicaEmCache) {
+      return;
+    }
+
+    setCarregandoDica(true);
+
     try {
-      const response = await pedirDicaQuestao(simulado.questaoAtual.id);
+      const response = await pedirDicaQuestao(questaoId);
       setTokens(response.tokens);
-      setDica(response.resposta);
+      setDicasPorQuestao((atual) => ({
+        ...atual,
+        [questaoId]: response.resposta,
+      }));
     } catch (err) {
       setErroDica(
         err instanceof Error ? err.message : "Não foi possível obter a dica.",
@@ -103,6 +123,12 @@ export default function SimuladoQuestaoPage() {
     } finally {
       setCarregandoDica(false);
     }
+  };
+
+  const fecharDica = () => {
+    setPainelDicaVisivel(false);
+    setErroDica(null);
+    setCarregandoDica(false);
   };
 
   const handleResponder = async () => {
@@ -148,8 +174,11 @@ export default function SimuladoQuestaoPage() {
       }
 
       setTimeout(() => {
-        setLoading(true);
-        carregar();
+        fecharDica();
+        setTimeout(() => {
+          setLoading(true);
+          carregar();
+        }, 450);
       }, result.revelarGabaritoImediato ? 900 : 500);
     } catch (err) {
       setError(
@@ -178,10 +207,19 @@ export default function SimuladoQuestaoPage() {
 
   const questao = simulado?.questaoAtual;
   const questaoNumero = (simulado?.respondidas ?? 0) + 1;
+  const dicaAtual = questao ? (dicasPorQuestao[questao.id] ?? null) : null;
+  const jaTemDica = Boolean(dicaAtual);
+  const painelDicaAberto =
+    painelDicaVisivel && Boolean(dicaAtual || carregandoDica || erroDica);
 
   return (
     <WorkspaceSection title="Simulado" contentClassName="flex min-h-0 flex-1 flex-col pt-6 pb-6">
-      <div className="mx-auto flex w-full max-w-3xl min-h-0 flex-1 flex-col gap-4">
+      <div
+        className={cn(
+          "mx-auto flex w-full min-h-0 flex-1 flex-col gap-4 transition-[max-width] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
+          painelDicaAberto ? "max-w-6xl" : "max-w-3xl",
+        )}
+      >
         <div className="shrink-0 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs uppercase tracking-wide text-white/40">
@@ -206,11 +244,7 @@ export default function SimuladoQuestaoPage() {
           <div className="flex justify-end">
             <button
               type="button"
-              onClick={() => {
-                if (window.confirm("Finalizar o simulado agora?")) {
-                  handleFinalizar();
-                }
-              }}
+              onClick={() => setDialogFinalizarAberto(true)}
               disabled={submitting}
               className="text-sm text-white/40 underline-offset-2 hover:text-white/70 hover:underline"
             >
@@ -220,11 +254,17 @@ export default function SimuladoQuestaoPage() {
         </div>
 
         <div
-          data-lenis-prevent
-          className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 tutor-prompt-scroll"
+          className={cn(
+            "grid min-h-0 flex-1 gap-4 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none lg:gap-6",
+            painelDicaAberto ? "lg:grid-cols-2" : "grid-cols-1",
+          )}
         >
-          {questao ? (
-            <article className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-6 md:p-8">
+          <div
+            data-lenis-prevent
+            className="min-h-0 overflow-y-auto overscroll-contain pr-1 tutor-prompt-scroll"
+          >
+            {questao ? (
+              <article className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-6 md:p-8">
               <p className="mb-4 text-xs uppercase tracking-wider text-white/35">
                 ENEM {questao.ano} · Questão {questao.indice}
               </p>
@@ -278,35 +318,29 @@ export default function SimuladoQuestaoPage() {
             <p className="text-sm text-white/50">Nenhuma questão pendente.</p>
           )}
 
-          {dica ? (
-            <div className="mt-4 rounded-[14px] border border-amber-500/20 bg-amber-500/5 p-5">
-              <p className="mb-2 flex items-center gap-2 text-sm font-medium text-amber-200">
-                <Lightbulb className="size-4" strokeWidth={1.75} />
-                Dica do tutor
+            {feedback ? (
+              <p
+                className={cn(
+                  "mt-4 text-sm",
+                  feedback.startsWith("Correto") || feedback.startsWith("Resposta")
+                    ? "text-emerald-400"
+                    : "text-amber-300",
+                )}
+              >
+                {feedback}
               </p>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-white/75">
-                {dica}
-              </p>
-            </div>
-          ) : null}
+            ) : null}
 
-          {erroDica ? (
-            <p className="mt-3 text-sm text-red-400">{erroDica}</p>
-          ) : null}
+            {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}
+          </div>
 
-          {feedback ? (
-            <p
-              className={`mt-4 text-sm ${
-                feedback.startsWith("Correto") || feedback.startsWith("Resposta")
-                  ? "text-emerald-400"
-                  : "text-amber-300"
-              }`}
-            >
-              {feedback}
-            </p>
-          ) : null}
-
-          {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}
+          <SimuladoDicaPanel
+            aberto={painelDicaAberto}
+            dica={dicaAtual}
+            carregando={carregandoDica}
+            erro={erroDica}
+            onFechar={fecharDica}
+          />
         </div>
 
         <div className="shrink-0 space-y-3 border-t border-white/[0.06] pt-4">
@@ -314,7 +348,12 @@ export default function SimuladoQuestaoPage() {
             <button
               type="button"
               onClick={handlePedirDica}
-              disabled={!questao || carregandoDica || submitting}
+              disabled={
+                !questao ||
+                carregandoDica ||
+                submitting ||
+                (painelDicaVisivel && jaTemDica)
+              }
               className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-sm text-white/75 transition hover:border-white/25 hover:text-white disabled:opacity-50"
             >
               {carregandoDica ? (
@@ -322,7 +361,13 @@ export default function SimuladoQuestaoPage() {
               ) : (
                 <Lightbulb className="size-4" strokeWidth={1.75} />
               )}
-              {carregandoDica ? "Buscando dica…" : "Pedir dica (1 token IA)"}
+              {carregandoDica
+                ? "Buscando dica…"
+                : jaTemDica
+                  ? painelDicaVisivel
+                    ? "Dica aberta"
+                    : "Ver dica"
+                  : "Pedir dica (1 token IA)"}
             </button>
             {!simulado?.revelarGabaritoImediato ? (
               <p className="self-center text-xs text-white/35">
@@ -353,6 +398,15 @@ export default function SimuladoQuestaoPage() {
           </div>
         </div>
       </div>
+
+      <SimuladoFinalizarDialog
+        open={dialogFinalizarAberto}
+        onClose={() => setDialogFinalizarAberto(false)}
+        onConfirm={handleFinalizar}
+        respondidas={simulado?.respondidas ?? 0}
+        totalQuestoes={simulado?.totalQuestoes ?? 0}
+        submitting={submitting}
+      />
     </WorkspaceSection>
   );
 }

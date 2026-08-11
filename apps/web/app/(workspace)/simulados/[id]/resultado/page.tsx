@@ -1,5 +1,6 @@
 "use client";
 
+import { QuestaoRevisaoModal } from "@/components/simulados/questao-revisao-modal";
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
 import { useTokensIa } from "@/components/workspace/tokens-ia-provider";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
@@ -33,6 +34,9 @@ export default function SimuladoResultadoPage() {
   const [error, setError] = useState<string | null>(null);
   const [explicandoId, setExplicandoId] = useState<string | null>(null);
   const [explicarErro, setExplicarErro] = useState<string | null>(null);
+  const [questaoEmRevisao, setQuestaoEmRevisao] = useState<
+    SimuladoResultado["questoes"][number] | null
+  >(null);
 
   useEffect(() => {
     obterResultadoSimulado(simuladoId)
@@ -136,21 +140,30 @@ export default function SimuladoResultadoPage() {
             {erros.map((q) => (
               <div
                 key={q.id}
-                className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-5"
+                className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-5 transition hover:border-white/10 hover:bg-[#1a1a1a]"
               >
-                <p className="text-xs text-white/40">
-                  ENEM {q.ano} · Questão {q.indice}
-                </p>
-                <p className="mt-2 line-clamp-3 text-sm text-white/75">
-                  {q.contexto.replace(/!\[[^\]]*]\([^)]+\)/g, "").slice(0, 200)}…
-                </p>
-                <p className="mt-3 text-sm">
-                  <span className="text-red-400">
-                    Sua resposta: {q.alternativaMarcada ?? "—"}
-                  </span>
-                  <span className="mx-2 text-white/25">·</span>
-                  <span className="text-emerald-400">Gabarito: {q.gabarito}</span>
-                </p>
+                <button
+                  type="button"
+                  onClick={() => setQuestaoEmRevisao(q)}
+                  className="w-full text-left"
+                >
+                  <p className="text-xs text-white/40">
+                    ENEM {q.ano} · Questão {q.indice}
+                  </p>
+                  <p className="mt-2 line-clamp-3 text-sm text-white/75">
+                    {q.contexto.replace(/!\[[^\]]*]\([^)]+\)/g, "").slice(0, 200)}…
+                  </p>
+                  <p className="mt-3 text-sm">
+                    <span className="text-red-400">
+                      Sua resposta: {q.alternativaMarcada ?? "—"}
+                    </span>
+                    <span className="mx-2 text-white/25">·</span>
+                    <span className="text-emerald-400">Gabarito: {q.gabarito}</span>
+                  </p>
+                  <p className="mt-3 text-xs text-white/35">
+                    Clique para ver o enunciado completo
+                  </p>
+                </button>
                 <button
                   type="button"
                   disabled={explicandoId === q.id || !q.alternativaMarcada}
@@ -217,6 +230,11 @@ export default function SimuladoResultadoPage() {
           </Link>
         </div>
       </div>
+
+      <QuestaoRevisaoModal
+        questao={questaoEmRevisao}
+        onClose={() => setQuestaoEmRevisao(null)}
+      />
     </WorkspaceSection>
   );
 }

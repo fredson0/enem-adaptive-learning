@@ -9,7 +9,31 @@ import {
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3333";
+
+const API_UNAVAILABLE_MESSAGE =
+  "API indisponível. Aguarde o backend iniciar (npm run dev:api) em http://127.0.0.1:3333.";
+
+async function fetchApiWithRetry(
+  url: string,
+  init: RequestInit,
+  retries = 2,
+): Promise<Response> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      return await fetch(url, init);
+    } catch (error) {
+      lastError = error;
+      if (attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+  }
+
+  throw lastError;
+}
 
 export function applyAuthCookies(response: NextResponse, tokens: AuthTokens) {
   response.cookies.set(
@@ -60,7 +84,7 @@ export async function nestFetch<T>(
 
   let response: Response;
   try {
-    response = await fetch(`${API_URL}${path}`, {
+    response = await fetchApiWithRetry(`${API_URL}${path}`, {
       ...rest,
       headers,
       cache: "no-store",
@@ -68,7 +92,7 @@ export async function nestFetch<T>(
   } catch {
     return {
       data: {
-        message: "API indisponível. Verifique se o backend está rodando em localhost:3333.",
+        message: API_UNAVAILABLE_MESSAGE,
       } as T,
       status: 503,
     };

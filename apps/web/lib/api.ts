@@ -45,6 +45,7 @@ export async function apiFetch<T>(
     headers,
     body: body ? JSON.stringify(body) : undefined,
     credentials: "same-origin",
+    cache: "no-store",
   });
 
   if (response.status === 401 && auth) {
@@ -55,6 +56,7 @@ export async function apiFetch<T>(
         headers,
         body: body ? JSON.stringify(body) : undefined,
         credentials: "same-origin",
+        cache: "no-store",
       });
       return parseResponse<T>(retry);
     }

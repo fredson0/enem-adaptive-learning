@@ -22,14 +22,18 @@ export function SimuladoLista({ modoSlug }: SimuladoListaProps) {
 
   useEffect(() => {
     setLoading(true);
+    setError(null);
     listarSimulados({
       modo: modo.api,
       status: filtroStatus === "todos" ? undefined : filtroStatus,
       limit: 30,
     })
       .then((response) => {
-        setItems(response.items);
-        setTotal(response.total);
+        const itemsFiltrados = response.items.filter(
+          (simulado) => simulado.modo === modo.api,
+        );
+        setItems(itemsFiltrados);
+        setTotal(itemsFiltrados.length);
       })
       .catch((err) =>
         setError(

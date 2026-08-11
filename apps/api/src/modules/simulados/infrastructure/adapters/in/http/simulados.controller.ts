@@ -26,6 +26,7 @@ import {
   GerarSimuladoComIaDto,
   ListarSimuladosQueryDto,
 } from './dto/simulados.dto';
+import { parseModoSimulado } from '../../../../core/application/helpers/modo-simulado.config';
 
 @Controller('simulados')
 @UseGuards(JwtAuthGuard)
@@ -49,7 +50,7 @@ export class SimuladosController {
   criar(@CurrentUser() user: JwtPayload, @Body() dto: CriarSimuladoDto) {
     return this.gerarSimuladoUseCase.execute({
       userId: user.sub,
-      modo: dto.modoEnum,
+      modo: parseModoSimulado(dto.modo),
       area: dto.areaEnum ?? undefined,
       ano: dto.anos?.length ? undefined : dto.ano,
       anos: dto.anos,
@@ -66,15 +67,19 @@ export class SimuladosController {
     return this.gerarSimuladoComIaUseCase.execute({
       userId: user.sub,
       pedido: dto.pedido,
-      modo: dto.modoEnum,
+      modo: parseModoSimulado(dto.modo),
     });
   }
 
   @Get()
-  listar(@CurrentUser() user: JwtPayload, @Query() query: ListarSimuladosQueryDto) {
+  listar(
+    @CurrentUser() user: JwtPayload,
+    @Query() query: ListarSimuladosQueryDto,
+    @Query('modo') modoQuery?: string,
+  ) {
     return this.listarSimuladosUseCase.execute({
       userId: user.sub,
-      modo: query.modoEnum,
+      modo: modoQuery ? parseModoSimulado(modoQuery) : undefined,
       status: query.status,
       limit: query.limit,
       offset: query.offset,

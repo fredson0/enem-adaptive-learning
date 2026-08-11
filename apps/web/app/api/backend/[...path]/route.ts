@@ -6,6 +6,8 @@ import {
   rotateRefreshTokens,
 } from "@/lib/auth-server";
 
+export const dynamic = "force-dynamic";
+
 type RouteContext = { params: Promise<{ path: string[] }> };
 
 export async function GET(request: Request, context: RouteContext) {

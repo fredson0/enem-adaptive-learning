@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -24,6 +24,9 @@ export class CriarSimuladoDto {
   @IsOptional()
   @IsString()
   @IsIn(MODOS)
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   modo?: string;
 
   @IsOptional()
@@ -80,6 +83,9 @@ export class GerarSimuladoComIaDto {
   @IsOptional()
   @IsString()
   @IsIn(MODOS)
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   modo?: string;
 
   get modoEnum() {
@@ -91,6 +97,9 @@ export class ListarSimuladosQueryDto {
   @IsOptional()
   @IsString()
   @IsIn(MODOS)
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   modo?: string;
 
   @IsOptional()
