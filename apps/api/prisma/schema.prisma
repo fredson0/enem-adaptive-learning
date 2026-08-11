@@ -194,6 +194,7 @@ model PerfilAluno {
   tipoEnsinoMedio    TipoEnsinoMedio? @map("tipo_ensino_medio")
   tempoDiarioMinutos Int              @default(120) @map("tempo_diario_minutos")
   nivelAtual         NivelAluno       @default(INICIANTE) @map("nivel_atual")
+  trilhaEstado       Json?            @map("trilha_estado") @db.JsonB
   atualizadoEm       DateTime         @updatedAt @map("atualizado_em") @db.Timestamptz(3)
 
   usuario Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)

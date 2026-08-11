@@ -7,6 +7,10 @@ import {
   ObterLacunasUseCase,
   ObterProficienciaUseCase,
 } from './core/application/use-cases/obter-metricas.use-case';
+import {
+  ObterTrilhaUseCase,
+  SalvarDiagnosticoTrilhaUseCase,
+} from './core/application/use-cases/obter-trilha.use-case';
 import { MetricasController } from './infrastructure/adapters/in/http/metricas.controller';
 import { PrismaMetricasRepository } from './infrastructure/adapters/out/persistence/prisma-metricas.repository';
 import { UsuariosModule } from '../usuarios/usuarios.module';
@@ -20,6 +24,8 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
     ObterEvolucaoUseCase,
     ObterLacunasUseCase,
     ObterContextoTutorUseCase,
+    ObterTrilhaUseCase,
+    SalvarDiagnosticoTrilhaUseCase,
     {
       provide: METRICAS_REPOSITORY,
       useClass: PrismaMetricasRepository,

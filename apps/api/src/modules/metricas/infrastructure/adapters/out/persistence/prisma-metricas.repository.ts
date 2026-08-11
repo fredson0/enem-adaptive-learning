@@ -8,6 +8,10 @@ import type {
   ResumoSimuladosBruto,
   UltimoSimuladoBruto,
 } from '../../../../core/application/ports/metricas.repository.port';
+import {
+  parseTrilhaEstado,
+  type TrilhaEstado,
+} from '../../../../core/application/helpers/trilha.config';
 
 @Injectable()
 export class PrismaMetricasRepository implements MetricasRepositoryPort {
@@ -180,5 +184,40 @@ export class PrismaMetricasRepository implements MetricasRepositoryPort {
           ? Math.round((totalAcertos / totalQuestoes) * 1000) / 10
           : null,
     };
+  }
+
+  async obterTrilhaEstado(userId: string): Promise<TrilhaEstado | null> {
+    const perfil = await this.prisma.perfilAluno.findUnique({
+      where: { userId },
+      select: { trilhaEstado: true },
+    });
+
+    if (!perfil?.trilhaEstado) {
+      return null;
+    }
+
+    return parseTrilhaEstado(perfil.trilhaEstado);
+  }
+
+  async salvarTrilhaEstado(userId: string, estado: TrilhaEstado): Promise<void> {
+    await this.prisma.perfilAluno.upsert({
+      where: { userId },
+      create: {
+        userId,
+        trilhaEstado: estado,
+      },
+      update: {
+        trilhaEstado: estado,
+      },
+    });
+  }
+
+  async obterTempoDiarioMinutos(userId: string): Promise<number> {
+    const perfil = await this.prisma.perfilAluno.findUnique({
+      where: { userId },
+      select: { tempoDiarioMinutos: true },
+    });
+
+    return perfil?.tempoDiarioMinutos ?? 120;
   }
 }

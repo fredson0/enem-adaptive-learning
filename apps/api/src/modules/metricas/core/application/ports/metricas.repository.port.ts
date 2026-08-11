@@ -1,4 +1,5 @@
 import type { AreaEnem } from '@generated/prisma';
+import type { TrilhaEstado } from '../helpers/trilha.config';
 
 export const METRICAS_REPOSITORY = Symbol('METRICAS_REPOSITORY');
 
@@ -51,4 +52,7 @@ export interface MetricasRepositoryPort {
       atualizadoEm: Date;
     }[]
   >;
+  obterTrilhaEstado(userId: string): Promise<TrilhaEstado | null>;
+  salvarTrilhaEstado(userId: string, estado: TrilhaEstado): Promise<void>;
+  obterTempoDiarioMinutos(userId: string): Promise<number>;
 }

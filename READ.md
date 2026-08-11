@@ -14,7 +14,7 @@ O grande diferencial do projeto é o seu foco em acessibilidade social. Através
 
 📝 Simulados ENEM: Banco de ~10 mil questões reais (seed via api.enem.dev). Criar simulado por área, **pedir à IA em linguagem natural** (`POST /simulados/gerar-com-ia`), filtros multi-ano e termos no enunciado. Responder questões A–E e ver resultado com gabarito + explicação IA.
 
-📊 Métricas de Proficiência: API de proficiência, evolução e lacunas por área ENEM. Telas **Progresso** e **Trilha** conectadas ao backend; recálculo automático ao finalizar simulado.
+📊 Métricas de Proficiência: API de proficiência, evolução e lacunas por área ENEM. Telas **Progresso** e **Trilha** conectadas ao backend; recálculo automático ao finalizar simulado. A **Trilha** inclui diagnóstico inicial (autoavaliação + disciplinas fracas + meta) e plano sequencial por área ENEM — ver [Trilha personalizada](docs/TRILHA-PERSONALIZADA.md).
 
 💳 Sistema de Sustentabilidade (Planos e Tokens): - Plano Gratuito: Focado em alunos de escolas públicas, com um limite de tokens de IA diários para garantir a viabilidade financeira do projeto.
 
@@ -165,6 +165,7 @@ Desenvolvido com 🩵 e foco em educação para o Trabalho de Conclusão de Curs
 | [Infraestrutura Railway](docs/INFRAESTRUTURA-RAILWAY.md) | Setup Railway (API, PostgreSQL, Redis) + R2 para imagens |
 | [Escopo do Produto](docs/ESCOPO-PRODUTO.md) | Telas, tutor vision, storage, fora do TCC |
 | [Segurança Auth](docs/SEGURANCA-AUTH.md) | HttpOnly, refresh, rate limit, anti privilege-escalation |
+| [Trilha personalizada](docs/TRILHA-PERSONALIZADA.md) | Diagnóstico, priorização por área ENEM, etapas e roadmap UI Osmo |
 | [Simulados — modos e polish](docs/SIMULADOS-POLISH.md) | Treino, modalidade, cronômetro, UX e API |
 | [Banco de questões ENEM](docs/BANCO-QUESTOES-ENEM.md) | api.enem.dev, rate limit, self-hosting e seed |
 | [Tutor IA — Perguntas e Endpoints](docs/TUTOR-IA-PERGUNTAS-E-ENDPOINTS.md) | Tipos de pergunta do aluno, o que funciona hoje e endpoints futuros |

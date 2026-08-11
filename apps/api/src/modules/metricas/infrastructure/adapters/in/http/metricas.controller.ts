@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Inject,
@@ -14,6 +15,11 @@ import {
   ObterLacunasUseCase,
   ObterProficienciaUseCase,
 } from '../../../../core/application/use-cases/obter-metricas.use-case';
+import {
+  ObterTrilhaUseCase,
+  SalvarDiagnosticoTrilhaUseCase,
+} from '../../../../core/application/use-cases/obter-trilha.use-case';
+import { SalvarDiagnosticoTrilhaDto } from './dto/trilha.dto';
 
 @Controller('metricas')
 @UseGuards(JwtAuthGuard)
@@ -27,6 +33,10 @@ export class MetricasController {
     private readonly obterLacunasUseCase: ObterLacunasUseCase,
     @Inject(CalcularProficienciaUseCase)
     private readonly calcularProficienciaUseCase: CalcularProficienciaUseCase,
+    @Inject(ObterTrilhaUseCase)
+    private readonly obterTrilhaUseCase: ObterTrilhaUseCase,
+    @Inject(SalvarDiagnosticoTrilhaUseCase)
+    private readonly salvarDiagnosticoTrilhaUseCase: SalvarDiagnosticoTrilhaUseCase,
   ) {}
 
   @Get('proficiencia')
@@ -42,6 +52,24 @@ export class MetricasController {
   @Get('lacunas')
   obterLacunas(@CurrentUser() user: JwtPayload) {
     return this.obterLacunasUseCase.execute(user.sub);
+  }
+
+  @Get('trilha')
+  obterTrilha(@CurrentUser() user: JwtPayload) {
+    return this.obterTrilhaUseCase.execute(user.sub);
+  }
+
+  @Post('trilha/diagnostico')
+  salvarDiagnosticoTrilha(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: SalvarDiagnosticoTrilhaDto,
+  ) {
+    return this.salvarDiagnosticoTrilhaUseCase.execute({
+      userId: user.sub,
+      autoAvaliacao: dto.autoAvaliacaoNormalizada,
+      disciplinasFracas: dto.disciplinasFracas,
+      metaEnem: dto.metaEnem,
+    });
   }
 
   /** Recalcula proficiência a partir de todas as respostas (útil após migração). */
