@@ -17,9 +17,15 @@ import {
 } from '../../../../core/application/use-cases/obter-metricas.use-case';
 import {
   ObterTrilhaUseCase,
+  MarcarEtapaTrilhaUseCase,
+  MarcarChecklistIaUseCase,
   SalvarDiagnosticoTrilhaUseCase,
 } from '../../../../core/application/use-cases/obter-trilha.use-case';
-import { SalvarDiagnosticoTrilhaDto } from './dto/trilha.dto';
+import {
+  MarcarChecklistIaDto,
+  MarcarEtapaTrilhaDto,
+  SalvarDiagnosticoTrilhaDto,
+} from './dto/trilha.dto';
 
 @Controller('metricas')
 @UseGuards(JwtAuthGuard)
@@ -37,6 +43,10 @@ export class MetricasController {
     private readonly obterTrilhaUseCase: ObterTrilhaUseCase,
     @Inject(SalvarDiagnosticoTrilhaUseCase)
     private readonly salvarDiagnosticoTrilhaUseCase: SalvarDiagnosticoTrilhaUseCase,
+    @Inject(MarcarEtapaTrilhaUseCase)
+    private readonly marcarEtapaTrilhaUseCase: MarcarEtapaTrilhaUseCase,
+    @Inject(MarcarChecklistIaUseCase)
+    private readonly marcarChecklistIaUseCase: MarcarChecklistIaUseCase,
   ) {}
 
   @Get('proficiencia')
@@ -66,9 +76,33 @@ export class MetricasController {
   ) {
     return this.salvarDiagnosticoTrilhaUseCase.execute({
       userId: user.sub,
-      autoAvaliacao: dto.autoAvaliacaoNormalizada,
-      disciplinasFracas: dto.disciplinasFracas,
+      autoAvaliacao: dto.autoAvaliacao ?? {},
+      disciplinasFracas: dto.disciplinasFracas ?? [],
       metaEnem: dto.metaEnem,
+    });
+  }
+
+  @Post('trilha/etapas')
+  marcarEtapaTrilha(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: MarcarEtapaTrilhaDto,
+  ) {
+    return this.marcarEtapaTrilhaUseCase.execute({
+      userId: user.sub,
+      etapaId: dto.etapaId,
+      concluida: dto.concluida,
+    });
+  }
+
+  @Post('trilha/checklist')
+  marcarChecklistIa(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: MarcarChecklistIaDto,
+  ) {
+    return this.marcarChecklistIaUseCase.execute({
+      userId: user.sub,
+      itemId: dto.itemId,
+      concluida: dto.concluida,
     });
   }
 

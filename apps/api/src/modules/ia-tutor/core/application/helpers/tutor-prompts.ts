@@ -1,4 +1,6 @@
 import type { ContextoQuestao } from '../ports/ia-engine.port';
+import type { ContextoTrilhaTutor } from './trilha-tutor.helper';
+import { buildTrilhaContextBlock } from './trilha-tutor.helper';
 
 export type ContextoAlunoMetricas = {
   simuladosConcluidos: number;
@@ -19,7 +21,6 @@ export type ContextoAlunoMetricas = {
     finalizadoEm: Date | null;
   } | null;
 };
-
 const NIVEL_LABELS: Record<string, string> = {
   INICIANTE: 'iniciante no ENEM',
   INTERMEDIARIO: 'intermediário no ENEM',
@@ -66,12 +67,13 @@ Quando o aluno perguntar sobre desempenho, lacunas ou o que estudar, priorize es
 export function buildTutorSystemPrompt(
   nivelAluno?: string,
   contextoMetricas?: ContextoAlunoMetricas,
+  contextoTrilha?: ContextoTrilhaTutor,
 ) {
   const nivel =
     NIVEL_LABELS[nivelAluno ?? 'INICIANTE'] ?? 'estudante do ensino médio';
 
   return `Você é o tutor IA do ENEM+, uma plataforma educacional brasileira.
-Seu papel é ajudar estudantes a entender questões do ENEM de forma didática.
+Seu papel é ajudar estudantes a entender questões do ENEM e montar trilhas de estudo personalizadas.
 
 Regras:
 - Responda sempre em português brasileiro, claro e encorajador.
@@ -82,9 +84,9 @@ Regras:
 - Não revele gabarito de imediato em simulados em andamento — aqui o contexto já inclui o gabarito para explicar o erro após a resposta.
 - Você NÃO cria simulados na plataforma. Se o aluno pedir um simulado, explique que ele deve ir em **Simulados → Novo simulado** ou usar a **Trilha** (simulado focado na lacuna). Você pode sugerir área e quantidade de questões.
 - Sobre "o que mais cai no ENEM": use padrões históricos conhecidos (funções, geometria, estatística em Matemática etc.), mas deixe claro que não há previsão garantida do que cairá "este ano".
-- Se não souber responder com segurança, diga honestamente em vez de inventar.${buildTutorContextBlock(contextoMetricas)}`;
+- Ao falar de disciplinas, use gramática correta: "são Filosofia e Atualidades" (plural) ou "é Filosofia" (singular) — nunca "é em Filosofia".
+- Se não souber responder com segurança, diga honestamente em vez de inventar.${buildTutorContextBlock(contextoMetricas)}${buildTrilhaContextBlock(contextoTrilha)}`;
 }
-
 export function buildDicaQuestaoUserPrompt(contexto: ContextoQuestao) {
   const alternativas = contexto.alternativas
     .map((a) => `${a.letra}) ${a.texto}`)

@@ -1,24 +1,20 @@
 import {
   ArrayMaxSize,
   IsArray,
-  IsInt,
+  IsBoolean,
   IsObject,
   IsOptional,
   IsString,
-  Max,
   MaxLength,
-  Min,
   MinLength,
 } from 'class-validator';
-
-const AREAS = ['matematica', 'linguagens', 'humanas', 'natureza'] as const;
 
 export class SalvarDiagnosticoTrilhaDto {
   @IsObject()
   autoAvaliacao!: Record<string, number>;
 
   @IsArray()
-  @ArrayMaxSize(12)
+  @ArrayMaxSize(16)
   @IsString({ each: true })
   @MinLength(2, { each: true })
   @MaxLength(60, { each: true })
@@ -28,15 +24,24 @@ export class SalvarDiagnosticoTrilhaDto {
   @IsString()
   @MaxLength(120)
   metaEnem?: string;
+}
 
-  get autoAvaliacaoNormalizada() {
-    const normalizada: Record<string, number> = {};
+export class MarcarEtapaTrilhaDto {
+  @IsString()
+  @MinLength(10)
+  @MaxLength(40)
+  etapaId!: string;
 
-    for (const slug of AREAS) {
-      const valor = Number(this.autoAvaliacao[slug]);
-      normalizada[slug] = valor;
-    }
+  @IsBoolean()
+  concluida!: boolean;
+}
 
-    return normalizada;
-  }
+export class MarcarChecklistIaDto {
+  @IsString()
+  @MinLength(8)
+  @MaxLength(60)
+  itemId!: string;
+
+  @IsBoolean()
+  concluida!: boolean;
 }

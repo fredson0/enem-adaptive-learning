@@ -29,6 +29,10 @@ export type EnviarMensagemTutorResponse = {
   resposta: string;
   conversaId: string;
   tokens: TokensIa;
+  trilhaAtualizada?: {
+    etapasConcluidas: string[];
+    checklistIa: import("@/lib/trilha").ChecklistItemIa[];
+  };
 };
 
 export type ConversaResumo = {
@@ -96,6 +100,44 @@ export function pedirDicaQuestao(questaoId: string) {
   return apiFetch<ExplicarErroResponse>("/ia-tutor/dica", {
     method: "POST",
     body: { questaoId },
+  });
+}
+
+export function personalizarTrilhaComIa() {
+  return apiFetch<{
+    ok: boolean;
+    planoIa: import("@/lib/trilha").PlanoIa;
+    trilha: import("@/lib/trilha").TrilhaResponse;
+  }>("/ia-tutor/trilha/personalizar", { method: "POST" });
+}
+
+export function conversarPersonalizarTrilha(body: {
+  areaSlug?: string;
+  mensagem?: string;
+  historico?: MensagemHistorico[];
+  iniciar?: boolean;
+}) {
+  return apiFetch<{
+    resposta: string;
+    areaSlug: string;
+    podeFinalizar: boolean;
+  }>("/ia-tutor/trilha/conversa", {
+    method: "POST",
+    body,
+  });
+}
+
+export function finalizarPersonalizarTrilha(body: {
+  areaSlug: string;
+  historico: MensagemHistorico[];
+}) {
+  return apiFetch<{
+    ok: boolean;
+    planoIa: import("@/lib/trilha").PlanoIa;
+    trilha: import("@/lib/trilha").TrilhaResponse;
+  }>("/ia-tutor/trilha/finalizar", {
+    method: "POST",
+    body,
   });
 }
 

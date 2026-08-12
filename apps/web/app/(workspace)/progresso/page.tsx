@@ -76,7 +76,7 @@ export default function ProgressoPage() {
   const areas = data?.areas ?? [];
 
   return (
-    <WorkspaceSection title="Progresso" count={areas.length}>
+    <WorkspaceSection title="Progresso" count={areas.length || undefined}>
       <div className="space-y-8">
         {loading ? (
           <p className="text-sm text-white/45">Carregando seu progresso…</p>
@@ -139,7 +139,15 @@ export default function ProgressoPage() {
         ) : null}
 
         <div>
-          <h2 className="mb-4 text-lg font-medium text-white">Proficiência por área</h2>
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <h2 className="text-lg font-medium text-white">Proficiência por área</h2>
+            <Link
+              href="/trilha"
+              className="text-xs text-white/40 underline-offset-2 hover:text-white/65 hover:underline"
+            >
+              Ir para minha trilha →
+            </Link>
+          </div>
           {areas.length === 0 && !loading ? (
             <p className="text-sm text-white/45">
               Faça seu primeiro simulado para ver sua proficiência por área.

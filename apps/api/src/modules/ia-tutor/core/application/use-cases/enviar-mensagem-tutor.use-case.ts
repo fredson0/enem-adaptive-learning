@@ -7,6 +7,17 @@ import {
 import { USUARIOS_REPOSITORY } from '../../../../usuarios/core/application/ports/usuarios.repository.port';
 import type { UsuariosRepositoryPort } from '../../../../usuarios/core/application/ports/usuarios.repository.port';
 import { ObterContextoTutorUseCase } from '../../../../metricas/core/application/use-cases/obter-metricas.use-case';
+import { ObterTrilhaUseCase } from '../../../../metricas/core/application/use-cases/obter-trilha.use-case';
+import {
+  METRICAS_REPOSITORY,
+  type MetricasRepositoryPort,
+} from '../../../../metricas/core/application/ports/metricas.repository.port';
+import { estadoTrilhaVazio } from '../../../../metricas/core/application/helpers/trilha.config';
+import {
+  aplicarTrilhaAcoes,
+  parseTrilhaAcoes,
+  type ContextoTrilhaTutor,
+} from '../helpers/trilha-tutor.helper';
 import { buildConversaTitulo } from '../helpers/conversa-title.helper';
 import { IA_ENGINE } from '../ports/ia-engine.port';
 import type { IaEnginePort, ImagemAnexo } from '../ports/ia-engine.port';
@@ -37,6 +48,10 @@ export class EnviarMensagemTutorUseCase {
     private readonly usoTokens: UsoTokensIaService,
     @Inject(ObterContextoTutorUseCase)
     private readonly obterContextoTutorUseCase: ObterContextoTutorUseCase,
+    @Inject(ObterTrilhaUseCase)
+    private readonly obterTrilhaUseCase: ObterTrilhaUseCase,
+    @Inject(METRICAS_REPOSITORY)
+    private readonly metricasRepository: MetricasRepositoryPort,
     @Inject(CONVERSAS_TUTOR_REPOSITORY)
     private readonly conversasRepository: ConversasTutorRepositoryPort,
     @Inject(OBJECT_STORAGE)
@@ -83,6 +98,28 @@ export class EnviarMensagemTutorUseCase {
     const contextoMetricas = await this.obterContextoTutorUseCase.execute(
       input.userId,
     );
+    const trilha = await this.obterTrilhaUseCase.execute(input.userId);
+    const contextoTrilha: ContextoTrilhaTutor = {
+      diagnosticoCompleto: trilha.diagnosticoCompleto,
+      metaEnem: trilha.metaEnem,
+      areaPrioritaria: trilha.areaPrioritaria,
+      areas: trilha.areas.map((area) => ({
+        slug: area.slug,
+        label: area.label,
+        progresso: area.progresso,
+        disciplinasSugeridas: area.disciplinasSugeridas,
+        proximaEtapa: area.proximaEtapa
+          ? { id: area.proximaEtapa.id, titulo: area.proximaEtapa.titulo }
+          : null,
+        etapas: area.etapas.map((etapa) => ({
+          id: etapa.id,
+          titulo: etapa.titulo,
+          concluida: etapa.concluida,
+        })),
+      })),
+      checklistIa: trilha.checklistIa,
+      planoIa: trilha.planoIa,
+    };
     const custoTokens = input.anexoUrl ? 2 : 1;
     const tokens = await this.usoTokens.consumir(input.userId, custoTokens);
     const imagem = await this.resolverImagem(input.anexoUrl);
@@ -91,13 +128,43 @@ export class EnviarMensagemTutorUseCase {
       throw new NotFoundException('Anexo não encontrado. Envie a imagem novamente.');
     }
 
-    const resposta = await this.iaEngine.enviarMensagem({
+    const respostaBruta = await this.iaEngine.enviarMensagem({
       texto: input.mensagem,
       historico: conversa?.mensagens,
       nivelAluno: perfil?.nivelAtual ?? 'INICIANTE',
       contextoMetricas,
+      contextoTrilha,
       imagem,
     });
+
+    const acoes = parseTrilhaAcoes(respostaBruta);
+    let trilhaAtualizada:
+      | { etapasConcluidas: string[]; checklistIa: typeof trilha.checklistIa }
+      | undefined;
+
+    if (
+      acoes.etapasConcluir.length > 0 ||
+      acoes.checklistAdicionar.length > 0
+    ) {
+      const estado =
+        (await this.metricasRepository.obterTrilhaEstado(input.userId)) ??
+        estadoTrilhaVazio();
+      const novoEstado = aplicarTrilhaAcoes(
+        estado,
+        acoes,
+        trilha.areaPrioritaria ?? undefined,
+      );
+      await this.metricasRepository.salvarTrilhaEstado(
+        input.userId,
+        novoEstado,
+      );
+      trilhaAtualizada = {
+        etapasConcluidas: novoEstado.etapasConcluidas,
+        checklistIa: novoEstado.checklistIa ?? [],
+      };
+    }
+
+    const resposta = acoes.textoLimpo || respostaBruta;
 
     const novasMensagens = [
       {
@@ -125,6 +192,7 @@ export class EnviarMensagemTutorUseCase {
       resposta,
       conversaId,
       tokens,
+      trilhaAtualizada,
     };
   }
 }

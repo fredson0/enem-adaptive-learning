@@ -1,4 +1,5 @@
 import { AreaEnem } from '@generated/prisma';
+import { formatarListaAssuntos } from './trilha-texto.helper';
 
 export type TrilhaDiagnostico = {
   completo: boolean;
@@ -8,9 +9,27 @@ export type TrilhaDiagnostico = {
   metaEnem?: string;
 };
 
+export type ChecklistItemIa = {
+  id: string;
+  texto: string;
+  concluida: boolean;
+  areaSlug?: string;
+  criadoEm: string;
+};
+
+export type PlanoIa = {
+  atualizadoEm: string;
+  metaSemanal: string;
+  proximoPasso: string;
+  areaSlug: string;
+  resumo?: string;
+};
+
 export type TrilhaEstado = {
   diagnostico: TrilhaDiagnostico;
   etapasConcluidas: string[];
+  checklistIa?: ChecklistItemIa[];
+  planoIa?: PlanoIa;
 };
 
 export type TrilhaEtapaTipo =
@@ -31,16 +50,41 @@ export type TrilhaEtapa = {
   concluida: boolean;
 };
 
+/** Assuntos de maior incidência no ENEM — curadoria, não lista exaustiva. */
 export const DISCIPLINAS_POR_AREA: Record<string, string[]> = {
-  matematica: ['Funções', 'Geometria', 'Probabilidade', 'Porcentagem'],
+  matematica: [
+    'Funções',
+    'Geometria',
+    'Probabilidade',
+    'Porcentagem',
+    'Estatística',
+    'Razão e proporção',
+  ],
   linguagens: [
+    'Língua Portuguesa',
     'Interpretação de texto',
     'Literatura',
     'Gramática',
+    'Redação',
     'Gêneros textuais',
+    'Figuras de linguagem',
+    'Inglês',
+    'Espanhol',
   ],
-  humanas: ['História', 'Geografia', 'Sociologia', 'Filosofia'],
-  natureza: ['Física', 'Química', 'Biologia', 'Ecologia'],
+  humanas: [
+    'História',
+    'Geografia',
+    'Sociologia',
+    'Filosofia',
+    'Atualidades',
+  ],
+  natureza: [
+    'Física',
+    'Química',
+    'Biologia',
+    'Ecologia',
+    'Energia e meio ambiente',
+  ],
 };
 
 export const AREA_SLUG_TO_ENUM: Record<string, AreaEnem> = {
@@ -75,25 +119,22 @@ export function montarEtapasArea(input: {
   disciplinasFoco: string[];
   etapasConcluidas: Set<string>;
 }): TrilhaEtapa[] {
-  const foco =
-    input.disciplinasFoco.length > 0
-      ? input.disciplinasFoco.slice(0, 2).join(' e ')
-      : 'os tópicos mais cobrados';
+  const foco = formatarListaAssuntos(input.disciplinasFoco.slice(0, 2));
 
   const etapas: TrilhaEtapa[] = [
     {
       id: `orientacao-${input.slug}`,
       ordem: 1,
-      titulo: 'Entender sua lacuna',
-      descricao: `Priorize ${foco} em ${input.label}.`,
+      titulo: `Foco: ${foco}`,
+      descricao: `Sua trilha em ${input.label} começa pelos assuntos que você marcou como fraqueza.`,
       tipo: 'orientacao',
       concluida: input.etapasConcluidas.has(`orientacao-${input.slug}`),
     },
     {
       id: `treino-${input.slug}`,
       ordem: 2,
-      titulo: 'Treino guiado',
-      descricao: '5 questões com gabarito imediato para aquecer.',
+      titulo: 'Treino guiado (5q)',
+      descricao: `5 questões de ${input.label} com gabarito imediato — aqueça em ${foco}.`,
       tipo: 'treino',
       href: `/simulados/treino/novo?area=${input.slug}&quantidade=5`,
       concluida: input.etapasConcluidas.has(`treino-${input.slug}`),
@@ -101,8 +142,8 @@ export function montarEtapasArea(input: {
     {
       id: `modalidade-${input.slug}`,
       ordem: 3,
-      titulo: 'Simulado focado',
-      descricao: `10 questões só de ${input.label}.`,
+      titulo: 'Simulado da área (10q)',
+      descricao: `Prova só de ${input.label} para medir se ${foco} já melhorou.`,
       tipo: 'modalidade',
       href: `/simulados/modalidade/novo?area=${input.slug}&quantidade=10`,
       concluida: input.etapasConcluidas.has(`modalidade-${input.slug}`),
@@ -110,8 +151,8 @@ export function montarEtapasArea(input: {
     {
       id: `revisao-${input.slug}`,
       ordem: 4,
-      titulo: 'Revisar erros',
-      descricao: 'Veja o que errou e peça explicação com IA.',
+      titulo: 'Revisar erros com IA',
+      descricao: 'Abra o resultado, clique nos erros e peça explicação no tutor.',
       tipo: 'revisao',
       href: '/simulados',
       concluida: input.etapasConcluidas.has(`revisao-${input.slug}`),
@@ -119,28 +160,34 @@ export function montarEtapasArea(input: {
     {
       id: `tutor-${input.slug}`,
       ordem: 5,
-      titulo: 'Tirar dúvida com o tutor',
-      descricao: `Pergunte sobre ${foco}.`,
+      titulo: 'Plano com o tutor',
+      descricao: `Peça um roteiro curto só para ${foco}.`,
       tipo: 'tutor',
       concluida: input.etapasConcluidas.has(`tutor-${input.slug}`),
     },
   ];
 
-  if (input.scoreCombinado < 50) {
-    return etapas.slice(0, 4);
+  // Área ainda crítica: inclui cronômetro depois do aquecimento.
+  if (input.scoreCombinado >= 35) {
+    etapas.push({
+      id: `cronometrado-${input.slug}`,
+      ordem: 6,
+      titulo: 'Prova cronometrada',
+      descricao: `10 questões de ${input.label} no ritmo de prova.`,
+      tipo: 'cronometrado',
+      href: `/simulados/cronometro/novo?area=${input.slug}&quantidade=10`,
+      concluida: input.etapasConcluidas.has(`cronometrado-${input.slug}`),
+    });
   }
 
-  etapas.push({
-    id: `cronometrado-${input.slug}`,
-    ordem: 6,
-    titulo: 'Prova simulada',
-    descricao: '10 questões com cronômetro — gabarito só no final.',
-    tipo: 'cronometrado',
-    href: `/simulados/cronometrado/novo?area=${input.slug}&quantidade=10`,
-    concluida: input.etapasConcluidas.has(`cronometrado-${input.slug}`),
-  });
-
   return etapas;
+}
+
+const ETAPA_ID_REGEX =
+  /^(orientacao|treino|modalidade|revisao|tutor|cronometrado)-(matematica|linguagens|humanas|natureza)$/;
+
+export function isEtapaIdValida(etapaId: string): boolean {
+  return ETAPA_ID_REGEX.test(etapaId);
 }
 
 export function estadoTrilhaVazio(): TrilhaEstado {
@@ -189,5 +236,50 @@ export function parseTrilhaEstado(raw: unknown): TrilhaEstado {
           (item): item is string => typeof item === 'string',
         )
       : [],
+    checklistIa: Array.isArray(data.checklistIa)
+      ? data.checklistIa
+          .filter(
+            (item): item is ChecklistItemIa =>
+              Boolean(item) &&
+              typeof item === 'object' &&
+              typeof (item as ChecklistItemIa).id === 'string' &&
+              typeof (item as ChecklistItemIa).texto === 'string',
+          )
+          .map((item) => ({
+            id: item.id,
+            texto: item.texto,
+            concluida: Boolean(item.concluida),
+            areaSlug:
+              typeof item.areaSlug === 'string' ? item.areaSlug : undefined,
+            criadoEm:
+              typeof item.criadoEm === 'string'
+                ? item.criadoEm
+                : new Date().toISOString(),
+          }))
+      : [],
+    planoIa:
+      data.planoIa &&
+      typeof data.planoIa === 'object' &&
+      typeof (data.planoIa as PlanoIa).metaSemanal === 'string'
+        ? {
+            atualizadoEm:
+              typeof (data.planoIa as PlanoIa).atualizadoEm === 'string'
+                ? (data.planoIa as PlanoIa).atualizadoEm
+                : new Date().toISOString(),
+            metaSemanal: (data.planoIa as PlanoIa).metaSemanal,
+            proximoPasso:
+              typeof (data.planoIa as PlanoIa).proximoPasso === 'string'
+                ? (data.planoIa as PlanoIa).proximoPasso
+                : '',
+            areaSlug:
+              typeof (data.planoIa as PlanoIa).areaSlug === 'string'
+                ? (data.planoIa as PlanoIa).areaSlug
+                : '',
+            resumo:
+              typeof (data.planoIa as PlanoIa).resumo === 'string'
+                ? (data.planoIa as PlanoIa).resumo
+                : undefined,
+          }
+        : undefined,
   };
 }

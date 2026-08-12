@@ -8,6 +8,9 @@ import { PrismaService } from '../../../../../../infrastructure/database/prisma.
 
 @Injectable()
 export class UsoTokensIaService {
+  /** Valor usado como limite ilimitado (plano dev / premium). */
+  static readonly LIMITE_ILIMITADO = 999_999;
+
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   private startOfToday() {
@@ -16,7 +19,23 @@ export class UsoTokensIaService {
     return hoje;
   }
 
+  private isIlimitadoEnv() {
+    return (
+      process.env.IA_TOKENS_UNLIMITED === 'true' ||
+      process.env.NODE_ENV !== 'production'
+    );
+  }
+
+  private isIlimitado(limite: number) {
+    return (
+      limite >= UsoTokensIaService.LIMITE_ILIMITADO || this.isIlimitadoEnv()
+    );
+  }
+
   private async getLimiteDiario(userId: string) {
+    if (this.isIlimitadoEnv()) {
+      return UsoTokensIaService.LIMITE_ILIMITADO;
+    }
     const plano = await this.prisma.planoAssinatura.findUnique({
       where: { userId },
     });
@@ -35,6 +54,14 @@ export class UsoTokensIaService {
 
     const consumo = existente?.consumo ?? 0;
 
+    if (this.isIlimitado(limite)) {
+      return {
+        consumo,
+        limite,
+        restantes: limite,
+      };
+    }
+
     return {
       consumo,
       limite,
@@ -45,6 +72,7 @@ export class UsoTokensIaService {
   async consumir(userId: string, custo = 1) {
     const hoje = this.startOfToday();
     const limite = await this.getLimiteDiario(userId);
+    const ilimitado = this.isIlimitado(limite);
 
     const existente = await this.prisma.usoTokenIa.findUnique({
       where: {
@@ -65,11 +93,13 @@ export class UsoTokensIaService {
       return {
         consumo: criado.consumo,
         limite: criado.limite,
-        restantes: criado.limite - criado.consumo,
+        restantes: ilimitado
+          ? criado.limite
+          : criado.limite - criado.consumo,
       };
     }
 
-    if (existente.consumo >= existente.limite) {
+    if (!ilimitado && existente.consumo >= limite) {
       throw new HttpException(
         `Limite diário de ${existente.limite} mensagens IA atingido. Volte amanhã ou faça upgrade do plano.`,
         HttpStatus.TOO_MANY_REQUESTS,
@@ -87,7 +117,9 @@ export class UsoTokensIaService {
     return {
       consumo: atualizado.consumo,
       limite: atualizado.limite,
-      restantes: atualizado.limite - atualizado.consumo,
+      restantes: ilimitado
+        ? atualizado.limite
+        : atualizado.limite - atualizado.consumo,
     };
   }
 }

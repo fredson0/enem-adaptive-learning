@@ -13,13 +13,18 @@ export type OpenAiChatMessage = {
 export function buildOpenAiChatMessages(
   input: EnviarMensagemIaInput,
 ): OpenAiChatMessage[] {
+  const systemContent =
+    input.systemPromptOverride ??
+    buildTutorSystemPrompt(
+      input.nivelAluno,
+      input.contextoMetricas,
+      input.contextoTrilha,
+    );
+
   const messages: OpenAiChatMessage[] = [
     {
       role: 'system',
-      content: buildTutorSystemPrompt(
-        input.nivelAluno,
-        input.contextoMetricas,
-      ),
+      content: systemContent,
     },
   ];
 

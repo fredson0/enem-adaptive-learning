@@ -7,11 +7,17 @@ import {
 import {
   DISCIPLINAS_POR_AREA,
   estadoTrilhaVazio,
+  isEtapaIdValida,
   labelPrioridade,
   montarEtapasArea,
   prioridadeTrilha,
+  type ChecklistItemIa,
   type TrilhaEstado,
 } from '../helpers/trilha.config';
+import {
+  formatarPerguntaTutor,
+  montarMetaSemanalDinamica,
+} from '../helpers/trilha-texto.helper';
 import {
   METRICAS_REPOSITORY,
   type MetricasRepositoryPort,
@@ -32,14 +38,17 @@ export class SalvarDiagnosticoTrilhaUseCase {
   ) {}
 
   async execute(input: SalvarDiagnosticoTrilhaInput) {
+    const autoAvaliacao: Record<string, number> = {};
+
     for (const area of AREAS_ENEM) {
       const slug = slugAreaEnem(area);
-      const valor = input.autoAvaliacao[slug];
-      if (valor === undefined || valor < 1 || valor > 5) {
+      const valor = Number(input.autoAvaliacao?.[slug]);
+      if (!Number.isFinite(valor) || valor < 1 || valor > 5) {
         throw new BadRequestException(
           `Autoavaliação inválida para ${labelAreaEnem(area)}. Use valores de 1 a 5.`,
         );
       }
+      autoAvaliacao[slug] = valor;
     }
 
     const estadoAtual =
@@ -51,8 +60,8 @@ export class SalvarDiagnosticoTrilhaUseCase {
       diagnostico: {
         completo: true,
         concluidoEm: new Date().toISOString(),
-        autoAvaliacao: input.autoAvaliacao,
-        disciplinasFracas: input.disciplinasFracas,
+        autoAvaliacao,
+        disciplinasFracas: input.disciplinasFracas ?? [],
         metaEnem: input.metaEnem?.trim() || undefined,
       },
     };
@@ -122,6 +131,7 @@ export class ObterTrilhaUseCase {
         etapas.length > 0
           ? Math.round((etapasConcluidasCount / etapas.length) * 100)
           : 0;
+      const proximaEtapa = etapas.find((etapa) => !etapa.concluida) ?? null;
 
       return {
         area,
@@ -135,7 +145,8 @@ export class ObterTrilhaUseCase {
         disciplinasSugeridas,
         progresso,
         etapas,
-        perguntaTutor: `Estou montando minha trilha no ENEM+. Minha maior dificuldade em ${label} é em ${disciplinasSugeridas.join(' e ')}. Por onde devo começar a estudar?`,
+        proximaEtapa,
+        perguntaTutor: formatarPerguntaTutor(label, disciplinasSugeridas),
       };
     }).sort((a, b) => b.scoreCombinado - a.scoreCombinado);
 
@@ -143,17 +154,114 @@ export class ObterTrilhaUseCase {
     const minutosPorDia = Math.max(30, Math.round(tempoDiario / 4));
     const metaSemanal = estado.diagnostico.completo
       ? foco
-        ? `Esta semana: ${minutosPorDia} min/dia em ${foco.label} — comece pelo treino guiado e revise os erros.`
+        ? montarMetaSemanalDinamica({
+            minutosPorDia,
+            areaLabel: foco.label,
+            disciplinas: foco.disciplinasSugeridas,
+            proximaEtapa: foco.proximaEtapa,
+            metaIa:
+              estado.planoIa?.areaSlug === foco.slug
+                ? estado.planoIa.metaSemanal
+                : undefined,
+          })
         : 'Mantenha ritmo com simulados variados.'
       : 'Complete o diagnóstico para receber sua trilha personalizada.';
+
+    const checklistIa = estado.checklistIa ?? [];
 
     return {
       diagnosticoCompleto: estado.diagnostico.completo,
       metaEnem: estado.diagnostico.metaEnem ?? null,
       metaSemanal,
+      planoIa: estado.planoIa ?? null,
+      checklistIa,
       tempoDiarioMinutos: tempoDiario,
       areas,
       areaPrioritaria: foco?.slug ?? null,
     };
+  }
+}
+
+export type MarcarEtapaTrilhaInput = {
+  userId: string;
+  etapaId: string;
+  concluida: boolean;
+};
+
+@Injectable()
+export class MarcarEtapaTrilhaUseCase {
+  constructor(
+    @Inject(METRICAS_REPOSITORY)
+    private readonly metricasRepository: MetricasRepositoryPort,
+  ) {}
+
+  async execute(input: MarcarEtapaTrilhaInput) {
+    if (!isEtapaIdValida(input.etapaId)) {
+      throw new BadRequestException('Etapa inválida.');
+    }
+
+    const estado =
+      (await this.metricasRepository.obterTrilhaEstado(input.userId)) ??
+      estadoTrilhaVazio();
+
+    const etapas = new Set(estado.etapasConcluidas);
+
+    if (input.concluida) {
+      etapas.add(input.etapaId);
+    } else {
+      etapas.delete(input.etapaId);
+    }
+
+    const novoEstado: TrilhaEstado = {
+      ...estado,
+      etapasConcluidas: Array.from(etapas),
+    };
+
+    await this.metricasRepository.salvarTrilhaEstado(
+      input.userId,
+      novoEstado,
+    );
+
+    return { ok: true, etapasConcluidas: novoEstado.etapasConcluidas };
+  }
+}
+
+export type MarcarChecklistIaInput = {
+  userId: string;
+  itemId: string;
+  concluida: boolean;
+};
+
+@Injectable()
+export class MarcarChecklistIaUseCase {
+  constructor(
+    @Inject(METRICAS_REPOSITORY)
+    private readonly metricasRepository: MetricasRepositoryPort,
+  ) {}
+
+  async execute(input: MarcarChecklistIaInput) {
+    const estado =
+      (await this.metricasRepository.obterTrilhaEstado(input.userId)) ??
+      estadoTrilhaVazio();
+
+    const checklist = estado.checklistIa ?? [];
+    const indice = checklist.findIndex((item) => item.id === input.itemId);
+
+    if (indice < 0) {
+      throw new BadRequestException('Item de checklist não encontrado.');
+    }
+
+    const atualizado: ChecklistItemIa[] = checklist.map((item, index) =>
+      index === indice ? { ...item, concluida: input.concluida } : item,
+    );
+
+    const novoEstado: TrilhaEstado = {
+      ...estado,
+      checklistIa: atualizado,
+    };
+
+    await this.metricasRepository.salvarTrilhaEstado(input.userId, novoEstado);
+
+    return { ok: true, checklistIa: atualizado };
   }
 }

@@ -25,8 +25,10 @@ export type EnviarMensagemIaInput = {
   historico?: MensagemHistorico[];
   contextoQuestao?: ContextoQuestao;
   contextoMetricas?: import('../helpers/tutor-prompts').ContextoAlunoMetricas;
+  contextoTrilha?: import('../helpers/trilha-tutor.helper').ContextoTrilhaTutor;
   nivelAluno?: string;
   imagem?: ImagemAnexo;
+  systemPromptOverride?: string;
 };
 
 export interface IaEnginePort {

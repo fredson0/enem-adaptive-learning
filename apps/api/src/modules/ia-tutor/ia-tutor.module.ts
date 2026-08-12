@@ -10,6 +10,9 @@ import { GerarPresignAnexoUseCase } from './core/application/use-cases/gerar-pre
 import { ListarConversasUseCase } from './core/application/use-cases/listar-conversas.use-case';
 import { ObterConversaUseCase } from './core/application/use-cases/obter-conversa.use-case';
 import { PedirDicaQuestaoUseCase } from './core/application/use-cases/pedir-dica-questao.use-case';
+import { ConversarPersonalizarTrilhaUseCase } from './core/application/use-cases/conversar-personalizar-trilha.use-case';
+import { FinalizarPersonalizarTrilhaUseCase } from './core/application/use-cases/finalizar-personalizar-trilha.use-case';
+import { PersonalizarTrilhaUseCase } from './core/application/use-cases/personalizar-trilha.use-case';
 import { ObterSaldoTokensUseCase } from './core/application/use-cases/obter-saldo-tokens.use-case';
 import { DevUploadsController } from './infrastructure/adapters/in/http/dev-uploads.controller';
 import { IaTutorController } from './infrastructure/adapters/in/http/ia-tutor.controller';
@@ -32,6 +35,9 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
     EnviarMensagemTutorUseCase,
     ExplicarErroUseCase,
     PedirDicaQuestaoUseCase,
+    PersonalizarTrilhaUseCase,
+    ConversarPersonalizarTrilhaUseCase,
+    FinalizarPersonalizarTrilhaUseCase,
     ObterSaldoTokensUseCase,
     ListarConversasUseCase,
     ObterConversaUseCase,

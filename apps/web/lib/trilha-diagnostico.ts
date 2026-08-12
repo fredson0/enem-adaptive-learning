@@ -7,35 +7,60 @@ export type AreaDiagnosticoConfig = {
   disciplinas: string[];
 };
 
+/** Principais assuntos cobrados no ENEM — curadoria, não lista exaustiva. */
 export const AREAS_DIAGNOSTICO: AreaDiagnosticoConfig[] = [
   {
     slug: "matematica",
     label: "Matemática",
     cor: "#60a5fa",
-    disciplinas: ["Funções", "Geometria", "Probabilidade", "Porcentagem"],
+    disciplinas: [
+      "Funções",
+      "Geometria",
+      "Probabilidade",
+      "Porcentagem",
+      "Estatística",
+      "Razão e proporção",
+    ],
   },
   {
     slug: "linguagens",
     label: "Linguagens",
     cor: "#f472b6",
     disciplinas: [
+      "Língua Portuguesa",
       "Interpretação de texto",
       "Literatura",
       "Gramática",
+      "Redação",
       "Gêneros textuais",
+      "Figuras de linguagem",
+      "Inglês",
+      "Espanhol",
     ],
   },
   {
     slug: "humanas",
     label: "Ciências Humanas",
     cor: "#fbbf24",
-    disciplinas: ["História", "Geografia", "Sociologia", "Filosofia"],
+    disciplinas: [
+      "História",
+      "Geografia",
+      "Sociologia",
+      "Filosofia",
+      "Atualidades",
+    ],
   },
   {
     slug: "natureza",
     label: "Ciências da Natureza",
     cor: "#34d399",
-    disciplinas: ["Física", "Química", "Biologia", "Ecologia"],
+    disciplinas: [
+      "Física",
+      "Química",
+      "Biologia",
+      "Ecologia",
+      "Energia e meio ambiente",
+    ],
   },
 ];
 

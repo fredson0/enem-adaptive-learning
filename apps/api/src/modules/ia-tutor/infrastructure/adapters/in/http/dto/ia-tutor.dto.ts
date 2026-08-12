@@ -1,4 +1,4 @@
-import { IsArray, IsOptional, IsString, IsUUID, MaxLength, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsOptional, IsString, IsUUID, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class MensagemHistoricoDto {
@@ -61,4 +61,36 @@ export class ExplicarErroDto {
 export class PedirDicaDto {
   @IsUUID()
   questaoId!: string;
+}
+
+export class ConversarPersonalizarTrilhaDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  areaSlug?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  mensagem?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MensagemHistoricoDto)
+  historico?: MensagemHistoricoDto[];
+
+  @IsOptional()
+  iniciar?: boolean;
+}
+
+export class FinalizarPersonalizarTrilhaDto {
+  @IsString()
+  @MaxLength(20)
+  areaSlug!: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MensagemHistoricoDto)
+  historico!: MensagemHistoricoDto[];
 }

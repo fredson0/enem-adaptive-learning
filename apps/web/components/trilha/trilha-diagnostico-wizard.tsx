@@ -167,8 +167,8 @@ export function TrilhaDiagnosticoWizard() {
             Onde você sente mais dificuldade?
           </p>
           <p className="text-xs text-white/40">
-            Selecione quantas quiser — usamos isso para sugerir o foco de cada
-            área.
+            Só os assuntos que mais caem no ENEM. Marque os seus pontos fracos —
+            a trilha prioriza exatamente isso em cada área.
           </p>
           <div className="space-y-5">
             {AREAS_DIAGNOSTICO.map((area) => (

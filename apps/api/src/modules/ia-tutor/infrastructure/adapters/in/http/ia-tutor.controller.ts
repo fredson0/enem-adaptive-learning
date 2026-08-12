@@ -28,11 +28,16 @@ import { GerarPresignAnexoUseCase } from '../../../../core/application/use-cases
 import { ListarConversasUseCase } from '../../../../core/application/use-cases/listar-conversas.use-case';
 import { ObterConversaUseCase } from '../../../../core/application/use-cases/obter-conversa.use-case';
 import { PedirDicaQuestaoUseCase } from '../../../../core/application/use-cases/pedir-dica-questao.use-case';
+import { PersonalizarTrilhaUseCase } from '../../../../core/application/use-cases/personalizar-trilha.use-case';
+import { ConversarPersonalizarTrilhaUseCase } from '../../../../core/application/use-cases/conversar-personalizar-trilha.use-case';
+import { FinalizarPersonalizarTrilhaUseCase } from '../../../../core/application/use-cases/finalizar-personalizar-trilha.use-case';
 import { ObterSaldoTokensUseCase } from '../../../../core/application/use-cases/obter-saldo-tokens.use-case';
 import {
+  ConversarPersonalizarTrilhaDto,
   CriarConversaDto,
   EnviarMensagemTutorDto,
   ExplicarErroDto,
+  FinalizarPersonalizarTrilhaDto,
   PedirDicaDto,
   PresignAnexoDto,
 } from './dto/ia-tutor.dto';
@@ -46,6 +51,12 @@ export class IaTutorController {
     private readonly explicarErroUseCase: ExplicarErroUseCase,
     @Inject(PedirDicaQuestaoUseCase)
     private readonly pedirDicaQuestaoUseCase: PedirDicaQuestaoUseCase,
+    @Inject(PersonalizarTrilhaUseCase)
+    private readonly personalizarTrilhaUseCase: PersonalizarTrilhaUseCase,
+    @Inject(ConversarPersonalizarTrilhaUseCase)
+    private readonly conversarPersonalizarTrilhaUseCase: ConversarPersonalizarTrilhaUseCase,
+    @Inject(FinalizarPersonalizarTrilhaUseCase)
+    private readonly finalizarPersonalizarTrilhaUseCase: FinalizarPersonalizarTrilhaUseCase,
     @Inject(ObterSaldoTokensUseCase)
     private readonly obterSaldoTokensUseCase: ObterSaldoTokensUseCase,
     @Inject(ListarConversasUseCase)
@@ -178,6 +189,43 @@ export class IaTutorController {
     return this.pedirDicaQuestaoUseCase.execute({
       userId: user.sub,
       questaoId: dto.questaoId,
+    });
+  }
+
+  @Post('trilha/personalizar')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  personalizarTrilha(@CurrentUser() user: JwtPayload) {
+    return this.personalizarTrilhaUseCase.execute(user.sub);
+  }
+
+  @Post('trilha/conversa')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  conversarPersonalizarTrilha(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: ConversarPersonalizarTrilhaDto,
+  ) {
+    return this.conversarPersonalizarTrilhaUseCase.execute({
+      userId: user.sub,
+      areaSlug: dto.areaSlug,
+      mensagem: dto.mensagem,
+      historico: dto.historico,
+      iniciar: dto.iniciar,
+    });
+  }
+
+  @Post('trilha/finalizar')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  finalizarPersonalizarTrilha(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: FinalizarPersonalizarTrilhaDto,
+  ) {
+    return this.finalizarPersonalizarTrilhaUseCase.execute({
+      userId: user.sub,
+      areaSlug: dto.areaSlug,
+      historico: dto.historico,
     });
   }
 }

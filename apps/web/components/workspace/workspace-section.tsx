@@ -26,8 +26,14 @@ export function WorkspaceSection({
         className,
       )}
       data-lenis-prevent
+      data-workspace-scroll
     >
-      <div className="px-6 pt-24 md:px-10 md:pt-28 lg:px-12">
+      <div
+        className={cn(
+          "px-6 md:px-10 lg:px-12",
+          title ? "pt-24 md:pt-28" : null,
+        )}
+      >
         {title ? (
           <h1 className="text-[2.5rem] leading-none font-medium tracking-tight text-white md:text-5xl">
             {title}
@@ -42,7 +48,8 @@ export function WorkspaceSection({
 
       <div
         className={cn(
-          "flex-1 px-6 pt-8 pb-10 md:px-10 md:pt-10 md:pb-12 lg:px-12",
+          "flex-1 px-6 pb-10 md:px-10 md:pb-12 lg:px-12",
+          title ? "pt-8 md:pt-10" : "pt-20 md:pt-24",
           contentClassName,
         )}
       >

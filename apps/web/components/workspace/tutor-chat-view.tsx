@@ -11,6 +11,7 @@ import {
   uploadAnexoTutor,
   type MensagemHistorico,
 } from "@/lib/ia-tutor";
+import { emitirTrilhaAtualizada } from "@/lib/trilha-events";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -73,6 +74,10 @@ export function TutorChatView({
         anexoUrl,
       });
       setTokens(response.tokens);
+
+      if (response.trilhaAtualizada) {
+        emitirTrilhaAtualizada();
+      }
 
       const withAssistant: MensagemHistorico[] = [
         ...historico,

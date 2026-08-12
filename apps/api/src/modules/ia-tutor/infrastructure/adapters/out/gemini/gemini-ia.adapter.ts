@@ -97,10 +97,13 @@ export class GeminiIaAdapter implements IaEnginePort {
   ): Promise<string> {
     const model = this.getClient().getGenerativeModel({
       model: modelName,
-      systemInstruction: buildTutorSystemPrompt(
-        input.nivelAluno,
-        input.contextoMetricas,
-      ),
+      systemInstruction:
+        input.systemPromptOverride ??
+        buildTutorSystemPrompt(
+          input.nivelAluno,
+          input.contextoMetricas,
+          input.contextoTrilha,
+        ),
       generationConfig: {
         maxOutputTokens: 2048,
       },

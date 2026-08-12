@@ -16,7 +16,9 @@ export function PlanBadge() {
       <span className="hidden h-3 w-px bg-white/10 sm:block" />
       <span className="inline-flex items-center gap-1.5 font-medium">
         <Sparkles className="size-3.5 text-[#b0ff57]" strokeWidth={1.75} />
-        {tokens.restantes}/{tokens.limite} IA
+        {tokens.limite >= 999_999
+          ? "IA ilimitada"
+          : `${tokens.restantes}/${tokens.limite} IA`}
       </span>
     </Link>
   );

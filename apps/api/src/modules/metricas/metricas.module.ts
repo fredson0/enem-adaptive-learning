@@ -9,6 +9,8 @@ import {
 } from './core/application/use-cases/obter-metricas.use-case';
 import {
   ObterTrilhaUseCase,
+  MarcarEtapaTrilhaUseCase,
+  MarcarChecklistIaUseCase,
   SalvarDiagnosticoTrilhaUseCase,
 } from './core/application/use-cases/obter-trilha.use-case';
 import { MetricasController } from './infrastructure/adapters/in/http/metricas.controller';
@@ -26,6 +28,8 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
     ObterContextoTutorUseCase,
     ObterTrilhaUseCase,
     SalvarDiagnosticoTrilhaUseCase,
+    MarcarEtapaTrilhaUseCase,
+    MarcarChecklistIaUseCase,
     {
       provide: METRICAS_REPOSITORY,
       useClass: PrismaMetricasRepository,
@@ -35,6 +39,8 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
     CalcularProficienciaUseCase,
     ObterContextoTutorUseCase,
     ObterLacunasUseCase,
+    ObterTrilhaUseCase,
+    METRICAS_REPOSITORY,
   ],
 })
 export class MetricasModule {}

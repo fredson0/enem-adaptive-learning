@@ -19,6 +19,22 @@ export type TrilhaEtapa = {
   concluida: boolean;
 };
 
+export type ChecklistItemIa = {
+  id: string;
+  texto: string;
+  concluida: boolean;
+  areaSlug?: string;
+  criadoEm: string;
+};
+
+export type PlanoIa = {
+  atualizadoEm: string;
+  metaSemanal: string;
+  proximoPasso: string;
+  areaSlug: string;
+  resumo?: string;
+};
+
 export type TrilhaArea = {
   area: string;
   slug: AreaEnemSlug;
@@ -31,6 +47,7 @@ export type TrilhaArea = {
   disciplinasSugeridas: string[];
   progresso: number;
   etapas: TrilhaEtapa[];
+  proximaEtapa: TrilhaEtapa | null;
   perguntaTutor: string;
 };
 
@@ -38,6 +55,8 @@ export type TrilhaResponse = {
   diagnosticoCompleto: boolean;
   metaEnem: string | null;
   metaSemanal: string;
+  planoIa: PlanoIa | null;
+  checklistIa: ChecklistItemIa[];
   tempoDiarioMinutos: number;
   areas: TrilhaArea[];
   areaPrioritaria: AreaEnemSlug | null;
@@ -58,4 +77,32 @@ export function salvarDiagnosticoTrilha(payload: SalvarDiagnosticoPayload) {
     method: "POST",
     body: payload,
   });
+}
+
+export function marcarEtapaTrilha(etapaId: string, concluida: boolean) {
+  return apiFetch<{ ok: boolean; etapasConcluidas: string[] }>(
+    "/metricas/trilha/etapas",
+    {
+      method: "POST",
+      body: { etapaId, concluida },
+    },
+  );
+}
+
+export function marcarChecklistIa(itemId: string, concluida: boolean) {
+  return apiFetch<{ ok: boolean; checklistIa: ChecklistItemIa[] }>(
+    "/metricas/trilha/checklist",
+    {
+      method: "POST",
+      body: { itemId, concluida },
+    },
+  );
+}
+
+/** "Filosofia", "Filosofia e Atualidades" */
+export function formatarAssuntos(assuntos: string[]): string {
+  if (assuntos.length === 0) return "os tópicos mais cobrados";
+  if (assuntos.length === 1) return assuntos[0];
+  if (assuntos.length === 2) return `${assuntos[0]} e ${assuntos[1]}`;
+  return `${assuntos.slice(0, -1).join(", ")} e ${assuntos[assuntos.length - 1]}`;
 }

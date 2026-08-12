@@ -1,5 +1,6 @@
 "use client";
 
+import { ProgressArcGauge } from "@/components/progresso/progress-arc-gauge";
 import type { TrilhaArea } from "@/lib/trilha";
 import { cn } from "@/lib/utils";
 import { Check, ChevronRight, Circle } from "lucide-react";
@@ -34,53 +35,98 @@ export function TrilhaAreaCard({
   return (
     <article
       className={cn(
-        "overflow-hidden rounded-[14px] border transition-colors",
+        "overflow-hidden rounded-[22px] border transition-colors",
         destaque
-          ? "border-[#b0ff57]/25 bg-[#161616] ring-1 ring-[#b0ff57]/10"
+          ? "border-[#5b4dff]/35 bg-[#161616] ring-1 ring-[#5b4dff]/20"
           : "border-white/[0.06] bg-[#161616] hover:border-white/10",
       )}
     >
-      <div
-        className={cn(
-          "relative flex aspect-[16/9] flex-col justify-between bg-gradient-to-br p-5 sm:aspect-[16/10]",
-          AREA_GRADIENTS[area.slug] ?? "from-[#222] via-[#171717] to-[#111]",
-        )}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <span
-            className={cn(
-              "rounded-full border px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide",
-              PRIORIDADE_STYLES[area.prioridade],
-            )}
-          >
-            {area.prioridade}
-          </span>
-          <div className="text-right">
-            <p className="text-2xl font-medium tracking-tight text-white">
-              {area.progresso}%
-            </p>
-            <p className="text-[10px] uppercase tracking-wide text-white/40">
-              da trilha
-            </p>
+      {destaque ? (
+        <div className="relative flex flex-col justify-between bg-[#5b4dff] px-5 pb-6 pt-6 sm:px-7">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_15%,rgba(255,255,255,0.18),transparent_45%)]" />
+          <div className="relative z-10 flex items-start justify-between gap-3">
+            <span className="rounded-full border border-white/25 bg-black/25 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-white">
+              Prioridade · {area.prioridade}
+            </span>
+            <Link
+              href="/trilha"
+              className="text-[10px] uppercase tracking-wide text-white/70 underline-offset-2 hover:text-white hover:underline"
+            >
+              Ver trilha
+            </Link>
           </div>
-        </div>
 
-        <div>
-          <p className="text-lg font-medium text-white">{area.label}</p>
-          <p className="mt-1 text-sm text-white/45">
+          <div className="relative z-10 mt-6 text-center">
+            <p className="text-xl font-medium tracking-tight text-white sm:text-2xl">
+              {area.label}
+            </p>
+            {area.disciplinasSugeridas.length > 0 ? (
+              <p className="mt-1 text-sm text-white/75">
+                Foco: {area.disciplinasSugeridas.slice(0, 2).join(" e ")}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="relative z-10 mt-6">
+            <ProgressArcGauge
+              percent={area.progresso}
+              labelRight={
+                area.progresso >= 100
+                  ? "Concluída"
+                  : proximaEtapa
+                    ? "Próxima etapa"
+                    : "Em andamento"
+              }
+            />
+          </div>
+
+          <p className="relative z-10 mt-2 text-center text-xs text-white/70">
             {area.proficienciaReal > 0
               ? `${area.proficienciaReal}% nos simulados`
               : "Ainda sem simulados — baseado no seu diagnóstico"}
           </p>
-          {area.disciplinasSugeridas.length > 0 ? (
-            <p className="mt-2 text-xs text-[#b0ff57]/80">
-              Foco: {area.disciplinasSugeridas.join(" · ")}
-            </p>
-          ) : null}
         </div>
+      ) : (
+        <div
+          className={cn(
+            "relative flex aspect-[16/9] flex-col justify-between bg-gradient-to-br p-5 sm:aspect-[16/10]",
+            AREA_GRADIENTS[area.slug] ?? "from-[#222] via-[#171717] to-[#111]",
+          )}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <span
+              className={cn(
+                "rounded-full border px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide",
+                PRIORIDADE_STYLES[area.prioridade],
+              )}
+            >
+              {area.prioridade}
+            </span>
+            <div className="text-right">
+              <p className="text-2xl font-medium tracking-tight text-white">
+                {area.progresso}%
+              </p>
+              <p className="text-[10px] uppercase tracking-wide text-white/40">
+                da trilha
+              </p>
+            </div>
+          </div>
 
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(176,255,87,0.06),transparent_50%)]" />
-      </div>
+          <div>
+            <p className="text-lg font-medium text-white">{area.label}</p>
+            <p className="mt-1 text-sm text-white/45">
+              {area.proficienciaReal > 0
+                ? `${area.proficienciaReal}% nos simulados`
+                : "Ainda sem simulados — baseado no seu diagnóstico"}
+            </p>
+            {area.disciplinasSugeridas.length > 0 ? (
+              <p className="mt-2 text-xs text-[#b0ff57]/80">
+                Foco: {area.disciplinasSugeridas.join(" · ")}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4 p-5">
         <ol className="space-y-2">
@@ -92,7 +138,7 @@ export function TrilhaAreaCard({
                 etapa.concluida
                   ? "border-emerald-500/15 bg-emerald-500/5 text-white/55"
                   : etapa.id === proximaEtapa?.id
-                    ? "border-white/15 bg-white/[0.04] text-white"
+                    ? "border-[#5b4dff]/35 bg-[#5b4dff]/10 text-white"
                     : "border-white/[0.06] text-white/55",
               )}
             >
