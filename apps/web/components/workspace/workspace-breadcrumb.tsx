@@ -1,58 +1,21 @@
 "use client";
 
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
+import { getWorkspaceCrumbs } from "@/lib/workspace-breadcrumbs";
 import { cn } from "@/lib/utils";
-import {
-  PROFILE_NAV,
-  TUTOR_NAV,
-  WORKSPACE_NAV,
-} from "@/lib/workspace-nav";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-type Crumb = {
-  label: string;
-  href?: string;
-};
-
-function getCrumbs(
-  pathname: string,
-  activeSessionTitle: string | null,
-): Crumb[] {
-  if (pathname.startsWith("/tutor")) {
-    if (activeSessionTitle) {
-      return [
-        { label: TUTOR_NAV.label, href: TUTOR_NAV.href },
-        { label: activeSessionTitle },
-      ];
-    }
-
-    return [{ label: TUTOR_NAV.label }];
-  }
-
-  const navItem = WORKSPACE_NAV.find(
-    (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
-  );
-  if (navItem) {
-    return [{ label: navItem.label }];
-  }
-
-  if (pathname.startsWith(PROFILE_NAV.href)) {
-    return [{ label: PROFILE_NAV.label }];
-  }
-
-  if (pathname.startsWith("/planos")) {
-    return [{ label: "Planos" }];
-  }
-
-  return [];
-}
+import { usePathname, useSearchParams } from "next/navigation";
 
 export function WorkspaceBreadcrumb() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { activeSession } = useTutorSession();
-  const crumbs = getCrumbs(pathname, activeSession?.title ?? null);
+  const crumbs = getWorkspaceCrumbs(
+    pathname,
+    searchParams,
+    activeSession?.title ?? null,
+  );
 
   if (crumbs.length === 0) return null;
 

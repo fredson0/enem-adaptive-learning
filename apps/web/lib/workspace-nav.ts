@@ -28,6 +28,16 @@ export const WORKSPACE_NAV: WorkspaceNavItem[] = [
   },
 ];
 
+export const SIMULADOS_NAV = {
+  label: "Simulados",
+  href: "/simulados",
+} as const;
+
+export const PLANOS_NAV = {
+  label: "Planos",
+  href: "/planos",
+} as const;
+
 export const TUTOR_NAV = {
   label: "Tutor IA",
   href: "/tutor",

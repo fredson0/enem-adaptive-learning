@@ -213,7 +213,7 @@ export default function SimuladoQuestaoPage() {
     painelDicaVisivel && Boolean(dicaAtual || carregandoDica || erroDica);
 
   return (
-    <WorkspaceSection title="Simulado" contentClassName="flex min-h-0 flex-1 flex-col pt-6 pb-6">
+    <WorkspaceSection title="Simulado" contentClassName="flex min-h-0 flex-1 flex-col pb-6">
       <div
         className={cn(
           "mx-auto flex w-full min-h-0 flex-1 flex-col gap-4 transition-[max-width] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",

@@ -3,7 +3,7 @@ import { WorkspaceSection } from "@/components/workspace/workspace-section";
 
 export default function TrilhaDiagnosticoPage() {
   return (
-    <WorkspaceSection contentClassName="pt-6">
+    <WorkspaceSection>
       <TrilhaDiagnosticoWizard />
     </WorkspaceSection>
   );

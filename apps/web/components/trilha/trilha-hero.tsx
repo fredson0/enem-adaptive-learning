@@ -1,10 +1,10 @@
 "use client";
 
 import { ProgressArcGauge } from "@/components/progresso/progress-arc-gauge";
-import { TrilhaAreasMarquee } from "@/components/trilha/trilha-areas-marquee";
+import { TrilhaModalidadesCarousel } from "@/components/trilha/trilha-modalidades-carousel";
 import type { TrilhaResponse } from "@/lib/trilha";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Caveat } from "next/font/google";
 import Link from "next/link";
 
@@ -20,7 +20,6 @@ type TrilhaHeroProps = {
 export function TrilhaHero({ trilha }: TrilhaHeroProps) {
   const areas = trilha.areas;
   const areaPrioritaria = areas[0] ?? null;
-  const demaisAreas = areas.slice(1);
 
   const hrefPrioridade = areaPrioritaria
     ? `/trilha/${areaPrioritaria.slug}`
@@ -95,39 +94,25 @@ export function TrilhaHero({ trilha }: TrilhaHeroProps) {
           <div className="pointer-events-none absolute inset-8 rounded-full border border-white/[0.04]" />
 
           <div className="relative z-10 text-center">
-            <p className="text-lg font-medium text-white">Trilha geral</p>
-            <p className="mt-1 text-xs text-white/40">
-              Outras áreas — mantenha ritmo sem perder o foco da prioridade
+            <p className="text-xl font-medium text-[#b0ff57] sm:text-2xl">
+              Trilha geral
+            </p>
+            <p className="mt-2 text-sm text-white/55">
+              Ver todas as modalidades
             </p>
           </div>
 
           <div className="relative z-10 mt-8 flex flex-1 items-center overflow-hidden">
-            {demaisAreas.length > 0 ? (
-              <TrilhaAreasMarquee areas={demaisAreas} />
-            ) : (
-              <div className="mx-auto max-w-[240px] space-y-3 text-center">
-                <Sparkles className="mx-auto size-5 text-[#b0ff57]" />
-                <p className="text-sm text-white/50">
-                  Só uma área no plano por enquanto. Continue na prioridade à
-                  esquerda.
-                </p>
-              </div>
-            )}
+            <TrilhaModalidadesCarousel />
           </div>
 
-          <div className="relative z-10 mt-4 flex flex-col items-center gap-3">
+          <div className="relative z-10 mt-4 flex justify-center">
             <Link
               href="/trilha/geral"
               className="flex size-10 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
-              aria-label="Ver todas as áreas"
+              aria-label="Ver todas as modalidades"
             >
               <ArrowRight className="size-4" strokeWidth={2} />
-            </Link>
-            <Link
-              href="/trilha/geral"
-              className="text-xs text-white/45 underline-offset-2 transition hover:text-white/75 hover:underline"
-            >
-              Ver trilha completa de todas as áreas
             </Link>
           </div>
         </div>

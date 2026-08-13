@@ -204,7 +204,7 @@ export default function TrilhaAreaPage() {
   const isPrioridade = data.areaPrioritaria === area.slug;
 
   return (
-    <WorkspaceSection contentClassName="pt-16 md:pt-20">
+    <WorkspaceSection>
       <div className="mx-auto max-w-5xl space-y-8">
         <div className="flex flex-wrap items-center gap-3 text-sm trilha-breadcrumbs">
           <Link

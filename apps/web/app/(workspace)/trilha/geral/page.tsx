@@ -46,7 +46,7 @@ export default function TrilhaGeralPage() {
   }
 
   return (
-    <WorkspaceSection contentClassName="pt-16 md:pt-20">
+    <WorkspaceSection>
       <TrilhaGeralVault trilha={data} />
     </WorkspaceSection>
   );

@@ -1,5 +1,8 @@
 import { cn } from "@/lib/utils";
 
+/** Espaço reservado para o chrome fixo (tag + plano). */
+export const WORKSPACE_CHROME_OFFSET = "pt-[4.75rem] md:pt-[5.75rem]";
+
 type WorkspaceSectionProps = {
   title?: string;
   count?: number;
@@ -31,7 +34,7 @@ export function WorkspaceSection({
       <div
         className={cn(
           "px-6 md:px-10 lg:px-12",
-          title ? "pt-24 md:pt-28" : null,
+          title ? WORKSPACE_CHROME_OFFSET : null,
         )}
       >
         {title ? (
@@ -49,7 +52,7 @@ export function WorkspaceSection({
       <div
         className={cn(
           "flex-1 px-6 pb-10 md:px-10 md:pb-12 lg:px-12",
-          title ? "pt-8 md:pt-10" : "pt-20 md:pt-24",
+          title ? "pt-8 md:pt-10" : WORKSPACE_CHROME_OFFSET,
           contentClassName,
         )}
       >
