@@ -22,14 +22,14 @@ export function WorkspacePageTransition({
     gsap.killTweensOf(ref.current);
 
     if (isTutor) {
-      gsap.set(ref.current, { opacity: 1, y: 0 });
+      gsap.set(ref.current, { opacity: 1 });
       return;
     }
 
     gsap.fromTo(
       ref.current,
-      { opacity: 0, y: 10 },
-      { opacity: 1, y: 0, duration: 0.38, ease: "power2.out" },
+      { opacity: 0 },
+      { opacity: 1, duration: 0.38, ease: "power2.out" },
     );
   }, [pathname, isTutor]);
 
@@ -39,6 +39,7 @@ export function WorkspacePageTransition({
       className="absolute inset-0 flex min-h-0 flex-col overflow-hidden bg-[var(--osmo-surface)] text-white"
     >
       <WorkspaceChrome />
+
       <div className="relative flex min-h-0 flex-1 flex-col">
         <div
           className={cn(

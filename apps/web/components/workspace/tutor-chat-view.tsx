@@ -2,6 +2,7 @@
 
 import { HeroWave } from "@/components/ui/ai-input-hero";
 import { useTokensIa } from "@/components/workspace/tokens-ia-provider";
+import { useWorkspaceScrollReporter } from "@/components/workspace/workspace-scroll-context";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
 import { ApiError } from "@/lib/api";
 import { compressImageForUpload } from "@/lib/image-compress";
@@ -31,6 +32,7 @@ export function TutorChatView({
     useTutorSession();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const hasMessages = messages.length > 0;
+  const reportScroll = useWorkspaceScrollReporter();
 
   useEffect(() => {
     setMessages(activeSession?.messages ?? initialMessages);
@@ -110,6 +112,8 @@ export function TutorChatView({
       {hasMessages && (
         <div
           data-lenis-prevent
+          data-workspace-scroll
+          onScroll={(event) => reportScroll(event.currentTarget.scrollTop)}
           className={cn(
             "absolute inset-x-0 top-20 bottom-44 z-10 overflow-y-auto overscroll-contain md:top-24 md:bottom-48",
             "pl-[calc(var(--osmo-sidebar-width)+1.25rem)] pr-4 md:pl-[calc(var(--osmo-sidebar-width)+1.5rem)] md:pr-6",

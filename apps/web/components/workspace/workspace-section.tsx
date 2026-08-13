@@ -1,6 +1,9 @@
+"use client";
+
+import { useWorkspaceScroll } from "@/components/workspace/workspace-scroll-context";
 import { cn } from "@/lib/utils";
 
-/** Espaço reservado para o chrome fixo (tag + plano). */
+/** Espaço para as tags flutuantes (seção + plano) no topo. */
 export const WORKSPACE_CHROME_OFFSET = "pt-[4.75rem] md:pt-[5.75rem]";
 
 type WorkspaceSectionProps = {
@@ -22,6 +25,8 @@ export function WorkspaceSection({
   className,
   contentClassName,
 }: WorkspaceSectionProps) {
+  const { onWorkspaceScroll } = useWorkspaceScroll();
+
   return (
     <div
       className={cn(
@@ -30,6 +35,7 @@ export function WorkspaceSection({
       )}
       data-lenis-prevent
       data-workspace-scroll
+      onScroll={(event) => onWorkspaceScroll(event.currentTarget.scrollTop)}
     >
       <div
         className={cn(
