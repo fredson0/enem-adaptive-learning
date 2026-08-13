@@ -4,7 +4,6 @@ import { fetchTrilha, type TrilhaResponse } from "@/lib/trilha";
 import { usarTrilhaAtualizada } from "@/lib/trilha-events";
 import { TrilhaHero } from "@/components/trilha/trilha-hero";
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -66,15 +65,9 @@ export default function TrilhaPage() {
   }
 
   return (
-    <WorkspaceSection contentClassName={`${trilhaContentClass} relative`}>
-      <Link
-        href="/trilha/diagnostico"
-        className="absolute top-0 left-0 right-0 text-center text-xs text-white/35 underline-offset-2 transition hover:text-white/60 hover:underline"
-      >
-        Refazer diagnóstico
-      </Link>
+    <WorkspaceSection contentClassName={trilhaContentClass}>
       <div className="mx-auto w-full max-w-5xl">
-        <TrilhaHero trilha={data} onTrilhaAtualizada={setData} />
+        <TrilhaHero trilha={data} />
       </div>
     </WorkspaceSection>
   );

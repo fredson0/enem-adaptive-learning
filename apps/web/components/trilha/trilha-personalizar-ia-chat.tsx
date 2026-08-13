@@ -80,54 +80,60 @@ export function TrilhaPersonalizarPainel({
       animate={{ opacity: 1, y: 0 }}
       exit={prefersReducedMotion ? undefined : { opacity: 0, y: -12 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="relative flex min-h-[min(82vh,760px)] flex-col items-center px-2 pb-6 pt-4 md:px-0"
+      className="relative flex max-h-[min(82vh,760px)] min-h-[min(82vh,760px)] flex-col px-2 pb-6 pt-4 md:px-0"
     >
       <button
         type="button"
         onClick={chat.fechar}
-        className="absolute right-0 top-0 rounded-full p-2 text-white/25 transition hover:text-white/60"
+        className="absolute right-0 top-0 z-10 rounded-full p-2 text-white/25 transition hover:text-white/60"
         aria-label="Fechar"
       >
         <X className="size-5" />
       </button>
 
-      <div className="flex w-full max-w-2xl flex-1 flex-col items-center text-center">
-        <h2 className="text-3xl font-medium tracking-tight text-white md:text-[2.75rem] md:leading-tight">
-          {titulo}
-        </h2>
-        {subtitulo ? (
-          <p className="mt-3 text-sm text-white/35 md:text-base">
-            {subtitulo}
-          </p>
-        ) : null}
+      <div className="mx-auto flex w-full max-w-2xl min-h-0 flex-1 flex-col">
+        <div className="shrink-0 text-center">
+          <h2 className="text-3xl font-medium tracking-tight text-white md:text-[2.75rem] md:leading-tight">
+            {titulo}
+          </h2>
+          {subtitulo ? (
+            <p className="mt-3 text-sm text-white/35 md:text-base">
+              {subtitulo}
+            </p>
+          ) : null}
+        </div>
 
         <div
+          ref={chat.mensagensRef}
           data-lenis-prevent
-          className="mt-12 flex w-full flex-1 flex-col overflow-y-auto overscroll-contain"
+          className="tutor-prompt-scroll mt-8 min-h-0 flex-1 overflow-y-auto overscroll-contain"
         >
-          <div className="mx-auto w-full max-w-xl space-y-7 py-2">
+          <div className="mx-auto w-full max-w-xl space-y-5 py-2">
             {chat.mensagens.map((msg, index) => (
-              <p
+              <div
                 key={`${msg.role}-${index}`}
                 className={cn(
-                  "text-base leading-relaxed md:text-[17px]",
-                  msg.role === "user" ? "text-white" : "text-white/45",
+                  "max-w-[92%] rounded-2xl px-4 py-3 text-left text-base leading-relaxed md:text-[15px]",
+                  msg.role === "user"
+                    ? "ml-auto bg-[#1f3dbc]/90 text-white"
+                    : "mr-auto border border-white/10 bg-[rgba(15,15,20,0.55)] text-white/85",
                 )}
               >
-                {msg.texto}
-              </p>
+                <p className="whitespace-pre-wrap">{msg.texto}</p>
+              </div>
             ))}
             {chat.loading ? (
-              <p className="text-white/30">
-                <Loader2 className="mx-auto size-4 animate-spin" />
-              </p>
+              <div className="mr-auto inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-[rgba(15,15,20,0.55)] px-4 py-3 text-sm text-white/50">
+                <Loader2 className="size-4 animate-spin" />
+                Montando sua checklist…
+              </div>
             ) : null}
-            <div ref={chat.fimRef} />
+            <div ref={chat.fimRef} className="h-px shrink-0" />
           </div>
         </div>
 
-        <div className="mt-6 w-full max-w-xl shrink-0 space-y-4">
-          <div className="flex items-center gap-3 rounded-full border border-white/[0.08] bg-[#141414] px-5 py-3.5">
+        <div className="mt-4 w-full max-w-xl shrink-0 space-y-4 self-center">
+          <div className="flex items-end gap-3 rounded-2xl border border-white/[0.08] bg-[#141414] px-4 py-3">
             <textarea
               ref={chat.inputRef}
               value={chat.input}
@@ -136,7 +142,8 @@ export function TrilhaPersonalizarPainel({
               rows={1}
               placeholder="Sua resposta…"
               disabled={chat.loading || chat.finalizando}
-              className="max-h-24 min-h-[24px] flex-1 resize-none bg-transparent text-sm text-white placeholder:text-white/25 focus:outline-none md:text-base"
+              style={{ scrollBehavior: "smooth" }}
+              className="tutor-prompt-scroll min-h-[24px] w-full flex-1 resize-none overflow-y-auto bg-transparent text-sm leading-relaxed text-white placeholder:text-white/25 focus:outline-none md:text-base"
             />
             <button
               type="button"
@@ -144,7 +151,7 @@ export function TrilhaPersonalizarPainel({
               disabled={
                 !chat.input.trim() || chat.loading || chat.finalizando
               }
-              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-black transition hover:bg-white/90 disabled:opacity-30"
+              className="mb-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-black transition hover:bg-white/90 disabled:opacity-30"
               aria-label="Enviar"
             >
               <ArrowUp className="size-4" strokeWidth={2.5} />
@@ -170,8 +177,11 @@ export function TrilhaPersonalizarPainel({
           </button>
 
           {chat.error ? (
-            <p className="text-xs text-red-400">{chat.error}</p>
+            <p className="text-center text-xs text-red-400">{chat.error}</p>
           ) : null}
+          <p className="text-center text-[11px] text-white/25">
+            Enter envia · Shift+Enter nova linha
+          </p>
         </div>
       </div>
     </motion.section>

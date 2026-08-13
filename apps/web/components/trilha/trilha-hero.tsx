@@ -2,17 +2,11 @@
 
 import { ProgressArcGauge } from "@/components/progresso/progress-arc-gauge";
 import { TrilhaAreasMarquee } from "@/components/trilha/trilha-areas-marquee";
-import {
-  TrilhaPersonalizarBotao,
-  TrilhaPersonalizarPainel,
-} from "@/components/trilha/trilha-personalizar-ia-chat";
-import { useTrilhaPersonalizarChat } from "@/components/trilha/use-trilha-personalizar-chat";
 import type { TrilhaResponse } from "@/lib/trilha";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Caveat } from "next/font/google";
 import Link from "next/link";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 
 const caveat = Caveat({
   subsets: ["latin"],
@@ -21,10 +15,9 @@ const caveat = Caveat({
 
 type TrilhaHeroProps = {
   trilha: TrilhaResponse;
-  onTrilhaAtualizada?: (trilha: TrilhaResponse) => void;
 };
 
-export function TrilhaHero({ trilha, onTrilhaAtualizada }: TrilhaHeroProps) {
+export function TrilhaHero({ trilha }: TrilhaHeroProps) {
   const areas = trilha.areas;
   const areaPrioritaria = areas[0] ?? null;
   const demaisAreas = areas.slice(1);
@@ -35,61 +28,26 @@ export function TrilhaHero({ trilha, onTrilhaAtualizada }: TrilhaHeroProps) {
 
   const percentPrioridade = areaPrioritaria?.progresso ?? 0;
 
-  const chat = useTrilhaPersonalizarChat({
-    areaSlug: areaPrioritaria?.slug,
-    onAtualizado: onTrilhaAtualizada,
-  });
-
   return (
-    <LayoutGroup>
     <section className="space-y-12">
-      <AnimatePresence mode="wait">
-        {chat.aberto ? (
-          <TrilhaPersonalizarPainel
-            key="painel"
-            chat={chat}
-            titulo="Monte sua checklist"
-            subtitulo={areaPrioritaria?.label}
-          />
-        ) : (
-          <motion.header
-            key="header"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="relative mx-auto max-w-3xl text-center"
+      <header className="relative mx-auto max-w-3xl text-center">
+        <div className="relative mb-6 flex justify-center">
+          <p
+            className={cn(
+              caveat.className,
+              "text-xl text-[#b0ff57] sm:text-2xl",
+            )}
           >
-            <div className="relative mb-6 flex justify-center">
-              <p
-                className={cn(
-                  caveat.className,
-                  "text-xl text-[#b0ff57] sm:text-2xl",
-                )}
-              >
-                Trilha e simulados
-              </p>
-            </div>
+            Trilha e simulados
+          </p>
+        </div>
 
-            <h2 className="text-3xl font-medium leading-[1.15] tracking-tight text-white sm:text-4xl md:text-[2.75rem]">
-              Um plano feito para onde você mais precisa evoluir.
-            </h2>
+        <h2 className="text-3xl font-medium leading-[1.15] tracking-tight text-white sm:text-4xl md:text-[2.75rem]">
+          Um plano feito para onde você mais precisa evoluir.
+        </h2>
+      </header>
 
-            <div className="mt-8 flex justify-center">
-              <TrilhaPersonalizarBotao chat={chat} />
-            </div>
-          </motion.header>
-        )}
-      </AnimatePresence>
-
-      <motion.div
-        layout
-        animate={{
-          opacity: chat.aberto ? 0.32 : 1,
-          y: chat.aberto ? 32 : 0,
-        }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        className="grid items-end gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"
-      >
+      <div className="grid items-end gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <Link
           href={hrefPrioridade}
           className="group relative flex h-[500px] flex-col overflow-hidden rounded-[32px] bg-[#5b4dff] px-6 py-8 text-white shadow-[0_24px_70px_rgba(91,77,255,0.28)] transition duration-300 hover:-translate-y-1 hover:bg-[#6559ff] sm:px-8"
@@ -173,8 +131,7 @@ export function TrilhaHero({ trilha, onTrilhaAtualizada }: TrilhaHeroProps) {
             </Link>
           </div>
         </div>
-      </motion.div>
+      </div>
     </section>
-    </LayoutGroup>
   );
 }

@@ -11,6 +11,9 @@ import { emitirTrilhaAtualizada } from "@/lib/trilha-events";
 import { scrollWorkspaceToTop } from "@/lib/scroll-workspace";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+const INPUT_MIN_HEIGHT = 24;
+const INPUT_MAX_HEIGHT = 120;
+
 type UseTrilhaPersonalizarChatOptions = {
   areaSlug?: AreaEnemSlug;
   onAtualizado?: (trilha: TrilhaResponse) => void;
@@ -32,6 +35,7 @@ export function useTrilhaPersonalizarChat({
   const [podeFinalizar, setPodeFinalizar] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fimRef = useRef<HTMLDivElement>(null);
+  const mensagensRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const painelRef = useRef<HTMLElement>(null);
 
@@ -39,7 +43,27 @@ export function useTrilhaPersonalizarChat({
     setAreaAtiva(areaSlug);
   }, [areaSlug]);
 
-  const scrollParaChat = useCallback(() => {
+  const ajustarAlturaInput = useCallback(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(
+      Math.max(el.scrollHeight, INPUT_MIN_HEIGHT),
+      INPUT_MAX_HEIGHT,
+    )}px`;
+  }, []);
+
+  useEffect(() => {
+    ajustarAlturaInput();
+  }, [input, ajustarAlturaInput]);
+
+  const rolarParaFim = useCallback(() => {
+    const el = mensagensRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, []);
+
+  const scrollParaAbertura = useCallback(() => {
     scrollWorkspaceToTop("instant");
     requestAnimationFrame(() => {
       painelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -48,8 +72,10 @@ export function useTrilhaPersonalizarChat({
 
   useEffect(() => {
     if (!aberto) return;
-    fimRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [aberto, mensagens, loading]);
+    requestAnimationFrame(() => {
+      rolarParaFim();
+    });
+  }, [aberto, mensagens, loading, rolarParaFim]);
 
   const iniciarConversa = useCallback(async () => {
     setIniciando(true);
@@ -63,7 +89,6 @@ export function useTrilhaPersonalizarChat({
       setAreaAtiva(response.areaSlug as AreaEnemSlug);
       setMensagens([{ role: "assistant", texto: response.resposta }]);
       setPodeFinalizar(response.podeFinalizar);
-      scrollParaChat();
     } catch (err) {
       setError(
         err instanceof Error
@@ -74,17 +99,16 @@ export function useTrilhaPersonalizarChat({
     } finally {
       setIniciando(false);
     }
-  }, [areaSlug, scrollParaChat]);
+  }, [areaSlug]);
 
   const abrir = useCallback(async () => {
     setAberto(true);
-    scrollParaChat();
+    scrollParaAbertura();
     if (mensagens.length === 0) {
       await iniciarConversa();
     }
-    scrollParaChat();
     setTimeout(() => inputRef.current?.focus(), 400);
-  }, [iniciarConversa, mensagens.length, scrollParaChat]);
+  }, [iniciarConversa, mensagens.length, scrollParaAbertura]);
 
   const fechar = useCallback(() => {
     setAberto(false);
@@ -104,7 +128,6 @@ export function useTrilhaPersonalizarChat({
     setInput("");
     setLoading(true);
     setError(null);
-    scrollParaChat();
 
     try {
       const response = await conversarPersonalizarTrilha({
@@ -128,8 +151,9 @@ export function useTrilhaPersonalizarChat({
       );
     } finally {
       setLoading(false);
+      requestAnimationFrame(ajustarAlturaInput);
     }
-  }, [areaAtiva, input, loading, mensagens, scrollParaChat]);
+  }, [areaAtiva, input, loading, mensagens, ajustarAlturaInput]);
 
   const finalizar = useCallback(async () => {
     if (!areaAtiva || mensagens.length === 0) return;
@@ -172,6 +196,7 @@ export function useTrilhaPersonalizarChat({
     podeFinalizar,
     error,
     fimRef,
+    mensagensRef,
     inputRef,
     painelRef,
   };
