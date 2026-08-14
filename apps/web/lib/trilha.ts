@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api";
+import { recalcularTrilhaProgresso } from "@/lib/trilha-progresso";
 import type { AreaEnemSlug } from "@/lib/simulados";
 
 export type TrilhaEtapaTipo =
@@ -24,6 +25,7 @@ export type ChecklistItemIa = {
   texto: string;
   concluida: boolean;
   areaSlug?: string;
+  assuntoId?: string;
   criadoEm: string;
 };
 
@@ -57,6 +59,7 @@ export type TrilhaResponse = {
   metaSemanal: string;
   planoIa: PlanoIa | null;
   checklistIa: ChecklistItemIa[];
+  progressoPorAssunto?: Record<string, number>;
   tempoDiarioMinutos: number;
   areas: TrilhaArea[];
   areaPrioritaria: AreaEnemSlug | null;
@@ -69,7 +72,9 @@ export type SalvarDiagnosticoPayload = {
 };
 
 export function fetchTrilha() {
-  return apiFetch<TrilhaResponse>("/metricas/trilha");
+  return apiFetch<TrilhaResponse>("/metricas/trilha").then(
+    recalcularTrilhaProgresso,
+  );
 }
 
 export function salvarDiagnosticoTrilha(payload: SalvarDiagnosticoPayload) {

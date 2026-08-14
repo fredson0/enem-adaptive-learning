@@ -1,6 +1,6 @@
 "use client";
 
-import { ProgressoView } from "@/components/progresso/progresso-view";
+import { ProgressoDetalheView } from "@/components/progresso/progresso-view";
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
 import {
   fetchEvolucao,
@@ -13,7 +13,7 @@ import {
 import { fetchTrilha, type TrilhaResponse } from "@/lib/trilha";
 import { useEffect, useState } from "react";
 
-export default function ProgressoPage() {
+export default function ProgressoDetalhesPage() {
   const [proficiencia, setProficiencia] = useState<ProficienciaResponse | null>(
     null,
   );
@@ -47,15 +47,15 @@ export default function ProgressoPage() {
   }, []);
 
   return (
-    <WorkspaceSection contentClassName="flex min-h-0 flex-1 flex-col justify-center">
+    <WorkspaceSection>
       {loading ? (
-        <p className="text-sm text-white/45">Carregando seu progresso…</p>
+        <p className="text-sm text-white/45">Carregando análise…</p>
       ) : null}
 
       {error ? <p className="text-sm text-red-400">{error}</p> : null}
 
       {proficiencia && lacunas ? (
-        <ProgressoView
+        <ProgressoDetalheView
           proficiencia={proficiencia}
           evolucao={evolucao}
           lacunas={lacunas}

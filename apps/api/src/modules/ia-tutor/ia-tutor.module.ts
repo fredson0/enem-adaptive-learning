@@ -4,6 +4,8 @@ import { CONVERSAS_TUTOR_REPOSITORY } from './core/application/ports/conversas-t
 import { IA_ENGINE } from './core/application/ports/ia-engine.port';
 import { OBJECT_STORAGE } from './core/application/ports/object-storage.port';
 import { CriarConversaUseCase } from './core/application/use-cases/criar-conversa.use-case';
+import { AtualizarConversaUseCase } from './core/application/use-cases/atualizar-conversa.use-case';
+import { ExcluirConversaUseCase } from './core/application/use-cases/excluir-conversa.use-case';
 import { EnviarMensagemTutorUseCase } from './core/application/use-cases/enviar-mensagem-tutor.use-case';
 import { ExplicarErroUseCase } from './core/application/use-cases/explicar-erro.use-case';
 import { GerarPresignAnexoUseCase } from './core/application/use-cases/gerar-presign-anexo.use-case';
@@ -42,6 +44,8 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
     ListarConversasUseCase,
     ObterConversaUseCase,
     CriarConversaUseCase,
+    AtualizarConversaUseCase,
+    ExcluirConversaUseCase,
     GerarPresignAnexoUseCase,
     UsoTokensIaService,
     GeminiIaAdapter,

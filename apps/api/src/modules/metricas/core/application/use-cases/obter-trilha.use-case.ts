@@ -19,6 +19,11 @@ import {
   montarMetaSemanalDinamica,
 } from '../helpers/trilha-texto.helper';
 import {
+  calcularProgressoArea,
+  calcularProgressoPorAssunto,
+  enriquecerChecklistComAssunto,
+} from '../helpers/trilha-progresso.helper';
+import {
   METRICAS_REPOSITORY,
   type MetricasRepositoryPort,
 } from '../ports/metricas.repository.port';
@@ -90,6 +95,7 @@ export class ObterTrilhaUseCase {
     const tempoDiario =
       await this.metricasRepository.obterTempoDiarioMinutos(userId);
     const etapasConcluidas = new Set(estado.etapasConcluidas);
+    const checklistIa = enriquecerChecklistComAssunto(estado.checklistIa ?? []);
 
     const areas = AREAS_ENEM.map((area) => {
       const slug = slugAreaEnem(area);
@@ -126,11 +132,10 @@ export class ObterTrilhaUseCase {
         etapasConcluidas,
       });
 
-      const etapasConcluidasCount = etapas.filter((etapa) => etapa.concluida).length;
-      const progresso =
-        etapas.length > 0
-          ? Math.round((etapasConcluidasCount / etapas.length) * 100)
-          : 0;
+      const checklistArea = checklistIa.filter(
+        (item) => !item.areaSlug || item.areaSlug === slug,
+      );
+      const progresso = calcularProgressoArea(etapas, checklistArea);
       const proximaEtapa = etapas.find((etapa) => !etapa.concluida) ?? null;
 
       return {
@@ -150,6 +155,18 @@ export class ObterTrilhaUseCase {
       };
     }).sort((a, b) => b.scoreCombinado - a.scoreCombinado);
 
+    const etapasPorArea = new Map(
+      areas.map((area) => [area.slug, area.etapas]),
+    );
+    const disciplinasFocoPorArea = new Map(
+      areas.map((area) => [area.slug, area.disciplinasSugeridas]),
+    );
+    const progressoPorAssunto = calcularProgressoPorAssunto(
+      checklistIa,
+      etapasPorArea,
+      disciplinasFocoPorArea,
+    );
+
     const foco = areas[0];
     const minutosPorDia = Math.max(30, Math.round(tempoDiario / 4));
     const metaSemanal = estado.diagnostico.completo
@@ -167,14 +184,13 @@ export class ObterTrilhaUseCase {
         : 'Mantenha ritmo com simulados variados.'
       : 'Complete o diagnóstico para receber sua trilha personalizada.';
 
-    const checklistIa = estado.checklistIa ?? [];
-
     return {
       diagnosticoCompleto: estado.diagnostico.completo,
       metaEnem: estado.diagnostico.metaEnem ?? null,
       metaSemanal,
       planoIa: estado.planoIa ?? null,
       checklistIa,
+      progressoPorAssunto,
       tempoDiarioMinutos: tempoDiario,
       areas,
       areaPrioritaria: foco?.slug ?? null,

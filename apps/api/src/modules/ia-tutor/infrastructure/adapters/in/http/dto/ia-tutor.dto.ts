@@ -44,6 +44,12 @@ export class CriarConversaDto {
   mensagens?: MensagemHistoricoDto[];
 }
 
+export class AtualizarConversaDto {
+  @IsString()
+  @MaxLength(120)
+  titulo!: string;
+}
+
 export class ExplicarErroDto {
   @IsUUID()
   questaoId!: string;
@@ -71,6 +77,16 @@ export class ConversarPersonalizarTrilhaDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(80)
+  assuntoId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  assuntoNome?: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(2000)
   mensagem?: string;
 
@@ -88,6 +104,16 @@ export class FinalizarPersonalizarTrilhaDto {
   @IsString()
   @MaxLength(20)
   areaSlug!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  assuntoId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  assuntoNome?: string;
 
   @IsArray()
   @ValidateNested({ each: true })

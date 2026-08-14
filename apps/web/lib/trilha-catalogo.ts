@@ -357,6 +357,90 @@ export function getModalidadeById(id: string): TrilhaModalidadeItem | undefined 
   return CATALOGO_MODALIDADES.find((item) => item.id === id);
 }
 
+export function getAssuntoById(id: string): TrilhaAssuntoCatalogo | undefined {
+  return TRILHA_ASSUNTOS.find((item) => item.id === id);
+}
+
+function normalizarTextoAssunto(texto: string): string {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function pontuarMatchAssunto(
+  busca: string,
+  assunto: TrilhaAssuntoCatalogo,
+): number {
+  const nome = normalizarTextoAssunto(assunto.nome);
+  if (busca === nome) return 100;
+  if (nome.startsWith(busca) || busca.startsWith(nome)) return 85;
+  if (nome.includes(busca) || busca.includes(nome)) return 70;
+
+  for (const palavra of assunto.palavrasChave) {
+    const normalizada = normalizarTextoAssunto(palavra);
+    if (busca.includes(normalizada) || normalizada.includes(busca)) return 55;
+  }
+
+  const modalidade = normalizarTextoAssunto(assunto.modalidadeNome);
+  if (modalidade.includes(busca) || busca.includes(modalidade)) return 45;
+
+  return 0;
+}
+
+export type ResolverAssuntoInput = {
+  areaSlug: string;
+  assuntoId?: string | null;
+  disciplina?: string | null;
+  modalidadeId?: string | null;
+};
+
+/** Resolve o assunto do catálogo para qualquer matéria/modalidade. */
+export function resolverAssuntoNoCatalogo(
+  input: ResolverAssuntoInput,
+): TrilhaAssuntoCatalogo | undefined {
+  const { areaSlug, assuntoId, disciplina, modalidadeId } = input;
+
+  if (assuntoId) {
+    const porId = getAssuntoById(assuntoId);
+    if (porId?.areaSlug === areaSlug) return porId;
+  }
+
+  const candidatos = TRILHA_ASSUNTOS.filter((item) => {
+    if (item.areaSlug !== areaSlug) return false;
+    if (modalidadeId && item.modalidadeId !== modalidadeId) return false;
+    return true;
+  });
+
+  if (!disciplina?.trim()) return undefined;
+
+  const busca = normalizarTextoAssunto(disciplina.trim());
+  let melhor: { item: TrilhaAssuntoCatalogo; score: number } | undefined;
+
+  for (const item of candidatos) {
+    const score = pontuarMatchAssunto(busca, item);
+    if (score > 0 && (!melhor || score > melhor.score)) {
+      melhor = { item, score };
+    }
+  }
+
+  return melhor && melhor.score >= 40 ? melhor.item : undefined;
+}
+
+/** Rótulo de estudo: "Inglês", "História", "Matemática" etc. */
+export function getContextoEstudoAssunto(
+  assunto: TrilhaAssuntoCatalogo,
+): string {
+  if (
+    assunto.areaSlug === "linguagens" &&
+    assunto.modalidadeId !== assunto.areaSlug
+  ) {
+    return assunto.modalidadeNome;
+  }
+
+  return assunto.areaLabel;
+}
+
 export function filtrarModalidades(termo: string): TrilhaModalidadeItem[] {
   const busca = termo.trim().toLowerCase();
   if (!busca) return CATALOGO_MODALIDADES;

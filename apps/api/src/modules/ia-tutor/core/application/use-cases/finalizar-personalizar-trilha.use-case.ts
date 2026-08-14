@@ -9,10 +9,11 @@ import { USUARIOS_REPOSITORY } from '../../../../usuarios/core/application/ports
 import type { UsuariosRepositoryPort } from '../../../../usuarios/core/application/ports/usuarios.repository.port';
 import {
   estadoTrilhaVazio,
-  type ChecklistItemIa,
   type PlanoIa,
   type TrilhaEstado,
 } from '../../../../metricas/core/application/helpers/trilha.config';
+import { criarItemChecklist } from '../../../../metricas/core/application/helpers/trilha-progresso.helper';
+import { getAssuntoById } from '../../../../metricas/core/application/helpers/trilha-assuntos.catalog';
 import { ObterTrilhaUseCase } from '../../../../metricas/core/application/use-cases/obter-trilha.use-case';
 import {
   METRICAS_REPOSITORY,
@@ -29,6 +30,8 @@ import {
 export type FinalizarPersonalizarTrilhaInput = {
   userId: string;
   areaSlug: string;
+  assuntoId?: string;
+  assuntoNome?: string;
   historico: MensagemHistorico[];
 };
 
@@ -65,7 +68,13 @@ export class FinalizarPersonalizarTrilhaUseCase {
 
     const conversa = formatarHistoricoParaExtracao(input.historico);
 
-    const prompt = `Com base na conversa abaixo, monte o plano de estudos personalizado do aluno em ${area.label}.
+    const assuntoCatalogo = input.assuntoId
+      ? getAssuntoById(input.assuntoId)
+      : undefined;
+    const assuntoNome =
+      input.assuntoNome?.trim() || assuntoCatalogo?.nome || undefined;
+
+    const prompt = `Com base na conversa abaixo, monte o plano de estudos personalizado do aluno${assuntoNome ? ` em **${assuntoNome}**` : ` em ${area.label}`}.
 
 Conversa:
 ${conversa}
@@ -80,6 +89,7 @@ Responda APENAS com JSON válido (sem markdown):
 
 Regras:
 - checklist: 3 a 6 itens curtos e acionáveis, baseados nas respostas do aluno
+- Todos os itens devem ser sobre ${assuntoNome ?? area.label} — não inclua outros assuntos
 - Português brasileiro
 - Não use "é em" antes de disciplinas`;
 
@@ -107,13 +117,18 @@ Regras:
       resumo: plano.resumo,
     };
 
-    const checklistNovos: ChecklistItemIa[] = plano.checklist.map((texto) => ({
-      id: randomUUID(),
-      texto,
-      concluida: false,
-      areaSlug: area.slug,
-      criadoEm: new Date().toISOString(),
-    }));
+    const checklistNovos = plano.checklist.map((texto) => {
+      const item = criarItemChecklist({
+        id: randomUUID(),
+        texto,
+        areaSlug: area.slug,
+      });
+
+      return {
+        ...item,
+        assuntoId: input.assuntoId ?? item.assuntoId,
+      };
+    });
 
     const novoEstado: TrilhaEstado = {
       ...estado,

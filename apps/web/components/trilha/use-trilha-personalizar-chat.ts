@@ -16,11 +16,15 @@ const INPUT_MAX_HEIGHT = 120;
 
 type UseTrilhaPersonalizarChatOptions = {
   areaSlug?: AreaEnemSlug;
+  assuntoId?: string;
+  assuntoNome?: string;
   onAtualizado?: (trilha: TrilhaResponse) => void;
 };
 
 export function useTrilhaPersonalizarChat({
   areaSlug,
+  assuntoId,
+  assuntoNome,
   onAtualizado,
 }: UseTrilhaPersonalizarChatOptions) {
   const [aberto, setAberto] = useState(false);
@@ -83,6 +87,8 @@ export function useTrilhaPersonalizarChat({
     try {
       const response = await conversarPersonalizarTrilha({
         areaSlug,
+        assuntoId,
+        assuntoNome,
         iniciar: true,
         historico: [],
       });
@@ -99,7 +105,7 @@ export function useTrilhaPersonalizarChat({
     } finally {
       setIniciando(false);
     }
-  }, [areaSlug]);
+  }, [areaSlug, assuntoId, assuntoNome]);
 
   const abrir = useCallback(async () => {
     setAberto(true);
@@ -132,6 +138,8 @@ export function useTrilhaPersonalizarChat({
     try {
       const response = await conversarPersonalizarTrilha({
         areaSlug: areaAtiva,
+        assuntoId,
+        assuntoNome,
         mensagem: texto,
         historico,
       });
@@ -153,7 +161,7 @@ export function useTrilhaPersonalizarChat({
       setLoading(false);
       requestAnimationFrame(ajustarAlturaInput);
     }
-  }, [areaAtiva, input, loading, mensagens, ajustarAlturaInput]);
+  }, [areaAtiva, assuntoId, assuntoNome, input, loading, mensagens, ajustarAlturaInput]);
 
   const finalizar = useCallback(async () => {
     if (!areaAtiva || mensagens.length === 0) return;
@@ -163,6 +171,8 @@ export function useTrilhaPersonalizarChat({
     try {
       const response = await finalizarPersonalizarTrilha({
         areaSlug: areaAtiva,
+        assuntoId,
+        assuntoNome,
         historico: mensagens,
       });
       onAtualizado?.(response.trilha);
@@ -179,7 +189,7 @@ export function useTrilhaPersonalizarChat({
     } finally {
       setFinalizando(false);
     }
-  }, [areaAtiva, mensagens, onAtualizado]);
+  }, [areaAtiva, assuntoId, assuntoNome, mensagens, onAtualizado]);
 
   return {
     aberto,

@@ -5,6 +5,7 @@ import type {
   TrilhaEstado,
 } from '../../../../metricas/core/application/helpers/trilha.config';
 import { isEtapaIdValida } from '../../../../metricas/core/application/helpers/trilha.config';
+import { criarItemChecklist } from '../../../../metricas/core/application/helpers/trilha-progresso.helper';
 
 export type ContextoTrilhaTutor = {
   diagnosticoCompleto: boolean;
@@ -87,6 +88,7 @@ export type PersonalizarTrilhaContexto = {
   areaLabel: string;
   areaSlug: string;
   disciplinas: string[];
+  assuntoNome?: string;
   progresso: number;
   proximaEtapa?: string;
   metaEnem?: string | null;
@@ -96,18 +98,19 @@ export type PersonalizarTrilhaContexto = {
 export function buildPersonalizarTrilhaSystemPrompt(
   ctx: PersonalizarTrilhaContexto,
 ) {
-  const assuntos =
+  const focoPrincipal = ctx.assuntoNome ?? (
     ctx.disciplinas.length > 0
       ? ctx.disciplinas.join(', ')
-      : 'tópicos mais cobrados';
+      : 'tópicos mais cobrados'
+  );
 
   return `Você é o tutor IA do ENEM+ em modo de **co-criação de checklist**.
 
-Objetivo: conversar com o aluno para montar um plano de estudos personalizado em ${ctx.areaLabel}. Você NÃO gera a checklist final agora — só coleta informações com perguntas.
+Objetivo: conversar com o aluno para montar um plano de estudos personalizado${ctx.assuntoNome ? ` em **${ctx.assuntoNome}**` : ` em ${ctx.areaLabel}`}. Você NÃO gera a checklist final agora — só coleta informações com perguntas.
 
 Contexto do aluno:
 - Área: ${ctx.areaLabel}
-- Assuntos de foco: ${assuntos}
+${ctx.assuntoNome ? `- Assunto de foco: ${ctx.assuntoNome}` : `- Assuntos de foco: ${focoPrincipal}`}
 - Progresso na trilha: ${ctx.progresso}%
 - Próxima etapa sugerida: ${ctx.proximaEtapa ?? 'não definida'}
 ${ctx.metaEnem ? `- Objetivo ENEM: ${ctx.metaEnem}` : ''}
@@ -118,10 +121,11 @@ Regras da conversa:
 - Faça UMA pergunta por vez (máximo 2 frases + a pergunta)
 - Perguntas-chave a cobrir (na ordem natural da conversa):
   1. Tempo disponível por dia/semana para estudar
-  2. Maior dificuldade específica dentro de ${ctx.areaLabel}
+  2. Maior dificuldade específica dentro de ${ctx.assuntoNome ?? ctx.areaLabel}
   3. Preferência: mais teoria, mais questões ou equilíbrio
   4. Meta de curto prazo (esta semana)
   5. Algum evento ou prova próxima que influencia o ritmo
+- Todos os itens da checklist devem ser sobre ${focoPrincipal} — não misture outros assuntos
 - Não use "é em Filosofia" — use "é Filosofia" ou "são X e Y"
 - Quando tiver informações suficientes (após 3+ respostas do aluno), diga: "Perfeito! Clique em **Finalizar** para eu montar sua checklist personalizada."
 - Não invente dados que o aluno não disse`;
@@ -166,13 +170,13 @@ export function aplicarTrilhaAcoes(
 
   for (const texto of acoes.checklistAdicionar) {
     if (textosExistentes.has(texto.toLowerCase())) continue;
-    checklist.push({
-      id: randomUUID(),
-      texto,
-      concluida: false,
-      areaSlug,
-      criadoEm: new Date().toISOString(),
-    });
+    checklist.push(
+      criarItemChecklist({
+        id: randomUUID(),
+        texto,
+        areaSlug,
+      }),
+    );
     textosExistentes.add(texto.toLowerCase());
   }
 

@@ -8,10 +8,10 @@ import { USUARIOS_REPOSITORY } from '../../../../usuarios/core/application/ports
 import type { UsuariosRepositoryPort } from '../../../../usuarios/core/application/ports/usuarios.repository.port';
 import {
   estadoTrilhaVazio,
-  type ChecklistItemIa,
   type PlanoIa,
   type TrilhaEstado,
 } from '../../../../metricas/core/application/helpers/trilha.config';
+import { criarItemChecklist } from '../../../../metricas/core/application/helpers/trilha-progresso.helper';
 import { ObterTrilhaUseCase } from '../../../../metricas/core/application/use-cases/obter-trilha.use-case';
 import {
   METRICAS_REPOSITORY,
@@ -99,13 +99,13 @@ Regras:
       resumo: plano.resumo,
     };
 
-    const checklistNovos: ChecklistItemIa[] = plano.checklist.map((texto) => ({
-      id: randomUUID(),
-      texto,
-      concluida: false,
-      areaSlug: foco.slug,
-      criadoEm: new Date().toISOString(),
-    }));
+    const checklistNovos = plano.checklist.map((texto) =>
+      criarItemChecklist({
+        id: randomUUID(),
+        texto,
+        areaSlug: foco.slug,
+      }),
+    );
 
     const novoEstado: TrilhaEstado = {
       ...estado,

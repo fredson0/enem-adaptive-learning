@@ -11,10 +11,11 @@ import {
   type TrilhaResponse,
 } from "@/lib/trilha";
 import { usarTrilhaAtualizada } from "@/lib/trilha-events";
+import { recalcularTrilhaProgresso, resolverAssuntoNoCatalogo } from "@/lib/trilha-progresso";
 import type { AreaEnemSlug } from "@/lib/simulados";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 const AREAS_VALIDAS: AreaEnemSlug[] = [
@@ -30,6 +31,7 @@ function isAreaSlug(value: string): value is AreaEnemSlug {
 
 export default function TrilhaAreaPage() {
   const params = useParams<{ area: string }>();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { startChatWithSeed } = useTutorSession();
   const [data, setData] = useState<TrilhaResponse | null>(null);
@@ -52,6 +54,9 @@ export default function TrilhaAreaPage() {
   }, [router]);
 
   const slugParam = params.area ?? "";
+  const assuntoIdParam = searchParams.get("assuntoId");
+  const disciplinaParam = searchParams.get("disciplina");
+  const modalidadeParam = searchParams.get("modalidade");
 
   useEffect(() => {
     if (!isAreaSlug(slugParam)) {
@@ -85,7 +90,7 @@ export default function TrilhaAreaPage() {
       setData((prev) => {
         if (!prev) return prev;
 
-        return {
+        const next = {
           ...prev,
           areas: prev.areas.map((item) => {
             if (item.slug !== slugParam) return item;
@@ -93,15 +98,12 @@ export default function TrilhaAreaPage() {
             const etapas = item.etapas.map((etapa) =>
               etapa.id === etapaId ? { ...etapa, concluida } : etapa,
             );
-            const concluidas = etapas.filter((e) => e.concluida).length;
-            const progresso =
-              etapas.length > 0
-                ? Math.round((concluidas / etapas.length) * 100)
-                : 0;
 
-            return { ...item, etapas, progresso };
+            return { ...item, etapas };
           }),
         };
+
+        return recalcularTrilhaProgresso(next);
       });
     },
     [slugParam],
@@ -136,12 +138,12 @@ export default function TrilhaAreaPage() {
     setTogglingChecklistId(itemId);
     setData((prev) => {
       if (!prev) return prev;
-      return {
+      return recalcularTrilhaProgresso({
         ...prev,
         checklistIa: prev.checklistIa.map((item) =>
           item.id === itemId ? { ...item, concluida } : item,
         ),
-      };
+      });
     });
 
     try {
@@ -150,14 +152,14 @@ export default function TrilhaAreaPage() {
       if (itemAnterior) {
         setData((prev) => {
           if (!prev) return prev;
-          return {
+          return recalcularTrilhaProgresso({
             ...prev,
             checklistIa: prev.checklistIa.map((item) =>
               item.id === itemId
                 ? { ...item, concluida: itemAnterior.concluida }
                 : item,
             ),
-          };
+          });
         });
       }
       setError(
@@ -202,6 +204,15 @@ export default function TrilhaAreaPage() {
   }
 
   const isPrioridade = data.areaPrioritaria === area.slug;
+  const assuntoFoco = resolverAssuntoNoCatalogo({
+    areaSlug: area.slug,
+    assuntoId: assuntoIdParam,
+    disciplina: disciplinaParam,
+    modalidadeId: modalidadeParam,
+  });
+  const breadcrumbModalidade = modalidadeParam
+    ? `/trilha/geral?modalidade=${encodeURIComponent(modalidadeParam)}`
+    : "/trilha/geral";
 
   return (
     <WorkspaceSection>
@@ -216,23 +227,38 @@ export default function TrilhaAreaPage() {
           </Link>
           <span className="text-white/20">/</span>
           <Link
-            href="/trilha/geral"
+            href={breadcrumbModalidade}
             className="text-white/45 transition hover:text-white/75"
           >
-            Todas as áreas
+            {modalidadeParam ? "Modalidade" : "Todas as áreas"}
           </Link>
           <span className="text-white/20">/</span>
-          <span className="text-white/70">{area.label}</span>
+          {assuntoFoco ? (
+            <>
+              <Link
+                href={`/trilha/${area.slug}`}
+                className="text-white/45 transition hover:text-white/75"
+              >
+                {area.label}
+              </Link>
+              <span className="text-white/20">/</span>
+              <span className="text-white/70">{assuntoFoco.nome}</span>
+            </>
+          ) : (
+            <span className="text-white/70">{area.label}</span>
+          )}
         </div>
 
         <TrilhaAreaDetalheView
           area={area}
           trilha={data}
           isPrioridade={isPrioridade}
+          assuntoFoco={assuntoFoco}
+          modalidadeId={modalidadeParam ?? assuntoFoco?.modalidadeId ?? null}
           onAbrirTutor={abrirTutor}
           onToggleEtapa={handleToggleEtapa}
           onToggleChecklist={handleToggleChecklist}
-          onTrilhaAtualizada={setData}
+          onTrilhaAtualizada={(trilha) => setData(recalcularTrilhaProgresso(trilha))}
           togglingEtapaId={togglingEtapaId}
           togglingChecklistId={togglingChecklistId}
         />

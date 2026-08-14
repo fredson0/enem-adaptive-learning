@@ -28,17 +28,32 @@ export class PrismaConversasTutorRepository implements ConversasTutorRepositoryP
       include: {
         mensagens: {
           orderBy: { ordem: 'desc' },
-          take: 1,
+          take: 8,
         },
       },
     });
 
-    return conversas.map((conversa) => ({
-      id: conversa.id,
-      titulo: conversa.titulo,
-      preview: conversa.mensagens[0]?.texto ?? 'Sem mensagens',
-      atualizadoEm: conversa.atualizadoEm,
-    }));
+    return conversas.map((conversa) => {
+      const titulo = conversa.titulo;
+      const ultimaAssistant = conversa.mensagens.find(
+        (mensagem) => mensagem.papel === PapelMensagemTutor.ASSISTANT,
+      );
+      const ultima = conversa.mensagens[0];
+      const previewBruto =
+        ultimaAssistant?.texto ?? ultima?.texto ?? 'Sem mensagens';
+      const preview =
+        previewBruto.trim().toLowerCase() === titulo.trim().toLowerCase() ||
+        titulo.trim().toLowerCase().startsWith(previewBruto.trim().toLowerCase().slice(0, 24))
+          ? ''
+          : previewBruto;
+
+      return {
+        id: conversa.id,
+        titulo,
+        preview,
+        atualizadoEm: conversa.atualizadoEm,
+      };
+    });
   }
 
   async obterPorId(
@@ -116,6 +131,12 @@ export class PrismaConversasTutorRepository implements ConversasTutorRepositoryP
     await this.prisma.conversaTutor.update({
       where: { id: conversaId },
       data: { titulo },
+    });
+  }
+
+  async excluir(userId: string, conversaId: string): Promise<void> {
+    await this.prisma.conversaTutor.deleteMany({
+      where: { id: conversaId, userId },
     });
   }
 }

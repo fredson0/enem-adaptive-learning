@@ -23,6 +23,7 @@ export interface ConversasTutorRepositoryPort {
     mensagens: MensagemHistorico[],
   ): Promise<void>;
   atualizarTitulo(conversaId: string, titulo: string): Promise<void>;
+  excluir(userId: string, conversaId: string): Promise<void>;
 }
 
 export const CONVERSAS_TUTOR_REPOSITORY = Symbol('CONVERSAS_TUTOR_REPOSITORY');

@@ -82,6 +82,22 @@ export function criarConversaTutor(mensagens?: MensagemHistorico[]) {
   });
 }
 
+export function atualizarConversaTutor(conversaId: string, titulo: string) {
+  return apiFetch<{ ok: boolean; titulo: string }>(
+    `/ia-tutor/conversas/${conversaId}`,
+    {
+      method: "PATCH",
+      body: { titulo },
+    },
+  );
+}
+
+export function excluirConversaTutor(conversaId: string) {
+  return apiFetch<{ ok: boolean }>(`/ia-tutor/conversas/${conversaId}`, {
+    method: "DELETE",
+  });
+}
+
 export function enviarMensagemTutor(body: EnviarMensagemTutorBody) {
   return apiFetch<EnviarMensagemTutorResponse>("/ia-tutor/mensagens", {
     method: "POST",
@@ -113,6 +129,8 @@ export function personalizarTrilhaComIa() {
 
 export function conversarPersonalizarTrilha(body: {
   areaSlug?: string;
+  assuntoId?: string;
+  assuntoNome?: string;
   mensagem?: string;
   historico?: MensagemHistorico[];
   iniciar?: boolean;
@@ -129,6 +147,8 @@ export function conversarPersonalizarTrilha(body: {
 
 export function finalizarPersonalizarTrilha(body: {
   areaSlug: string;
+  assuntoId?: string;
+  assuntoNome?: string;
   historico: MensagemHistorico[];
 }) {
   return apiFetch<{

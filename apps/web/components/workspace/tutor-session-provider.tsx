@@ -2,7 +2,9 @@
 
 import type { MensagemHistorico } from "@/lib/ia-tutor";
 import {
+  atualizarConversaTutor,
   criarConversaTutor,
+  excluirConversaTutor,
   listarConversasTutor,
   obterConversaTutor,
 } from "@/lib/ia-tutor";
@@ -26,6 +28,27 @@ export type TutorChatSession = {
   preview?: string;
 };
 
+const PINNED_CHATS_STORAGE_KEY = "enem-tutor-pinned-chats";
+
+function readPinnedChats(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(PINNED_CHATS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function writePinnedChats(ids: string[]) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(PINNED_CHATS_STORAGE_KEY, JSON.stringify(ids));
+}
+
 type TutorSessionContextValue = {
   sessions: TutorChatSession[];
   activeSessionId: string | null;
@@ -33,11 +56,15 @@ type TutorSessionContextValue = {
   sessionKey: number;
   isNewChat: boolean;
   loading: boolean;
+  pinnedSessionIds: string[];
   startNewChat: () => void;
   startChatWithSeed: (messages: MensagemHistorico[]) => Promise<void>;
   goToTutor: () => void;
   openSession: (id: string) => Promise<void>;
   registerConversation: (session: TutorChatSession) => void;
+  deleteSession: (id: string) => Promise<void>;
+  renameSession: (id: string, titulo: string) => Promise<void>;
+  togglePinSession: (id: string) => void;
 };
 
 const TutorSessionContext = createContext<TutorSessionContextValue | null>(null);
@@ -63,8 +90,13 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [sessions, setSessions] = useState<TutorChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [pinnedSessionIds, setPinnedSessionIds] = useState<string[]>([]);
   const [sessionKey, setSessionKey] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setPinnedSessionIds(readPinnedChats());
+  }, []);
 
   const refreshSessions = useCallback(async () => {
     const conversas = await listarConversasTutor();
@@ -154,6 +186,45 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
     setActiveSessionId(session.id);
   }, []);
 
+  const deleteSession = useCallback(
+    async (id: string) => {
+      await excluirConversaTutor(id);
+
+      setSessions((current) => current.filter((session) => session.id !== id));
+      setPinnedSessionIds((current) => {
+        const next = current.filter((item) => item !== id);
+        writePinnedChats(next);
+        return next;
+      });
+
+      if (activeSessionId === id) {
+        setActiveSessionId(null);
+        setSessionKey((key) => key + 1);
+        router.push(TUTOR_CHAT_PATH);
+      }
+    },
+    [activeSessionId, router],
+  );
+
+  const renameSession = useCallback(async (id: string, titulo: string) => {
+    await atualizarConversaTutor(id, titulo);
+    setSessions((current) =>
+      current.map((session) =>
+        session.id === id ? { ...session, title: titulo } : session,
+      ),
+    );
+  }, []);
+
+  const togglePinSession = useCallback((id: string) => {
+    setPinnedSessionIds((current) => {
+      const next = current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [id, ...current];
+      writePinnedChats(next);
+      return next;
+    });
+  }, []);
+
   const activeSession = useMemo(
     () => sessions.find((session) => session.id === activeSessionId) ?? null,
     [activeSessionId, sessions],
@@ -169,11 +240,15 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
       sessionKey,
       isNewChat,
       loading,
+      pinnedSessionIds,
       startNewChat,
       startChatWithSeed,
       goToTutor,
       openSession,
       registerConversation,
+      deleteSession,
+      renameSession,
+      togglePinSession,
     }),
     [
       sessions,
@@ -182,11 +257,15 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
       sessionKey,
       isNewChat,
       loading,
+      pinnedSessionIds,
       startNewChat,
       startChatWithSeed,
       goToTutor,
       openSession,
       registerConversation,
+      deleteSession,
+      renameSession,
+      togglePinSession,
     ],
   );
 

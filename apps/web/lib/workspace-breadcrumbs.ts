@@ -158,6 +158,13 @@ export function getWorkspaceCrumbs(
     return trilhaCrumbs(pathname, searchParams);
   }
 
+  if (pathname.startsWith("/progresso/detalhes")) {
+    return [
+      { label: PROGRESSO_NAV.label, href: PROGRESSO_NAV.href },
+      { label: "Análise completa" },
+    ];
+  }
+
   if (pathname.startsWith(PROGRESSO_NAV.href)) {
     return [{ label: PROGRESSO_NAV.label }];
   }

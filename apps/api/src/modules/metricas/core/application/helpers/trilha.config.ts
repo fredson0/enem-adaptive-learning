@@ -14,6 +14,7 @@ export type ChecklistItemIa = {
   texto: string;
   concluida: boolean;
   areaSlug?: string;
+  assuntoId?: string;
   criadoEm: string;
 };
 
@@ -251,6 +252,8 @@ export function parseTrilhaEstado(raw: unknown): TrilhaEstado {
             concluida: Boolean(item.concluida),
             areaSlug:
               typeof item.areaSlug === 'string' ? item.areaSlug : undefined,
+            assuntoId:
+              typeof item.assuntoId === 'string' ? item.assuntoId : undefined,
             criadoEm:
               typeof item.criadoEm === 'string'
                 ? item.criadoEm

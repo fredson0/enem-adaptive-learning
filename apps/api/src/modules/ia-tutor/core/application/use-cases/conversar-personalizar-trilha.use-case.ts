@@ -11,10 +11,13 @@ import { IA_ENGINE } from '../ports/ia-engine.port';
 import type { IaEnginePort, MensagemHistorico } from '../ports/ia-engine.port';
 import { UsoTokensIaService } from '../../../infrastructure/adapters/out/persistence/uso-tokens-ia.service';
 import { buildPersonalizarTrilhaSystemPrompt } from '../helpers/trilha-tutor.helper';
+import { getAssuntoById } from '../../../../metricas/core/application/helpers/trilha-assuntos.catalog';
 
 export type ConversarPersonalizarTrilhaInput = {
   userId: string;
   areaSlug?: string;
+  assuntoId?: string;
+  assuntoNome?: string;
   mensagem?: string;
   historico?: MensagemHistorico[];
   iniciar?: boolean;
@@ -58,10 +61,17 @@ export class ConversarPersonalizarTrilhaUseCase {
     const perfil = await this.usuariosRepository.obterPerfilAluno(input.userId);
     await this.usoTokens.consumir(input.userId, 1);
 
+    const assuntoCatalogo = input.assuntoId
+      ? getAssuntoById(input.assuntoId)
+      : undefined;
+    const assuntoNome =
+      input.assuntoNome?.trim() || assuntoCatalogo?.nome || undefined;
+
     const systemPrompt = buildPersonalizarTrilhaSystemPrompt({
       areaLabel: area.label,
       areaSlug: area.slug,
-      disciplinas: area.disciplinasSugeridas,
+      disciplinas: assuntoNome ? [assuntoNome] : area.disciplinasSugeridas,
+      assuntoNome,
       progresso: area.progresso,
       proximaEtapa: area.proximaEtapa?.titulo,
       metaEnem: trilha.metaEnem,
@@ -69,7 +79,9 @@ export class ConversarPersonalizarTrilhaUseCase {
     });
 
     const textoUsuario = iniciar
-      ? 'Olá! Quero montar minha checklist personalizada para esta área.'
+      ? assuntoNome
+        ? `Olá! Quero montar minha checklist personalizada para estudar ${assuntoNome} em ${area.label}.`
+        : 'Olá! Quero montar minha checklist personalizada para esta área.'
       : input.mensagem!.trim();
 
     const resposta = await this.iaEngine.enviarMensagem({

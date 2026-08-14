@@ -10,6 +10,7 @@ import {
   getModalidadeById,
   TRILHA_MODALIDADES,
 } from "@/lib/trilha-catalogo";
+import { calcularProgressoPorAssunto } from "@/lib/trilha-progresso";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Search } from "lucide-react";
 import Link from "next/link";
@@ -33,6 +34,11 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
   useEffect(() => {
     setBusca("");
   }, [modalidadeId]);
+
+  const progressoPorAssunto = useMemo(
+    () => trilha.progressoPorAssunto ?? calcularProgressoPorAssunto(trilha),
+    [trilha],
+  );
 
   const mapaArea = useMemo(
     () => new Map(trilha.areas.map((area) => [area.slug, area])),
@@ -159,6 +165,7 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
               key={assunto.id}
               assunto={assunto}
               emFoco={assuntosEmFoco.has(assunto.nome.toLowerCase())}
+              progresso={progressoPorAssunto[assunto.id] ?? 0}
             />
           ))}
         </div>

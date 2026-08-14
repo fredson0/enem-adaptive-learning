@@ -3,6 +3,14 @@
 import type { TrilhaArea, TrilhaEtapa, TrilhaResponse } from "@/lib/trilha";
 import { formatarAssuntos } from "@/lib/trilha";
 import {
+  adaptarAreaParaAssunto,
+  getChecklistArea,
+  getMetaAreaContextual,
+  getProgressoAssunto,
+} from "@/lib/trilha-progresso";
+import type { TrilhaAssuntoCatalogo } from "@/lib/trilha-catalogo";
+import { getContextoEstudoAssunto } from "@/lib/trilha-catalogo";
+import {
   TrilhaPersonalizarBotao,
   TrilhaPersonalizarPainel,
 } from "@/components/trilha/trilha-personalizar-ia-chat";
@@ -12,7 +20,6 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
-  Circle,
   Loader2,
   Sparkles,
   Square,
@@ -25,6 +32,8 @@ type TrilhaAreaDetalheViewProps = {
   area: TrilhaArea;
   trilha: TrilhaResponse;
   isPrioridade: boolean;
+  assuntoFoco?: TrilhaAssuntoCatalogo;
+  modalidadeId?: string | null;
   onAbrirTutor: (pergunta: string) => void;
   onToggleEtapa: (etapaId: string, concluida: boolean) => Promise<void>;
   onToggleChecklist?: (itemId: string, concluida: boolean) => Promise<void>;
@@ -33,10 +42,10 @@ type TrilhaAreaDetalheViewProps = {
   togglingChecklistId?: string | null;
 };
 
-function OrientacaoPainel({ area }: { area: TrilhaArea }) {
-  const disciplinas =
-    area.disciplinasSugeridas.length > 0
-      ? area.disciplinasSugeridas
+function OrientacaoPainel({ disciplinas }: { disciplinas: string[] }) {
+  const assuntos =
+    disciplinas.length > 0
+      ? disciplinas
       : ["os tópicos mais cobrados no ENEM"];
 
   return (
@@ -46,7 +55,7 @@ function OrientacaoPainel({ area }: { area: TrilhaArea }) {
           Assuntos prioritários
         </p>
         <ul className="mt-2 space-y-1.5">
-          {disciplinas.map((disciplina) => (
+          {assuntos.map((disciplina) => (
             <li
               key={disciplina}
               className="flex items-start gap-2 text-sm text-white/70"
@@ -88,6 +97,7 @@ function EtapaAcoes({
   toggling,
   orientacaoAberta,
   onToggleOrientacao,
+  disciplinasOrientacao,
 }: {
   etapa: TrilhaEtapa;
   area: TrilhaArea;
@@ -96,6 +106,7 @@ function EtapaAcoes({
   toggling: boolean;
   orientacaoAberta: boolean;
   onToggleOrientacao: () => void;
+  disciplinasOrientacao: string[];
 }) {
   const repassando = etapa.concluida;
 
@@ -115,7 +126,9 @@ function EtapaAcoes({
             )}
           />
         </button>
-        {orientacaoAberta ? <OrientacaoPainel area={area} /> : null}
+        {orientacaoAberta ? (
+          <OrientacaoPainel disciplinas={disciplinasOrientacao} />
+        ) : null}
         {!etapa.concluida ? (
           <button
             type="button"
@@ -167,6 +180,8 @@ export function TrilhaAreaDetalheView({
   area,
   trilha,
   isPrioridade,
+  assuntoFoco,
+  modalidadeId = null,
   onAbrirTutor,
   onToggleEtapa,
   onToggleChecklist,
@@ -174,16 +189,30 @@ export function TrilhaAreaDetalheView({
   togglingEtapaId = null,
   togglingChecklistId = null,
 }: TrilhaAreaDetalheViewProps) {
-  const proximaEtapa = area.etapas.find((etapa) => !etapa.concluida);
-  const etapasConcluidas = area.etapas.filter((e) => e.concluida).length;
-  const checklistArea = trilha.checklistIa.filter(
-    (item) => !item.areaSlug || item.areaSlug === area.slug,
+  const areaContextual = assuntoFoco
+    ? adaptarAreaParaAssunto(area, assuntoFoco)
+    : area;
+  const contextoEstudo = assuntoFoco
+    ? getContextoEstudoAssunto(assuntoFoco)
+    : area.label;
+  const proximaEtapa = areaContextual.etapas.find((etapa) => !etapa.concluida);
+  const etapasConcluidas = areaContextual.etapas.filter((e) => e.concluida).length;
+  const checklistArea = getChecklistArea(trilha, area, assuntoFoco?.id);
+  const checklistConcluidos = checklistArea.filter((item) => item.concluida).length;
+  const progressoExibido = assuntoFoco
+    ? getProgressoAssunto(trilha, assuntoFoco.id)
+    : area.progresso;
+  const assuntos = formatarAssuntos(areaContextual.disciplinasSugeridas);
+  const metaArea = getMetaAreaContextual(
+    trilha,
+    areaContextual,
+    assuntoFoco,
+    isPrioridade,
   );
-  const assuntos = formatarAssuntos(area.disciplinasSugeridas);
   const [orientacaoAbertaId, setOrientacaoAbertaId] = useState<string | null>(
     () =>
-      area.etapas.find((e) => e.tipo === "orientacao" && !e.concluida)?.id ??
-      null,
+      areaContextual.etapas.find((e) => e.tipo === "orientacao" && !e.concluida)
+        ?.id ?? null,
   );
 
   const toggleOrientacao = (etapaId: string) => {
@@ -192,6 +221,8 @@ export function TrilhaAreaDetalheView({
 
   const chat = useTrilhaPersonalizarChat({
     areaSlug: area.slug,
+    assuntoId: assuntoFoco?.id,
+    assuntoNome: assuntoFoco?.nome,
     onAtualizado: onTrilhaAtualizada,
   });
 
@@ -204,7 +235,11 @@ export function TrilhaAreaDetalheView({
             key="painel"
             chat={chat}
             titulo="Monte sua checklist"
-            subtitulo={area.label}
+            subtitulo={
+              assuntoFoco
+                ? `${assuntoFoco.nome} · ${contextoEstudo}`
+                : area.label
+            }
           />
         ) : (
           <motion.header
@@ -219,13 +254,23 @@ export function TrilhaAreaDetalheView({
               {isPrioridade ? "Trilha prioritária" : "Plano da área"}
             </p>
             <h1 className="mt-2 text-3xl font-medium tracking-tight text-white md:text-4xl">
-              {area.label}
+              {assuntoFoco ? assuntoFoco.nome : area.label}
             </h1>
             <p className="mt-3 max-w-lg text-sm text-white/40">
-              {area.disciplinasSugeridas.length > 0
-                ? `Foco em ${assuntos}.`
-                : "Siga as etapas para fortalecer esta área."}
+              {assuntoFoco
+                ? `Plano de estudos em ${assuntoFoco.nome} · ${contextoEstudo}.`
+                : area.disciplinasSugeridas.length > 0
+                  ? `Foco em ${assuntos}.`
+                  : "Siga as etapas para fortalecer esta área."}
             </p>
+            {assuntoFoco && modalidadeId ? (
+              <Link
+                href={`/trilha/geral?modalidade=${encodeURIComponent(modalidadeId)}`}
+                className="mt-3 inline-block text-xs text-[#b0ff57]/80 transition hover:text-[#b0ff57]"
+              >
+                Ver todos os assuntos desta modalidade
+              </Link>
+            ) : null}
             <div className="mt-8 flex justify-center">
               <TrilhaPersonalizarBotao
                 chat={chat}
@@ -248,7 +293,7 @@ export function TrilhaAreaDetalheView({
       >
       <div className="space-y-8">
         <motion.div layout className="space-y-6">
-          {area.etapas.map((etapa, index) => {
+          {areaContextual.etapas.map((etapa, index) => {
             const isProxima = etapa.id === proximaEtapa?.id && !etapa.concluida;
             const toggling = togglingEtapaId === etapa.id;
 
@@ -318,12 +363,13 @@ export function TrilhaAreaDetalheView({
 
                     <EtapaAcoes
                       etapa={etapa}
-                      area={area}
+                      area={areaContextual}
                       onAbrirTutor={onAbrirTutor}
                       onToggleEtapa={onToggleEtapa}
                       toggling={toggling}
                       orientacaoAberta={orientacaoAbertaId === etapa.id}
                       onToggleOrientacao={() => toggleOrientacao(etapa.id)}
+                      disciplinasOrientacao={areaContextual.disciplinasSugeridas}
                     />
                   </div>
                 </div>
@@ -333,12 +379,67 @@ export function TrilhaAreaDetalheView({
         </motion.div>
       </div>
 
-      <aside className="space-y-5 lg:sticky lg:top-28 lg:self-start">
+      <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
+        <div className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-4">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+            <span
+              className={cn(
+                "rounded-full px-2 py-0.5 font-medium",
+                area.prioridade === "Alta"
+                  ? "bg-red-500/15 text-red-300"
+                  : area.prioridade === "Média"
+                    ? "bg-amber-500/15 text-amber-300"
+                    : "bg-emerald-500/15 text-emerald-300",
+              )}
+            >
+              {area.prioridade}
+            </span>
+            <span className="text-white/45">{progressoExibido}%</span>
+            <span className="text-white/20">·</span>
+            <span className="text-white/45">
+              {etapasConcluidas}/{areaContextual.etapas.length} etapas
+            </span>
+            {checklistArea.length > 0 ? (
+              <>
+                <span className="text-white/20">·</span>
+                <span className="text-white/45">
+                  {checklistConcluidos}/{checklistArea.length} checklist
+                </span>
+              </>
+            ) : null}
+            {area.proficienciaReal > 0 ? (
+              <>
+                <span className="text-white/20">·</span>
+                <span className="text-white/45">
+                  {area.proficienciaReal}% nos simulados
+                </span>
+              </>
+            ) : null}
+          </div>
+
+          {trilha.metaEnem || metaArea ? (
+            <div className="mt-3 space-y-1.5 border-t border-white/[0.06] pt-3">
+              {trilha.metaEnem ? (
+                <p className="text-xs leading-relaxed text-white/55">
+                  <span className="text-[#b0ff57]">Objetivo:</span>{" "}
+                  {trilha.metaEnem}
+                </p>
+              ) : null}
+              {metaArea ? (
+                <p className="text-xs leading-relaxed text-white/40">
+                  {metaArea}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
         {checklistArea.length > 0 ? (
           <div className="rounded-[14px] border border-[#b0ff57]/15 bg-[#b0ff57]/5 p-5">
             <p className="flex items-center gap-2 text-xs uppercase tracking-wide text-[#b0ff57]/80">
               <Sparkles className="size-3.5" />
               Checklist IA
+              {assuntoFoco ? ` · ${assuntoFoco.nome}` : ""}
             </p>
             <ul className="mt-3 space-y-2">
               {checklistArea.map((item) => {
@@ -379,128 +480,8 @@ export function TrilhaAreaDetalheView({
                 );
               })}
             </ul>
-            <p className="mt-3 text-[11px] text-white/35">
-              Gerada pela IA com base no seu plano.
-            </p>
           </div>
         ) : null}
-
-        <div className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-5">
-          <p className="text-xs uppercase tracking-wide text-white/35">
-            Etapas da trilha
-          </p>
-          <ul className="mt-3 space-y-2">
-            {area.etapas.map((etapa) => (
-              <li
-                key={etapa.id}
-                className="flex items-center gap-2.5 text-sm"
-              >
-                <span
-                  className={cn(
-                    "flex size-5 shrink-0 items-center justify-center rounded-full",
-                    etapa.concluida
-                      ? "bg-emerald-500/20 text-emerald-300"
-                      : "border border-white/15 text-transparent",
-                  )}
-                >
-                  {etapa.concluida ? (
-                    <Check className="size-3" strokeWidth={2.5} />
-                  ) : (
-                    <span className="size-1.5 rounded-full bg-white/20" />
-                  )}
-                </span>
-                <span
-                  className={cn(
-                    "truncate",
-                    etapa.concluida ? "text-white/50 line-through" : "text-white/75",
-                  )}
-                >
-                  {etapa.titulo}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-5">
-          <p className="text-xs uppercase tracking-wide text-white/35">
-            Seu status
-          </p>
-          <dl className="mt-4 space-y-3 text-sm">
-            <div className="flex justify-between gap-4">
-              <dt className="text-white/45">Prioridade</dt>
-              <dd className="font-medium text-white">{area.prioridade}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-white/45">Progresso</dt>
-              <dd className="font-medium text-white">{area.progresso}%</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-white/45">Proficiência</dt>
-              <dd className="font-medium text-white">
-                {area.proficienciaReal > 0
-                  ? `${area.proficienciaReal}%`
-                  : "—"}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-white/45">Autoavaliação</dt>
-              <dd className="font-medium text-white">{area.autoAvaliacao}/5</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-white/45">Etapas</dt>
-              <dd className="font-medium text-white">
-                {etapasConcluidas}/{area.etapas.length}
-              </dd>
-            </div>
-          </dl>
-        </div>
-
-        {area.disciplinasSugeridas.length > 0 ? (
-          <div className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-5">
-            <p className="text-xs uppercase tracking-wide text-white/35">
-              Foco de estudo
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {area.disciplinasSugeridas.map((disciplina) => (
-                <span
-                  key={disciplina}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/60"
-                >
-                  {disciplina}
-                </span>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {trilha.metaEnem ? (
-          <div className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-5">
-            <p className="flex items-center gap-2 text-xs uppercase tracking-wide text-white/35">
-              <Sparkles className="size-3.5 text-[#b0ff57]" />
-              Objetivo ENEM
-            </p>
-            <p className="mt-2 text-sm text-white/70">{trilha.metaEnem}</p>
-          </div>
-        ) : null}
-
-        <div className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-5">
-          <p className="text-xs uppercase tracking-wide text-white/35">
-            Meta da semana
-          </p>
-          <p className="mt-2 text-sm leading-relaxed text-white/55">
-            {trilha.metaSemanal}
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => onAbrirTutor(area.perguntaTutor)}
-          className="flex w-full items-center justify-center gap-2 rounded-[10px] border border-white/10 bg-white/[0.04] py-3 text-sm text-white/80 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-        >
-          Pedir plano ao tutor
-          <Circle className="size-3 fill-[#b0ff57] text-[#b0ff57]" />
-        </button>
       </aside>
       </motion.div>
     </div>

@@ -1,16 +1,36 @@
 "use client";
 
+import { ChatListItem, getChatPreview } from "@/components/workspace/chat-list-item";
 import {
   SidebarTree,
   SidebarTreeButton,
-  SidebarTreeChatButton,
 } from "@/components/workspace/sidebar-tree-nav";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
 import { Plus } from "lucide-react";
+import { useMemo } from "react";
 
 export function ChatList() {
-  const { sessions, activeSessionId, isNewChat, startNewChat, openSession } =
-    useTutorSession();
+  const {
+    sessions,
+    activeSessionId,
+    isNewChat,
+    pinnedSessionIds,
+    startNewChat,
+    openSession,
+    deleteSession,
+    renameSession,
+    togglePinSession,
+  } = useTutorSession();
+
+  const orderedSessions = useMemo(() => {
+    const pinned = new Set(pinnedSessionIds);
+    return [...sessions].sort((a, b) => {
+      const aPinned = pinned.has(a.id);
+      const bPinned = pinned.has(b.id);
+      if (aPinned !== bPinned) return aPinned ? -1 : 1;
+      return b.updatedAt - a.updatedAt;
+    });
+  }, [pinnedSessionIds, sessions]);
 
   return (
     <SidebarTree scrollable>
@@ -19,24 +39,19 @@ export function ChatList() {
         Nova conversa
       </SidebarTreeButton>
 
-      {sessions.map((chat) => {
-        const isActive = activeSessionId === chat.id;
-        const preview =
-          chat.preview ??
-          chat.messages.find((message) => message.role === "assistant")?.texto ??
-          chat.messages.find((message) => message.role === "user")?.texto ??
-          "Sem mensagens";
-
-        return (
-          <SidebarTreeChatButton
-            key={chat.id}
-            active={isActive}
-            title={chat.title}
-            preview={preview}
-            onClick={() => openSession(chat.id)}
-          />
-        );
-      })}
+      {orderedSessions.map((chat) => (
+        <ChatListItem
+          key={chat.id}
+          chat={chat}
+          active={activeSessionId === chat.id}
+          pinned={pinnedSessionIds.includes(chat.id)}
+          preview={getChatPreview(chat)}
+          onOpen={() => void openSession(chat.id)}
+          onPin={() => togglePinSession(chat.id)}
+          onRename={(titulo) => renameSession(chat.id, titulo)}
+          onDelete={() => deleteSession(chat.id)}
+        />
+      ))}
     </SidebarTree>
   );
 }

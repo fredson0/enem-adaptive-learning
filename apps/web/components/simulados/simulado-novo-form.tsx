@@ -48,6 +48,7 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
   useEffect(() => {
     const areaParam = searchParams.get("area");
     const quantidadeParam = searchParams.get("quantidade");
+    const assuntoParam = searchParams.get("assunto");
 
     if (areaParam && AREA_OPTIONS.some((option) => option.value === areaParam)) {
       setArea(areaParam);
@@ -59,7 +60,18 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
         setQuantidade(parsed);
       }
     }
-  }, [searchParams, modo.quantidades]);
+
+    if (assuntoParam?.trim()) {
+      const assunto = assuntoParam.trim();
+      const areaLabel =
+        AREA_OPTIONS.find((option) => option.value === (areaParam ?? area))
+          ?.label ?? "ENEM";
+      setTermosBusca(assunto);
+      setPedidoIa(
+        `${quantidadeParam ?? modo.quantidades[0]} questões de ${areaLabel.toLowerCase()} sobre ${assunto.toLowerCase()}`,
+      );
+    }
+  }, [searchParams, modo.quantidades, area]);
 
   useEffect(() => {
     const termos = termosBusca

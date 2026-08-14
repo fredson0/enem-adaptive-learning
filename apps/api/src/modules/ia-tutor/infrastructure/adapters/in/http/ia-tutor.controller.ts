@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
   Headers,
   Inject,
   Param,
+  Patch,
   Post,
   Put,
   Req,
@@ -22,6 +24,8 @@ import {
   type ObjectStoragePort,
 } from '../../../../core/application/ports/object-storage.port';
 import { CriarConversaUseCase } from '../../../../core/application/use-cases/criar-conversa.use-case';
+import { AtualizarConversaUseCase } from '../../../../core/application/use-cases/atualizar-conversa.use-case';
+import { ExcluirConversaUseCase } from '../../../../core/application/use-cases/excluir-conversa.use-case';
 import { EnviarMensagemTutorUseCase } from '../../../../core/application/use-cases/enviar-mensagem-tutor.use-case';
 import { ExplicarErroUseCase } from '../../../../core/application/use-cases/explicar-erro.use-case';
 import { GerarPresignAnexoUseCase } from '../../../../core/application/use-cases/gerar-presign-anexo.use-case';
@@ -33,6 +37,7 @@ import { ConversarPersonalizarTrilhaUseCase } from '../../../../core/application
 import { FinalizarPersonalizarTrilhaUseCase } from '../../../../core/application/use-cases/finalizar-personalizar-trilha.use-case';
 import { ObterSaldoTokensUseCase } from '../../../../core/application/use-cases/obter-saldo-tokens.use-case';
 import {
+  AtualizarConversaDto,
   ConversarPersonalizarTrilhaDto,
   CriarConversaDto,
   EnviarMensagemTutorDto,
@@ -65,6 +70,10 @@ export class IaTutorController {
     private readonly obterConversaUseCase: ObterConversaUseCase,
     @Inject(CriarConversaUseCase)
     private readonly criarConversaUseCase: CriarConversaUseCase,
+    @Inject(AtualizarConversaUseCase)
+    private readonly atualizarConversaUseCase: AtualizarConversaUseCase,
+    @Inject(ExcluirConversaUseCase)
+    private readonly excluirConversaUseCase: ExcluirConversaUseCase,
     @Inject(GerarPresignAnexoUseCase)
     private readonly gerarPresignAnexoUseCase: GerarPresignAnexoUseCase,
     @Inject(OBJECT_STORAGE)
@@ -102,6 +111,29 @@ export class IaTutorController {
       userId: user.sub,
       mensagens: dto.mensagens,
     });
+  }
+
+  @Patch('conversas/:id')
+  @UseGuards(JwtAuthGuard)
+  atualizarConversa(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') conversaId: string,
+    @Body() dto: AtualizarConversaDto,
+  ) {
+    return this.atualizarConversaUseCase.execute({
+      userId: user.sub,
+      conversaId,
+      titulo: dto.titulo,
+    });
+  }
+
+  @Delete('conversas/:id')
+  @UseGuards(JwtAuthGuard)
+  excluirConversa(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') conversaId: string,
+  ) {
+    return this.excluirConversaUseCase.execute(user.sub, conversaId);
   }
 
   @Post('anexos/presign')
@@ -209,6 +241,8 @@ export class IaTutorController {
     return this.conversarPersonalizarTrilhaUseCase.execute({
       userId: user.sub,
       areaSlug: dto.areaSlug,
+      assuntoId: dto.assuntoId,
+      assuntoNome: dto.assuntoNome,
       mensagem: dto.mensagem,
       historico: dto.historico,
       iniciar: dto.iniciar,
@@ -225,6 +259,8 @@ export class IaTutorController {
     return this.finalizarPersonalizarTrilhaUseCase.execute({
       userId: user.sub,
       areaSlug: dto.areaSlug,
+      assuntoId: dto.assuntoId,
+      assuntoNome: dto.assuntoNome,
       historico: dto.historico,
     });
   }
