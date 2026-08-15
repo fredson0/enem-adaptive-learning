@@ -134,7 +134,7 @@ export function LandingPlatformShowcase() {
         </p>
 
         <Link
-          href="/login"
+          href="/tutor"
           className="mt-6 inline-flex rounded-full bg-[#6840ff] px-6 py-2.5 text-sm font-medium text-white transition hover:bg-[#5a36e0]"
         >
           Conhecer a plataforma

@@ -56,7 +56,7 @@ export function LandingProductShowcase() {
         </p>
 
         <Link
-          href="/login"
+          href="/tutor"
           className="group mt-8 inline-flex items-center gap-2 rounded-full bg-[#b0ff57] py-1 pr-1 pl-5 text-sm font-medium text-black transition-all hover:gap-3 sm:text-base"
         >
           Começar agora

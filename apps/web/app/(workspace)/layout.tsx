@@ -1,3 +1,5 @@
+import { AuthGuard } from "@/components/auth/auth-guard";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import { OnboardingGuard } from "@/components/auth/onboarding-guard";
 import { TokensIaProvider } from "@/components/workspace/tokens-ia-provider";
 import { TutorSessionProvider } from "@/components/workspace/tutor-session-provider";
@@ -12,17 +14,21 @@ export default function WorkspaceLayout({
   children: React.ReactNode;
 }) {
   return (
-    <TokensIaProvider>
-      <TutorSessionProvider>
-        <WorkspaceScrollProvider>
-          <div className="osmo-canvas-bg relative h-screen w-screen overflow-hidden">
-            <WorkspaceLenisGuard />
-            <OnboardingGuard />
-            <WorkspacePageTransition>{children}</WorkspacePageTransition>
-            <WorkspaceSidebar />
-          </div>
-        </WorkspaceScrollProvider>
-      </TutorSessionProvider>
-    </TokensIaProvider>
+    <AuthProvider>
+      <AuthGuard>
+        <TokensIaProvider>
+          <TutorSessionProvider>
+            <WorkspaceScrollProvider>
+              <div className="osmo-canvas-bg relative h-screen w-screen overflow-hidden">
+                <WorkspaceLenisGuard />
+                <OnboardingGuard />
+                <WorkspacePageTransition>{children}</WorkspacePageTransition>
+                <WorkspaceSidebar />
+              </div>
+            </WorkspaceScrollProvider>
+          </TutorSessionProvider>
+        </TokensIaProvider>
+      </AuthGuard>
+    </AuthProvider>
   );
 }

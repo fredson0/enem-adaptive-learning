@@ -116,6 +116,8 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         await refreshSessions();
+      } catch {
+        setSessions([]);
       } finally {
         setLoading(false);
       }

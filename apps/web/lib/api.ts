@@ -1,3 +1,5 @@
+import { getLoginPath } from "@/lib/login-redirect";
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -14,6 +16,8 @@ type RequestOptions = {
   body?: unknown;
   /** Se true, chama Nest via BFF /api/backend (cookie HttpOnly → Bearer). */
   auth?: boolean;
+  /** Redireciona para /login em 401. Desligue em rotas com acesso guest. */
+  redirectOnUnauthenticated?: boolean;
   /** Evita duplo envio em POST (ex.: resposta de simulado). */
   idempotencyKey?: string;
 };
@@ -26,7 +30,13 @@ type RequestOptions = {
  */
 export async function apiFetch<T>(
   path: string,
-  { method = "GET", body, auth = true, idempotencyKey }: RequestOptions = {},
+  {
+    method = "GET",
+    body,
+    auth = true,
+    redirectOnUnauthenticated = true,
+    idempotencyKey,
+  }: RequestOptions = {},
 ): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -60,8 +70,9 @@ export async function apiFetch<T>(
       });
       return parseResponse<T>(retry);
     }
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
+    if (redirectOnUnauthenticated !== false && typeof window !== "undefined") {
+      const next = `${window.location.pathname}${window.location.search}`;
+      window.location.href = getLoginPath(next);
     }
     throw new ApiError("Não autenticado", 401);
   }

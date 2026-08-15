@@ -1,6 +1,7 @@
 "use client";
 
 import { HeroWave } from "@/components/ui/ai-input-hero";
+import { useAuth } from "@/components/auth/auth-provider";
 import { useTokensIa } from "@/components/workspace/tokens-ia-provider";
 import { useWorkspaceScrollReporter } from "@/components/workspace/workspace-scroll-context";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
@@ -12,6 +13,7 @@ import {
   uploadAnexoTutor,
   type MensagemHistorico,
 } from "@/lib/ia-tutor";
+import { consumePendingTutorPrompt } from "@/lib/pending-tutor-prompt";
 import { emitirTrilhaAtualizada } from "@/lib/trilha-events";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
@@ -27,10 +29,15 @@ export function TutorChatView({
   const [messages, setMessages] = useState<MensagemHistorico[]>(initialMessages);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated, isLoading, requireAuth } = useAuth();
   const { setTokens } = useTokensIa();
   const { registerConversation, sessionKey, activeSession, activeSessionId } =
     useTutorSession();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const pendingSentRef = useRef(false);
+  const handleSubmitRef = useRef<
+    (value: string, attachment?: File) => Promise<void>
+  >(async () => {});
   const hasMessages = messages.length > 0;
   const reportScroll = useWorkspaceScrollReporter();
 
@@ -46,6 +53,15 @@ export function TutorChatView({
   const handleSubmit = async (value: string, attachment?: File) => {
     const mensagem = value.trim();
     if (!mensagem || loading) return;
+
+    if (
+      !requireAuth({
+        next: "/tutor",
+        tutorPrompt: mensagem,
+      })
+    ) {
+      return;
+    }
 
     setError(null);
     setLoading(true);
@@ -106,6 +122,18 @@ export function TutorChatView({
       setLoading(false);
     }
   };
+
+  handleSubmitRef.current = handleSubmit;
+
+  useEffect(() => {
+    if (isLoading || !isAuthenticated || pendingSentRef.current) return;
+
+    const pending = consumePendingTutorPrompt();
+    if (!pending) return;
+
+    pendingSentRef.current = true;
+    void handleSubmitRef.current(pending);
+  }, [isAuthenticated, isLoading]);
 
   return (
     <div className="relative flex h-full min-h-0 flex-col">

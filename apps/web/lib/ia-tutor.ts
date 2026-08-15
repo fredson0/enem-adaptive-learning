@@ -62,11 +62,17 @@ export type ExplicarErroResponse = {
 };
 
 export function obterSaldoTokens() {
-  return apiFetch<TokensIa>("/ia-tutor/tokens", { auth: true });
+  return apiFetch<TokensIa>("/ia-tutor/tokens", {
+    auth: true,
+    redirectOnUnauthenticated: false,
+  });
 }
 
 export function listarConversasTutor() {
-  return apiFetch<ConversaResumo[]>("/ia-tutor/conversas", { auth: true });
+  return apiFetch<ConversaResumo[]>("/ia-tutor/conversas", {
+    auth: true,
+    redirectOnUnauthenticated: false,
+  });
 }
 
 export function obterConversaTutor(conversaId: string) {

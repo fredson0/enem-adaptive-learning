@@ -64,6 +64,7 @@ type SidebarTreeLinkProps = {
   active?: boolean;
   children: ReactNode;
   className?: string;
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
 };
 
 export function SidebarTreeLink({
@@ -71,10 +72,12 @@ export function SidebarTreeLink({
   active,
   children,
   className,
+  onClick,
 }: SidebarTreeLinkProps) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={cn(
         "block w-full rounded-[6px] px-3 py-2 text-sm transition-all duration-300",
         active

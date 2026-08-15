@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/components/auth/auth-provider";
 import { ChatListItem, getChatPreview } from "@/components/workspace/chat-list-item";
 import {
   SidebarTree,
@@ -10,6 +11,7 @@ import { Plus } from "lucide-react";
 import { useMemo } from "react";
 
 export function ChatList() {
+  const { requireAuth } = useAuth();
   const {
     sessions,
     activeSessionId,
@@ -34,7 +36,14 @@ export function ChatList() {
 
   return (
     <SidebarTree scrollable>
-      <SidebarTreeButton dashed active={isNewChat} onClick={startNewChat}>
+      <SidebarTreeButton
+        dashed
+        active={isNewChat}
+        onClick={() => {
+          if (!requireAuth({ next: "/tutor" })) return;
+          startNewChat();
+        }}
+      >
         <Plus className="size-3.5 shrink-0" strokeWidth={1.75} />
         Nova conversa
       </SidebarTreeButton>
@@ -46,10 +55,22 @@ export function ChatList() {
           active={activeSessionId === chat.id}
           pinned={pinnedSessionIds.includes(chat.id)}
           preview={getChatPreview(chat)}
-          onOpen={() => void openSession(chat.id)}
-          onPin={() => togglePinSession(chat.id)}
-          onRename={(titulo) => renameSession(chat.id, titulo)}
-          onDelete={() => deleteSession(chat.id)}
+          onOpen={() => {
+            if (!requireAuth({ next: "/tutor" })) return;
+            void openSession(chat.id);
+          }}
+          onPin={() => {
+            if (!requireAuth({ next: "/tutor" })) return;
+            togglePinSession(chat.id);
+          }}
+          onRename={async (titulo) => {
+            if (!requireAuth({ next: "/tutor" })) return;
+            await renameSession(chat.id, titulo);
+          }}
+          onDelete={async () => {
+            if (!requireAuth({ next: "/tutor" })) return;
+            await deleteSession(chat.id);
+          }}
         />
       ))}
     </SidebarTree>

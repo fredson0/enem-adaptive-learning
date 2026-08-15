@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/components/auth/auth-provider";
 import { ChatList } from "@/components/workspace/chat-list";
 import {
   SidebarTree,
@@ -15,14 +16,12 @@ import {
   WORKSPACE_NAV,
 } from "@/lib/workspace-nav";
 import { SIMULADO_MODOS } from "@/lib/simulado-modos";
-import { fetchMe } from "@/lib/api";
-import { type User } from "@/lib/auth";
 import { TUTOR_CHAT_PATH } from "@/lib/tutor-navigation";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
 import { Asterisk, ChevronRight, ClipboardList, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 
 type SectionId = "tutor" | "simulados" | "trilha" | "progresso";
 
@@ -40,38 +39,33 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { goToTutor } = useTutorSession();
+  const { user, requireAuth } = useAuth();
 
   const [expandedSection, setExpandedSection] = useState<SectionId | null>(
     () => getSectionFromPath(pathname),
   );
-  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     setExpandedSection(getSectionFromPath(pathname));
   }, [pathname]);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchMe()
-      .then((profile) => {
-        if (!cancelled) setUser(profile);
-      })
-      .catch(() => {
-        if (!cancelled) setUser(null);
-      });
-
-    return () => {
-      cancelled = true;
+  const guardLink =
+    (href: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+      if (!requireAuth({ next: href })) {
+        event.preventDefault();
+      }
     };
-  }, [pathname]);
 
   const handleSectionClick = (id: SectionId, href: string) => {
-    setExpandedSection(id);
     if (id === "tutor") {
+      setExpandedSection(id);
       goToTutor();
       return;
     }
+
+    if (!requireAuth({ next: href })) return;
+
+    setExpandedSection(id);
     router.push(href);
   };
 
@@ -166,7 +160,7 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
 
         <SidebarAccordion open={isSimuladosExpanded} className="mb-2">
           <SidebarTree>
-            <SidebarTreeLink href="/simulados" active={pathname === "/simulados"}>
+            <SidebarTreeLink href="/simulados" active={pathname === "/simulados"} onClick={guardLink("/simulados")}>
               Visão geral
             </SidebarTreeLink>
             {SIMULADO_MODOS.map((modo) => (
@@ -174,6 +168,7 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
                 key={modo.slug}
                 href={modo.href}
                 active={pathname.startsWith(modo.href)}
+                onClick={guardLink(modo.href)}
               >
                 {modo.shortLabel}
               </SidebarTreeLink>
@@ -210,6 +205,7 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
       <div className="shrink-0 p-4">
         <Link
           href={PROFILE_NAV.href}
+          onClick={guardLink(PROFILE_NAV.href)}
           className={cn(
             "flex items-center gap-3 rounded-[10px] px-2.5 py-2.5 transition-all duration-300 ease-out",
             isActivePath(pathname, PROFILE_NAV.href)
@@ -218,16 +214,16 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
           )}
         >
           <UserAvatar
-            name={user?.nome ?? "Usuário"}
+            name={user?.nome ?? "Visitante"}
             fotoUrl={user?.fotoUrl}
             className="size-9"
           />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-white">
-              {user?.nome ?? "Usuário"}
+              {user?.nome ?? "Entrar"}
             </p>
             <p className="truncate text-xs text-white/40">
-              {user?.email ?? ""}
+              {user?.email ?? "Faça login para salvar"}
             </p>
           </div>
           <MoreHorizontal

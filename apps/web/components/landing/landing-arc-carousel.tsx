@@ -46,9 +46,13 @@ export const PRODUCT_FEATURES: ProductFeature[] = [
 
 const CARD_COUNT = PRODUCT_FEATURES.length;
 const LOOP_DURATION = 24;
-const SPREAD_STEP = 0.42;
 const RAD_TO_DEG = 180 / Math.PI;
 const VISIBLE_OFFSET = 4.6;
+
+const CAROUSEL_LAYOUT = {
+  section: { spreadXFactor: 0.64, spreadStep: 0.42 },
+  background: { spreadXFactor: 0.86, spreadStep: 0.56 },
+} as const;
 
 function getCopyRange(index: number, progress: number) {
   const minCopy = Math.ceil((progress - index - VISIBLE_OFFSET) / CARD_COUNT);
@@ -62,10 +66,14 @@ function getCopyRange(index: number, progress: number) {
   return copies;
 }
 
-function getCardTransform(linearOffset: number, viewportWidth: number) {
-  const spreadX = viewportWidth * 0.64;
+function getCardTransform(
+  linearOffset: number,
+  viewportWidth: number,
+  layout: (typeof CAROUSEL_LAYOUT)[keyof typeof CAROUSEL_LAYOUT],
+) {
+  const spreadX = viewportWidth * layout.spreadXFactor;
   const spreadY = spreadX * 0.28;
-  const cardSpacing = Math.sin(SPREAD_STEP) * spreadX;
+  const cardSpacing = Math.sin(layout.spreadStep) * spreadX;
 
   const x = linearOffset * cardSpacing;
   const t = Math.asin(Math.max(-1, Math.min(1, x / spreadX)));
@@ -221,7 +229,13 @@ function FeaturePreview({
   );
 }
 
-export function LandingArcCarousel() {
+export function LandingArcCarousel({
+  variant = "section",
+  className,
+}: {
+  variant?: "section" | "background";
+  className?: string;
+}) {
   const [progress, setProgress] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(1440);
   const progressRef = useRef(0);
@@ -254,10 +268,15 @@ export function LandingArcCarousel() {
     };
   }, []);
 
-  const cardWidth = Math.min(Math.max(viewportWidth * 0.22, 260), 380);
+  const isBackground = variant === "background";
+  const layout = CAROUSEL_LAYOUT[variant];
+  const cardWidth = Math.min(
+    Math.max(viewportWidth * (isBackground ? 0.24 : 0.22), isBackground ? 260 : 260),
+    isBackground ? 380 : 380,
+  );
   const previewHeight = cardWidth * 0.58;
   const footerHeight = 44;
-  const spreadX = viewportWidth * 0.64;
+  const spreadX = viewportWidth * layout.spreadXFactor;
   const arcDepth = spreadX * 0.28;
 
   const visibleCards = PRODUCT_FEATURES.flatMap((feature, index) =>
@@ -269,9 +288,19 @@ export function LandingArcCarousel() {
   );
 
   return (
-    <div className="relative left-1/2 mt-2 w-screen -translate-x-1/2 overflow-x-clip md:mt-4">
+    <div
+      className={cn(
+        isBackground
+          ? "absolute inset-0 z-0 flex items-center justify-center overflow-hidden"
+          : "relative left-1/2 mt-2 w-screen -translate-x-1/2 overflow-x-clip md:mt-4",
+        className,
+      )}
+    >
       <div
-        className="pointer-events-none absolute top-1/2 left-1/2 rounded-[50%] border border-dashed border-black/[0.14]"
+        className={cn(
+          "pointer-events-none absolute top-1/2 left-1/2 rounded-[50%] border border-dashed",
+          isBackground ? "border-white/10" : "border-black/[0.14]",
+        )}
         style={{
           width: spreadX * 2,
           height: arcDepth * 2,
@@ -280,9 +309,23 @@ export function LandingArcCarousel() {
         aria-hidden
       />
 
-      <div className="relative h-[clamp(300px,40vw,520px)] w-full">
+      <div
+        className={cn(
+          "relative w-full",
+          isBackground
+            ? "h-[clamp(360px,58vh,720px)]"
+            : "h-[clamp(300px,40vw,520px)]",
+        )}
+      >
         {visibleCards.map(({ feature, offset, key }) => {
-          const transform = getCardTransform(offset, viewportWidth);
+          const transform = getCardTransform(offset, viewportWidth, layout);
+          const cardOpacity = isBackground
+            ? transform.opacity * 0.72
+            : transform.opacity;
+
+          const cardZIndex = isBackground
+            ? Math.max(1, 4 - Math.round(Math.abs(offset)))
+            : transform.zIndex;
 
           return (
             <article
@@ -292,8 +335,8 @@ export function LandingArcCarousel() {
                 width: cardWidth,
                 transform: `translate3d(calc(-50% + ${transform.x}px), calc(-50% + ${transform.y}px), 0) rotate(${transform.rotate}deg) scale(${transform.scale})`,
                 transformOrigin: "center center",
-                opacity: transform.opacity,
-                zIndex: transform.zIndex,
+                opacity: cardOpacity,
+                zIndex: cardZIndex,
               }}
             >
               <div style={{ height: previewHeight }}>

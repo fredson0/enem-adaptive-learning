@@ -174,7 +174,7 @@ function EnemHero() {
               }}
             >
               <Link
-                href="/login"
+                href="/tutor"
                 className="group inline-flex items-center gap-2 self-start rounded-full bg-[#b0ff57] py-1 pr-1 pl-5 text-sm font-medium text-black transition-all hover:gap-3 sm:text-base"
               >
                 Começar agora

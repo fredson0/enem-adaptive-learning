@@ -9,6 +9,134 @@ export const AREA_CORES: Record<string, string> = {
   natureza: "#34d399",
 };
 
+export const AREA_SIGLAS: Record<string, string> = {
+  matematica: "MAT",
+  linguagens: "LIN",
+  humanas: "HUM",
+  natureza: "NAT",
+};
+
+export const AREA_ORDEM_RADAR = [
+  "matematica",
+  "natureza",
+  "linguagens",
+  "humanas",
+] as const;
+
+export type SegmentoArea = {
+  slug: string;
+  label: string;
+  sigla: string;
+  valor: number;
+  cor: string;
+};
+
+export function montarSegmentosPorArea(
+  areas: ProficienciaArea[],
+): SegmentoArea[] {
+  return areas
+    .map((area) => ({
+      slug: area.slug,
+      label: area.label,
+      sigla: AREA_SIGLAS[area.slug] ?? area.slug.slice(0, 3).toUpperCase(),
+      valor: area.totalQuestoes,
+      cor: AREA_CORES[area.slug] ?? "#ffffff",
+    }))
+    .filter((segmento) => segmento.valor > 0)
+    .sort((a, b) => b.valor - a.valor);
+}
+
+export type DiaSemanaStatus = {
+  label: string;
+  ativo: boolean;
+  hoje: boolean;
+};
+
+export type RitmoSemanal = {
+  diasAtivosNaSemana: number;
+  sequenciaAtual: number;
+  melhorSequencia: number;
+  dias: DiaSemanaStatus[];
+};
+
+const LABELS_DIA = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+
+function toDateKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function startOfWeekMonday(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(12, 0, 0, 0);
+  return d;
+}
+
+/** Dias com prática na semana atual, sequência e melhor sequência. */
+export function calcularRitmoSemanal(pontos: PontoEvolucao[]): RitmoSemanal {
+  const activityDates = new Set<string>();
+  for (const ponto of pontos) {
+    activityDates.add(toDateKey(new Date(ponto.finalizadoEm)));
+  }
+
+  const hoje = new Date();
+  hoje.setHours(12, 0, 0, 0);
+  const hojeKey = toDateKey(hoje);
+  const inicioSemana = startOfWeekMonday(hoje);
+
+  const dias: DiaSemanaStatus[] = LABELS_DIA.map((label, index) => {
+    const dia = new Date(inicioSemana);
+    dia.setDate(dia.getDate() + index);
+    const key = toDateKey(dia);
+    return {
+      label,
+      ativo: activityDates.has(key),
+      hoje: key === hojeKey,
+    };
+  });
+
+  let sequenciaAtual = 0;
+  const cursor = new Date(hoje);
+  if (!activityDates.has(hojeKey)) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  while (activityDates.has(toDateKey(cursor))) {
+    sequenciaAtual += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  const sorted = [...activityDates].sort();
+  let melhorSequencia = 0;
+  let atual = 0;
+  let anterior: string | null = null;
+
+  for (const key of sorted) {
+    if (anterior) {
+      const prev = new Date(`${anterior}T12:00:00`);
+      const curr = new Date(`${key}T12:00:00`);
+      const diff =
+        (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
+      atual = diff === 1 ? atual + 1 : 1;
+    } else {
+      atual = 1;
+    }
+    melhorSequencia = Math.max(melhorSequencia, atual);
+    anterior = key;
+  }
+
+  return {
+    diasAtivosNaSemana: dias.filter((dia) => dia.ativo).length,
+    sequenciaAtual,
+    melhorSequencia,
+    dias,
+  };
+}
+
 export type TendenciaArea = number | null;
 
 /** Delta entre os dois últimos simulados da mesma área. */

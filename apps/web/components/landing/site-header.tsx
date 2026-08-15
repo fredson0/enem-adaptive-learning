@@ -80,6 +80,16 @@ function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
 
+const AUTH_HEADER_MORPH: HeaderMorph = { detach: 1, compact: 1 };
+
+function resolveNavHref(href: string, useHomeAnchors: boolean) {
+  if (useHomeAnchors && href.startsWith("#")) {
+    return `/${href}`;
+  }
+
+  return href;
+}
+
 function getScrollMaxWidth(compact: number) {
   const rem = getScrollMaxWidthRem(compact);
   if (rem === null) return "100%";
@@ -95,7 +105,8 @@ function getTargetWidthRem(
   return rem;
 }
 
-export function SiteHeader() {
+export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "auth" }) {
+  const isAuth = variant === "auth";
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuActive, setMenuActive] = useState(false);
   const [menuMorph, setMenuMorph] = useState<HeaderMorph | null>(null);
@@ -111,7 +122,20 @@ export function SiteHeader() {
   const menuInnerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
-  const activeMorph = menuMorph ?? morph;
+  const getRestMorph = () => (isAuth ? AUTH_HEADER_MORPH : readScrollMorph());
+
+  const activeMorph = isAuth
+    ? (menuMorph ?? AUTH_HEADER_MORPH)
+    : (menuMorph ?? morph);
+
+  useEffect(() => {
+    if (!isAuth) return;
+
+    setMenuOpen(false);
+    setMenuActive(false);
+    setMenuMorph(null);
+    setMenuWidthRem(null);
+  }, [isAuth]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -147,9 +171,9 @@ export function SiteHeader() {
     setMenuOpen(true);
     setMenuActive(true);
 
-    const startMorph = readScrollMorph();
+    const startMorph = getRestMorph();
     morphRef.current = startMorph;
-    const needsCompactFirst = startMorph.compact < 0.55;
+    const needsCompactFirst = !isAuth && startMorph.compact < 0.55;
     const panelHeight = menuInnerRef.current.scrollHeight;
     const currentWidthRem =
       containerRef.current.getBoundingClientRect().width / 16;
@@ -227,12 +251,14 @@ export function SiteHeader() {
 
     timelineRef.current?.kill();
 
-    const targetMorph = readScrollMorph();
+    const targetMorph = getRestMorph();
     morphRef.current = targetMorph;
 
     const viewportWidth =
       headerRef.current?.clientWidth ?? window.innerWidth;
-    const targetWidthRem = getTargetWidthRem(targetMorph, viewportWidth);
+    const targetWidthRem = isAuth
+      ? COMPACT_MAX
+      : getTargetWidthRem(targetMorph, viewportWidth);
 
     const animState = {
       detach: menuMorph?.detach ?? targetMorph.detach,
@@ -251,7 +277,12 @@ export function SiteHeader() {
 
     const tl = gsap.timeline({
       onComplete: () => {
-        syncFromScroll();
+        if (!isAuth) {
+          syncFromScroll();
+        } else {
+          morphRef.current = AUTH_HEADER_MORPH;
+        }
+
         setMenuOpen(false);
         setMenuActive(false);
         setMenuMorph(null);
@@ -315,13 +346,16 @@ export function SiteHeader() {
     openMenu();
   };
 
-  const showNavLinks = activeMorph.compact < 0.45 && !menuOpen;
-  const showLogo = activeMorph.compact > 0.2 || menuOpen;
-  const showTicker = activeMorph.compact < 0.2 && !menuOpen;
+  const showNavLinks = !isAuth && activeMorph.compact < 0.45 && !menuOpen;
+  const showLogo = isAuth || activeMorph.compact > 0.2 || menuOpen;
+  const showTicker = !isAuth && activeMorph.compact < 0.2 && !menuOpen;
+  const useCompactShell = isAuth || activeMorph.detach > 0.08 || menuOpen;
 
   const containerMaxWidth = menuWidthRem
     ? `${menuWidthRem}rem`
-    : getScrollMaxWidth(morph.compact);
+    : isAuth
+      ? `${COMPACT_MAX}rem`
+      : getScrollMaxWidth(morph.compact);
 
   const headerPaddingTop = lerp(0, 16, activeMorph.detach);
   const headerPaddingX = lerp(0, 16, activeMorph.compact);
@@ -353,15 +387,17 @@ export function SiteHeader() {
           ref={navShellRef}
           className={cn(
             "relative z-20 overflow-hidden bg-black transition-[border-radius,padding] duration-500 ease-out",
-            activeMorph.detach > 0.08 || menuOpen
-              ? "rounded-2xl md:rounded-3xl"
+            useCompactShell
+              ? "rounded-xl border border-white/10"
               : "rounded-b-2xl md:rounded-b-3xl",
           )}
         >
           <div
             className="relative flex items-center justify-between gap-3 transition-[padding] duration-500 ease-out"
             style={{
-              padding: `${lerp(10, 8, activeMorph.compact)}px ${lerp(24, 14, activeMorph.compact)}px`,
+              padding: useCompactShell
+                ? "10px 16px"
+                : `${lerp(10, 8, activeMorph.compact)}px ${lerp(24, 14, activeMorph.compact)}px`,
             }}
           >
             <button
@@ -391,7 +427,7 @@ export function SiteHeader() {
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}
-                  href={link.href}
+                  href={resolveNavHref(link.href, isAuth)}
                   className="text-xs text-[#E1E0CC]/75 transition-colors hover:text-[#E1E0CC] lg:text-sm"
                 >
                   {link.label}
@@ -423,11 +459,18 @@ export function SiteHeader() {
               <SlideHoverButton
                 href="/login"
                 label="Login"
-                className="hidden h-9 rounded-full px-4 text-xs text-[#E1E0CC]/80 hover:text-[#E1E0CC] sm:inline-flex sm:text-sm"
+                className={cn(
+                  "hidden h-9 rounded-full px-4 text-xs text-[#E1E0CC]/80 hover:text-[#E1E0CC] sm:inline-flex sm:text-sm",
+                  useCompactShell &&
+                    "rounded-lg border border-white/15 bg-white/[0.08] px-4 hover:bg-white/[0.12]",
+                )}
               />
               <Link
-                href="/login"
-                className="inline-flex h-9 items-center rounded-full bg-[#b0ff57] px-4 text-xs font-medium text-black transition hover:bg-[#c4ff7a] sm:text-sm"
+                href="/tutor"
+                className={cn(
+                  "inline-flex h-9 items-center bg-[#b0ff57] px-4 text-xs font-medium text-black transition hover:bg-[#c4ff7a] sm:text-sm",
+                  useCompactShell ? "rounded-lg" : "rounded-full",
+                )}
               >
                 Começar
               </Link>
@@ -453,7 +496,13 @@ export function SiteHeader() {
           className="h-0 overflow-hidden opacity-0"
           aria-hidden={!menuOpen}
         >
-          <div ref={menuInnerRef} className="rounded-b-2xl border border-t-0 border-white/10 bg-black p-4 md:rounded-b-3xl md:p-5">
+          <div
+            ref={menuInnerRef}
+            className={cn(
+              "border border-t-0 border-white/10 bg-black p-4 md:p-5",
+              useCompactShell ? "rounded-b-xl" : "rounded-b-2xl md:rounded-b-3xl",
+            )}
+          >
             <div className="grid gap-4 md:grid-cols-3">
               <section className="rounded-xl border border-white/8 bg-white/[0.03] p-5 md:p-6">
                 <p className="mb-5 font-mono text-[10px] tracking-[0.24em] text-[#E1E0CC]/40 uppercase">
@@ -463,7 +512,7 @@ export function SiteHeader() {
                   {PRODUTO_LINKS.map((link) => (
                     <li key={link.href}>
                       <Link
-                        href={link.href}
+                        href={resolveNavHref(link.href, isAuth)}
                         onClick={closeMenu}
                         className="group flex items-center gap-2 text-base font-medium text-[#E1E0CC]/85 transition hover:text-[#E1E0CC]"
                       >
@@ -487,7 +536,7 @@ export function SiteHeader() {
                   {EXPLORAR_LINKS.map((link) => (
                     <li key={link.href}>
                       <Link
-                        href={link.href}
+                        href={resolveNavHref(link.href, isAuth)}
                         onClick={closeMenu}
                         className="text-base font-medium text-[#E1E0CC]/80 transition hover:text-[#E1E0CC]"
                       >
@@ -536,7 +585,7 @@ export function SiteHeader() {
                 </div>
 
                 <Link
-                  href="/login"
+                  href="/tutor"
                   onClick={closeMenu}
                   className="flex h-10 w-full items-center justify-center rounded-full bg-[#b0ff57] text-sm font-medium text-black transition hover:bg-[#c4ff7a]"
                 >
