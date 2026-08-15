@@ -1,4 +1,6 @@
 import { LandingArcCarousel } from "@/components/landing/landing-arc-carousel";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export function LandingProductShowcase() {
   return (
@@ -45,6 +47,24 @@ export function LandingProductShowcase() {
       </div>
 
       <LandingArcCarousel />
+
+      <div className="mx-auto mt-10 max-w-3xl px-4 text-center md:mt-14">
+        <p className="font-display text-[clamp(1.25rem,2.8vw,2rem)] leading-[1.22] font-medium tracking-[-0.03em] text-balance text-[#0b1220]">
+          ENEM+ é uma plataforma que evolui com você — simulados, tutor IA, trilha
+          e métricas no mesmo lugar, sempre ajustados ao que você ainda precisa
+          dominar.
+        </p>
+
+        <Link
+          href="/login"
+          className="group mt-8 inline-flex items-center gap-2 rounded-full bg-[#b0ff57] py-1 pr-1 pl-5 text-sm font-medium text-black transition-all hover:gap-3 sm:text-base"
+        >
+          Começar agora
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black transition-transform group-hover:scale-110 sm:h-10 sm:w-10">
+            <ArrowRight className="h-4 w-4 text-[#E1E0CC]" />
+          </span>
+        </Link>
+      </div>
     </section>
   );
 }
