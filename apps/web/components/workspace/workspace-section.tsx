@@ -4,7 +4,7 @@ import { useWorkspaceScroll } from "@/components/workspace/workspace-scroll-cont
 import { cn } from "@/lib/utils";
 
 /** Espaço para as tags flutuantes (seção + plano) no topo. */
-export const WORKSPACE_CHROME_OFFSET = "pt-[4.75rem] md:pt-[5.75rem]";
+export const WORKSPACE_CHROME_OFFSET = "pt-[5.25rem] sm:pt-[5.5rem] md:pt-[5.75rem]";
 
 type WorkspaceSectionProps = {
   title?: string;
@@ -39,7 +39,7 @@ export function WorkspaceSection({
     >
       <div
         className={cn(
-          "px-6 md:px-10 lg:px-12",
+          "px-4 md:px-10 lg:px-12",
           title ? WORKSPACE_CHROME_OFFSET : null,
         )}
       >
@@ -57,7 +57,7 @@ export function WorkspaceSection({
 
       <div
         className={cn(
-          "flex-1 px-6 pb-10 md:px-10 md:pb-12 lg:px-12",
+          "flex-1 px-4 pb-8 md:px-10 md:pb-12 lg:px-12",
           title ? "pt-8 md:pt-10" : WORKSPACE_CHROME_OFFSET,
           contentClassName,
         )}

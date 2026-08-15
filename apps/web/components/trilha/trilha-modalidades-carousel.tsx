@@ -14,11 +14,11 @@ function ModalidadePreviewCard({
   return (
     <Link
       href={`/trilha/geral?modalidade=${encodeURIComponent(modalidade.id)}`}
-      className="group block w-[148px] shrink-0 sm:w-[160px]"
+      className="group block w-[118px] shrink-0 sm:w-[148px] md:w-[160px]"
     >
       <div
         className={cn(
-          "relative h-[120px] overflow-hidden rounded-[14px] border border-white/[0.08]",
+          "relative h-[96px] overflow-hidden rounded-[12px] border border-white/[0.08] sm:h-[120px] sm:rounded-[14px]",
           "transition duration-300 group-hover:border-white/20 group-hover:brightness-110",
         )}
       >
@@ -30,8 +30,8 @@ function ModalidadePreviewCard({
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_15%,rgba(255,255,255,0.1),transparent_55%)]" />
 
-        <div className="relative flex h-full flex-col justify-end p-3.5">
-          <p className="text-sm font-medium leading-snug text-white">
+        <div className="relative flex h-full flex-col justify-end p-2.5 sm:p-3.5">
+          <p className="text-xs font-medium leading-snug text-white sm:text-sm">
             {modalidade.nome}
           </p>
         </div>

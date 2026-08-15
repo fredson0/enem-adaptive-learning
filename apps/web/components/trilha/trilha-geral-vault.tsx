@@ -83,7 +83,7 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
 
   if (modalidadeId && !modalidadeAtiva) {
     return (
-      <div className="mx-auto max-w-6xl space-y-6 pb-8">
+      <div className="mx-auto max-w-6xl space-y-6 pb-6 sm:space-y-8">
         <Link
           href="/trilha/geral"
           className="inline-flex items-center gap-2 text-sm text-white/45 transition hover:text-white/75"
@@ -100,7 +100,7 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
     const area = mapaArea.get(modalidadeAtiva.areaSlug);
 
     return (
-      <div className="mx-auto max-w-6xl space-y-12 pb-8">
+      <div className="mx-auto max-w-6xl space-y-8 pb-6 sm:space-y-12 sm:pb-8">
         <button
           type="button"
           onClick={voltar}
@@ -110,18 +110,18 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
           Todas as modalidades
         </button>
 
-        <header className="mx-auto max-w-2xl space-y-8 text-center">
-          <div className="space-y-3">
+        <header className="mx-auto max-w-2xl space-y-5 text-center sm:space-y-8">
+          <div className="space-y-2 sm:space-y-3">
             <p
-              className="text-[11px] uppercase tracking-[0.18em]"
+              className="text-[10px] uppercase tracking-[0.18em] sm:text-[11px]"
               style={{ color: modalidadeAtiva.areaCor }}
             >
               {modalidadeAtiva.areaTag}
             </p>
-            <h1 className="text-3xl font-medium tracking-tight text-white md:text-5xl">
+            <h1 className="text-2xl font-medium tracking-tight text-white sm:text-3xl md:text-5xl">
               {modalidadeAtiva.nome}
             </h1>
-            <p className="text-sm text-white/40 md:text-base">
+            <p className="text-xs text-white/40 sm:text-sm md:text-base">
               {modalidadeAtiva.assuntos.length} assuntos — escolha por onde
               começar.
             </p>
@@ -134,7 +134,7 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
 
           <div className="relative mx-auto max-w-xl">
             <Search
-              className="pointer-events-none absolute left-5 top-1/2 size-4 -translate-y-1/2 text-white/30"
+              className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white/30 sm:left-5"
               strokeWidth={1.75}
             />
             <input
@@ -143,7 +143,7 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
               onChange={(event) => setBusca(event.target.value)}
               placeholder="Buscar assunto…"
               className={cn(
-                "w-full rounded-full border border-white/[0.08] bg-[#1a1a1a] py-3.5 pr-5 pl-12 text-sm text-white",
+                "w-full rounded-full border border-white/[0.08] bg-[#1a1a1a] py-3 pr-4 pl-11 text-sm text-white sm:py-3.5 sm:pr-5 sm:pl-12",
                 "placeholder:text-white/30 outline-none transition",
                 "focus:border-white/20 focus:bg-[#1e1e1e]",
               )}
@@ -159,7 +159,7 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
           ) : null}
         </header>
 
-        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 sm:gap-x-4 sm:gap-y-8 md:grid-cols-4 lg:grid-cols-5">
           {assuntosFiltrados.map((assunto) => (
             <TrilhaAssuntoCard
               key={assunto.id}
@@ -183,12 +183,12 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
         Voltar
       </Link>
 
-      <header className="mx-auto max-w-2xl space-y-8 text-center">
-        <div className="space-y-3">
-          <h1 className="text-3xl font-medium tracking-tight text-white md:text-5xl">
+      <header className="mx-auto max-w-2xl space-y-5 text-center sm:space-y-8">
+        <div className="space-y-2 sm:space-y-3">
+          <h1 className="text-2xl font-medium tracking-tight text-white sm:text-3xl md:text-5xl">
             Todas as modalidades
           </h1>
-          <p className="text-sm text-white/40 md:text-base">
+          <p className="text-xs text-white/40 sm:text-sm md:text-base">
             {TRILHA_MODALIDADES.length} modalidades do ENEM — escolha uma para
             ver os assuntos.
           </p>
@@ -205,7 +205,7 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
             onChange={(event) => setBusca(event.target.value)}
             placeholder="Buscar modalidade…"
             className={cn(
-              "w-full rounded-full border border-white/[0.08] bg-[#1a1a1a] py-3.5 pr-5 pl-12 text-sm text-white",
+              "w-full rounded-full border border-white/[0.08] bg-[#1a1a1a] py-3 pr-4 pl-11 text-sm text-white sm:py-3.5 sm:pr-5 sm:pl-12",
               "placeholder:text-white/30 outline-none transition",
               "focus:border-white/20 focus:bg-[#1e1e1e]",
             )}
@@ -221,21 +221,21 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
         ) : null}
       </header>
 
-      <div className="space-y-14">
+      <div className="space-y-8 sm:space-y-14">
         {gruposModalidades.map((grupo) => {
           const area = mapaArea.get(grupo.areaSlug);
 
           return (
-            <section key={grupo.areaSlug} className="space-y-5">
-              <div className="flex flex-wrap items-end justify-between gap-3 border-b border-white/[0.06] pb-4">
+            <section key={grupo.areaSlug} className="space-y-4 sm:space-y-5">
+              <div className="flex flex-wrap items-end justify-between gap-2 border-b border-white/[0.06] pb-3 sm:gap-3 sm:pb-4">
                 <div>
                   <p
-                    className="text-[11px] uppercase tracking-[0.18em]"
+                    className="text-[10px] uppercase tracking-[0.18em] sm:text-[11px]"
                     style={{ color: grupo.cor }}
                   >
                     {grupo.tag}
                   </p>
-                  <h2 className="mt-1 text-xl font-medium text-white md:text-2xl">
+                  <h2 className="mt-0.5 text-lg font-medium text-white sm:mt-1 sm:text-xl md:text-2xl">
                     {grupo.label}
                   </h2>
                 </div>
@@ -246,7 +246,7 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
                 ) : null}
               </div>
 
-              <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 sm:gap-x-4 sm:gap-y-8 md:grid-cols-4 lg:grid-cols-5">
                 {grupo.itens.map((modalidade) => (
                   <TrilhaModalidadeCard
                     key={modalidade.id}

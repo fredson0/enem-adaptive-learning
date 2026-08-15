@@ -59,7 +59,7 @@ function OrientacaoPainel({ disciplinas }: { disciplinas: string[] }) {
       : ["os tópicos mais cobrados no ENEM"];
 
   return (
-    <div className="mt-4 space-y-4 rounded-[14px] border border-white/[0.08] bg-black/25 p-4">
+    <div className="mt-3 space-y-2.5 rounded-[12px] border border-white/[0.08] bg-black/25 p-3 sm:mt-4 sm:space-y-4 sm:rounded-[14px] sm:p-4">
       <div>
         <p className="text-[10px] uppercase tracking-[0.14em] text-white/35">
           Assuntos prioritários
@@ -126,7 +126,7 @@ function EtapaAcoes({
         <button
           type="button"
           onClick={onToggleOrientacao}
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs text-white/75 transition hover:border-white/25 hover:bg-white/[0.08]"
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs text-white/75 transition hover:border-white/25 hover:bg-white/[0.08] sm:w-auto"
         >
           {orientacaoAberta
             ? "Ocultar orientação"
@@ -148,7 +148,7 @@ function EtapaAcoes({
             type="button"
             disabled={toggling}
             onClick={() => onToggleEtapa(etapa.id, true)}
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#b0ff57] px-4 py-2 text-xs font-medium text-black transition hover:bg-[#c4ff7a] disabled:opacity-50"
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#b0ff57] px-4 py-2 text-xs font-medium text-black transition hover:bg-[#c4ff7a] disabled:opacity-50 sm:w-auto"
           >
             {toggling ? (
               <Loader2 className="size-3.5 animate-spin" />
@@ -167,7 +167,7 @@ function EtapaAcoes({
       <button
         type="button"
         onClick={() => onAbrirTutor(area.perguntaTutor)}
-        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#b0ff57] px-4 py-2 text-xs font-medium text-black transition hover:bg-[#c4ff7a]"
+        className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#b0ff57] px-4 py-2 text-xs font-medium text-black transition hover:bg-[#c4ff7a] sm:w-auto"
       >
         {repassando ? "Repasar com tutor" : "Abrir tutor IA"}
         <ChevronRight className="size-3.5" />
@@ -179,7 +179,7 @@ function EtapaAcoes({
     return (
       <Link
         href={etapa.href}
-        className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-medium text-white/85 transition hover:border-[#b0ff57]/30 hover:bg-[#b0ff57]/10 hover:text-white"
+        className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-medium text-white/85 transition hover:border-[#b0ff57]/30 hover:bg-[#b0ff57]/10 hover:text-white sm:w-auto"
       >
         {repassando ? "Repasar etapa" : "Iniciar etapa"}
         <ChevronRight className="size-3.5" />
@@ -266,19 +266,19 @@ export function TrilhaAreaDetalheView({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               className={cn(
-                "overflow-hidden rounded-[20px] border border-white/[0.08] bg-gradient-to-br p-6",
+                "overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br p-4 sm:rounded-[20px] sm:p-6",
                 AREA_GRADIENTS[area.slug] ?? "from-[#161616] to-[#111]",
               )}
             >
-              <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] uppercase tracking-[0.14em] text-white/40">
                     {isPrioridade ? "Trilha prioritária" : "Plano da área"}
                   </p>
-                  <h1 className="mt-2 text-2xl font-medium tracking-tight text-white md:text-3xl">
+                  <h1 className="mt-1.5 text-xl font-medium tracking-tight text-white sm:mt-2 sm:text-2xl md:text-3xl">
                     {assuntoFoco ? assuntoFoco.nome : area.label}
                   </h1>
-                  <p className="mt-2 max-w-xl text-sm text-white/45">
+                  <p className="mt-1.5 max-w-xl text-[13px] leading-relaxed text-white/45 sm:mt-2 sm:text-sm">
                     {assuntoFoco
                       ? `Plano de estudos em ${assuntoFoco.nome} · ${contextoEstudo}.`
                       : area.disciplinasSugeridas.length > 0
@@ -298,6 +298,7 @@ export function TrilhaAreaDetalheView({
                   chat={chat}
                   variant="ghost"
                   label="Atualizar plano com IA"
+                  className="w-full sm:w-auto sm:items-end"
                 />
               </div>
             </motion.article>
@@ -334,7 +335,7 @@ export function TrilhaAreaDetalheView({
                     <section
                       key={etapa.id}
                       className={cn(
-                        "rounded-[16px] border p-4 transition",
+                        "rounded-[14px] border p-3 transition sm:rounded-[16px] sm:p-4",
                         etapa.concluida
                           ? "border-[#b0ff57]/15 bg-[#b0ff57]/5"
                           : isProxima

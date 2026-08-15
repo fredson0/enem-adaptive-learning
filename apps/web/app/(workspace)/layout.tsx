@@ -5,6 +5,7 @@ import { TokensIaProvider } from "@/components/workspace/tokens-ia-provider";
 import { TutorSessionProvider } from "@/components/workspace/tutor-session-provider";
 import { WorkspaceLenisGuard } from "@/components/workspace/workspace-lenis-guard";
 import { WorkspaceScrollProvider } from "@/components/workspace/workspace-scroll-context";
+import { WorkspaceSidebarProvider } from "@/components/workspace/workspace-sidebar-context";
 import { WorkspaceSidebar } from "@/components/workspace/workspace-sidebar";
 import { WorkspacePageTransition } from "@/components/workspace/workspace-page-transition";
 
@@ -19,12 +20,14 @@ export default function WorkspaceLayout({
         <TokensIaProvider>
           <TutorSessionProvider>
             <WorkspaceScrollProvider>
-              <div className="osmo-canvas-bg relative h-screen w-screen overflow-hidden">
-                <WorkspaceLenisGuard />
-                <OnboardingGuard />
-                <WorkspacePageTransition>{children}</WorkspacePageTransition>
-                <WorkspaceSidebar />
-              </div>
+              <WorkspaceSidebarProvider>
+                <div className="osmo-canvas-bg relative h-screen w-screen overflow-hidden">
+                  <WorkspaceLenisGuard />
+                  <OnboardingGuard />
+                  <WorkspacePageTransition>{children}</WorkspacePageTransition>
+                  <WorkspaceSidebar />
+                </div>
+              </WorkspaceSidebarProvider>
             </WorkspaceScrollProvider>
           </TutorSessionProvider>
         </TokensIaProvider>

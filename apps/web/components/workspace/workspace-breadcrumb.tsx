@@ -20,8 +20,8 @@ export function WorkspaceBreadcrumb() {
   if (crumbs.length === 0) return null;
 
   return (
-    <nav aria-label="Breadcrumb">
-      <ol className="flex max-w-[min(60vw,36rem)] items-center gap-1.5">
+    <nav aria-label="Breadcrumb" className="min-w-0">
+      <ol className="flex min-w-0 items-center gap-1 overflow-hidden sm:gap-1.5">
         {crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1;
           const isDeepCurrent = isLast && crumbs.length > 1;
@@ -42,7 +42,7 @@ export function WorkspaceBreadcrumb() {
               {isLast || !crumb.href ? (
                 <span
                   className={cn(
-                    "truncate px-3 py-1.5 text-[13px]",
+                    "block max-w-[34vw] truncate px-2.5 py-1.5 text-xs sm:max-w-none sm:px-3 sm:text-[13px]",
                     isDeepCurrent
                       ? "rounded-[8px] bg-[#2a2a2a] text-white/90"
                       : "rounded-full bg-[#1c1c1c] text-white/60",
@@ -53,7 +53,7 @@ export function WorkspaceBreadcrumb() {
               ) : (
                 <Link
                   href={crumb.href}
-                  className="truncate rounded-full bg-[#1c1c1c] px-3 py-1.5 text-[13px] text-white/60 transition-colors hover:bg-[#222] hover:text-white/85"
+                  className="block max-w-[34vw] truncate rounded-full bg-[#1c1c1c] px-2.5 py-1.5 text-xs text-white/60 transition-colors hover:bg-[#222] hover:text-white/85 sm:max-w-none sm:px-3 sm:text-[13px]"
                 >
                   {crumb.label}
                 </Link>

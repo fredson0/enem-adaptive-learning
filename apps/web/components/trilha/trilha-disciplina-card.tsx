@@ -69,7 +69,7 @@ export function TrilhaAssuntoCard({
         </div>
       </div>
 
-      <p className="mt-2.5 line-clamp-2 text-sm text-white/70 transition group-hover:text-white">
+      <p className="mt-2 line-clamp-2 text-xs text-white/70 transition group-hover:text-white sm:mt-2.5 sm:text-sm">
         {assunto.nome}
       </p>
     </Link>

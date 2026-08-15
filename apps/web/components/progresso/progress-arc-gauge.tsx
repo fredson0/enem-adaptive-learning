@@ -25,7 +25,7 @@ export function ProgressArcGauge({
   const radius = 108;
 
   return (
-    <div className={cn("relative mx-auto w-full max-w-[280px]", className)}>
+    <div className={cn("relative mx-auto w-full max-w-[220px] sm:max-w-[280px]", className)}>
       <svg viewBox="0 0 280 150" className="h-auto w-full" aria-hidden>
         {Array.from({ length: ticks }).map((_, index) => {
           const t = ticks <= 1 ? 0 : index / (ticks - 1);
@@ -53,12 +53,12 @@ export function ProgressArcGauge({
         })}
       </svg>
 
-      <div className="pointer-events-none absolute inset-x-0 top-[38%] flex justify-center">
-        <div className="flex items-center">
-          <span className="rounded-l-full bg-black px-3 py-1.5 text-sm font-medium text-white">
+      <div className="pointer-events-none absolute inset-x-0 top-[36%] flex justify-center sm:top-[38%]">
+        <div className="flex max-w-[92%] items-center">
+          <span className="truncate rounded-l-full bg-black px-2 py-1 text-xs font-medium text-white sm:px-3 sm:py-1.5 sm:text-sm">
             {labelLeft ?? `${clamped}%`}
           </span>
-          <span className="rounded-r-full bg-white/20 px-3 py-1.5 text-sm font-medium text-white/90 backdrop-blur-sm">
+          <span className="truncate rounded-r-full bg-white/20 px-2 py-1 text-xs font-medium text-white/90 backdrop-blur-sm sm:px-3 sm:py-1.5 sm:text-sm">
             {labelRight ?? (clamped >= 100 ? "Concluída" : "Em andamento")}
           </span>
         </div>

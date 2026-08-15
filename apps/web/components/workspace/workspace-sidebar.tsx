@@ -8,6 +8,7 @@ import {
 } from "@/components/workspace/sidebar-tree-nav";
 import { SidebarAccordion } from "@/components/workspace/sidebar-accordion";
 import { UserAvatar } from "@/components/workspace/user-avatar";
+import { useWorkspaceSidebar } from "@/components/workspace/workspace-sidebar-context";
 import { cn } from "@/lib/utils";
 import {
   isActivePath,
@@ -18,12 +19,21 @@ import {
 import { SIMULADO_MODOS } from "@/lib/simulado-modos";
 import { TUTOR_CHAT_PATH } from "@/lib/tutor-navigation";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
-import { Asterisk, ChevronRight, ClipboardList, MoreHorizontal } from "lucide-react";
+import {
+  Asterisk,
+  ChevronRight,
+  ClipboardList,
+  MoreHorizontal,
+  X,
+} from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type MouseEvent } from "react";
 
 type SectionId = "tutor" | "simulados" | "trilha" | "progresso";
+
+const DRAWER_EASE = [0.22, 1, 0.36, 1] as const;
 
 function getSectionFromPath(pathname: string): SectionId | null {
   if (pathname.startsWith("/tutor")) return "tutor";
@@ -40,6 +50,7 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
   const router = useRouter();
   const { goToTutor } = useTutorSession();
   const { user, requireAuth } = useAuth();
+  const { isMobile, isOpen, close } = useWorkspaceSidebar();
 
   const [expandedSection, setExpandedSection] = useState<SectionId | null>(
     () => getSectionFromPath(pathname),
@@ -74,20 +85,32 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
   const isSimuladosExpanded = expandedSection === "simulados";
   const isSimuladosActive = pathname.startsWith("/simulados");
 
-  return (
-    <aside className="absolute top-1.5 bottom-1.5 left-1.5 z-30 flex w-[var(--osmo-sidebar-width)] flex-col overflow-hidden rounded-[14px] border border-[var(--osmo-border)] bg-[var(--osmo-sidebar)]">
+  const sidebarPanel = (
+    <>
       <div className="flex shrink-0 items-center justify-between px-6 py-6">
         <Link
           href={TUTOR_CHAT_PATH}
           onClick={(event) => {
             event.preventDefault();
             goToTutor();
+            if (isMobile) close();
           }}
           className="text-lg font-bold tracking-[0.18em] text-white uppercase"
         >
           ENEM+
         </Link>
-        <Asterisk className="size-4 text-[#b0ff57]" strokeWidth={2} />
+        {isMobile ? (
+          <button
+            type="button"
+            onClick={close}
+            aria-label="Fechar menu"
+            className="flex size-9 items-center justify-center rounded-full bg-[#b0ff57] text-black transition-transform hover:scale-105"
+          >
+            <X className="size-4" strokeWidth={2.25} />
+          </button>
+        ) : (
+          <Asterisk className="size-4 text-[#b0ff57]" strokeWidth={2} />
+        )}
       </div>
 
       <div
@@ -232,6 +255,48 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
           />
         </Link>
       </div>
-    </aside>
+    </>
+  );
+
+  if (!isMobile) {
+    return (
+      <aside className="absolute top-1.5 bottom-1.5 left-1.5 z-30 flex w-[var(--osmo-sidebar-width)] flex-col overflow-hidden rounded-[14px] border border-[var(--osmo-border)] bg-[var(--osmo-sidebar)]">
+        {sidebarPanel}
+      </aside>
+    );
+  }
+
+  return (
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.button
+            key="workspace-sidebar-backdrop"
+            type="button"
+            aria-label="Fechar menu"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.28, ease: DRAWER_EASE }}
+            className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[2px] lg:hidden"
+            onClick={close}
+          />
+        )}
+      </AnimatePresence>
+
+      <motion.aside
+        className="fixed top-1.5 bottom-1.5 left-1.5 z-50 flex w-[min(var(--osmo-sidebar-width),calc(100vw-0.75rem))] flex-col overflow-hidden rounded-[14px] border border-[var(--osmo-border)] bg-[var(--osmo-sidebar)] shadow-[0_24px_80px_rgba(0,0,0,0.45)] lg:hidden"
+        initial={false}
+        animate={{ x: isOpen ? 0 : "-108%" }}
+        transition={{
+          type: "spring",
+          damping: 34,
+          stiffness: 360,
+          mass: 0.82,
+        }}
+      >
+        {sidebarPanel}
+      </motion.aside>
+    </>
   );
 }

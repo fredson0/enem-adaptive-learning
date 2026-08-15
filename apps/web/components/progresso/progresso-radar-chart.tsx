@@ -58,7 +58,7 @@ export function ProgressoRadarChart({ areas }: ProgressoRadarChartProps) {
           Faça treinos em diferentes áreas para ver seu mapa.
         </p>
       ) : (
-        <div className="relative mx-auto w-full max-w-[260px]">
+        <div className="relative mx-auto w-full max-w-[200px] sm:max-w-[260px]">
           <svg viewBox="0 0 240 240" className="h-auto w-full" aria-hidden>
             {niveis.map((nivel) => {
               const pontos = Array.from({ length: total }, (_, indice) =>
@@ -117,7 +117,7 @@ export function ProgressoRadarChart({ areas }: ProgressoRadarChartProps) {
             })}
           </svg>
 
-          <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
+          <div className="mt-1.5 grid grid-cols-2 gap-x-2 gap-y-1 sm:mt-2 sm:gap-x-3 sm:gap-y-1.5">
             {AREA_ORDEM_RADAR.map((slug) => {
               const area = porSlug.get(slug);
               const semPratica = !area || area.totalQuestoes === 0;
@@ -126,7 +126,7 @@ export function ProgressoRadarChart({ areas }: ProgressoRadarChartProps) {
               return (
                 <div
                   key={slug}
-                  className="flex items-center justify-between gap-2 text-[11px]"
+                  className="flex items-center justify-between gap-1.5 text-[10px] sm:gap-2 sm:text-[11px]"
                 >
                   <span className="flex items-center gap-1.5 text-white/50">
                     <span

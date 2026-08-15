@@ -4,6 +4,7 @@ import { HeroWave } from "@/components/ui/ai-input-hero";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useTokensIa } from "@/components/workspace/tokens-ia-provider";
 import { useWorkspaceScrollReporter } from "@/components/workspace/workspace-scroll-context";
+import { workspaceContentOffsetClass } from "@/components/workspace/workspace-sidebar-context";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
 import { ApiError } from "@/lib/api";
 import { compressImageForUpload } from "@/lib/image-compress";
@@ -144,7 +145,7 @@ export function TutorChatView({
           onScroll={(event) => reportScroll(event.currentTarget.scrollTop)}
           className={cn(
             "absolute inset-x-0 top-20 bottom-44 z-10 overflow-y-auto overscroll-contain md:top-24 md:bottom-48",
-            "pl-[calc(var(--osmo-sidebar-width)+1.25rem)] pr-4 md:pl-[calc(var(--osmo-sidebar-width)+1.5rem)] md:pr-6",
+            workspaceContentOffsetClass,
             "tutor-prompt-scroll",
           )}
         >
@@ -192,7 +193,7 @@ export function TutorChatView({
       )}
 
       {!hasMessages && error && (
-        <div className="absolute inset-x-0 top-20 z-10 px-4 pl-[calc(var(--osmo-sidebar-width)+1.25rem)] md:pl-[calc(var(--osmo-sidebar-width)+1.5rem)]">
+        <div className={cn("absolute inset-x-0 top-20 z-10", workspaceContentOffsetClass)}>
           <div className="mx-auto max-w-3xl rounded-2xl border border-red-500/30 bg-red-950/40 px-4 py-3 text-sm text-red-200">
             {error}
           </div>

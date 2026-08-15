@@ -48,11 +48,11 @@ export function ProgressoSegmentedBar({
         })}
       </div>
 
-      <ul className="space-y-2">
+      <ul className="space-y-1.5 sm:space-y-2">
         {segmentos.map((segmento) => (
           <li
             key={segmento.slug}
-            className="flex items-center justify-between gap-3 text-sm"
+            className="flex items-center justify-between gap-2 text-xs sm:gap-3 sm:text-sm"
           >
             <span className="flex min-w-0 items-center gap-2 text-white/65">
               <span

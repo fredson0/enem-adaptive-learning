@@ -1,6 +1,7 @@
 "use client";
 
 import { WorkspaceChrome } from "@/components/workspace/workspace-chrome";
+import { workspaceContentOffsetClass } from "@/components/workspace/workspace-sidebar-context";
 import { TutorPageClient } from "@/components/workspace/tutor-page-client";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef } from "react";
@@ -55,8 +56,7 @@ export function WorkspacePageTransition({
           className={cn(
             "relative flex min-h-0 flex-1 flex-col",
             isTutor && "pointer-events-none invisible",
-            !isTutor &&
-              "pl-[calc(var(--osmo-sidebar-width)+1.25rem)] md:pl-[calc(var(--osmo-sidebar-width)+1.5rem)]",
+            !isTutor && workspaceContentOffsetClass,
           )}
           aria-hidden={isTutor}
         >

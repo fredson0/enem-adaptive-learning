@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 const trilhaContentClass =
-  "flex min-h-[calc(100vh-6rem)] flex-col justify-center pb-6 md:pb-10";
+  "flex min-h-0 flex-1 flex-col justify-start pb-4 sm:min-h-[calc(100vh-6rem)] sm:justify-center sm:pb-6 md:pb-10";
 
 export default function TrilhaPage() {
   const router = useRouter();

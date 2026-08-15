@@ -4,7 +4,13 @@ import type { TutorChatSession } from "@/components/workspace/tutor-session-prov
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { MoreHorizontal, Pencil, Pin, PinOff, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+
+type MenuPosition = {
+  top: number;
+  left: number;
+};
 
 type ChatListItemProps = {
   chat: TutorChatSession;
@@ -16,6 +22,9 @@ type ChatListItemProps = {
   onRename: (titulo: string) => Promise<void>;
   onDelete: () => Promise<void>;
 };
+
+const MENU_WIDTH = 168;
+const MENU_APPROX_HEIGHT = 132;
 
 export function ChatListItem({
   chat,
@@ -32,8 +41,16 @@ export function ChatListItem({
   const [draftTitle, setDraftTitle] = useState(chat.title);
   const [hovered, setHovered] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setDraftTitle(chat.title);
@@ -45,13 +62,47 @@ export function ChatListItem({
     inputRef.current?.select();
   }, [renaming]);
 
+  const updateMenuPosition = useCallback(() => {
+    const button = menuButtonRef.current;
+    if (!button) return null;
+
+    const rect = button.getBoundingClientRect();
+    const margin = 8;
+
+    let left = rect.right - MENU_WIDTH;
+    let top = rect.bottom + 6;
+
+    if (left < margin) {
+      left = margin;
+    }
+
+    if (left + MENU_WIDTH > window.innerWidth - margin) {
+      left = window.innerWidth - MENU_WIDTH - margin;
+    }
+
+    if (top + MENU_APPROX_HEIGHT > window.innerHeight - margin) {
+      top = Math.max(margin, rect.top - MENU_APPROX_HEIGHT - 6);
+    }
+
+    const position = { top, left };
+    setMenuPosition(position);
+    return position;
+  }, []);
+
   useEffect(() => {
     if (!menuOpen) return;
 
+    updateMenuPosition();
+
     const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setMenuOpen(false);
+      const target = event.target as Node;
+      if (
+        rootRef.current?.contains(target) ||
+        menuRef.current?.contains(target)
+      ) {
+        return;
       }
+      setMenuOpen(false);
     };
 
     const handleEscape = (event: KeyboardEvent) => {
@@ -62,13 +113,18 @@ export function ChatListItem({
       }
     };
 
+    window.addEventListener("resize", updateMenuPosition);
+    window.addEventListener("scroll", updateMenuPosition, true);
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("keydown", handleEscape);
+
     return () => {
+      window.removeEventListener("resize", updateMenuPosition);
+      window.removeEventListener("scroll", updateMenuPosition, true);
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [menuOpen, chat.title]);
+  }, [menuOpen, chat.title, updateMenuPosition]);
 
   const commitRename = async () => {
     const titulo = draftTitle.trim();
@@ -89,6 +145,61 @@ export function ChatListItem({
       setDeleting(false);
     }
   };
+
+  const menu =
+    mounted &&
+    createPortal(
+      <AnimatePresence>
+        {menuOpen && menuPosition ? (
+          <motion.div
+            key="chat-item-menu"
+            ref={menuRef}
+            initial={{ opacity: 0, scale: 0.96, y: -6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: -6 }}
+            transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+            style={{ top: menuPosition.top, left: menuPosition.left }}
+            className="fixed z-[120] min-w-[168px] overflow-hidden rounded-xl border border-white/10 bg-[#262626] p-1 shadow-2xl"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                onPin();
+                setMenuOpen(false);
+              }}
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-white/85 transition hover:bg-white/8"
+            >
+              {pinned ? (
+                <PinOff className="size-4 text-white/55" strokeWidth={1.75} />
+              ) : (
+                <Pin className="size-4 text-white/55" strokeWidth={1.75} />
+              )}
+              {pinned ? "Desafixar" : "Fixar"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                setRenaming(true);
+              }}
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-white/85 transition hover:bg-white/8"
+            >
+              <Pencil className="size-4 text-white/55" strokeWidth={1.75} />
+              Renomear
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleDelete()}
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-red-300 transition hover:bg-red-500/10"
+            >
+              <Trash2 className="size-4" strokeWidth={1.75} />
+              Excluir
+            </button>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>,
+      document.body,
+    );
 
   return (
     <div
@@ -151,16 +262,24 @@ export function ChatListItem({
         </button>
 
         <button
+          ref={menuButtonRef}
           type="button"
           aria-label="Opções da conversa"
+          aria-expanded={menuOpen}
           onClick={(event) => {
             event.stopPropagation();
-            setMenuOpen((open) => !open);
+            event.preventDefault();
+            if (menuOpen) {
+              setMenuOpen(false);
+              return;
+            }
+            updateMenuPosition();
+            setMenuOpen(true);
           }}
           className={cn(
             "mt-1.5 flex size-7 shrink-0 items-center justify-center rounded-md text-white/45 transition",
-            (hovered || menuOpen || active) && "opacity-100",
-            !(hovered || menuOpen || active) && "opacity-0",
+            "opacity-100 lg:opacity-0",
+            (hovered || menuOpen || active) && "lg:opacity-100",
             "hover:bg-white/10 hover:text-white/80",
           )}
         >
@@ -168,52 +287,7 @@ export function ChatListItem({
         </button>
       </div>
 
-      <AnimatePresence>
-        {menuOpen ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: -6 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: -6 }}
-            transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute left-full top-0 z-50 ml-2 min-w-[168px] overflow-hidden rounded-xl border border-white/10 bg-[#262626] p-1 shadow-2xl"
-          >
-            <button
-              type="button"
-              onClick={() => {
-                onPin();
-                setMenuOpen(false);
-              }}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-white/85 transition hover:bg-white/8"
-            >
-              {pinned ? (
-                <PinOff className="size-4 text-white/55" strokeWidth={1.75} />
-              ) : (
-                <Pin className="size-4 text-white/55" strokeWidth={1.75} />
-              )}
-              {pinned ? "Desafixar" : "Fixar"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setRenaming(true);
-              }}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-white/85 transition hover:bg-white/8"
-            >
-              <Pencil className="size-4 text-white/55" strokeWidth={1.75} />
-              Renomear
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleDelete()}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-red-300 transition hover:bg-red-500/10"
-            >
-              <Trash2 className="size-4" strokeWidth={1.75} />
-              Excluir
-            </button>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      {menu}
     </div>
   );
 }

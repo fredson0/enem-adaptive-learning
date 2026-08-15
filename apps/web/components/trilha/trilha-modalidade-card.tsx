@@ -70,10 +70,10 @@ export function TrilhaModalidadeCard({
         </div>
       </div>
 
-      <p className="mt-2.5 line-clamp-2 text-sm text-white/70 transition group-hover:text-white">
+      <p className="mt-2 line-clamp-2 text-xs text-white/70 transition group-hover:text-white sm:mt-2.5 sm:text-sm">
         {modalidade.nome}
       </p>
-      <p className="mt-0.5 text-[11px] text-white/35">
+      <p className="mt-0.5 text-[10px] text-white/35 sm:text-[11px]">
         {modalidade.assuntos.length} assuntos
       </p>
     </Link>

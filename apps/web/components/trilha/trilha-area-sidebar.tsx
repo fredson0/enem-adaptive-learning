@@ -44,17 +44,25 @@ export function TrilhaAreaSidebar({
   const corArea = AREA_CORES[area.slug] ?? "#b0ff57";
 
   return (
-    <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
+    <aside className="space-y-3 sm:space-y-4 lg:sticky lg:top-28 lg:self-start">
       <ProgressoCard icon={<Target className="size-4" />} title="Seu progresso">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <ProgressRing
+            percent={progressoExibido}
+            color={corArea}
+            size={52}
+            strokeWidth={3.5}
+            className="sm:hidden"
+          />
           <ProgressRing
             percent={progressoExibido}
             color={corArea}
             size={64}
             strokeWidth={4}
+            className="hidden sm:block"
           />
           <div className="min-w-0">
-            <p className="text-2xl font-medium tabular-nums text-white">
+            <p className="text-xl font-medium tabular-nums text-white sm:text-2xl">
               {progressoExibido}%
             </p>
             <p className="mt-0.5 text-xs text-white/40">

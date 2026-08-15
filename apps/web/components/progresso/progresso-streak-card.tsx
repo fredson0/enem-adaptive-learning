@@ -17,17 +17,19 @@ export function ProgressoStreakCard({ ritmo }: ProgressoStreakCardProps) {
 
   return (
     <ProgressoCard icon={<Flame className="size-4" />} title="Ritmo da semana">
-      <p className="text-3xl font-medium tracking-tight text-white">
+      <p className="text-2xl font-medium tracking-tight text-white sm:text-3xl">
         {labelDias}
       </p>
-      <p className="mt-1 text-xs text-white/40">com prática esta semana</p>
+      <p className="mt-0.5 text-[11px] text-white/40 sm:mt-1 sm:text-xs">
+        com prática esta semana
+      </p>
 
-      <div className="mt-5 flex justify-between gap-1">
+      <div className="mt-4 flex justify-between gap-0.5 sm:mt-5 sm:gap-1">
         {ritmo.dias.map((dia) => (
-          <div key={dia.label} className="flex flex-col items-center gap-1.5">
+          <div key={dia.label} className="flex flex-col items-center gap-1 sm:gap-1.5">
             <div
               className={cn(
-                "flex size-7 items-center justify-center rounded-full border transition",
+                "flex size-6 items-center justify-center rounded-full border transition sm:size-7",
                 dia.ativo
                   ? "border-[#b0ff57]/40 bg-[#b0ff57] text-black"
                   : "border-white/10 bg-white/[0.03] text-white/20",
@@ -42,7 +44,7 @@ export function ProgressoStreakCard({ ritmo }: ProgressoStreakCardProps) {
             </div>
             <span
               className={cn(
-                "text-[9px] uppercase tracking-wide",
+                "text-[8px] uppercase tracking-wide sm:text-[9px]",
                 dia.hoje ? "text-white/70" : "text-white/30",
               )}
             >
@@ -52,7 +54,7 @@ export function ProgressoStreakCard({ ritmo }: ProgressoStreakCardProps) {
         ))}
       </div>
 
-      <div className="mt-5 flex items-center gap-4 border-t border-white/[0.06] pt-4 text-xs text-white/45">
+      <div className="mt-4 flex flex-col gap-2 border-t border-white/[0.06] pt-3 text-[11px] text-white/45 sm:mt-5 sm:flex-row sm:items-center sm:gap-4 sm:pt-4 sm:text-xs">
         <span className="inline-flex items-center gap-1.5">
           <Flame className="size-3.5 text-[#b0ff57]" />
           {ritmo.sequenciaAtual > 0

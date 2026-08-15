@@ -7,6 +7,7 @@ import {
   SidebarTreeButton,
 } from "@/components/workspace/sidebar-tree-nav";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
+import { useWorkspaceSidebar } from "@/components/workspace/workspace-sidebar-context";
 import { Plus } from "lucide-react";
 import { useMemo } from "react";
 
@@ -23,6 +24,7 @@ export function ChatList() {
     renameSession,
     togglePinSession,
   } = useTutorSession();
+  const { isMobile, close } = useWorkspaceSidebar();
 
   const orderedSessions = useMemo(() => {
     const pinned = new Set(pinnedSessionIds);
@@ -42,6 +44,7 @@ export function ChatList() {
         onClick={() => {
           if (!requireAuth({ next: "/tutor" })) return;
           startNewChat();
+          if (isMobile) close();
         }}
       >
         <Plus className="size-3.5 shrink-0" strokeWidth={1.75} />
@@ -58,6 +61,7 @@ export function ChatList() {
           onOpen={() => {
             if (!requireAuth({ next: "/tutor" })) return;
             void openSession(chat.id);
+            if (isMobile) close();
           }}
           onPin={() => {
             if (!requireAuth({ next: "/tutor" })) return;

@@ -216,8 +216,8 @@ export default function TrilhaAreaPage() {
 
   return (
     <WorkspaceSection>
-      <div className="mx-auto max-w-5xl space-y-8">
-        <div className="flex flex-wrap items-center gap-3 text-sm trilha-breadcrumbs">
+      <div className="mx-auto max-w-5xl space-y-4 sm:space-y-8">
+        <div className="scrollbar-none flex items-center gap-2 overflow-x-auto text-xs whitespace-nowrap trilha-breadcrumbs sm:flex-wrap sm:gap-3 sm:text-sm sm:whitespace-normal">
           <Link
             href="/trilha"
             className="inline-flex items-center gap-2 text-white/45 transition hover:text-white/75"

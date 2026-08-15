@@ -148,15 +148,14 @@ export function ProgressoView({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 py-2">
-      <header className="mb-2 px-1">
-        <p className="text-xs uppercase tracking-[0.18em] text-white/30">
-          Progresso
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 py-1 sm:gap-4 sm:py-2">
+      <header className="px-0.5 pt-1">
+        <p className="inline-flex max-w-full rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs leading-snug text-white/50">
+          {subtitulo}
         </p>
-        <p className="mt-1 text-sm text-white/45">{subtitulo}</p>
       </header>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-2 md:gap-4">
         <ProgressoStreakCard ritmo={ritmoSemanal} />
 
         <ProgressoCard
@@ -168,12 +167,12 @@ export function ProgressoView({
             ) : undefined
           }
         >
-          <div className="flex justify-center py-1">
+          <div className="flex justify-center py-0 sm:py-1">
             <ProgressArcGauge
               percent={mediaExibida}
               labelLeft={`${mediaExibida}%`}
               labelRight="média geral"
-              className="max-w-[220px]"
+              className="max-w-[180px] sm:max-w-[220px]"
             />
           </div>
         </ProgressoCard>
@@ -194,10 +193,10 @@ export function ProgressoView({
           <p className="text-[10px] uppercase tracking-wide text-white/35">
             Total de questões
           </p>
-          <p className="mt-1 text-3xl font-medium tabular-nums text-white">
+          <p className="mt-0.5 text-2xl font-medium tabular-nums text-white sm:mt-1 sm:text-3xl">
             {totalQuestoes}
           </p>
-          <div className="mt-5">
+          <div className="mt-4 sm:mt-5">
             <ProgressoSegmentedBar
               segmentos={segmentos}
               total={totalQuestoes}
@@ -207,7 +206,7 @@ export function ProgressoView({
 
         <section
           className={cn(
-            "overflow-hidden rounded-[20px] border p-5 md:col-span-2",
+            "overflow-hidden rounded-2xl border p-4 sm:rounded-[20px] sm:p-5 md:col-span-2",
             lacunaPrincipal
               ? cn(
                   "border-white/[0.08] bg-gradient-to-br",
@@ -218,24 +217,26 @@ export function ProgressoView({
           )}
         >
           {lacunaPrincipal ? (
-            <div className="mb-3 flex items-center gap-2">
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white/55">
+            <div className="mb-2 flex items-center gap-2 sm:mb-3">
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-medium uppercase tracking-wide text-white/55 sm:text-[10px]">
                 Próximo passo · {lacunaPrincipal.label}
               </span>
             </div>
           ) : (
-            <p className="text-[10px] uppercase tracking-[0.14em] text-white/35">
+            <p className="text-[9px] uppercase tracking-[0.14em] text-white/35 sm:text-[10px]">
               Próximo passo
             </p>
           )}
 
-          <p className="text-base font-medium text-white">{labelTreino}</p>
+          <p className="text-sm font-medium leading-snug text-white sm:text-base">
+            {labelTreino}
+          </p>
 
-          <div className="mt-5 flex flex-col gap-3">
-            <div className="flex flex-wrap items-center gap-3">
+          <div className="mt-4 flex flex-col gap-2.5 sm:mt-5 sm:gap-3">
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
               <Link
                 href={hrefSimuladoFocado}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#b0ff57] px-5 py-2.5 text-sm font-medium text-black transition hover:bg-[#c4ff7a]"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#b0ff57] px-5 py-2.5 text-sm font-medium text-black transition hover:bg-[#c4ff7a] sm:w-auto"
               >
                 Começar
                 <ArrowRight className="size-4" />
@@ -246,7 +247,7 @@ export function ProgressoView({
                   type="button"
                   onClick={abrirTutorLacuna}
                   disabled={abrindoTutor}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-white/85 transition hover:border-white/25 hover:bg-white/[0.08] disabled:opacity-60"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-white/85 transition hover:border-white/25 hover:bg-white/[0.08] disabled:opacity-60 sm:w-auto"
                 >
                   <MessageSquare className="size-4 text-[#b0ff57]" />
                   {abrindoTutor ? "Abrindo…" : "Tutor IA"}
@@ -323,17 +324,17 @@ export function ProgressoView({
           title="Meta da semana"
           className="md:col-span-2"
         >
-          <p className="text-sm leading-relaxed text-white/55">
+          <p className="text-[13px] leading-relaxed text-white/55 sm:text-sm">
             {lacunas.metaSemanal}
           </p>
           {trilha?.metaEnem ? (
-            <p className="mt-3 text-sm text-white/45">
+            <p className="mt-2.5 text-[13px] text-white/45 sm:mt-3 sm:text-sm">
               <span className="text-[#b0ff57]">Objetivo ENEM:</span>{" "}
               {trilha.metaEnem}
             </p>
           ) : null}
           {proficiencia.ultimoSimulado ? (
-            <p className="mt-4 border-t border-white/[0.06] pt-4 text-xs text-white/35">
+            <p className="mt-3 border-t border-white/[0.06] pt-3 text-[11px] text-white/35 sm:mt-4 sm:pt-4 sm:text-xs">
               <Link
                 href={`/simulados/${proficiencia.ultimoSimulado.id}/resultado`}
                 className="underline-offset-2 hover:text-white/55 hover:underline"
@@ -429,11 +430,11 @@ export function ProgressoDetalheView({
           title="Meta da semana"
           className="md:col-span-2"
         >
-          <p className="text-sm leading-relaxed text-white/55">
+          <p className="text-[13px] leading-relaxed text-white/55 sm:text-sm">
             {lacunas.metaSemanal}
           </p>
           {trilha?.metaEnem ? (
-            <p className="mt-3 text-sm text-white/45">
+            <p className="mt-2.5 text-[13px] text-white/45 sm:mt-3 sm:text-sm">
               <span className="text-[#b0ff57]">Objetivo ENEM:</span>{" "}
               {trilha.metaEnem}
             </p>

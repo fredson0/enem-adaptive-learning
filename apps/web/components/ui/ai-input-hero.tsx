@@ -1000,7 +1000,7 @@ export function HeroWave({
     <section
       ref={containerRef}
       className={cn(
-        variant === "workspace" && "min-h-0 min-h-[480px] flex-1",
+        variant === "workspace" && "min-h-0 flex-1 lg:min-h-[480px]",
         className,
       )}
       style={{
@@ -1020,16 +1020,21 @@ export function HeroWave({
           variant === "workspace" && "flex flex-col",
           variant === "workspace" && (docked ? "justify-end" : "justify-center"),
           variant === "hero" && "flex items-center justify-center",
+          variant === "workspace" &&
+            "pt-[3.75rem] pr-4 pb-4 sm:pt-20 sm:pr-5 sm:pb-5 lg:p-6",
         )}
         style={{
           position: "absolute",
           inset: 0,
           zIndex: docked ? 15 : 3,
           pointerEvents: "none",
-          padding:
+          paddingLeft:
             variant === "workspace"
-              ? "24px 24px 24px calc(var(--osmo-sidebar-width) + 1.25rem + 24px)"
-              : "24px",
+              ? "var(--workspace-content-inset-left)"
+              : undefined,
+          paddingRight: variant === "workspace" ? undefined : "24px",
+          paddingTop: variant === "workspace" ? undefined : "24px",
+          paddingBottom: variant === "workspace" ? undefined : "24px",
         }}
       >
         <div
@@ -1045,10 +1050,10 @@ export function HeroWave({
         >
           {variant === "workspace" ? (
             <div ref={headerRef} className="overflow-hidden text-center">
-              <h1 className="text-3xl font-semibold tracking-tight text-white drop-shadow-[0_1px_8px_rgba(31,61,188,0.25)] sm:text-5xl">
+              <h1 className="text-2xl font-semibold tracking-tight text-white drop-shadow-[0_1px_8px_rgba(31,61,188,0.25)] sm:text-3xl md:text-5xl">
                 {title}
               </h1>
-              <p className="mt-3 text-sm text-gray-300/90 sm:mt-4 sm:text-base">
+              <p className="mt-2 text-xs text-gray-300/90 sm:mt-3 sm:text-sm md:mt-4 md:text-base">
                 {subtitle}
               </p>
             </div>
@@ -1068,7 +1073,7 @@ export function HeroWave({
             className={cn(
               "flex items-center justify-center",
               (showHeader || variant === "workspace") && !docked
-                ? "mt-6 sm:mt-8"
+                ? "mt-4 sm:mt-6 md:mt-8"
                 : "mt-0",
             )}
             onSubmit={(e) => {

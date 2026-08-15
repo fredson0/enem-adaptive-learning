@@ -23,14 +23,14 @@ export function TrilhaPersonalizarBotao({
   if (chat.aberto) return null;
 
   return (
-    <div className={cn("flex flex-col items-center gap-2", className)}>
+    <div className={cn("flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-center", className)}>
       <motion.button
         type="button"
         layoutId={LAYOUT_ID}
         disabled={chat.iniciando}
         onClick={() => void chat.abrir()}
         className={cn(
-          "inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium transition disabled:opacity-60",
+          "inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition disabled:opacity-60 sm:w-auto sm:px-6 sm:py-2.5 sm:text-sm",
           variant === "primary"
             ? "bg-[#b0ff57] text-black hover:bg-[#c4ff7a]"
             : "border border-[#b0ff57]/30 bg-[#b0ff57]/10 text-[#b0ff57] hover:bg-[#b0ff57]/15",

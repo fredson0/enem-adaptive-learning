@@ -53,6 +53,7 @@
   --osmo-canvas: #111111;
   --osmo-sidebar: #181818;
   --osmo-sidebar-width: 320px;
+  --workspace-content-inset-left: calc(var(--osmo-sidebar-width) + 1.25rem + 24px);
   --osmo-surface: #111111;
   --osmo-active: #252525;
   --osmo-hover: #1f1f1f;

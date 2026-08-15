@@ -22,6 +22,10 @@ const DOCKED_MIN_HEIGHT = 52;
 const DOCKED_MAX_HEIGHT = 280;
 const HERO_MIN_HEIGHT = 128;
 const HERO_MAX_HEIGHT = 280;
+const MOBILE_DOCKED_MIN_HEIGHT = 44;
+const MOBILE_DOCKED_MAX_HEIGHT = 160;
+const MOBILE_HERO_MIN_HEIGHT = 72;
+const MOBILE_HERO_MAX_HEIGHT = 120;
 
 export type TutorPromptInputProps = {
   value: string;
@@ -57,10 +61,37 @@ export function TutorPromptInput({
   const [attachmentPreview, setAttachmentPreview] = useState<string | null>(
     null,
   );
+  const [isCompact, setIsCompact] = useState(false);
 
-  const minHeight = docked ? DOCKED_MIN_HEIGHT : HERO_MIN_HEIGHT;
-  const maxHeight = docked ? DOCKED_MAX_HEIGHT : HERO_MAX_HEIGHT;
-  const placeholderHeight = docked ? 108 : 196;
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 639px)");
+    const syncCompact = () => setIsCompact(mediaQuery.matches);
+    syncCompact();
+    mediaQuery.addEventListener("change", syncCompact);
+    return () => mediaQuery.removeEventListener("change", syncCompact);
+  }, []);
+
+  const minHeight = docked
+    ? isCompact
+      ? MOBILE_DOCKED_MIN_HEIGHT
+      : DOCKED_MIN_HEIGHT
+    : isCompact
+      ? MOBILE_HERO_MIN_HEIGHT
+      : HERO_MIN_HEIGHT;
+  const maxHeight = docked
+    ? isCompact
+      ? MOBILE_DOCKED_MAX_HEIGHT
+      : DOCKED_MAX_HEIGHT
+    : isCompact
+      ? MOBILE_HERO_MAX_HEIGHT
+      : HERO_MAX_HEIGHT;
+  const placeholderHeight = docked
+    ? isCompact
+      ? 84
+      : 108
+    : isCompact
+      ? 108
+      : 196;
 
   useEffect(() => {
     setMounted(true);
@@ -171,7 +202,7 @@ export function TutorPromptInput({
         onClick={() =>
           expanded ? closeFullscreen() : setFullscreen(true)
         }
-        className="absolute top-2.5 right-2.5 z-10 inline-flex h-8 w-8 items-center justify-center rounded-lg text-white/45 transition-colors hover:bg-white/10 hover:text-white/80"
+        className="absolute top-2 right-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-lg text-white/45 transition-colors hover:bg-white/10 hover:text-white/80 sm:top-2.5 sm:right-2.5 sm:h-8 sm:w-8"
         aria-label={expanded ? "Sair da tela cheia" : "Abrir em tela cheia"}
         title={expanded ? "Sair da tela cheia" : "Tela cheia"}
       >
@@ -218,13 +249,13 @@ export function TutorPromptInput({
             : { scrollBehavior: "smooth" }
         }
         className={cn(
-          "w-full resize-none bg-transparent px-4 py-3.5 text-[15px] leading-relaxed text-white outline-none placeholder:text-white/40",
+          "w-full resize-none bg-transparent px-3 py-2.5 text-sm leading-relaxed text-white outline-none placeholder:text-white/40 sm:px-4 sm:py-3.5 sm:text-[15px]",
           "overflow-y-auto disabled:cursor-not-allowed disabled:opacity-60 tutor-prompt-scroll",
-          expanded ? "min-h-0 flex-1 pr-12 pt-4" : "pr-12",
+          expanded ? "min-h-0 flex-1 pr-10 pt-3 sm:pr-12 sm:pt-4" : "pr-10 sm:pr-12",
         )}
       />
 
-      <div className="flex items-center justify-between gap-2 px-3 pb-3">
+      <div className="flex items-center justify-between gap-2 px-2.5 pb-2.5 sm:px-3 sm:pb-3">
         <div className="flex items-center gap-1">
           <input
             ref={fileInputRef}
@@ -237,7 +268,7 @@ export function TutorPromptInput({
           <label
             htmlFor={expanded ? `${fileInputId}-expanded` : fileInputId}
             className={cn(
-              "inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-white/55 transition-colors hover:bg-white/10 hover:text-white",
+              "inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-white/55 transition-colors hover:bg-white/10 hover:text-white sm:h-9 sm:w-9",
               loading && "pointer-events-none opacity-50",
             )}
             title="Enviar foto"
@@ -252,7 +283,7 @@ export function TutorPromptInput({
           onClick={handleSubmit}
           disabled={loading || !value.trim()}
           aria-label={buttonText}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#1f3dbc] text-white transition-colors hover:bg-[#2848d4] disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#1f3dbc] text-white transition-colors hover:bg-[#2848d4] disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 sm:w-9"
         >
           <ArrowUp className="size-4" strokeWidth={2.25} />
         </button>

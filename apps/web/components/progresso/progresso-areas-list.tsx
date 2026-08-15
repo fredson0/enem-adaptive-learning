@@ -56,12 +56,12 @@ export function ProgressoAreasList({
             <Link
               href={`/trilha/${area.slug}`}
               className={cn(
-                "flex items-center gap-3 py-3.5 transition first:pt-0 last:pb-0",
+                "flex items-center gap-2.5 py-2.5 transition first:pt-0 last:pb-0 sm:gap-3 sm:py-3.5",
                 ehPrioridade && "rounded-xl bg-white/[0.03] px-2 -mx-2",
               )}
             >
               <div
-                className="flex size-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-semibold tracking-wide"
+                className="flex size-8 shrink-0 items-center justify-center rounded-lg text-[9px] font-semibold tracking-wide sm:size-9 sm:text-[10px]"
                 style={{
                   backgroundColor: `${cor}22`,
                   color: cor,
@@ -74,7 +74,7 @@ export function ProgressoAreasList({
                 <div className="flex items-center gap-2">
                   <p
                     className={cn(
-                      "truncate text-sm",
+                      "truncate text-[13px] sm:text-sm",
                       ehPrioridade
                         ? "font-medium text-white"
                         : "text-white/75",
@@ -83,30 +83,39 @@ export function ProgressoAreasList({
                     {area.label}
                   </p>
                   {ehPrioridade ? (
-                    <span className="rounded-full bg-[#b0ff57]/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-[#b0ff57]">
+                    <span className="shrink-0 rounded-full bg-[#b0ff57]/15 px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-wide text-[#b0ff57] sm:text-[9px]">
                       Foco
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-0.5 text-[11px] text-white/35">
+                <p className="mt-0.5 text-[10px] text-white/35 sm:text-[11px]">
                   {semPratica
                     ? "Sem prática ainda"
                     : `${area.acertos}/${area.totalQuestoes} acertos`}
                 </p>
               </div>
 
-              <div className="flex shrink-0 items-center gap-2">
-                <div className="flex flex-col items-end gap-0.5">
+              <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+                <div className="hidden flex-col items-end gap-0.5 sm:flex">
                   <TendenciaMini valor={tendencia} />
                 </div>
                 <ProgressRing
                   percent={area.score}
                   color={cor}
                   empty={semPratica}
+                  size={38}
+                  strokeWidth={2.75}
+                  className="sm:hidden"
+                />
+                <ProgressRing
+                  percent={area.score}
+                  color={cor}
+                  empty={semPratica}
                   size={44}
                   strokeWidth={3}
+                  className="hidden sm:block"
                 />
-                <ChevronRight className="size-4 text-white/20" />
+                <ChevronRight className="hidden size-4 text-white/20 sm:block" />
               </div>
             </Link>
           </li>
