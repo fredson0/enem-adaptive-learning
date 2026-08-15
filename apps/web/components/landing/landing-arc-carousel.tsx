@@ -47,16 +47,52 @@ export const PRODUCT_FEATURES: ProductFeature[] = [
 const CARD_COUNT = PRODUCT_FEATURES.length;
 const LOOP_DURATION = 24;
 const RAD_TO_DEG = 180 / Math.PI;
-const VISIBLE_OFFSET = 4.6;
 
 const CAROUSEL_LAYOUT = {
   section: { spreadXFactor: 0.64, spreadStep: 0.42 },
   background: { spreadXFactor: 0.86, spreadStep: 0.56 },
 } as const;
 
-function getCopyRange(index: number, progress: number) {
-  const minCopy = Math.ceil((progress - index - VISIBLE_OFFSET) / CARD_COUNT);
-  const maxCopy = Math.floor((progress - index + VISIBLE_OFFSET) / CARD_COUNT);
+type CarouselLayout = {
+  spreadXFactor: number;
+  spreadStep: number;
+};
+
+function getResponsiveLayout(
+  variant: "section" | "background",
+  viewportWidth: number,
+): CarouselLayout {
+  const isMobile = viewportWidth < 640;
+  const isTablet = viewportWidth < 1024;
+
+  if (variant === "background") {
+    if (isMobile) return { spreadXFactor: 1.12, spreadStep: 0.56 };
+    if (isTablet) return { spreadXFactor: 0.86, spreadStep: 0.56 };
+    return CAROUSEL_LAYOUT.background;
+  }
+
+  // Mesma curva do desktop; spread mais aberto no mobile para separar os cards.
+  if (isMobile) return { spreadXFactor: 1.28, spreadStep: 0.42 };
+  if (isTablet) return { spreadXFactor: 0.72, spreadStep: 0.42 };
+  return CAROUSEL_LAYOUT.section;
+}
+
+function getVisibleOffset(
+  viewportWidth: number,
+  variant: "section" | "background",
+) {
+  if (viewportWidth < 640) return variant === "background" ? 2 : 2.2;
+  if (viewportWidth < 1024) return 4;
+  return 4.6;
+}
+
+function getCopyRange(
+  index: number,
+  progress: number,
+  visibleOffset: number,
+) {
+  const minCopy = Math.ceil((progress - index - visibleOffset) / CARD_COUNT);
+  const maxCopy = Math.floor((progress - index + visibleOffset) / CARD_COUNT);
   const copies: number[] = [];
 
   for (let copy = minCopy; copy <= maxCopy; copy += 1) {
@@ -69,8 +105,9 @@ function getCopyRange(index: number, progress: number) {
 function getCardTransform(
   linearOffset: number,
   viewportWidth: number,
-  layout: (typeof CAROUSEL_LAYOUT)[keyof typeof CAROUSEL_LAYOUT],
+  layout: CarouselLayout,
 ) {
+  const isMobile = viewportWidth < 640;
   const spreadX = viewportWidth * layout.spreadXFactor;
   const spreadY = spreadX * 0.28;
   const cardSpacing = Math.sin(layout.spreadStep) * spreadX;
@@ -81,9 +118,11 @@ function getCardTransform(
   const rotate =
     Math.atan2(spreadY * Math.sin(t), spreadX * Math.cos(t)) * RAD_TO_DEG;
   const scale = 1 - Math.min(Math.abs(linearOffset) * 0.015, 0.04);
+  const fadeStart = isMobile ? 1.2 : 4;
+  const fadeRate = isMobile ? 2.4 : 0.8;
   const opacity =
-    Math.abs(linearOffset) > 4
-      ? Math.max(0, 1 - (Math.abs(linearOffset) - 4) * 0.8)
+    Math.abs(linearOffset) > fadeStart
+      ? Math.max(0, 1 - (Math.abs(linearOffset) - fadeStart) * fadeRate)
       : 1;
 
   return {
@@ -94,6 +133,32 @@ function getCardTransform(
     opacity,
     zIndex: Math.round(100 - Math.abs(linearOffset) * 10),
   };
+}
+
+function getCardWidth(
+  variant: "section" | "background",
+  viewportWidth: number,
+) {
+  const isMobile = viewportWidth < 640;
+  const isTablet = viewportWidth < 1024;
+
+  if (variant === "background") {
+    return Math.min(
+      Math.max(
+        viewportWidth * (isMobile ? 0.32 : isTablet ? 0.28 : 0.24),
+        isMobile ? 128 : 260,
+      ),
+      isMobile ? 156 : 380,
+    );
+  }
+
+  return Math.min(
+    Math.max(
+      viewportWidth * (isMobile ? 0.36 : isTablet ? 0.28 : 0.22),
+      isMobile ? 140 : 260,
+    ),
+    isMobile ? 168 : 380,
+  );
 }
 
 function FeaturePreview({
@@ -213,10 +278,10 @@ function FeaturePreview({
 
   return (
     <div
-      className="flex h-full flex-col items-center justify-center p-6"
+      className="flex h-full flex-col items-center justify-center p-5 md:p-6"
       style={{ backgroundColor: accent }}
     >
-      <p className="text-5xl font-semibold tracking-tight text-[#12352b] md:text-6xl">
+      <p className="text-4xl font-semibold tracking-tight text-[#12352b] sm:text-5xl md:text-6xl">
         68%
       </p>
       <p className="mt-1 text-[11px] font-medium tracking-[0.12em] text-[#12352b]/45 uppercase md:text-xs">
@@ -269,18 +334,17 @@ export function LandingArcCarousel({
   }, []);
 
   const isBackground = variant === "background";
-  const layout = CAROUSEL_LAYOUT[variant];
-  const cardWidth = Math.min(
-    Math.max(viewportWidth * (isBackground ? 0.24 : 0.22), isBackground ? 260 : 260),
-    isBackground ? 380 : 380,
-  );
+  const isMobile = viewportWidth < 640;
+  const layout = getResponsiveLayout(variant, viewportWidth);
+  const visibleOffset = getVisibleOffset(viewportWidth, variant);
+  const cardWidth = getCardWidth(variant, viewportWidth);
   const previewHeight = cardWidth * 0.58;
   const footerHeight = 44;
   const spreadX = viewportWidth * layout.spreadXFactor;
   const arcDepth = spreadX * 0.28;
 
   const visibleCards = PRODUCT_FEATURES.flatMap((feature, index) =>
-    getCopyRange(index, progress).map((copy) => ({
+    getCopyRange(index, progress, visibleOffset).map((copy) => ({
       feature,
       offset: index - progress + copy * CARD_COUNT,
       key: `${feature.id}::${copy}`,
@@ -291,8 +355,11 @@ export function LandingArcCarousel({
     <div
       className={cn(
         isBackground
-          ? "absolute inset-0 z-0 flex items-center justify-center overflow-hidden"
-          : "relative left-1/2 mt-2 w-screen -translate-x-1/2 overflow-x-clip md:mt-4",
+          ? cn(
+              "absolute inset-0 z-0 flex items-center justify-center overflow-hidden",
+              isMobile && "translate-y-10",
+            )
+          : "relative left-1/2 mt-6 w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip md:mt-4",
         className,
       )}
     >
@@ -313,8 +380,12 @@ export function LandingArcCarousel({
         className={cn(
           "relative w-full",
           isBackground
-            ? "h-[clamp(360px,58vh,720px)]"
-            : "h-[clamp(300px,40vw,520px)]",
+            ? isMobile
+              ? "h-[clamp(280px,46vh,520px)]"
+              : "h-[clamp(360px,58vh,720px)]"
+            : isMobile
+              ? "h-[clamp(300px,52vw,400px)]"
+              : "h-[clamp(300px,40vw,520px)]",
         )}
       >
         {visibleCards.map(({ feature, offset, key }) => {

@@ -1,12 +1,52 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import {
+  motion,
+  useInView,
+  useReducedMotion,
+  type Transition,
+} from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useRef, type CSSProperties } from "react";
+import { useRef, type CSSProperties, type ReactNode } from "react";
 
 const HERO_VIDEO_URL =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_170732_8a9ccda6-5cff-4628-b164-059c500a2b41.mp4";
+
+const HERO_REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
+
+const heroRevealTransition = (delay = 0): Transition => ({
+  duration: 1,
+  delay,
+  ease: HERO_REVEAL_EASE,
+});
+
+function HeroBlurReveal({
+  children,
+  delay = 0,
+  className,
+}: {
+  children: ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  const reduceMotion = useReducedMotion();
+
+  if (reduceMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
+  return (
+    <motion.div
+      initial={{ y: 72, opacity: 0, filter: "blur(16px)" }}
+      animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+      transition={heroRevealTransition(delay)}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 /* ---------------- WordsPullUp ---------------- */
 interface WordsPullUpProps {
@@ -14,6 +54,8 @@ interface WordsPullUpProps {
   className?: string;
   showAsterisk?: boolean;
   style?: CSSProperties;
+  playOnMount?: boolean;
+  baseDelay?: number;
 }
 
 export const WordsPullUp = ({
@@ -21,9 +63,13 @@ export const WordsPullUp = ({
   className = "",
   showAsterisk = false,
   style,
+  playOnMount = false,
+  baseDelay = 0,
 }: WordsPullUpProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
+  const reduceMotion = useReducedMotion();
+  const shouldAnimate = playOnMount || isInView;
   const words = text.split(" ");
 
   return (
@@ -37,13 +83,19 @@ export const WordsPullUp = ({
         return (
           <motion.span
             key={i}
-            initial={{ y: 20, opacity: 0 }}
-            animate={isInView ? { y: 0, opacity: 1 } : {}}
-            transition={{
-              duration: 0.6,
-              delay: i * 0.08,
-              ease: [0.16, 1, 0.3, 1],
-            }}
+            initial={
+              reduceMotion
+                ? false
+                : { y: 72, opacity: 0, filter: "blur(16px)" }
+            }
+            animate={
+              shouldAnimate && !reduceMotion
+                ? { y: 0, opacity: 1, filter: "blur(0px)" }
+                : reduceMotion
+                  ? undefined
+                  : {}
+            }
+            transition={heroRevealTransition(baseDelay + i * 0.06)}
             className="relative inline-block"
             style={{ marginRight: isLast ? 0 : "0.25em" }}
           >
@@ -79,6 +131,7 @@ export const WordsPullUpMultiStyle = ({
 }: WordsPullUpMultiStyleProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
+  const reduceMotion = useReducedMotion();
 
   const words: { word: string; className?: string }[] = [];
   segments.forEach((seg) => {
@@ -96,13 +149,17 @@ export const WordsPullUpMultiStyle = ({
       {words.map((w, i) => (
         <motion.span
           key={i}
-          initial={{ y: 20, opacity: 0 }}
-          animate={isInView ? { y: 0, opacity: 1 } : {}}
-          transition={{
-            duration: 0.6,
-            delay: i * 0.08,
-            ease: [0.16, 1, 0.3, 1],
-          }}
+          initial={
+            reduceMotion ? false : { y: 72, opacity: 0, filter: "blur(16px)" }
+          }
+          animate={
+            isInView && !reduceMotion
+              ? { y: 0, opacity: 1, filter: "blur(0px)" }
+              : reduceMotion
+                ? undefined
+                : {}
+          }
+          transition={heroRevealTransition(i * 0.06)}
           className={`inline-block ${w.className ?? ""}`}
           style={{ marginRight: "0.25em" }}
         >
@@ -142,37 +199,20 @@ function EnemHero() {
       >
         <div className="grid grid-cols-12 items-end gap-4">
           <div className="col-span-12 lg:col-span-8">
-            <h1
-              className="font-display text-[22vw] leading-[0.85] font-normal tracking-[-0.06em] text-[#E1E0CC] sm:text-[20vw] md:text-[18vw] lg:text-[16vw] xl:text-[14vw]"
-            >
-              <WordsPullUp text="ENEM+" showAsterisk />
+            <h1 className="font-display text-[22vw] leading-[0.85] font-normal tracking-[-0.06em] text-[#E1E0CC] sm:text-[20vw] md:text-[18vw] lg:text-[16vw] xl:text-[14vw]">
+              <WordsPullUp text="ENEM+" showAsterisk playOnMount />
             </h1>
           </div>
 
           <div className="col-span-12 flex flex-col gap-5 pb-2 lg:col-span-4 lg:pb-6">
-            <motion.p
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{
-                duration: 0.8,
-                delay: 0.5,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="max-w-sm text-xs leading-snug text-[#E1E0CC]/75 sm:text-sm md:text-base"
-            >
-              Sua preparação adaptativa para o ENEM — simulados, tutor IA e
-              métricas ajustados ao que você ainda precisa dominar.
-            </motion.p>
+            <HeroBlurReveal delay={0.18}>
+              <p className="max-w-sm text-xs leading-snug text-[#E1E0CC]/75 sm:text-sm md:text-base">
+                Sua preparação adaptativa para o ENEM — simulados, tutor IA e
+                métricas ajustados ao que você ainda precisa dominar.
+              </p>
+            </HeroBlurReveal>
 
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{
-                duration: 0.8,
-                delay: 0.7,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-            >
+            <HeroBlurReveal delay={0.32}>
               <Link
                 href="/tutor"
                 className="group inline-flex items-center gap-2 self-start rounded-full bg-[#b0ff57] py-1 pr-1 pl-5 text-sm font-medium text-black transition-all hover:gap-3 sm:text-base"
@@ -182,7 +222,7 @@ function EnemHero() {
                   <ArrowRight className="h-4 w-4 text-[#E1E0CC]" />
                 </span>
               </Link>
-            </motion.div>
+            </HeroBlurReveal>
           </div>
         </div>
       </div>

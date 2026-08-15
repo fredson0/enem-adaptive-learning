@@ -84,18 +84,18 @@ function LoginContent() {
     <main className="relative min-h-screen overflow-hidden bg-[#201d1d]">
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
         <LandingArcCarousel variant="background" />
-        <div className="absolute inset-0 bg-[#201d1d]/60" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#201d1d_72%)]" />
+        <div className="absolute inset-0 bg-[#201d1d]/75 md:bg-[#201d1d]/60" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#201d1d_78%)] md:bg-[radial-gradient(circle_at_center,transparent_0%,#201d1d_72%)]" />
       </div>
 
       <SiteHeader variant="auth" />
 
-      <div className="relative z-20 flex min-h-screen flex-col items-center justify-center px-6 pt-28 pb-12">
-        <h1 className="font-display text-center text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.02] font-semibold tracking-[-0.04em] text-white">
+      <div className="relative z-20 flex min-h-screen flex-col items-center justify-center px-5 pt-24 pb-10 sm:px-6 sm:pt-28 sm:pb-12">
+        <h1 className="font-display text-center text-[clamp(2.25rem,10vw,4.5rem)] leading-[1.02] font-semibold tracking-[-0.04em] text-white">
           Entrar
         </h1>
 
-        <div className="relative z-30 mt-8 w-full max-w-md rounded-2xl border border-black/[0.06] bg-white p-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:p-10">
+        <div className="relative z-30 mt-6 w-full max-w-md rounded-2xl border border-black/[0.06] bg-white p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:mt-8 sm:p-8 md:p-10">
           <p className="text-sm leading-relaxed text-[#111111]/65">
             Use sua conta Google para acessar o tutor IA, simulados e trilha
             personalizada.
