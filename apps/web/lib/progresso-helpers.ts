@@ -49,6 +49,37 @@ export function calcularTendenciaGeral(pontos: PontoEvolucao[]): TendenciaArea {
   return Math.round((atual - anterior) * 10) / 10;
 }
 
+/** Linha curta abaixo da média (tendência ou contexto). */
+export function formatarLinhaTendencia(
+  tendencia: TendenciaArea,
+  simuladosConcluidos: number,
+): string | null {
+  if (simuladosConcluidos === 0) return null;
+  if (simuladosConcluidos === 1) return "Primeiro simulado concluído";
+  if (tendencia === null) return null;
+  if (tendencia > 0) return `+${tendencia}% desde o último simulado`;
+  if (tendencia < 0) return `${tendencia}% desde o último simulado`;
+  return "Estável no último simulado";
+}
+
+/** Uma frase de contexto — lacuna ou incentivo. */
+export function montarSubtituloProgresso(
+  lacunaPrincipal: LacunaTrilha | null,
+): string {
+  if (!lacunaPrincipal) {
+    return "Mantenha o ritmo com treinos curtos.";
+  }
+
+  if (lacunaPrincipal.prioridade === "Alta") {
+    return `Maior lacuna: ${lacunaPrincipal.label}.`;
+  }
+
+  const mensagem = lacunaPrincipal.mensagem.trim();
+  const primeiraFrase = mensagem.split(/(?<=[.!?])\s+/)[0];
+  return primeiraFrase || mensagem;
+}
+
+/** @deprecated Use média + formatarLinhaTendencia + montarSubtituloProgresso */
 export function montarTituloHero(input: {
   simuladosConcluidos: number;
   mediaGeral: number | null;
@@ -57,43 +88,15 @@ export function montarTituloHero(input: {
 }): { titulo: string; subtitulo: string } {
   if (input.simuladosConcluidos === 0) {
     return {
-      titulo: "Seu progresso começa com o primeiro simulado",
-      subtitulo:
-        "Responda 5 questões e liberamos seu mapa de proficiência por área.",
+      titulo: "Comece hoje",
+      subtitulo: "5 questões bastam para ver seu mapa de proficiência.",
     };
   }
 
-  if (input.mediaGeral === null) {
-    return {
-      titulo: "Continue praticando para ver sua média",
-      subtitulo: input.lacunaPrincipal?.mensagem ?? "Faça mais simulados focados.",
-    };
-  }
-
-  if (input.tendenciaGeral !== null && input.tendenciaGeral > 0) {
-    return {
-      titulo: `Sua média subiu ${input.tendenciaGeral}% no último simulado`,
-      subtitulo:
-        input.lacunaPrincipal?.prioridade === "Alta"
-          ? `Ainda vale reforçar ${input.lacunaPrincipal.label} esta semana.`
-          : "Bom ritmo — mantenha revisões curtas nos erros.",
-    };
-  }
-
-  if (input.tendenciaGeral !== null && input.tendenciaGeral < 0) {
-    return {
-      titulo: `Último simulado ficou ${Math.abs(input.tendenciaGeral)}% abaixo do anterior`,
-      subtitulo:
-        input.lacunaPrincipal?.mensagem ??
-        "Revise os erros antes do próximo treino.",
-    };
-  }
-
+  const media = input.mediaGeral ?? 0;
   return {
-    titulo: `Média geral de ${input.mediaGeral}% nos simulados`,
-    subtitulo:
-      input.lacunaPrincipal?.mensagem ??
-      "Estável — hora de variar áreas ou intensificar o foco.",
+    titulo: `Você está em ${media}%`,
+    subtitulo: montarSubtituloProgresso(input.lacunaPrincipal),
   };
 }
 

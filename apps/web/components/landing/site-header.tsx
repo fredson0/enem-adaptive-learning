@@ -2,13 +2,19 @@
 
 import { ScrollingTicker } from "@/components/landing/scrolling-ticker";
 import { SlideHoverButton } from "@/components/landing/slide-hover-button";
+import { cn } from "@/lib/utils";
 import gsap from "gsap";
 import { Globe, Menu, Share2, Sparkles, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-const TICKER_GAP = 8;
+const NAV_LINKS = [
+  { label: "Como funciona", href: "#como-funciona" },
+  { label: "Planos", href: "#planos" },
+  { label: "Tutor IA", href: "#tutor" },
+  { label: "Trilha", href: "#trilha" },
+];
 
 const PRODUTO_LINKS = [
   { label: "Tutor IA", href: "#tutor" },
@@ -24,29 +30,94 @@ const EXPLORAR_LINKS = [
   { label: "Sobre o Projeto", href: "#sobre" },
 ];
 
+type HeaderMorph = {
+  detach: number;
+  compact: number;
+};
+
+const COMPACT_MAX = 34;
+const MENU_MAX = 72;
+
+function readScrollMorph(): HeaderMorph {
+  const y = window.scrollY;
+  return {
+    detach: Math.min(Math.max((y - 10) / 72, 0), 1),
+    compact: Math.min(Math.max((y - 72) / 112, 0), 1),
+  };
+}
+
+function getScrollMaxWidthRem(compact: number) {
+  if (compact < 0.01) return null;
+  return lerp(56, COMPACT_MAX, compact);
+}
+
+function useHeaderMorph(menuActive: boolean) {
+  const [morph, setMorph] = useState<HeaderMorph>({ detach: 0, compact: 0 });
+  const morphRef = useRef<HeaderMorph>({ detach: 0, compact: 0 });
+
+  const syncFromScroll = () => {
+    const next = readScrollMorph();
+    morphRef.current = next;
+    setMorph(next);
+    return next;
+  };
+
+  useEffect(() => {
+    const update = () => {
+      if (menuActive) return;
+      syncFromScroll();
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, [menuActive]);
+
+  return { morph, morphRef, syncFromScroll };
+}
+
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
+
+function getScrollMaxWidth(compact: number) {
+  const rem = getScrollMaxWidthRem(compact);
+  if (rem === null) return "100%";
+  return `${rem}rem`;
+}
+
+function getTargetWidthRem(
+  scrollMorph: HeaderMorph,
+  viewportWidth: number,
+) {
+  const rem = getScrollMaxWidthRem(scrollMorph.compact);
+  if (rem === null) return viewportWidth / 16;
+  return rem;
+}
+
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuActive, setMenuActive] = useState(false);
+  const [menuMorph, setMenuMorph] = useState<HeaderMorph | null>(null);
+  const [menuWidthRem, setMenuWidthRem] = useState<number | null>(null);
 
+  const { morph, morphRef, syncFromScroll } = useHeaderMorph(menuActive);
+
+  const headerRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const navShellRef = useRef<HTMLDivElement>(null);
   const tickerOuterRef = useRef<HTMLDivElement>(null);
-  const tickerInnerRef = useRef<HTMLDivElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
   const menuInnerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
-  const getTickerMetrics = () => {
-    const tickerHeight = tickerInnerRef.current?.offsetHeight ?? 0;
-    const travel = tickerHeight + TICKER_GAP + 6;
-
-    return { tickerHeight, travel };
-  };
+  const activeMorph = menuMorph ?? morph;
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo(
         containerRef.current,
-        { opacity: 0, y: -24 },
+        { opacity: 0, y: -16 },
         { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" },
       );
     });
@@ -54,73 +125,100 @@ export function SiteHeader() {
     return () => ctx.revert();
   }, []);
 
+  const pinContainerWidth = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    gsap.set(el, { maxWidth: el.getBoundingClientRect().width });
+  };
+
   const openMenu = () => {
     if (
       !containerRef.current ||
-      !tickerOuterRef.current ||
-      !tickerInnerRef.current ||
       !menuPanelRef.current ||
-      !menuInnerRef.current
+      !menuInnerRef.current ||
+      !headerRef.current
     ) {
       return;
     }
 
-    setMenuOpen(true);
     timelineRef.current?.kill();
+    pinContainerWidth();
 
+    setMenuOpen(true);
+    setMenuActive(true);
+
+    const startMorph = readScrollMorph();
+    morphRef.current = startMorph;
+    const needsCompactFirst = startMorph.compact < 0.55;
     const panelHeight = menuInnerRef.current.scrollHeight;
-    const { tickerHeight, travel } = getTickerMetrics();
+    const currentWidthRem =
+      containerRef.current.getBoundingClientRect().width / 16;
 
-    timelineRef.current = gsap
-      .timeline()
-      .to(tickerInnerRef.current, {
-        y: -travel,
-        duration: 0.46,
+    const animState = {
+      detach: startMorph.detach,
+      compact: startMorph.compact,
+      widthRem: currentWidthRem,
+      panelHeight: 0,
+      panelOpacity: 0,
+      innerY: 12,
+      innerOpacity: 0,
+    };
+
+    const applyMenuMorph = () => {
+      setMenuMorph({ detach: animState.detach, compact: animState.compact });
+      setMenuWidthRem(animState.widthRem);
+    };
+
+    applyMenuMorph();
+
+    const tl = gsap.timeline();
+
+    if (needsCompactFirst) {
+      tl.to(animState, {
+        detach: 1,
+        compact: 1,
+        widthRem: COMPACT_MAX,
+        duration: 0.48,
         ease: "power3.inOut",
-      })
+        onUpdate: applyMenuMorph,
+      });
+    }
+
+    tl.to(animState, {
+      widthRem: MENU_MAX,
+      duration: 0.42,
+      ease: "power3.inOut",
+      onUpdate: applyMenuMorph,
+    })
       .to(
-        tickerOuterRef.current,
+        animState,
         {
-          marginTop: -tickerHeight,
-          height: 0,
-          opacity: 0,
-          duration: 0.34,
-          ease: "power3.inOut",
-        },
-        "-=0.34",
-      )
-      .to(
-        containerRef.current,
-        {
-          maxWidth: "72rem",
-          duration: 0.55,
-          ease: "power3.inOut",
-        },
-        "-=0.1",
-      )
-      .to(
-        menuPanelRef.current,
-        {
-          height: panelHeight,
-          opacity: 1,
-          duration: 0.45,
+          panelHeight,
+          panelOpacity: 1,
+          innerY: 0,
+          innerOpacity: 1,
+          duration: 0.4,
           ease: "power3.out",
+          onUpdate: () => {
+            if (menuPanelRef.current) {
+              menuPanelRef.current.style.height = `${animState.panelHeight}px`;
+              menuPanelRef.current.style.opacity = String(animState.panelOpacity);
+            }
+            if (menuInnerRef.current) {
+              menuInnerRef.current.style.opacity = String(animState.innerOpacity);
+              menuInnerRef.current.style.transform = `translateY(${animState.innerY}px)`;
+            }
+          },
         },
-        "-=0.2",
-      )
-      .fromTo(
-        menuInnerRef.current,
-        { y: 16, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" },
-        "-=0.28",
+        "-=0.22",
       );
+
+    timelineRef.current = tl;
   };
 
   const closeMenu = () => {
     if (
       !containerRef.current ||
-      !tickerOuterRef.current ||
-      !tickerInnerRef.current ||
       !menuPanelRef.current ||
       !menuInnerRef.current
     ) {
@@ -129,58 +227,83 @@ export function SiteHeader() {
 
     timelineRef.current?.kill();
 
-    const { tickerHeight, travel } = getTickerMetrics();
+    const targetMorph = readScrollMorph();
+    morphRef.current = targetMorph;
 
-    timelineRef.current = gsap
-      .timeline({
-        onComplete: () => setMenuOpen(false),
-      })
-      .to(menuInnerRef.current, {
-        y: 12,
-        opacity: 0,
-        duration: 0.25,
-        ease: "power2.in",
-      })
+    const viewportWidth =
+      headerRef.current?.clientWidth ?? window.innerWidth;
+    const targetWidthRem = getTargetWidthRem(targetMorph, viewportWidth);
+
+    const animState = {
+      detach: menuMorph?.detach ?? targetMorph.detach,
+      compact: menuMorph?.compact ?? targetMorph.compact,
+      widthRem: menuWidthRem ?? MENU_MAX,
+      panelHeight: menuPanelRef.current.offsetHeight,
+      panelOpacity: 1,
+      innerY: 0,
+      innerOpacity: 1,
+    };
+
+    const applyCloseMorph = () => {
+      setMenuMorph({ detach: animState.detach, compact: animState.compact });
+      setMenuWidthRem(animState.widthRem);
+    };
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        syncFromScroll();
+        setMenuOpen(false);
+        setMenuActive(false);
+        setMenuMorph(null);
+        setMenuWidthRem(null);
+        gsap.set(containerRef.current, { clearProps: "maxWidth" });
+        gsap.set(menuPanelRef.current, { clearProps: "height,opacity" });
+        gsap.set(menuInnerRef.current, { clearProps: "opacity,transform" });
+      },
+    });
+
+    tl.to(animState, {
+      innerY: 8,
+      innerOpacity: 0,
+      duration: 0.2,
+      ease: "power2.in",
+      onUpdate: () => {
+        if (menuInnerRef.current) {
+          menuInnerRef.current.style.opacity = String(animState.innerOpacity);
+          menuInnerRef.current.style.transform = `translateY(${animState.innerY}px)`;
+        }
+      },
+    })
       .to(
-        menuPanelRef.current,
+        animState,
         {
-          height: 0,
-          opacity: 0,
-          duration: 0.35,
+          panelHeight: 0,
+          panelOpacity: 0,
+          duration: 0.3,
           ease: "power3.inOut",
+          onUpdate: () => {
+            if (menuPanelRef.current) {
+              menuPanelRef.current.style.height = `${animState.panelHeight}px`;
+              menuPanelRef.current.style.opacity = String(animState.panelOpacity);
+            }
+          },
         },
         "-=0.05",
       )
       .to(
-        containerRef.current,
+        animState,
         {
-          maxWidth: "34rem",
-          duration: 0.5,
+          widthRem: targetWidthRem,
+          detach: targetMorph.detach,
+          compact: targetMorph.compact,
+          duration: 0.4,
           ease: "power3.inOut",
+          onUpdate: applyCloseMorph,
         },
-        "-=0.15",
-      )
-      .set(tickerOuterRef.current, {
-        height: tickerHeight,
-        marginTop: -tickerHeight,
-        opacity: 0,
-      })
-      .set(tickerInnerRef.current, { y: -travel })
-      .to(tickerOuterRef.current, {
-        marginTop: TICKER_GAP,
-        opacity: 1,
-        duration: 0.32,
-        ease: "power3.out",
-      })
-      .to(
-        tickerInnerRef.current,
-        {
-          y: 0,
-          duration: 0.48,
-          ease: "power3.out",
-        },
-        "-=0.28",
+        "-=0.1",
       );
+
+    timelineRef.current = tl;
   };
 
   const toggleMenu = () => {
@@ -192,22 +315,59 @@ export function SiteHeader() {
     openMenu();
   };
 
+  const showNavLinks = activeMorph.compact < 0.45 && !menuOpen;
+  const showLogo = activeMorph.compact > 0.2 || menuOpen;
+  const showTicker = activeMorph.compact < 0.2 && !menuOpen;
+
+  const containerMaxWidth = menuWidthRem
+    ? `${menuWidthRem}rem`
+    : getScrollMaxWidth(morph.compact);
+
+  const headerPaddingTop = lerp(0, 16, activeMorph.detach);
+  const headerPaddingX = lerp(0, 16, activeMorph.compact);
+
+  const useCssWidthTransition = !menuActive;
+
   return (
-    <header className="fixed top-0 right-0 left-0 z-50 px-4 pt-4 md:px-6">
+    <header
+      ref={headerRef}
+      className={cn(
+        "pointer-events-none fixed top-0 right-0 left-0 z-50 flex justify-center",
+        useCssWidthTransition && "transition-[padding] duration-500 ease-out",
+      )}
+      style={{
+        paddingTop: headerPaddingTop,
+        paddingLeft: headerPaddingX,
+        paddingRight: headerPaddingX,
+      }}
+    >
       <div
         ref={containerRef}
-        className="relative mx-auto w-full"
-        style={{ maxWidth: "34rem" }}
+        className={cn(
+          "pointer-events-auto relative w-full",
+          useCssWidthTransition && "transition-[max-width] duration-500 ease-out",
+        )}
+        style={{ maxWidth: containerMaxWidth }}
       >
         <div
           ref={navShellRef}
-          className="relative z-20 overflow-hidden rounded-[10px] border border-white/8 bg-[#12151c] shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
+          className={cn(
+            "relative z-20 overflow-hidden bg-black transition-[border-radius,padding] duration-500 ease-out",
+            activeMorph.detach > 0.08 || menuOpen
+              ? "rounded-2xl md:rounded-3xl"
+              : "rounded-b-2xl md:rounded-b-3xl",
+          )}
         >
-          <div className="relative flex items-center justify-between gap-3 px-3 py-2.5 md:px-4">
+          <div
+            className="relative flex items-center justify-between gap-3 transition-[padding] duration-500 ease-out"
+            style={{
+              padding: `${lerp(10, 8, activeMorph.compact)}px ${lerp(24, 14, activeMorph.compact)}px`,
+            }}
+          >
             <button
               type="button"
               onClick={toggleMenu}
-              className="flex items-center gap-2 rounded-[6px] bg-[#1c212b] px-3.5 py-2 text-sm text-white/90 transition-colors hover:bg-[#252b38]"
+              className="flex items-center gap-2 text-xs text-[#E1E0CC]/80 transition-colors hover:text-[#E1E0CC] sm:text-sm"
               aria-expanded={menuOpen}
               aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
             >
@@ -219,36 +379,73 @@ export function SiteHeader() {
               Menu
             </button>
 
+            <nav
+              className={cn(
+                "absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 transition-all duration-500 ease-out md:flex lg:gap-10",
+                showNavLinks
+                  ? "pointer-events-auto translate-y-0 opacity-100"
+                  : "pointer-events-none -translate-y-1 opacity-0",
+              )}
+              aria-hidden={!showNavLinks}
+            >
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-xs text-[#E1E0CC]/75 transition-colors hover:text-[#E1E0CC] lg:text-sm"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
             <Link
               href="/"
-              className="absolute left-1/2 -translate-x-1/2 text-base font-bold tracking-[0.2em] text-white uppercase md:text-lg"
+              className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold tracking-[0.18em] text-[#E1E0CC] uppercase md:hidden"
             >
               ENEM+
             </Link>
 
-            <div className="flex items-center gap-1.5">
+            <Link
+              href="/"
+              className={cn(
+                "absolute left-1/2 hidden -translate-x-1/2 text-base font-semibold tracking-[0.18em] text-[#E1E0CC] uppercase transition-all duration-500 ease-out md:block",
+                showLogo
+                  ? "pointer-events-auto translate-y-0 opacity-100"
+                  : "pointer-events-none translate-y-1 opacity-0",
+              )}
+              aria-hidden={!showLogo}
+            >
+              ENEM+
+            </Link>
+
+            <div className="flex items-center gap-2 sm:gap-3">
               <SlideHoverButton
                 href="/login"
                 label="Login"
-                className="hidden rounded-full bg-[#1c212b] text-white hover:bg-[#252b38] sm:inline-flex"
+                className="hidden h-9 rounded-full px-4 text-xs text-[#E1E0CC]/80 hover:text-[#E1E0CC] sm:inline-flex sm:text-sm"
               />
-              <SlideHoverButton
-                href="#planos"
-                label="Começar"
-                className="rounded-[6px] bg-[#1e3a8a] text-white hover:bg-[#1d4ed8]"
-              />
+              <Link
+                href="/login"
+                className="inline-flex h-9 items-center rounded-full bg-[#b0ff57] px-4 text-xs font-medium text-black transition hover:bg-[#c4ff7a] sm:text-sm"
+              >
+                Começar
+              </Link>
             </div>
           </div>
         </div>
 
         <div
           ref={tickerOuterRef}
-          className="relative z-10 overflow-hidden will-change-[margin,height]"
-          style={{ marginTop: TICKER_GAP }}
+          className={cn(
+            "overflow-hidden transition-all duration-500 ease-out",
+            showTicker
+              ? "mt-2 max-h-12 opacity-100"
+              : "mt-0 max-h-0 opacity-0",
+          )}
+          aria-hidden={!showTicker}
         >
-          <div ref={tickerInnerRef} className="will-change-transform">
-            <ScrollingTicker />
-          </div>
+          <ScrollingTicker variant="landing" />
         </div>
 
         <div
@@ -256,13 +453,10 @@ export function SiteHeader() {
           className="h-0 overflow-hidden opacity-0"
           aria-hidden={!menuOpen}
         >
-          <div
-            ref={menuInnerRef}
-            className="rounded-[10px] border border-white/8 bg-[#12151c] p-4 md:p-5"
-          >
+          <div ref={menuInnerRef} className="rounded-b-2xl border border-t-0 border-white/10 bg-black p-4 md:rounded-b-3xl md:p-5">
             <div className="grid gap-4 md:grid-cols-3">
-              <section className="rounded-[10px] border border-white/8 bg-[#151a24] p-5 md:p-6">
-                <p className="mb-5 font-mono text-[10px] tracking-[0.24em] text-white/40 uppercase">
+              <section className="rounded-xl border border-white/8 bg-white/[0.03] p-5 md:p-6">
+                <p className="mb-5 font-mono text-[10px] tracking-[0.24em] text-[#E1E0CC]/40 uppercase">
                   Nosso Produto
                 </p>
                 <ul className="space-y-3.5">
@@ -271,11 +465,11 @@ export function SiteHeader() {
                       <Link
                         href={link.href}
                         onClick={closeMenu}
-                        className="group flex items-center gap-2 text-base font-medium text-white/88 transition hover:text-white"
+                        className="group flex items-center gap-2 text-base font-medium text-[#E1E0CC]/85 transition hover:text-[#E1E0CC]"
                       >
                         {link.label}
                         {link.badge && (
-                          <span className="rounded-[4px] bg-[#1e3a8a] px-1.5 py-0.5 text-[9px] font-semibold tracking-wide text-white uppercase">
+                          <span className="rounded-full bg-[#b0ff57] px-1.5 py-0.5 text-[9px] font-semibold tracking-wide text-black uppercase">
                             {link.badge}
                           </span>
                         )}
@@ -285,8 +479,8 @@ export function SiteHeader() {
                 </ul>
               </section>
 
-              <section className="rounded-[10px] border border-white/8 bg-[#11151d] p-5 md:p-6">
-                <p className="mb-5 font-mono text-[10px] tracking-[0.24em] text-white/40 uppercase">
+              <section className="rounded-xl border border-white/8 bg-white/[0.02] p-5 md:p-6">
+                <p className="mb-5 font-mono text-[10px] tracking-[0.24em] text-[#E1E0CC]/40 uppercase">
                   Explorar
                 </p>
                 <ul className="space-y-3.5">
@@ -295,7 +489,7 @@ export function SiteHeader() {
                       <Link
                         href={link.href}
                         onClick={closeMenu}
-                        className="text-base font-medium text-white/85 transition hover:text-white"
+                        className="text-base font-medium text-[#E1E0CC]/80 transition hover:text-[#E1E0CC]"
                       >
                         {link.label}
                       </Link>
@@ -308,7 +502,7 @@ export function SiteHeader() {
                     <button
                       key={index}
                       type="button"
-                      className="flex size-9 items-center justify-center rounded-[6px] border border-white/10 bg-[#1a1f2a] text-white/65 transition hover:border-[#3b82f6]/40 hover:text-white"
+                      className="flex size-9 items-center justify-center rounded-full border border-white/10 text-[#E1E0CC]/55 transition hover:border-white/20 hover:text-[#E1E0CC]"
                       aria-label="Rede social"
                     >
                       <Icon className="size-3.5" />
@@ -317,17 +511,17 @@ export function SiteHeader() {
                 </div>
               </section>
 
-              <section className="relative overflow-hidden rounded-[10px] border border-white/8 bg-[#0f141d] p-5 md:p-6">
+              <section className="relative overflow-hidden rounded-xl border border-white/8 bg-white/[0.02] p-5 md:p-6">
                 <div className="mb-3 flex items-center gap-2">
-                  <span className="font-mono text-[10px] tracking-[0.24em] text-white/40 uppercase">
+                  <span className="font-mono text-[10px] tracking-[0.24em] text-[#E1E0CC]/40 uppercase">
                     Comece
                   </span>
-                  <span className="rounded-[4px] bg-[#1e3a8a] px-2 py-0.5 text-[9px] font-semibold tracking-wide text-white uppercase">
+                  <span className="rounded-full bg-[#b0ff57] px-2 py-0.5 text-[9px] font-semibold tracking-wide text-black uppercase">
                     Aprendizado
                   </span>
                 </div>
 
-                <h3 className="max-w-xs text-2xl leading-tight font-semibold text-white md:text-3xl">
+                <h3 className="max-w-xs text-2xl leading-tight font-medium text-[#E1E0CC] md:text-3xl">
                   Sua preparação ENEM começa aqui
                 </h3>
 
@@ -337,16 +531,16 @@ export function SiteHeader() {
                     alt="Estudantes estudando para o ENEM"
                     fill
                     sizes="(max-width: 768px) 100vw, 220px"
-                    className="rounded-[8px] object-cover ring-1 ring-white/10"
+                    className="rounded-lg object-cover ring-1 ring-white/10"
                   />
                 </div>
 
                 <Link
-                  href="#planos"
+                  href="/login"
                   onClick={closeMenu}
-                  className="flex h-10 w-full items-center justify-center rounded-[6px] bg-white text-sm font-medium text-[#0b1220] transition hover:bg-white/92"
+                  className="flex h-10 w-full items-center justify-center rounded-full bg-[#b0ff57] text-sm font-medium text-black transition hover:bg-[#c4ff7a]"
                 >
-                  Saiba mais
+                  Começar agora
                 </Link>
               </section>
             </div>
@@ -358,7 +552,7 @@ export function SiteHeader() {
         <button
           type="button"
           aria-label="Fechar menu"
-          className="fixed inset-0 -z-10 bg-black/35 backdrop-blur-[2px]"
+          className="pointer-events-auto fixed inset-0 -z-10 bg-black/40 backdrop-blur-[2px]"
           onClick={closeMenu}
         />
       )}

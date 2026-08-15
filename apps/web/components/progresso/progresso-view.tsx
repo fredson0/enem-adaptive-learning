@@ -1,6 +1,5 @@
 "use client";
 
-import { ProgressArcGauge } from "@/components/progresso/progress-arc-gauge";
 import { ProgressoEvolucaoChart } from "@/components/progresso/progresso-evolucao-chart";
 import type {
   LacunasResponse,
@@ -11,17 +10,18 @@ import {
   AREA_CORES,
   calcularTendenciaGeral,
   calcularTendenciasPorArea,
-  montarTituloHero,
+  formatarLinhaTendencia,
+  montarSubtituloProgresso,
   obterProximaAcaoTrilha,
   ordenarAreasPorPrioridade,
 } from "@/lib/progresso-helpers";
 import type { TrilhaResponse } from "@/lib/trilha";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
   ChevronRight,
-  Sparkles,
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
@@ -59,7 +59,25 @@ function TendenciaBadge({ valor }: { valor: number | null }) {
   return <span className="text-[10px] text-white/35">0%</span>;
 }
 
-/** Visão compacta — cabe na tela sem scroll. */
+function LinhaTendencia({ texto }: { texto: string }) {
+  const positivo = texto.startsWith("+");
+  const negativo = texto.startsWith("-");
+
+  return (
+    <p
+      className={cn(
+        "text-sm",
+        positivo && "text-[#b0ff57]/90",
+        negativo && "text-red-400/85",
+        !positivo && !negativo && "text-white/40",
+      )}
+    >
+      {texto}
+    </p>
+  );
+}
+
+/** Home — resumo, próximo passo e mapa mínimo das áreas. */
 export function ProgressoView({
   proficiencia,
   evolucao,
@@ -68,14 +86,6 @@ export function ProgressoView({
 }: ProgressoDataProps) {
   const lacunaPrincipal = lacunas.lacunas[0] ?? null;
   const tendenciaGeral = calcularTendenciaGeral(evolucao);
-  const tendenciasArea = calcularTendenciasPorArea(evolucao);
-  const { titulo, subtitulo } = montarTituloHero({
-    simuladosConcluidos: proficiencia.resumo.simuladosConcluidos,
-    mediaGeral: proficiencia.resumo.mediaGeralPercentual,
-    tendenciaGeral,
-    lacunaPrincipal,
-  });
-
   const mediaExibida = proficiencia.resumo.mediaGeralPercentual ?? 0;
   const areasOrdenadas = ordenarAreasPorPrioridade(
     proficiencia.areas,
@@ -84,145 +94,167 @@ export function ProgressoView({
   const proximaTrilha = obterProximaAcaoTrilha(trilha);
   const semDados = proficiencia.resumo.simuladosConcluidos === 0;
 
+  const linhaTendencia = formatarLinhaTendencia(
+    tendenciaGeral,
+    proficiencia.resumo.simuladosConcluidos,
+  );
+  const subtitulo = montarSubtituloProgresso(lacunaPrincipal);
+
   const hrefSimuladoFocado = lacunaPrincipal
     ? `/simulados/treino/novo?area=${lacunaPrincipal.simuladoSugerido.area}&quantidade=${lacunaPrincipal.simuladoSugerido.quantidade}`
     : "/simulados/treino/novo?quantidade=5";
 
-  return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col justify-center gap-5 py-2 md:gap-6">
-      <div className="grid items-center gap-5 md:grid-cols-[minmax(0,200px)_1fr] md:gap-8">
-        {!semDados ? (
-          <ProgressArcGauge
-            percent={mediaExibida}
-            labelLeft={`${mediaExibida}%`}
-            labelRight="Média geral"
-            className="mx-auto w-full max-w-[180px] md:mx-0"
-          />
-        ) : (
-          <div className="mx-auto flex size-[140px] items-center justify-center rounded-full border border-dashed border-white/15 bg-white/[0.02] md:mx-0">
-            <span className="text-center text-xs text-white/35">
-              Sem dados
-              <br />
-              ainda
-            </span>
-          </div>
-        )}
+  const labelTreino = lacunaPrincipal
+    ? `Treino em ${lacunaPrincipal.label} · ${lacunaPrincipal.simuladoSugerido.quantidade} questões`
+    : "Treino guiado · 5 questões";
 
-        <div className="space-y-2 text-center md:text-left">
-          <h2 className="text-xl font-medium tracking-tight text-white md:text-2xl">
-            {titulo}
+  if (semDados) {
+    return (
+      <div className="mx-auto flex w-full max-w-md flex-col items-center gap-8 py-4 text-center">
+        <div className="space-y-3">
+          <p className="text-xs uppercase tracking-[0.18em] text-white/30">
+            Progresso
+          </p>
+          <h2 className="text-2xl font-medium tracking-tight text-white md:text-3xl">
+            Comece hoje
           </h2>
-          <p className="text-sm leading-relaxed text-white/45">{subtitulo}</p>
-          <p className="text-[11px] text-white/30">
-            {proficiencia.resumo.simuladosConcluidos} simulados ·{" "}
-            {proficiencia.resumo.questoesRespondidas} questões
+          <p className="text-sm leading-relaxed text-white/45">
+            5 questões bastam para ver seu mapa de proficiência por área.
           </p>
         </div>
+
+        <Link
+          href="/simulados/treino/novo?quantidade=5"
+          className="inline-flex items-center gap-2 rounded-full bg-[#b0ff57] px-6 py-3 text-sm font-medium text-black transition hover:bg-[#c4ff7a]"
+        >
+          Fazer primeiro treino
+          <ArrowRight className="size-4" />
+        </Link>
       </div>
+    );
+  }
 
-      <section className="rounded-[14px] border border-[#5b4dff]/25 bg-[#5b4dff]/10 px-4 py-3.5 md:px-5">
-        <p className="flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] text-[#a89bff]">
-          <Sparkles className="size-3" />
-          O que fazer agora
+  return (
+    <div className="mx-auto flex w-full max-w-lg flex-col gap-8 py-2">
+      <header className="space-y-2 text-center md:text-left">
+        <p className="text-xs uppercase tracking-[0.18em] text-white/30">
+          Progresso
         </p>
+        <motion.p
+          key={mediaExibida}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          className="text-5xl font-medium tabular-nums tracking-tight text-white md:text-6xl"
+        >
+          {mediaExibida}%
+        </motion.p>
+        {linhaTendencia ? <LinhaTendencia texto={linhaTendencia} /> : null}
+        <p className="text-sm text-white/45">{subtitulo}</p>
+      </header>
 
-        {semDados ? (
-          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-white/70">
-              Comece com um treino de 5 questões.
-            </p>
+      <section className="rounded-[16px] border border-white/[0.08] bg-[#161616] p-5">
+        <p className="text-[10px] uppercase tracking-[0.14em] text-white/35">
+          Próximo passo
+        </p>
+        <p className="mt-2 text-base font-medium text-white">{labelTreino}</p>
+
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Link
+            href={hrefSimuladoFocado}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#b0ff57] px-5 py-2.5 text-sm font-medium text-black transition hover:bg-[#c4ff7a]"
+          >
+            Começar
+            <ArrowRight className="size-4" />
+          </Link>
+
+          {proximaTrilha ? (
             <Link
-              href="/simulados/treino/novo?quantidade=5"
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#b0ff57] px-4 py-2 text-xs font-medium text-black transition hover:bg-[#c4ff7a]"
+              href={proximaTrilha.href}
+              className="inline-flex items-center gap-1 text-sm text-white/45 transition hover:text-white/70"
             >
-              Começar
-              <ArrowRight className="size-3.5" />
+              {proximaTrilha.titulo}
+              <ChevronRight className="size-4" />
             </Link>
-          </div>
-        ) : (
-          <div className="mt-2.5 flex flex-wrap items-center gap-2">
+          ) : (
             <Link
-              href={hrefSimuladoFocado}
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#5b4dff] px-4 py-2 text-xs font-medium text-white transition hover:bg-[#6559ff]"
+              href="/trilha"
+              className="inline-flex items-center gap-1 text-sm text-white/45 transition hover:text-white/70"
             >
-              Treino · {lacunaPrincipal?.label ?? "foco"}
-              <ArrowRight className="size-3.5" />
+              Continuar trilha
+              <ChevronRight className="size-4" />
             </Link>
-            {proximaTrilha ? (
-              <Link
-                href={proximaTrilha.href}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 px-4 py-2 text-xs text-white/75 transition hover:border-white/25 hover:text-white"
-              >
-                {proximaTrilha.titulo}
-                <ChevronRight className="size-3.5" />
-              </Link>
-            ) : (
-              <Link
-                href="/trilha"
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 px-4 py-2 text-xs text-white/75 transition hover:border-white/25 hover:text-white"
-              >
-                Ver trilha
-                <ChevronRight className="size-3.5" />
-              </Link>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </section>
 
-      <div className="grid grid-cols-2 gap-2 sm:gap-3">
-        {areasOrdenadas.map((area) => {
-          const cor = AREA_CORES[area.slug] ?? "#ffffff";
-          const tendencia = tendenciasArea.get(area.slug) ?? null;
-          const ehPrioridade = lacunaPrincipal?.slug === area.slug;
-          const semPratica = area.totalQuestoes === 0;
+      <section className="space-y-3">
+        <p className="text-[10px] uppercase tracking-[0.14em] text-white/30">
+          Por área
+        </p>
+        <ul className="space-y-2">
+          {areasOrdenadas.map((area, index) => {
+            const cor = AREA_CORES[area.slug] ?? "#ffffff";
+            const ehPrioridade = lacunaPrincipal?.slug === area.slug;
+            const semPratica = area.totalQuestoes === 0;
+            const score = semPratica ? 0 : area.score;
 
-          return (
-            <Link
-              key={area.area}
-              href={`/trilha/${area.slug}`}
-              className="rounded-[12px] border border-white/[0.06] bg-[#161616] p-3.5 transition hover:border-white/12 hover:bg-[#1a1a1a]"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-xs font-medium text-white">
-                  {area.label}
-                </span>
-                <span className="text-sm font-medium text-white">
-                  {semPratica ? "—" : `${area.score}%`}
-                </span>
-              </div>
-
-              {ehPrioridade ? (
-                <span className="mt-1 inline-block rounded-full bg-[#5b4dff]/20 px-1.5 py-0.5 text-[9px] font-medium text-[#c4bbff]">
-                  Prioridade
-                </span>
-              ) : null}
-
-              <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]">
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${area.score}%`, backgroundColor: cor }}
-                />
-              </div>
-
-              <div className="mt-1.5 flex items-center justify-between gap-2">
-                <span className="text-[10px] text-white/35">
-                  {semPratica
-                    ? "Sem prática"
-                    : `${area.acertos}/${area.totalQuestoes}`}
-                </span>
-                <TendenciaBadge valor={tendencia} />
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+            return (
+              <li key={area.area}>
+                <Link
+                  href={`/trilha/${area.slug}`}
+                  className={cn(
+                    "flex items-center gap-3 rounded-[12px] px-3.5 py-3 transition",
+                    ehPrioridade
+                      ? "bg-white/[0.06] ring-1 ring-white/10"
+                      : "hover:bg-white/[0.04]",
+                  )}
+                >
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className={cn(
+                          "text-sm",
+                          ehPrioridade
+                            ? "font-medium text-white"
+                            : "text-white/75",
+                        )}
+                      >
+                        {area.label}
+                      </span>
+                      <span className="shrink-0 text-sm tabular-nums text-white/80">
+                        {semPratica ? "—" : `${area.score}%`}
+                      </span>
+                    </div>
+                    <div className="h-1 overflow-hidden rounded-full bg-white/[0.06]">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${score}%`,
+                          backgroundColor: cor,
+                          opacity: ehPrioridade ? 1 : 0.75,
+                        }}
+                      />
+                    </div>
+                  </div>
+                  {ehPrioridade && index === 0 ? (
+                    <span className="hidden shrink-0 text-[9px] uppercase tracking-wide text-white/30 sm:inline">
+                      Foco
+                    </span>
+                  ) : null}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
       <div className="flex justify-center pt-1">
         <Link
           href="/progresso/detalhes"
-          className="inline-flex items-center gap-1.5 text-sm text-white/45 transition hover:text-white/75"
+          className="inline-flex items-center gap-1.5 text-sm text-white/40 transition hover:text-white/70"
         >
-          Ver análise completa
+          Análise completa
           <ArrowRight className="size-3.5" />
         </Link>
       </div>
@@ -260,7 +292,8 @@ export function ProgressoDetalheView({
           Análise completa
         </h2>
         <p className="text-sm text-white/45">
-          Evolução nos simulados, detalhes por área e metas da semana.
+          {proficiencia.resumo.simuladosConcluidos} simulados ·{" "}
+          {proficiencia.resumo.questoesRespondidas} questões respondidas
         </p>
       </header>
 
@@ -303,8 +336,8 @@ export function ProgressoDetalheView({
                         {area.label}
                       </span>
                       {ehPrioridade ? (
-                        <span className="rounded-full bg-[#5b4dff]/20 px-2 py-0.5 text-[10px] font-medium text-[#c4bbff]">
-                          Prioridade
+                        <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/55">
+                          Foco
                         </span>
                       ) : null}
                     </div>
