@@ -35,6 +35,8 @@ import { PedirDicaQuestaoUseCase } from '../../../../core/application/use-cases/
 import { PersonalizarTrilhaUseCase } from '../../../../core/application/use-cases/personalizar-trilha.use-case';
 import { ConversarPersonalizarTrilhaUseCase } from '../../../../core/application/use-cases/conversar-personalizar-trilha.use-case';
 import { FinalizarPersonalizarTrilhaUseCase } from '../../../../core/application/use-cases/finalizar-personalizar-trilha.use-case';
+import { GerarPdfQuestoesUseCase } from '../../../../core/application/use-cases/gerar-pdf-questoes.use-case';
+import { GerarPdfResumoUseCase } from '../../../../core/application/use-cases/gerar-pdf-resumo.use-case';
 import { ObterSaldoTokensUseCase } from '../../../../core/application/use-cases/obter-saldo-tokens.use-case';
 import {
   AtualizarConversaDto,
@@ -43,6 +45,8 @@ import {
   EnviarMensagemTutorDto,
   ExplicarErroDto,
   FinalizarPersonalizarTrilhaDto,
+  GerarPdfQuestoesDto,
+  GerarPdfResumoDto,
   PedirDicaDto,
   PresignAnexoDto,
 } from './dto/ia-tutor.dto';
@@ -62,6 +66,10 @@ export class IaTutorController {
     private readonly conversarPersonalizarTrilhaUseCase: ConversarPersonalizarTrilhaUseCase,
     @Inject(FinalizarPersonalizarTrilhaUseCase)
     private readonly finalizarPersonalizarTrilhaUseCase: FinalizarPersonalizarTrilhaUseCase,
+    @Inject(GerarPdfResumoUseCase)
+    private readonly gerarPdfResumoUseCase: GerarPdfResumoUseCase,
+    @Inject(GerarPdfQuestoesUseCase)
+    private readonly gerarPdfQuestoesUseCase: GerarPdfQuestoesUseCase,
     @Inject(ObterSaldoTokensUseCase)
     private readonly obterSaldoTokensUseCase: ObterSaldoTokensUseCase,
     @Inject(ListarConversasUseCase)
@@ -262,6 +270,42 @@ export class IaTutorController {
       assuntoId: dto.assuntoId,
       assuntoNome: dto.assuntoNome,
       historico: dto.historico,
+    });
+  }
+
+  @Post('pdf/resumo')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 8, ttl: 60_000 } })
+  gerarPdfResumo(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: GerarPdfResumoDto,
+  ) {
+    return this.gerarPdfResumoUseCase.execute({
+      userId: user.sub,
+      assuntoId: dto.assuntoId,
+      assuntoNome: dto.assuntoNome,
+      areaSlug: dto.areaSlug,
+      conteudoBase: dto.conteudoBase,
+      conversaId: dto.conversaId,
+    });
+  }
+
+  @Post('pdf/questoes')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 12, ttl: 60_000 } })
+  gerarPdfQuestoes(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: GerarPdfQuestoesDto,
+  ) {
+    return this.gerarPdfQuestoesUseCase.execute({
+      userId: user.sub,
+      assuntoId: dto.assuntoId,
+      assuntoNome: dto.assuntoNome,
+      areaSlug: dto.areaSlug,
+      termosBusca: dto.termosBusca,
+      quantidade: dto.quantidade,
+      questaoIds: dto.questaoIds,
+      incluirGabarito: dto.incluirGabarito,
     });
   }
 }

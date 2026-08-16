@@ -5,9 +5,11 @@ import { SlideHoverButton } from "@/components/landing/slide-hover-button";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
 import { Globe, Menu, Share2, Sparkles, X } from "lucide-react";
+import { useLenis } from "lenis/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 const NAV_LINKS = [
   { label: "Como funciona", href: "#como-funciona" },
@@ -38,12 +40,15 @@ type HeaderMorph = {
 const COMPACT_MAX = 34;
 const MENU_MAX = 72;
 
-function readScrollMorph(): HeaderMorph {
-  const y = window.scrollY;
+function morphFromScrollY(y: number): HeaderMorph {
   return {
     detach: Math.min(Math.max((y - 10) / 72, 0), 1),
     compact: Math.min(Math.max((y - 72) / 112, 0), 1),
   };
+}
+
+function readScrollMorph(getScrollY: () => number) {
+  return morphFromScrollY(getScrollY());
 }
 
 function getScrollMaxWidthRem(compact: number) {
@@ -51,15 +56,23 @@ function getScrollMaxWidthRem(compact: number) {
   return lerp(56, COMPACT_MAX, compact);
 }
 
-function useHeaderMorph(menuActive: boolean) {
+function useHeaderMorph(
+  menuActive: boolean,
+  getScrollY: () => number,
+) {
   const [morph, setMorph] = useState<HeaderMorph>({ detach: 0, compact: 0 });
   const morphRef = useRef<HeaderMorph>({ detach: 0, compact: 0 });
 
   const syncFromScroll = () => {
-    const next = readScrollMorph();
+    const next = readScrollMorph(getScrollY);
     morphRef.current = next;
     setMorph(next);
     return next;
+  };
+
+  const restoreMorph = (next: HeaderMorph) => {
+    morphRef.current = next;
+    setMorph(next);
   };
 
   useEffect(() => {
@@ -71,9 +84,9 @@ function useHeaderMorph(menuActive: boolean) {
     update();
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
-  }, [menuActive]);
+  }, [menuActive, getScrollY]);
 
-  return { morph, morphRef, syncFromScroll };
+  return { morph, morphRef, syncFromScroll, restoreMorph };
 }
 
 function lerp(a: number, b: number, t: number) {
@@ -96,23 +109,33 @@ function getScrollMaxWidth(compact: number) {
   return `${rem}rem`;
 }
 
-function getTargetWidthRem(
-  scrollMorph: HeaderMorph,
-  viewportWidth: number,
-) {
+function getTargetWidthRem(scrollMorph: HeaderMorph, viewportWidth: number) {
   const rem = getScrollMaxWidthRem(scrollMorph.compact);
   if (rem === null) return viewportWidth / 16;
   return rem;
 }
 
+type MenuVisualState = {
+  widthRem: number;
+  detach: number;
+  compact: number;
+};
+
 export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "auth" }) {
   const isAuth = variant === "auth";
+  const lenis = useLenis();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuActive, setMenuActive] = useState(false);
-  const [menuMorph, setMenuMorph] = useState<HeaderMorph | null>(null);
-  const [menuWidthRem, setMenuWidthRem] = useState<number | null>(null);
 
-  const { morph, morphRef, syncFromScroll } = useHeaderMorph(menuActive);
+  const getScrollY = useCallback(
+    () => lenis?.scroll ?? window.scrollY,
+    [lenis],
+  );
+
+  const { morph, morphRef, syncFromScroll, restoreMorph } = useHeaderMorph(
+    menuActive,
+    getScrollY,
+  );
 
   const headerRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -121,21 +144,50 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "aut
   const menuPanelRef = useRef<HTMLDivElement>(null);
   const menuInnerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
+  const menuVisualRef = useRef<MenuVisualState | null>(null);
+  const layoutAtOpenRef = useRef<HeaderMorph | null>(null);
+  const widthAtOpenRef = useRef<number | null>(null);
 
-  const getRestMorph = () => (isAuth ? AUTH_HEADER_MORPH : readScrollMorph());
+  const getRestMorph = () =>
+    isAuth ? AUTH_HEADER_MORPH : readScrollMorph(getScrollY);
 
-  const activeMorph = isAuth
-    ? (menuMorph ?? AUTH_HEADER_MORPH)
-    : (menuMorph ?? morph);
+  const setMenuVisual = (next: MenuVisualState | null) => {
+    menuVisualRef.current = next;
+  };
+
+  const applyVisualToDom = (visual: MenuVisualState) => {
+    if (containerRef.current) {
+      containerRef.current.style.maxWidth = `${visual.widthRem}rem`;
+    }
+    if (headerRef.current) {
+      headerRef.current.style.paddingTop = `${lerp(0, 16, visual.detach)}px`;
+      headerRef.current.style.paddingLeft = `${lerp(0, 16, visual.compact)}px`;
+      headerRef.current.style.paddingRight = `${lerp(0, 16, visual.compact)}px`;
+    }
+  };
 
   useEffect(() => {
     if (!isAuth) return;
 
     setMenuOpen(false);
     setMenuActive(false);
-    setMenuMorph(null);
-    setMenuWidthRem(null);
+    setMenuVisual(null);
+    layoutAtOpenRef.current = null;
+    widthAtOpenRef.current = null;
   }, [isAuth]);
+
+  useEffect(() => {
+    if (!lenis || menuActive) return;
+
+    const onLenisScroll = () => {
+      syncFromScroll();
+    };
+
+    lenis.on("scroll", onLenisScroll);
+    return () => {
+      lenis.off("scroll", onLenisScroll);
+    };
+  }, [lenis, menuActive, syncFromScroll]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -149,11 +201,10 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "aut
     return () => ctx.revert();
   }, []);
 
-  const pinContainerWidth = () => {
-    const el = containerRef.current;
-    if (!el) return;
-    gsap.set(el, { maxWidth: el.getBoundingClientRect().width });
-  };
+  useLayoutEffect(() => {
+    if (isAuth) return;
+    syncFromScroll();
+  }, [isAuth]);
 
   const openMenu = () => {
     if (
@@ -166,17 +217,30 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "aut
     }
 
     timelineRef.current?.kill();
-    pinContainerWidth();
-
-    setMenuOpen(true);
-    setMenuActive(true);
 
     const startMorph = getRestMorph();
     morphRef.current = startMorph;
-    const needsCompactFirst = !isAuth && startMorph.compact < 0.55;
-    const panelHeight = menuInnerRef.current.scrollHeight;
-    const currentWidthRem =
+    layoutAtOpenRef.current = startMorph;
+    widthAtOpenRef.current =
       containerRef.current.getBoundingClientRect().width / 16;
+
+    const currentWidthRem = widthAtOpenRef.current;
+    const needsCompactFirst =
+      !isAuth && currentWidthRem > COMPACT_MAX + 0.75;
+    const panelHeight = menuInnerRef.current.scrollHeight;
+
+    const initialVisual: MenuVisualState = {
+      widthRem: currentWidthRem,
+      detach: startMorph.detach,
+      compact: startMorph.compact,
+    };
+
+    flushSync(() => {
+      restoreMorph(startMorph);
+      setMenuVisual(initialVisual);
+      setMenuActive(true);
+      setMenuOpen(true);
+    });
 
     const animState = {
       detach: startMorph.detach,
@@ -184,16 +248,33 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "aut
       widthRem: currentWidthRem,
       panelHeight: 0,
       panelOpacity: 0,
-      innerY: 12,
+      innerY: -10,
       innerOpacity: 0,
+      innerScale: 0.98,
+    };
+
+    const updatePanelStyles = () => {
+      if (menuPanelRef.current) {
+        menuPanelRef.current.style.height = `${animState.panelHeight}px`;
+        menuPanelRef.current.style.opacity = String(animState.panelOpacity);
+      }
+      if (menuInnerRef.current) {
+        menuInnerRef.current.style.opacity = String(animState.innerOpacity);
+        menuInnerRef.current.style.transform = `translateY(${animState.innerY}px) scaleY(${animState.innerScale})`;
+      }
     };
 
     const applyMenuMorph = () => {
-      setMenuMorph({ detach: animState.detach, compact: animState.compact });
-      setMenuWidthRem(animState.widthRem);
+      const next: MenuVisualState = {
+        widthRem: animState.widthRem,
+        detach: animState.detach,
+        compact: animState.compact,
+      };
+      setMenuVisual(next);
+      applyVisualToDom(next);
     };
 
-    applyMenuMorph();
+    updatePanelStyles();
 
     const tl = gsap.timeline();
 
@@ -209,33 +290,26 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "aut
     }
 
     tl.to(animState, {
-      widthRem: MENU_MAX,
-      duration: 0.42,
-      ease: "power3.inOut",
-      onUpdate: applyMenuMorph,
-    })
-      .to(
-        animState,
-        {
-          panelHeight,
-          panelOpacity: 1,
-          innerY: 0,
-          innerOpacity: 1,
-          duration: 0.4,
-          ease: "power3.out",
-          onUpdate: () => {
-            if (menuPanelRef.current) {
-              menuPanelRef.current.style.height = `${animState.panelHeight}px`;
-              menuPanelRef.current.style.opacity = String(animState.panelOpacity);
-            }
-            if (menuInnerRef.current) {
-              menuInnerRef.current.style.opacity = String(animState.innerOpacity);
-              menuInnerRef.current.style.transform = `translateY(${animState.innerY}px)`;
-            }
-          },
-        },
-        "-=0.22",
-      );
+      panelHeight,
+      panelOpacity: 1,
+      innerY: 0,
+      innerOpacity: 1,
+      innerScale: 1,
+      duration: 0.46,
+      ease: "power3.out",
+      onUpdate: updatePanelStyles,
+    });
+
+    tl.to(
+      animState,
+      {
+        widthRem: MENU_MAX,
+        duration: 0.4,
+        ease: "power3.inOut",
+        onUpdate: applyMenuMorph,
+      },
+      "+=0.02",
+    );
 
     timelineRef.current = tl;
   };
@@ -251,88 +325,109 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "aut
 
     timelineRef.current?.kill();
 
-    const targetMorph = getRestMorph();
+    const targetMorph =
+      layoutAtOpenRef.current ?? (isAuth ? AUTH_HEADER_MORPH : getRestMorph());
     morphRef.current = targetMorph;
 
     const viewportWidth =
       headerRef.current?.clientWidth ?? window.innerWidth;
-    const targetWidthRem = isAuth
-      ? COMPACT_MAX
-      : getTargetWidthRem(targetMorph, viewportWidth);
+    const targetWidthRem =
+      widthAtOpenRef.current ??
+      (isAuth ? COMPACT_MAX : getTargetWidthRem(targetMorph, viewportWidth));
+
+    const startVisual = menuVisualRef.current ?? {
+      widthRem: containerRef.current.getBoundingClientRect().width / 16,
+      detach: targetMorph.detach,
+      compact: targetMorph.compact,
+    };
 
     const animState = {
-      detach: menuMorph?.detach ?? targetMorph.detach,
-      compact: menuMorph?.compact ?? targetMorph.compact,
-      widthRem: menuWidthRem ?? MENU_MAX,
+      detach: startVisual.detach,
+      compact: startVisual.compact,
+      widthRem: startVisual.widthRem,
       panelHeight: menuPanelRef.current.offsetHeight,
       panelOpacity: 1,
       innerY: 0,
       innerOpacity: 1,
+      innerScale: 1,
+    };
+
+    const updatePanelStyles = () => {
+      if (menuPanelRef.current) {
+        menuPanelRef.current.style.height = `${animState.panelHeight}px`;
+        menuPanelRef.current.style.opacity = String(animState.panelOpacity);
+      }
+      if (menuInnerRef.current) {
+        menuInnerRef.current.style.opacity = String(animState.innerOpacity);
+        menuInnerRef.current.style.transform = `translateY(${animState.innerY}px) scaleY(${animState.innerScale})`;
+      }
     };
 
     const applyCloseMorph = () => {
-      setMenuMorph({ detach: animState.detach, compact: animState.compact });
-      setMenuWidthRem(animState.widthRem);
+      const next: MenuVisualState = {
+        widthRem: animState.widthRem,
+        detach: animState.detach,
+        compact: animState.compact,
+      };
+      setMenuVisual(next);
+      applyVisualToDom(next);
     };
 
     const tl = gsap.timeline({
       onComplete: () => {
-        if (!isAuth) {
-          syncFromScroll();
-        } else {
-          morphRef.current = AUTH_HEADER_MORPH;
-        }
+        const restoreMorphValue =
+          layoutAtOpenRef.current ??
+          (isAuth ? AUTH_HEADER_MORPH : morphRef.current);
 
-        setMenuOpen(false);
-        setMenuActive(false);
-        setMenuMorph(null);
-        setMenuWidthRem(null);
-        gsap.set(containerRef.current, { clearProps: "maxWidth" });
-        gsap.set(menuPanelRef.current, { clearProps: "height,opacity" });
-        gsap.set(menuInnerRef.current, { clearProps: "opacity,transform" });
+        flushSync(() => {
+          restoreMorph(
+            isAuth ? AUTH_HEADER_MORPH : restoreMorphValue,
+          );
+          setMenuOpen(false);
+          setMenuActive(false);
+          setMenuVisual(null);
+          layoutAtOpenRef.current = null;
+          widthAtOpenRef.current = null;
+        });
+
+        if (menuPanelRef.current) {
+          menuPanelRef.current.style.height = "";
+          menuPanelRef.current.style.opacity = "";
+        }
+        if (menuInnerRef.current) {
+          menuInnerRef.current.style.opacity = "";
+          menuInnerRef.current.style.transform = "";
+        }
       },
     });
 
     tl.to(animState, {
-      innerY: 8,
+      innerY: -10,
       innerOpacity: 0,
-      duration: 0.2,
+      innerScale: 0.98,
+      duration: 0.22,
       ease: "power2.in",
-      onUpdate: () => {
-        if (menuInnerRef.current) {
-          menuInnerRef.current.style.opacity = String(animState.innerOpacity);
-          menuInnerRef.current.style.transform = `translateY(${animState.innerY}px)`;
-        }
+      onUpdate: updatePanelStyles,
+    }).to(
+      animState,
+      {
+        panelHeight: 0,
+        panelOpacity: 0,
+        duration: 0.34,
+        ease: "power3.in",
+        onUpdate: updatePanelStyles,
       },
-    })
-      .to(
-        animState,
-        {
-          panelHeight: 0,
-          panelOpacity: 0,
-          duration: 0.3,
-          ease: "power3.inOut",
-          onUpdate: () => {
-            if (menuPanelRef.current) {
-              menuPanelRef.current.style.height = `${animState.panelHeight}px`;
-              menuPanelRef.current.style.opacity = String(animState.panelOpacity);
-            }
-          },
-        },
-        "-=0.05",
-      )
-      .to(
-        animState,
-        {
-          widthRem: targetWidthRem,
-          detach: targetMorph.detach,
-          compact: targetMorph.compact,
-          duration: 0.4,
-          ease: "power3.inOut",
-          onUpdate: applyCloseMorph,
-        },
-        "-=0.1",
-      );
+      "-=0.06",
+    );
+
+    tl.to(animState, {
+      widthRem: targetWidthRem,
+      detach: targetMorph.detach,
+      compact: targetMorph.compact,
+      duration: 0.42,
+      ease: "power3.inOut",
+      onUpdate: applyCloseMorph,
+    });
 
     timelineRef.current = tl;
   };
@@ -346,21 +441,31 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "aut
     openMenu();
   };
 
-  const showNavLinks = !isAuth && activeMorph.compact < 0.45 && !menuOpen;
-  const showLogo = isAuth || activeMorph.compact > 0.2 || menuOpen;
-  const showTicker = !isAuth && activeMorph.compact < 0.2 && !menuOpen;
-  const useCompactShell = isAuth || activeMorph.detach > 0.08 || menuOpen;
+  const layoutMorph = menuOpen
+    ? (layoutAtOpenRef.current ?? morph)
+    : morph;
 
-  const containerMaxWidth = menuWidthRem
-    ? `${menuWidthRem}rem`
+  const visual = menuOpen ? menuVisualRef.current : null;
+
+  const showNavLinks = !isAuth && layoutMorph.compact < 0.45 && !menuOpen;
+  const showLogo = isAuth || layoutMorph.compact > 0.2 || menuOpen;
+  const showTicker = !isAuth && layoutMorph.compact < 0.2 && !menuOpen;
+  const useCompactShell = isAuth || layoutMorph.detach > 0.08 || menuOpen;
+
+  const containerMaxWidth = visual
+    ? `${visual.widthRem}rem`
     : isAuth
       ? `${COMPACT_MAX}rem`
       : getScrollMaxWidth(morph.compact);
 
-  const headerPaddingTop = lerp(0, 16, activeMorph.detach);
-  const headerPaddingX = lerp(0, 16, activeMorph.compact);
+  const headerPaddingTop = visual
+    ? lerp(0, 16, visual.detach)
+    : lerp(0, 16, morph.detach);
+  const headerPaddingX = visual
+    ? lerp(0, 16, visual.compact)
+    : lerp(0, 16, morph.compact);
 
-  const useCssWidthTransition = !menuActive;
+  const useCssWidthTransition = !menuOpen;
 
   return (
     <header
@@ -397,7 +502,7 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "aut
             style={{
               padding: useCompactShell
                 ? "10px 16px"
-                : `${lerp(10, 8, activeMorph.compact)}px ${lerp(24, 14, activeMorph.compact)}px`,
+                : `${lerp(10, 8, layoutMorph.compact)}px ${lerp(24, 14, layoutMorph.compact)}px`,
             }}
           >
             <button
@@ -476,6 +581,110 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "aut
               </Link>
             </div>
           </div>
+
+          <div
+            ref={menuPanelRef}
+            className="h-0 overflow-hidden opacity-0"
+            style={{ transformOrigin: "top center" }}
+            aria-hidden={!menuOpen}
+          >
+            <div
+              ref={menuInnerRef}
+              className="border-t border-white/10 px-4 pt-4 pb-4 md:px-5 md:pt-5 md:pb-5"
+              style={{ transformOrigin: "top center" }}
+            >
+              <div className="grid gap-4 md:grid-cols-3">
+                <section className="rounded-xl border border-white/8 bg-white/[0.03] p-5 md:p-6">
+                  <p className="mb-5 font-mono text-[10px] tracking-[0.24em] text-[#E1E0CC]/40 uppercase">
+                    Nosso Produto
+                  </p>
+                  <ul className="space-y-3.5">
+                    {PRODUTO_LINKS.map((link) => (
+                      <li key={link.href}>
+                        <Link
+                          href={resolveNavHref(link.href, isAuth)}
+                          onClick={closeMenu}
+                          className="group flex items-center gap-2 text-base font-medium text-[#E1E0CC]/85 transition hover:text-[#E1E0CC]"
+                        >
+                          {link.label}
+                          {link.badge && (
+                            <span className="rounded-full bg-[#b0ff57] px-1.5 py-0.5 text-[9px] font-semibold tracking-wide text-black uppercase">
+                              {link.badge}
+                            </span>
+                          )}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <section className="rounded-xl border border-white/8 bg-white/[0.02] p-5 md:p-6">
+                  <p className="mb-5 font-mono text-[10px] tracking-[0.24em] text-[#E1E0CC]/40 uppercase">
+                    Explorar
+                  </p>
+                  <ul className="space-y-3.5">
+                    {EXPLORAR_LINKS.map((link) => (
+                      <li key={link.href}>
+                        <Link
+                          href={resolveNavHref(link.href, isAuth)}
+                          onClick={closeMenu}
+                          className="text-base font-medium text-[#E1E0CC]/80 transition hover:text-[#E1E0CC]"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-8 flex gap-2">
+                    {[Share2, Globe, Sparkles].map((Icon, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        className="flex size-9 items-center justify-center rounded-full border border-white/10 text-[#E1E0CC]/55 transition hover:border-white/20 hover:text-[#E1E0CC]"
+                        aria-label="Rede social"
+                      >
+                        <Icon className="size-3.5" />
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="relative overflow-hidden rounded-xl border border-white/8 bg-white/[0.02] p-5 md:p-6">
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className="font-mono text-[10px] tracking-[0.24em] text-[#E1E0CC]/40 uppercase">
+                      Comece
+                    </span>
+                    <span className="rounded-full bg-[#b0ff57] px-2 py-0.5 text-[9px] font-semibold tracking-wide text-black uppercase">
+                      Aprendizado
+                    </span>
+                  </div>
+
+                  <h3 className="max-w-xs text-2xl leading-tight font-medium text-[#E1E0CC] md:text-3xl">
+                    Sua preparação ENEM começa aqui
+                  </h3>
+
+                  <div className="relative mx-auto my-6 aspect-[4/3] w-full max-w-[220px]">
+                    <Image
+                      src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80"
+                      alt="Estudantes estudando para o ENEM"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 220px"
+                      className="rounded-lg object-cover ring-1 ring-white/10"
+                    />
+                  </div>
+
+                  <Link
+                    href="/tutor"
+                    onClick={closeMenu}
+                    className="flex h-10 w-full items-center justify-center rounded-full bg-[#b0ff57] text-sm font-medium text-black transition hover:bg-[#c4ff7a]"
+                  >
+                    Começar agora
+                  </Link>
+                </section>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div
@@ -489,111 +698,6 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "aut
           aria-hidden={!showTicker}
         >
           <ScrollingTicker variant="landing" />
-        </div>
-
-        <div
-          ref={menuPanelRef}
-          className="h-0 overflow-hidden opacity-0"
-          aria-hidden={!menuOpen}
-        >
-          <div
-            ref={menuInnerRef}
-            className={cn(
-              "border border-t-0 border-white/10 bg-black p-4 md:p-5",
-              useCompactShell ? "rounded-b-xl" : "rounded-b-2xl md:rounded-b-3xl",
-            )}
-          >
-            <div className="grid gap-4 md:grid-cols-3">
-              <section className="rounded-xl border border-white/8 bg-white/[0.03] p-5 md:p-6">
-                <p className="mb-5 font-mono text-[10px] tracking-[0.24em] text-[#E1E0CC]/40 uppercase">
-                  Nosso Produto
-                </p>
-                <ul className="space-y-3.5">
-                  {PRODUTO_LINKS.map((link) => (
-                    <li key={link.href}>
-                      <Link
-                        href={resolveNavHref(link.href, isAuth)}
-                        onClick={closeMenu}
-                        className="group flex items-center gap-2 text-base font-medium text-[#E1E0CC]/85 transition hover:text-[#E1E0CC]"
-                      >
-                        {link.label}
-                        {link.badge && (
-                          <span className="rounded-full bg-[#b0ff57] px-1.5 py-0.5 text-[9px] font-semibold tracking-wide text-black uppercase">
-                            {link.badge}
-                          </span>
-                        )}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-
-              <section className="rounded-xl border border-white/8 bg-white/[0.02] p-5 md:p-6">
-                <p className="mb-5 font-mono text-[10px] tracking-[0.24em] text-[#E1E0CC]/40 uppercase">
-                  Explorar
-                </p>
-                <ul className="space-y-3.5">
-                  {EXPLORAR_LINKS.map((link) => (
-                    <li key={link.href}>
-                      <Link
-                        href={resolveNavHref(link.href, isAuth)}
-                        onClick={closeMenu}
-                        className="text-base font-medium text-[#E1E0CC]/80 transition hover:text-[#E1E0CC]"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-8 flex gap-2">
-                  {[Share2, Globe, Sparkles].map((Icon, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      className="flex size-9 items-center justify-center rounded-full border border-white/10 text-[#E1E0CC]/55 transition hover:border-white/20 hover:text-[#E1E0CC]"
-                      aria-label="Rede social"
-                    >
-                      <Icon className="size-3.5" />
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              <section className="relative overflow-hidden rounded-xl border border-white/8 bg-white/[0.02] p-5 md:p-6">
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="font-mono text-[10px] tracking-[0.24em] text-[#E1E0CC]/40 uppercase">
-                    Comece
-                  </span>
-                  <span className="rounded-full bg-[#b0ff57] px-2 py-0.5 text-[9px] font-semibold tracking-wide text-black uppercase">
-                    Aprendizado
-                  </span>
-                </div>
-
-                <h3 className="max-w-xs text-2xl leading-tight font-medium text-[#E1E0CC] md:text-3xl">
-                  Sua preparação ENEM começa aqui
-                </h3>
-
-                <div className="relative mx-auto my-6 aspect-[4/3] w-full max-w-[220px]">
-                  <Image
-                    src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80"
-                    alt="Estudantes estudando para o ENEM"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 220px"
-                    className="rounded-lg object-cover ring-1 ring-white/10"
-                  />
-                </div>
-
-                <Link
-                  href="/tutor"
-                  onClick={closeMenu}
-                  className="flex h-10 w-full items-center justify-center rounded-full bg-[#b0ff57] text-sm font-medium text-black transition hover:bg-[#c4ff7a]"
-                >
-                  Começar agora
-                </Link>
-              </section>
-            </div>
-          </div>
         </div>
       </div>
 

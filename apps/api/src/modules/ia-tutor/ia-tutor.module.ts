@@ -14,6 +14,8 @@ import { ObterConversaUseCase } from './core/application/use-cases/obter-convers
 import { PedirDicaQuestaoUseCase } from './core/application/use-cases/pedir-dica-questao.use-case';
 import { ConversarPersonalizarTrilhaUseCase } from './core/application/use-cases/conversar-personalizar-trilha.use-case';
 import { FinalizarPersonalizarTrilhaUseCase } from './core/application/use-cases/finalizar-personalizar-trilha.use-case';
+import { GerarPdfQuestoesUseCase } from './core/application/use-cases/gerar-pdf-questoes.use-case';
+import { GerarPdfResumoUseCase } from './core/application/use-cases/gerar-pdf-resumo.use-case';
 import { PersonalizarTrilhaUseCase } from './core/application/use-cases/personalizar-trilha.use-case';
 import { ObterSaldoTokensUseCase } from './core/application/use-cases/obter-saldo-tokens.use-case';
 import { DevUploadsController } from './infrastructure/adapters/in/http/dev-uploads.controller';
@@ -40,6 +42,8 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
     PersonalizarTrilhaUseCase,
     ConversarPersonalizarTrilhaUseCase,
     FinalizarPersonalizarTrilhaUseCase,
+    GerarPdfResumoUseCase,
+    GerarPdfQuestoesUseCase,
     ObterSaldoTokensUseCase,
     ListarConversasUseCase,
     ObterConversaUseCase,

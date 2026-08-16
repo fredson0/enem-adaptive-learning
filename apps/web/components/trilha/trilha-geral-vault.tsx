@@ -1,13 +1,21 @@
 "use client";
 
-import { TrilhaAssuntoCard } from "@/components/trilha/trilha-disciplina-card";
+import {
+  TrilhaAssuntoCard,
+  TrilhaDisciplinaCard,
+} from "@/components/trilha/trilha-disciplina-card";
 import { TrilhaModalidadeCard } from "@/components/trilha/trilha-modalidade-card";
 import type { TrilhaResponse } from "@/lib/trilha";
 import {
   agruparModalidadesPorArea,
+  calcularProgressoDisciplina,
+  contarAssuntosModalidade,
   filtrarAssuntosModalidade,
+  filtrarDisciplinasModalidade,
   filtrarModalidades,
+  getDisciplinaById,
   getModalidadeById,
+  modalidadeTemDisciplinas,
   TRILHA_MODALIDADES,
 } from "@/lib/trilha-catalogo";
 import { calcularProgressoPorAssunto } from "@/lib/trilha-progresso";
@@ -21,19 +29,66 @@ type TrilhaGeralVaultProps = {
   trilha: TrilhaResponse;
 };
 
+function BuscaAssuntos({
+  busca,
+  onChange,
+  placeholder,
+  resultadoCount,
+}: {
+  busca: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  resultadoCount?: number;
+}) {
+  return (
+    <>
+      <div className="relative mx-auto max-w-xl">
+        <Search
+          className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white/30 sm:left-5"
+          strokeWidth={1.75}
+        />
+        <input
+          type="search"
+          value={busca}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          className={cn(
+            "w-full rounded-full border border-white/[0.08] bg-[#1a1a1a] py-3 pr-4 pl-11 text-sm text-white sm:py-3.5 sm:pr-5 sm:pl-12",
+            "placeholder:text-white/30 outline-none transition",
+            "focus:border-white/20 focus:bg-[#1e1e1e]",
+          )}
+        />
+      </div>
+
+      {busca.trim() && resultadoCount !== undefined ? (
+        <p className="text-xs text-white/35">
+          {resultadoCount === 0
+            ? "Nenhum resultado encontrado."
+            : `${resultadoCount} resultado${resultadoCount === 1 ? "" : "s"}`}
+        </p>
+      ) : null}
+    </>
+  );
+}
+
 export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const modalidadeId = searchParams.get("modalidade");
+  const disciplinaId = searchParams.get("disciplina");
   const modalidadeAtiva = modalidadeId
     ? getModalidadeById(modalidadeId)
     : undefined;
+  const disciplinaAtiva =
+    modalidadeId && disciplinaId
+      ? getDisciplinaById(modalidadeId, disciplinaId)
+      : undefined;
 
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
     setBusca("");
-  }, [modalidadeId]);
+  }, [modalidadeId, disciplinaId]);
 
   const progressoPorAssunto = useMemo(
     () => trilha.progressoPorAssunto ?? calcularProgressoPorAssunto(trilha),
@@ -67,12 +122,31 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
     [modalidadesFiltradas],
   );
 
-  const assuntosFiltrados = useMemo(() => {
-    if (!modalidadeAtiva) return [];
-    return filtrarAssuntosModalidade(modalidadeAtiva.id, busca);
+  const disciplinasFiltradas = useMemo(() => {
+    if (!modalidadeAtiva || !modalidadeTemDisciplinas(modalidadeAtiva)) {
+      return [];
+    }
+    return filtrarDisciplinasModalidade(modalidadeAtiva.id, busca);
   }, [busca, modalidadeAtiva]);
 
+  const assuntosFiltrados = useMemo(() => {
+    if (!modalidadeAtiva) return [];
+    if (modalidadeTemDisciplinas(modalidadeAtiva) && !disciplinaAtiva) {
+      return [];
+    }
+    return filtrarAssuntosModalidade(
+      modalidadeAtiva.id,
+      busca,
+      disciplinaAtiva?.id,
+    );
+  }, [busca, disciplinaAtiva, modalidadeAtiva]);
+
   const voltar = () => {
+    if (disciplinaAtiva && modalidadeAtiva) {
+      router.push(`/trilha/geral?modalidade=${encodeURIComponent(modalidadeAtiva.id)}`);
+      setBusca("");
+      return;
+    }
     if (modalidadeAtiva) {
       router.push("/trilha/geral");
       setBusca("");
@@ -96,8 +170,82 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
     );
   }
 
+  if (modalidadeId && disciplinaId && modalidadeAtiva && !disciplinaAtiva) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-6 pb-6 sm:space-y-8">
+        <Link
+          href={`/trilha/geral?modalidade=${encodeURIComponent(modalidadeAtiva.id)}`}
+          className="inline-flex items-center gap-2 text-sm text-white/45 transition hover:text-white/75"
+        >
+          <ArrowLeft className="size-4" />
+          {modalidadeAtiva.nome}
+        </Link>
+        <p className="text-sm text-white/45">Matéria não encontrada.</p>
+      </div>
+    );
+  }
+
+  if (disciplinaAtiva && modalidadeAtiva) {
+    const area = mapaArea.get(modalidadeAtiva.areaSlug);
+
+    return (
+      <div className="mx-auto max-w-6xl space-y-8 pb-6 sm:space-y-12 sm:pb-8">
+        <button
+          type="button"
+          onClick={voltar}
+          className="inline-flex items-center gap-2 text-sm text-white/45 transition hover:text-white/75"
+        >
+          <ArrowLeft className="size-4" />
+          {modalidadeAtiva.nome}
+        </button>
+
+        <header className="mx-auto max-w-2xl space-y-5 text-center sm:space-y-8">
+          <div className="space-y-2 sm:space-y-3">
+            <p
+              className="text-[10px] uppercase tracking-[0.18em] sm:text-[11px]"
+              style={{ color: modalidadeAtiva.areaCor }}
+            >
+              {modalidadeAtiva.nome}
+            </p>
+            <h1 className="text-2xl font-medium tracking-tight text-white sm:text-3xl md:text-5xl">
+              {disciplinaAtiva.nome}
+            </h1>
+            <p className="text-xs text-white/40 sm:text-sm md:text-base">
+              {disciplinaAtiva.assuntos.length} assuntos — escolha por onde
+              começar.
+            </p>
+            {area ? (
+              <p className="text-xs text-white/30">
+                {area.progresso}% da trilha · {area.prioridade}
+              </p>
+            ) : null}
+          </div>
+
+          <BuscaAssuntos
+            busca={busca}
+            onChange={setBusca}
+            placeholder="Buscar assunto…"
+            resultadoCount={busca.trim() ? assuntosFiltrados.length : undefined}
+          />
+        </header>
+
+        <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 sm:gap-x-4 sm:gap-y-8 md:grid-cols-4 lg:grid-cols-5">
+          {assuntosFiltrados.map((assunto) => (
+            <TrilhaAssuntoCard
+              key={assunto.id}
+              assunto={assunto}
+              emFoco={assuntosEmFoco.has(assunto.nome.toLowerCase())}
+              progresso={progressoPorAssunto[assunto.id] ?? 0}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (modalidadeAtiva) {
     const area = mapaArea.get(modalidadeAtiva.areaSlug);
+    const temDisciplinas = modalidadeTemDisciplinas(modalidadeAtiva);
 
     return (
       <div className="mx-auto max-w-6xl space-y-8 pb-6 sm:space-y-12 sm:pb-8">
@@ -122,8 +270,9 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
               {modalidadeAtiva.nome}
             </h1>
             <p className="text-xs text-white/40 sm:text-sm md:text-base">
-              {modalidadeAtiva.assuntos.length} assuntos — escolha por onde
-              começar.
+              {temDisciplinas
+                ? `${modalidadeAtiva.disciplinas?.length ?? 0} matérias — escolha por onde começar.`
+                : `${contarAssuntosModalidade(modalidadeAtiva)} assuntos — escolha por onde começar.`}
             </p>
             {area ? (
               <p className="text-xs text-white/30">
@@ -132,42 +281,41 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
             ) : null}
           </div>
 
-          <div className="relative mx-auto max-w-xl">
-            <Search
-              className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white/30 sm:left-5"
-              strokeWidth={1.75}
-            />
-            <input
-              type="search"
-              value={busca}
-              onChange={(event) => setBusca(event.target.value)}
-              placeholder="Buscar assunto…"
-              className={cn(
-                "w-full rounded-full border border-white/[0.08] bg-[#1a1a1a] py-3 pr-4 pl-11 text-sm text-white sm:py-3.5 sm:pr-5 sm:pl-12",
-                "placeholder:text-white/30 outline-none transition",
-                "focus:border-white/20 focus:bg-[#1e1e1e]",
-              )}
-            />
-          </div>
-
-          {busca.trim() ? (
-            <p className="text-xs text-white/35">
-              {assuntosFiltrados.length === 0
-                ? "Nenhum assunto encontrado."
-                : `${assuntosFiltrados.length} resultado${assuntosFiltrados.length === 1 ? "" : "s"}`}
-            </p>
-          ) : null}
+          <BuscaAssuntos
+            busca={busca}
+            onChange={setBusca}
+            placeholder={temDisciplinas ? "Buscar matéria…" : "Buscar assunto…"}
+            resultadoCount={
+              busca.trim()
+                ? temDisciplinas
+                  ? disciplinasFiltradas.length
+                  : assuntosFiltrados.length
+                : undefined
+            }
+          />
         </header>
 
         <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 sm:gap-x-4 sm:gap-y-8 md:grid-cols-4 lg:grid-cols-5">
-          {assuntosFiltrados.map((assunto) => (
-            <TrilhaAssuntoCard
-              key={assunto.id}
-              assunto={assunto}
-              emFoco={assuntosEmFoco.has(assunto.nome.toLowerCase())}
-              progresso={progressoPorAssunto[assunto.id] ?? 0}
-            />
-          ))}
+          {temDisciplinas
+            ? disciplinasFiltradas.map((disciplina) => (
+                <TrilhaDisciplinaCard
+                  key={disciplina.id}
+                  disciplina={disciplina}
+                  emFoco={assuntosEmFoco.has(disciplina.nome.toLowerCase())}
+                  progresso={calcularProgressoDisciplina(
+                    disciplina,
+                    progressoPorAssunto,
+                  )}
+                />
+              ))
+            : assuntosFiltrados.map((assunto) => (
+                <TrilhaAssuntoCard
+                  key={assunto.id}
+                  assunto={assunto}
+                  emFoco={assuntosEmFoco.has(assunto.nome.toLowerCase())}
+                  progresso={progressoPorAssunto[assunto.id] ?? 0}
+                />
+              ))}
         </div>
       </div>
     );
@@ -194,31 +342,14 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
           </p>
         </div>
 
-        <div className="relative mx-auto max-w-xl">
-          <Search
-            className="pointer-events-none absolute left-5 top-1/2 size-4 -translate-y-1/2 text-white/30"
-            strokeWidth={1.75}
-          />
-          <input
-            type="search"
-            value={busca}
-            onChange={(event) => setBusca(event.target.value)}
-            placeholder="Buscar modalidade…"
-            className={cn(
-              "w-full rounded-full border border-white/[0.08] bg-[#1a1a1a] py-3 pr-4 pl-11 text-sm text-white sm:py-3.5 sm:pr-5 sm:pl-12",
-              "placeholder:text-white/30 outline-none transition",
-              "focus:border-white/20 focus:bg-[#1e1e1e]",
-            )}
-          />
-        </div>
-
-        {busca.trim() ? (
-          <p className="text-xs text-white/35">
-            {modalidadesFiltradas.length === 0
-              ? "Nenhuma modalidade encontrada."
-              : `${modalidadesFiltradas.length} resultado${modalidadesFiltradas.length === 1 ? "" : "s"}`}
-          </p>
-        ) : null}
+        <BuscaAssuntos
+          busca={busca}
+          onChange={setBusca}
+          placeholder="Buscar modalidade…"
+          resultadoCount={
+            busca.trim() ? modalidadesFiltradas.length : undefined
+          }
+        />
       </header>
 
       <div className="space-y-8 sm:space-y-14">

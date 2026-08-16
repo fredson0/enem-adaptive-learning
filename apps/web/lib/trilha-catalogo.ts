@@ -7,6 +7,14 @@ export type TrilhaAssuntoItem = {
   palavrasChave: string[];
 };
 
+export type TrilhaDisciplinaItem = {
+  id: string;
+  nome: string;
+  gradient: string;
+  palavrasChave: string[];
+  assuntos: TrilhaAssuntoItem[];
+};
+
 export type TrilhaModalidadeItem = {
   id: string;
   nome: string;
@@ -16,11 +24,26 @@ export type TrilhaModalidadeItem = {
   areaTag: string;
   gradient: string;
   palavrasChave: string[];
-  assuntos: TrilhaAssuntoItem[];
+  /** Assuntos diretos — modalidades sem subdivisão (ex.: Matemática). */
+  assuntos?: TrilhaAssuntoItem[];
+  /** Matérias com assuntos aninhados (ex.: Física, Química, Biologia). */
+  disciplinas?: TrilhaDisciplinaItem[];
 };
 
 /** Assunto enriquecido com contexto da modalidade (para cards e links). */
 export type TrilhaAssuntoCatalogo = TrilhaAssuntoItem & {
+  modalidadeId: string;
+  modalidadeNome: string;
+  areaSlug: AreaEnemSlug;
+  areaLabel: string;
+  areaCor: string;
+  areaTag: string;
+  disciplinaId?: string;
+  disciplinaNome?: string;
+};
+
+/** Disciplina enriquecida com contexto da modalidade (para cards de matéria). */
+export type TrilhaDisciplinaCatalogo = TrilhaDisciplinaItem & {
   modalidadeId: string;
   modalidadeNome: string;
   areaSlug: AreaEnemSlug;
@@ -243,42 +266,138 @@ const CATALOGO_MODALIDADES: TrilhaModalidadeItem[] = [
     areaTag: "Humanas",
     gradient: "from-[#78350f] via-[#1a1510] to-[#141414]",
     palavrasChave: ["ch", "história", "geografia", "sociedade"],
-    assuntos: [
+    disciplinas: [
       {
         id: "hum-historia",
         nome: "História",
         gradient: "from-[#78350f] via-[#1a1510] to-[#141414]",
         palavrasChave: ["brasil", "república"],
+        assuntos: [
+          {
+            id: "hum-hist-brasil-colonia",
+            nome: "Brasil Colônia e Império",
+            gradient: "from-[#78350f] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["colônia", "império"],
+          },
+          {
+            id: "hum-hist-brasil-republica",
+            nome: "Brasil República",
+            gradient: "from-[#92400e] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["república", "vargas"],
+          },
+          {
+            id: "hum-hist-mundo",
+            nome: "História mundial",
+            gradient: "from-[#a16207] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["revolução", "industrial"],
+          },
+          {
+            id: "hum-hist-guerra-fria",
+            nome: "Guerra Fria",
+            gradient: "from-[#b45309] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["guerra fria", "blocos"],
+          },
+        ],
       },
       {
         id: "hum-geografia",
         nome: "Geografia",
         gradient: "from-[#92400e] via-[#1a1510] to-[#141414]",
         palavrasChave: ["clima", "urbanização"],
+        assuntos: [
+          {
+            id: "hum-geo-fisica",
+            nome: "Geografia física",
+            gradient: "from-[#92400e] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["clima", "relevo"],
+          },
+          {
+            id: "hum-geo-humana",
+            nome: "Geografia humana",
+            gradient: "from-[#a16207] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["população", "migração"],
+          },
+          {
+            id: "hum-geo-urbanizacao",
+            nome: "Urbanização",
+            gradient: "from-[#b45309] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["cidade", "metrópole"],
+          },
+          {
+            id: "hum-geo-geopolitica",
+            nome: "Geopolítica",
+            gradient: "from-[#ca8a04] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["conflitos", "globalização"],
+          },
+        ],
       },
       {
         id: "hum-sociologia",
         nome: "Sociologia",
         gradient: "from-[#b45309] via-[#1a1510] to-[#141414]",
         palavrasChave: ["sociedade", "cultura"],
+        assuntos: [
+          {
+            id: "hum-soc-cultura",
+            nome: "Cultura e sociedade",
+            gradient: "from-[#b45309] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["cultura", "identidade"],
+          },
+          {
+            id: "hum-soc-movimentos",
+            nome: "Movimentos sociais",
+            gradient: "from-[#ca8a04] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["protesto", "direitos"],
+          },
+        ],
       },
       {
         id: "hum-filosofia",
         nome: "Filosofia",
         gradient: "from-[#a16207] via-[#1a1510] to-[#141414]",
         palavrasChave: ["ética", "política"],
+        assuntos: [
+          {
+            id: "hum-filo-etica",
+            nome: "Ética",
+            gradient: "from-[#a16207] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["moral", "virtude"],
+          },
+          {
+            id: "hum-filo-politica",
+            nome: "Filosofia política",
+            gradient: "from-[#b45309] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["estado", "democracia"],
+          },
+        ],
       },
       {
         id: "hum-atualidades",
         nome: "Atualidades",
         gradient: "from-[#ca8a04] via-[#1a1510] to-[#141414]",
         palavrasChave: ["notícias", "mundo"],
+        assuntos: [
+          {
+            id: "hum-atual-mundo",
+            nome: "Mundo contemporâneo",
+            gradient: "from-[#ca8a04] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["atualidades", "notícias"],
+          },
+        ],
       },
       {
         id: "hum-antropologia",
         nome: "Antropologia",
         gradient: "from-[#854d0e] via-[#1a1510] to-[#141414]",
         palavrasChave: ["identidade", "diversidade"],
+        assuntos: [
+          {
+            id: "hum-antro-cultura",
+            nome: "Cultura e identidade",
+            gradient: "from-[#854d0e] via-[#1a1510] to-[#141414]",
+            palavrasChave: ["etnia", "diversidade"],
+          },
+        ],
       },
     ],
   },
@@ -291,48 +410,102 @@ const CATALOGO_MODALIDADES: TrilhaModalidadeItem[] = [
     areaTag: "Natureza",
     gradient: "from-[#064e3b] via-[#0f1a18] to-[#141414]",
     palavrasChave: ["cn", "física", "química", "biologia"],
-    assuntos: [
+    disciplinas: [
       {
         id: "nat-fisica",
         nome: "Física",
         gradient: "from-[#064e3b] via-[#0f1a18] to-[#141414]",
         palavrasChave: ["mecânica", "energia"],
+        assuntos: [
+          {
+            id: "nat-fis-mecanica",
+            nome: "Mecânica",
+            gradient: "from-[#064e3b] via-[#0f1a18] to-[#141414]",
+            palavrasChave: ["força", "movimento"],
+          },
+          {
+            id: "nat-fis-termodinamica",
+            nome: "Termodinâmica",
+            gradient: "from-[#047857] via-[#0f1a18] to-[#141414]",
+            palavrasChave: ["calor", "temperatura"],
+          },
+          {
+            id: "nat-fis-ondas",
+            nome: "Ondas e óptica",
+            gradient: "from-[#059669] via-[#0f1a18] to-[#141414]",
+            palavrasChave: ["luz", "som"],
+          },
+          {
+            id: "nat-energia",
+            nome: "Energia e meio ambiente",
+            gradient: "from-[#10b981] via-[#0f1a18] to-[#141414]",
+            palavrasChave: ["poluição", "clima"],
+          },
+        ],
       },
       {
         id: "nat-quimica",
         nome: "Química",
         gradient: "from-[#047857] via-[#0f1a18] to-[#141414]",
         palavrasChave: ["reação", "mol"],
+        assuntos: [
+          {
+            id: "nat-quim-geral",
+            nome: "Química geral",
+            gradient: "from-[#047857] via-[#0f1a18] to-[#141414]",
+            palavrasChave: ["átomo", "tabela periódica"],
+          },
+          {
+            id: "nat-quim-reacoes",
+            nome: "Reações químicas",
+            gradient: "from-[#059669] via-[#0f1a18] to-[#141414]",
+            palavrasChave: ["estequiometria", "balanceamento"],
+          },
+          {
+            id: "nat-quim-organica",
+            nome: "Química orgânica",
+            gradient: "from-[#065f46] via-[#0f1a18] to-[#141414]",
+            palavrasChave: ["carbono", "hidrocarboneto"],
+          },
+        ],
       },
       {
         id: "nat-biologia",
         nome: "Biologia",
         gradient: "from-[#059669] via-[#0f1a18] to-[#141414]",
         palavrasChave: ["célula", "evolução"],
-      },
-      {
-        id: "nat-ecologia",
-        nome: "Ecologia",
-        gradient: "from-[#065f46] via-[#0f1a18] to-[#141414]",
-        palavrasChave: ["bioma", "sustentabilidade"],
-      },
-      {
-        id: "nat-energia",
-        nome: "Energia e meio ambiente",
-        gradient: "from-[#10b981] via-[#0f1a18] to-[#141414]",
-        palavrasChave: ["poluição", "clima"],
-      },
-      {
-        id: "nat-genetica",
-        nome: "Genética",
-        gradient: "from-[#059669] via-[#111] to-[#141414]",
-        palavrasChave: ["dna", "hereditariedade"],
-      },
-      {
-        id: "nat-corpo",
-        nome: "Corpo humano",
-        gradient: "from-[#047857] via-[#111] to-[#141414]",
-        palavrasChave: ["anatomia", "saúde"],
+        assuntos: [
+          {
+            id: "nat-bio-celula",
+            nome: "Citologia",
+            gradient: "from-[#059669] via-[#0f1a18] to-[#141414]",
+            palavrasChave: ["célula", "membrana"],
+          },
+          {
+            id: "nat-ecologia",
+            nome: "Ecologia",
+            gradient: "from-[#065f46] via-[#0f1a18] to-[#141414]",
+            palavrasChave: ["bioma", "sustentabilidade"],
+          },
+          {
+            id: "nat-genetica",
+            nome: "Genética",
+            gradient: "from-[#059669] via-[#111] to-[#141414]",
+            palavrasChave: ["dna", "hereditariedade"],
+          },
+          {
+            id: "nat-corpo",
+            nome: "Corpo humano",
+            gradient: "from-[#047857] via-[#111] to-[#141414]",
+            palavrasChave: ["anatomia", "saúde"],
+          },
+          {
+            id: "nat-bio-evolucao",
+            nome: "Evolução",
+            gradient: "from-[#10b981] via-[#0f1a18] to-[#141414]",
+            palavrasChave: ["darwin", "seleção natural"],
+          },
+        ],
       },
     ],
   },
@@ -340,18 +513,87 @@ const CATALOGO_MODALIDADES: TrilhaModalidadeItem[] = [
 
 export const TRILHA_MODALIDADES = CATALOGO_MODALIDADES;
 
-export const TRILHA_ASSUNTOS: TrilhaAssuntoCatalogo[] =
+function enriquecerAssunto(
+  assunto: TrilhaAssuntoItem,
+  modalidade: TrilhaModalidadeItem,
+  disciplina?: TrilhaDisciplinaItem,
+): TrilhaAssuntoCatalogo {
+  return {
+    ...assunto,
+    modalidadeId: modalidade.id,
+    modalidadeNome: modalidade.nome,
+    areaSlug: modalidade.areaSlug,
+    areaLabel: modalidade.areaLabel,
+    areaCor: modalidade.areaCor,
+    areaTag: modalidade.areaTag,
+    ...(disciplina
+      ? { disciplinaId: disciplina.id, disciplinaNome: disciplina.nome }
+      : {}),
+  };
+}
+
+function enriquecerDisciplina(
+  disciplina: TrilhaDisciplinaItem,
+  modalidade: TrilhaModalidadeItem,
+): TrilhaDisciplinaCatalogo {
+  return {
+    ...disciplina,
+    modalidadeId: modalidade.id,
+    modalidadeNome: modalidade.nome,
+    areaSlug: modalidade.areaSlug,
+    areaLabel: modalidade.areaLabel,
+    areaCor: modalidade.areaCor,
+    areaTag: modalidade.areaTag,
+  };
+}
+
+export const TRILHA_DISCIPLINAS: TrilhaDisciplinaCatalogo[] =
   CATALOGO_MODALIDADES.flatMap((modalidade) =>
-    modalidade.assuntos.map((assunto) => ({
-      ...assunto,
-      modalidadeId: modalidade.id,
-      modalidadeNome: modalidade.nome,
-      areaSlug: modalidade.areaSlug,
-      areaLabel: modalidade.areaLabel,
-      areaCor: modalidade.areaCor,
-      areaTag: modalidade.areaTag,
-    })),
+    (modalidade.disciplinas ?? []).map((disciplina) =>
+      enriquecerDisciplina(disciplina, modalidade),
+    ),
   );
+
+export const TRILHA_ASSUNTOS: TrilhaAssuntoCatalogo[] =
+  CATALOGO_MODALIDADES.flatMap((modalidade) => {
+    if (modalidade.disciplinas?.length) {
+      return modalidade.disciplinas.flatMap((disciplina) =>
+        disciplina.assuntos.map((assunto) =>
+          enriquecerAssunto(assunto, modalidade, disciplina),
+        ),
+      );
+    }
+
+    return (modalidade.assuntos ?? []).map((assunto) =>
+      enriquecerAssunto(assunto, modalidade),
+    );
+  });
+
+export function modalidadeTemDisciplinas(
+  modalidade: TrilhaModalidadeItem,
+): boolean {
+  return (modalidade.disciplinas?.length ?? 0) > 0;
+}
+
+export function contarAssuntosModalidade(modalidade: TrilhaModalidadeItem): number {
+  if (modalidade.disciplinas?.length) {
+    return modalidade.disciplinas.reduce(
+      (total, disciplina) => total + disciplina.assuntos.length,
+      0,
+    );
+  }
+  return modalidade.assuntos?.length ?? 0;
+}
+
+export function getDisciplinaById(
+  modalidadeId: string,
+  disciplinaId: string,
+): TrilhaDisciplinaCatalogo | undefined {
+  return TRILHA_DISCIPLINAS.find(
+    (item) =>
+      item.modalidadeId === modalidadeId && item.id === disciplinaId,
+  );
+}
 
 export function getModalidadeById(id: string): TrilhaModalidadeItem | undefined {
   return CATALOGO_MODALIDADES.find((item) => item.id === id);
@@ -406,6 +648,11 @@ export function resolverAssuntoNoCatalogo(
     if (porId?.areaSlug === areaSlug) return porId;
   }
 
+  if (disciplina?.trim() && modalidadeId) {
+    const porDisciplinaId = getDisciplinaById(modalidadeId, disciplina.trim());
+    if (porDisciplinaId) return undefined;
+  }
+
   const candidatos = TRILHA_ASSUNTOS.filter((item) => {
     if (item.areaSlug !== areaSlug) return false;
     if (modalidadeId && item.modalidadeId !== modalidadeId) return false;
@@ -457,23 +704,73 @@ export function filtrarModalidades(termo: string): TrilhaModalidadeItem[] {
 
     if (textoModalidade.includes(busca)) return true;
 
-    return modalidade.assuntos.some((assunto) =>
+    if (modalidade.disciplinas?.length) {
+      return modalidade.disciplinas.some(
+        (disciplina) =>
+          [disciplina.nome, ...disciplina.palavrasChave]
+            .join(" ")
+            .toLowerCase()
+            .includes(busca) ||
+          disciplina.assuntos.some((assunto) =>
+            [assunto.nome, ...assunto.palavrasChave]
+              .join(" ")
+              .toLowerCase()
+              .includes(busca),
+          ),
+      );
+    }
+
+    return (modalidade.assuntos ?? []).some((assunto) =>
       [assunto.nome, ...assunto.palavrasChave].join(" ").toLowerCase().includes(busca),
     );
   });
 }
 
+export function filtrarDisciplinasModalidade(
+  modalidadeId: string,
+  termo: string,
+): TrilhaDisciplinaCatalogo[] {
+  const modalidade = getModalidadeById(modalidadeId);
+  if (!modalidade?.disciplinas?.length) return [];
+
+  const busca = termo.trim().toLowerCase();
+  const disciplinas = TRILHA_DISCIPLINAS.filter(
+    (item) => item.modalidadeId === modalidadeId,
+  );
+
+  if (!busca) return disciplinas;
+
+  return disciplinas.filter(
+    (disciplina) =>
+      [disciplina.nome, ...disciplina.palavrasChave]
+        .join(" ")
+        .toLowerCase()
+        .includes(busca) ||
+      disciplina.assuntos.some((assunto) =>
+        [assunto.nome, ...assunto.palavrasChave]
+          .join(" ")
+          .toLowerCase()
+          .includes(busca),
+      ),
+  );
+}
+
 export function filtrarAssuntosModalidade(
   modalidadeId: string,
   termo: string,
+  disciplinaId?: string | null,
 ): TrilhaAssuntoCatalogo[] {
   const modalidade = getModalidadeById(modalidadeId);
   if (!modalidade) return [];
 
   const busca = termo.trim().toLowerCase();
-  const assuntos = TRILHA_ASSUNTOS.filter(
+  let assuntos = TRILHA_ASSUNTOS.filter(
     (item) => item.modalidadeId === modalidadeId,
   );
+
+  if (disciplinaId) {
+    assuntos = assuntos.filter((item) => item.disciplinaId === disciplinaId);
+  }
 
   if (!busca) return assuntos;
 
@@ -483,6 +780,20 @@ export function filtrarAssuntosModalidade(
       .toLowerCase()
       .includes(busca),
   );
+}
+
+export function calcularProgressoDisciplina(
+  disciplina: TrilhaDisciplinaCatalogo,
+  progressoPorAssunto: Record<string, number>,
+): number {
+  if (disciplina.assuntos.length === 0) return 0;
+
+  const total = disciplina.assuntos.reduce(
+    (soma, assunto) => soma + (progressoPorAssunto[assunto.id] ?? 0),
+    0,
+  );
+
+  return Math.round(total / disciplina.assuntos.length);
 }
 
 /** Agrupa modalidades por área ENEM para exibição na raiz. */
@@ -520,7 +831,7 @@ export function agruparModalidadesPorArea(
 }
 
 /** @deprecated Use TrilhaAssuntoCatalogo */
-export type TrilhaDisciplinaItem = TrilhaAssuntoCatalogo;
+export type TrilhaDisciplinaItemLegacy = TrilhaAssuntoCatalogo;
 
 /** @deprecated Use TRILHA_ASSUNTOS */
 export const TRILHA_CATALOGO = TRILHA_ASSUNTOS;

@@ -1,6 +1,7 @@
 "use client";
 
 import type { TrilhaModalidadeItem } from "@/lib/trilha-catalogo";
+import { contarAssuntosModalidade, modalidadeTemDisciplinas } from "@/lib/trilha-catalogo";
 import { cn } from "@/lib/utils";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
@@ -74,7 +75,9 @@ export function TrilhaModalidadeCard({
         {modalidade.nome}
       </p>
       <p className="mt-0.5 text-[10px] text-white/35 sm:text-[11px]">
-        {modalidade.assuntos.length} assuntos
+        {modalidadeTemDisciplinas(modalidade)
+          ? `${modalidade.disciplinas?.length ?? 0} matérias`
+          : `${contarAssuntosModalidade(modalidade)} assuntos`}
       </p>
     </Link>
   );

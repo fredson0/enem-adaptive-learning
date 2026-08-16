@@ -120,3 +120,63 @@ export class FinalizarPersonalizarTrilhaDto {
   @Type(() => MensagemHistoricoDto)
   historico!: MensagemHistoricoDto[];
 }
+
+export class GerarPdfQuestoesDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  assuntoId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  assuntoNome?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  areaSlug?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  termosBusca?: string[];
+
+  @IsOptional()
+  quantidade?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  questaoIds?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  incluirGabarito?: boolean;
+}
+
+export class GerarPdfResumoDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  assuntoId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  assuntoNome?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  areaSlug?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(8000)
+  conteudoBase?: string;
+
+  @IsOptional()
+  @IsUUID()
+  conversaId?: string;
+}

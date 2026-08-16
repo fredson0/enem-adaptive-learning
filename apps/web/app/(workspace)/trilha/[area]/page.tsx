@@ -12,6 +12,7 @@ import {
 } from "@/lib/trilha";
 import { usarTrilhaAtualizada } from "@/lib/trilha-events";
 import { recalcularTrilhaProgresso, resolverAssuntoNoCatalogo } from "@/lib/trilha-progresso";
+import { getDisciplinaById } from "@/lib/trilha-catalogo";
 import type { AreaEnemSlug } from "@/lib/simulados";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -210,9 +211,19 @@ export default function TrilhaAreaPage() {
     disciplina: disciplinaParam,
     modalidadeId: modalidadeParam,
   });
+  const disciplinaCatalogo =
+    modalidadeParam && disciplinaParam
+      ? getDisciplinaById(modalidadeParam, disciplinaParam)
+      : assuntoFoco?.disciplinaId && modalidadeParam
+        ? getDisciplinaById(modalidadeParam, assuntoFoco.disciplinaId)
+        : undefined;
   const breadcrumbModalidade = modalidadeParam
     ? `/trilha/geral?modalidade=${encodeURIComponent(modalidadeParam)}`
     : "/trilha/geral";
+  const breadcrumbDisciplina =
+    modalidadeParam && disciplinaCatalogo
+      ? `/trilha/geral?modalidade=${encodeURIComponent(modalidadeParam)}&disciplina=${encodeURIComponent(disciplinaCatalogo.id)}`
+      : null;
 
   return (
     <WorkspaceSection>
@@ -232,11 +243,22 @@ export default function TrilhaAreaPage() {
           >
             {modalidadeParam ? "Modalidade" : "Todas as áreas"}
           </Link>
+          {breadcrumbDisciplina && disciplinaCatalogo ? (
+            <>
+              <span className="text-white/20">/</span>
+              <Link
+                href={breadcrumbDisciplina}
+                className="text-white/45 transition hover:text-white/75"
+              >
+                {disciplinaCatalogo.nome}
+              </Link>
+            </>
+          ) : null}
           <span className="text-white/20">/</span>
           {assuntoFoco ? (
             <>
               <Link
-                href={`/trilha/${area.slug}`}
+                href={`/trilha/${area.slug}?modalidade=${encodeURIComponent(modalidadeParam ?? assuntoFoco.modalidadeId)}${assuntoFoco.disciplinaId ? `&disciplina=${encodeURIComponent(assuntoFoco.disciplinaId)}` : ""}`}
                 className="text-white/45 transition hover:text-white/75"
               >
                 {area.label}

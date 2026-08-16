@@ -167,6 +167,64 @@ export function finalizarPersonalizarTrilha(body: {
   });
 }
 
+export type PdfResumoSecao = {
+  titulo: string;
+  paragrafos: string[];
+  topicos?: string[];
+};
+
+export type GerarPdfResumoBody = {
+  assuntoId?: string;
+  assuntoNome?: string;
+  areaSlug?: string;
+  conteudoBase?: string;
+  conversaId?: string;
+};
+
+export type GerarPdfResumoResponse = {
+  resumo: {
+    titulo: string;
+    subtitulo?: string;
+    secoes: PdfResumoSecao[];
+    dicaFinal?: string;
+  };
+  assuntoNome: string;
+  areaSlug: string | null;
+  tokens: TokensIa;
+};
+
+export function gerarPdfResumoTutor(body: GerarPdfResumoBody) {
+  return apiFetch<GerarPdfResumoResponse>("/ia-tutor/pdf/resumo", {
+    method: "POST",
+    body,
+  });
+}
+
+export type GerarPdfQuestoesBody = {
+  assuntoId?: string;
+  assuntoNome?: string;
+  areaSlug?: string;
+  termosBusca?: string[];
+  quantidade?: number;
+  questaoIds?: string[];
+  incluirGabarito?: boolean;
+};
+
+export type GerarPdfQuestoesResponse = {
+  titulo: string;
+  assuntoNome: string;
+  areaSlug: string | null;
+  incluirGabarito: boolean;
+  questoes: import("@/lib/pdf-questoes").PdfQuestaoItem[];
+};
+
+export function gerarPdfQuestoesTutor(body: GerarPdfQuestoesBody) {
+  return apiFetch<GerarPdfQuestoesResponse>("/ia-tutor/pdf/questoes", {
+    method: "POST",
+    body,
+  });
+}
+
 export function presignAnexoTutor(contentType: string, fileName?: string) {
   return apiFetch<PresignAnexoResponse>("/ia-tutor/anexos/presign", {
     method: "POST",

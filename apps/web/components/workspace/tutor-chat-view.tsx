@@ -10,14 +10,28 @@ import { ApiError } from "@/lib/api";
 import { compressImageForUpload } from "@/lib/image-compress";
 import {
   enviarMensagemTutor,
+  gerarPdfQuestoesTutor,
+  gerarPdfResumoTutor,
   presignAnexoTutor,
   uploadAnexoTutor,
   type MensagemHistorico,
 } from "@/lib/ia-tutor";
 import { consumePendingTutorPrompt } from "@/lib/pending-tutor-prompt";
+import {
+  baixarQuestoesComoHtml,
+  baixarQuestoesComoPdf,
+  usuarioPediuPdfQuestoes,
+} from "@/lib/pdf-questoes";
+import { abrirJanelaImpressao } from "@/lib/pdf-print";
+import {
+  baixarResumoComoHtml,
+  baixarResumoComoPdf,
+  CUSTO_TOKENS_PDF_RESUMO,
+  usuarioPediuPdf,
+} from "@/lib/pdf-resumo";
 import { emitirTrilhaAtualizada } from "@/lib/trilha-events";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { FileDown, FileText, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type TutorChatViewProps = {
@@ -29,6 +43,10 @@ export function TutorChatView({
 }: TutorChatViewProps) {
   const [messages, setMessages] = useState<MensagemHistorico[]>(initialMessages);
   const [loading, setLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState<{
+    index: number;
+    tipo: "resumo" | "questoes";
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { isAuthenticated, isLoading, requireAuth } = useAuth();
   const { setTokens } = useTokensIa();
@@ -126,6 +144,112 @@ export function TutorChatView({
 
   handleSubmitRef.current = handleSubmit;
 
+  const handleGerarPdfResumo = async (assistantIndex: number) => {
+    const mensagemAssistente = messages[assistantIndex];
+    if (!mensagemAssistente || mensagemAssistente.role !== "assistant") return;
+
+    if (
+      !requireAuth({
+        next: "/tutor",
+      })
+    ) {
+      return;
+    }
+
+    const mensagemUsuarioAnterior = [...messages]
+      .slice(0, assistantIndex)
+      .reverse()
+      .find((item) => item.role === "user");
+
+    setError(null);
+    setPdfLoading({ index: assistantIndex, tipo: "resumo" });
+    const janelaImpressao = abrirJanelaImpressao("Material ENEM+");
+
+    try {
+      const response = await gerarPdfResumoTutor({
+        conteudoBase: mensagemAssistente.texto,
+        assuntoNome: mensagemUsuarioAnterior?.texto,
+        conversaId: activeSessionId ?? undefined,
+      });
+
+      setTokens(response.tokens);
+
+      try {
+        baixarResumoComoPdf(response.resumo, janelaImpressao);
+      } catch {
+        janelaImpressao?.close();
+        baixarResumoComoHtml(response.resumo);
+      }
+    } catch (err) {
+      janelaImpressao?.close();
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Não foi possível gerar o PDF explicativo. Tente novamente.");
+      }
+    } finally {
+      setPdfLoading(null);
+    }
+  };
+
+  const handleGerarPdfQuestoes = async (assistantIndex: number) => {
+    const mensagemAssistente = messages[assistantIndex];
+    if (!mensagemAssistente || mensagemAssistente.role !== "assistant") return;
+
+    if (
+      !requireAuth({
+        next: "/tutor",
+      })
+    ) {
+      return;
+    }
+
+    const mensagemUsuarioAnterior = [...messages]
+      .slice(0, assistantIndex)
+      .reverse()
+      .find((item) => item.role === "user");
+
+    setError(null);
+    setPdfLoading({ index: assistantIndex, tipo: "questoes" });
+    const janelaImpressao = abrirJanelaImpressao("Questões ENEM+");
+
+    try {
+      const response = await gerarPdfQuestoesTutor({
+        assuntoNome: mensagemUsuarioAnterior?.texto,
+        quantidade: 5,
+        incluirGabarito: true,
+      });
+
+      const payload = {
+        titulo: response.titulo,
+        assuntoNome: response.assuntoNome,
+        areaSlug: response.areaSlug,
+        incluirGabarito: response.incluirGabarito,
+        questoes: response.questoes,
+      };
+
+      try {
+        baixarQuestoesComoPdf(payload, janelaImpressao);
+      } catch {
+        janelaImpressao?.close();
+        baixarQuestoesComoHtml(payload);
+      }
+    } catch (err) {
+      janelaImpressao?.close();
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Não foi possível gerar o PDF de questões. Tente novamente.");
+      }
+    } finally {
+      setPdfLoading(null);
+    }
+  };
+
   useEffect(() => {
     if (isLoading || !isAuthenticated || pendingSentRef.current) return;
 
@@ -154,23 +278,100 @@ export function TutorChatView({
               <div
                 key={`${message.role}-${index}`}
                 className={cn(
-                  "max-w-3xl rounded-2xl px-4 py-3 text-sm leading-relaxed sm:text-[15px]",
-                  message.role === "user"
-                    ? "ml-auto bg-[#1f3dbc]/90 text-white"
-                    : "mr-auto border border-white/10 bg-[rgba(15,15,20,0.75)] text-white/90 backdrop-blur-md",
+                  "max-w-3xl",
+                  message.role === "user" ? "ml-auto" : "mr-auto",
                 )}
               >
-                {message.anexoUrl ? (
-                  <div className="mb-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={message.anexoUrl}
-                      alt="Anexo enviado"
-                      className="max-h-48 rounded-xl border border-white/15 object-cover"
-                    />
+                <div
+                  className={cn(
+                    "rounded-2xl px-4 py-3 text-sm leading-relaxed sm:text-[15px]",
+                    message.role === "user"
+                      ? "bg-[#1f3dbc]/90 text-white"
+                      : "border border-white/10 bg-[rgba(15,15,20,0.75)] text-white/90 backdrop-blur-md",
+                  )}
+                >
+                  {message.anexoUrl ? (
+                    <div className="mb-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={message.anexoUrl}
+                        alt="Anexo enviado"
+                        className="max-h-48 rounded-xl border border-white/15 object-cover"
+                      />
+                    </div>
+                  ) : null}
+                  <p className="whitespace-pre-wrap">{message.texto}</p>
+                </div>
+
+                {message.role === "assistant" ? (
+                  <div className="mt-2 flex flex-col gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void handleGerarPdfResumo(index)}
+                        disabled={pdfLoading !== null || loading}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] text-white/65 transition",
+                          "hover:border-[#b0ff57]/30 hover:bg-[#b0ff57]/10 hover:text-white",
+                          "disabled:cursor-not-allowed disabled:opacity-50",
+                        )}
+                      >
+                        {pdfLoading?.index === index &&
+                        pdfLoading.tipo === "resumo" ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <FileText className="size-3.5" />
+                        )}
+                        PDF explicativo
+                        <span className="text-white/35">
+                          · {CUSTO_TOKENS_PDF_RESUMO} tokens
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => void handleGerarPdfQuestoes(index)}
+                        disabled={pdfLoading !== null || loading}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] text-white/65 transition",
+                          "hover:border-[#b0ff57]/30 hover:bg-[#b0ff57]/10 hover:text-white",
+                          "disabled:cursor-not-allowed disabled:opacity-50",
+                        )}
+                      >
+                        {pdfLoading?.index === index &&
+                        pdfLoading.tipo === "questoes" ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <FileDown className="size-3.5" />
+                        )}
+                        PDF de questões
+                        <span className="text-white/35">· grátis</span>
+                      </button>
+                    </div>
+
+                    {(() => {
+                      const perguntaUsuario =
+                        messages[index - 1]?.role === "user"
+                          ? messages[index - 1].texto
+                          : "";
+                      if (usuarioPediuPdfQuestoes(perguntaUsuario)) {
+                        return (
+                          <span className="text-[10px] text-white/35">
+                            Você pediu questões — use o PDF de questões acima.
+                          </span>
+                        );
+                      }
+                      if (usuarioPediuPdf(perguntaUsuario)) {
+                        return (
+                          <span className="text-[10px] text-white/35">
+                            Você pediu material — use o PDF explicativo acima.
+                          </span>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
                 ) : null}
-                <p className="whitespace-pre-wrap">{message.texto}</p>
               </div>
             ))}
 
@@ -207,7 +408,7 @@ export function TutorChatView({
         docked={hasMessages}
         extendLeftPx={0}
         title="Pergunte ao tutor ENEM+"
-        subtitle="Explique dúvidas, revise erros de simulado ou peça resumo de qualquer tema do ENEM."
+        subtitle="Peça explicações ou questões — depois baixe em PDF explicativo (IA) ou PDF de questões oficiais do ENEM."
         basePlaceholder="Me explica"
         buttonText="Enviar"
         loading={loading}
