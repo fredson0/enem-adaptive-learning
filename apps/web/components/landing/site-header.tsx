@@ -12,24 +12,24 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { flushSync } from "react-dom";
 
 const NAV_LINKS = [
-  { label: "Como funciona", href: "#como-funciona" },
-  { label: "Planos", href: "#planos" },
-  { label: "Tutor IA", href: "#tutor" },
-  { label: "Trilha", href: "#trilha" },
+  { label: "Como funciona", href: "/como-funciona" },
+  { label: "Planos", href: "/precos" },
+  { label: "Tutor IA", href: "/tutor-ia" },
+  { label: "Trilha", href: "/trilha-personalizada" },
 ];
 
 const PRODUTO_LINKS = [
-  { label: "Tutor IA", href: "#tutor" },
-  { label: "Simulados Adaptativos", href: "#simulados" },
-  { label: "Métricas de Proficiência", href: "#metricas" },
-  { label: "Trilha Personalizada", href: "#trilha", badge: "NOVO" },
+  { label: "Tutor IA", href: "/tutor-ia" },
+  { label: "Simulados Adaptativos", href: "/como-funciona" },
+  { label: "Métricas de Proficiência", href: "/como-funciona" },
+  { label: "Trilha Personalizada", href: "/trilha-personalizada", badge: "NOVO" },
 ];
 
 const EXPLORAR_LINKS = [
-  { label: "Como Funciona", href: "#como-funciona" },
-  { label: "Para Escolas Públicas", href: "#escolas" },
-  { label: "Planos e Preços", href: "#planos" },
-  { label: "Sobre o Projeto", href: "#sobre" },
+  { label: "Como Funciona", href: "/como-funciona" },
+  { label: "Para Escolas Públicas", href: "/precos" },
+  { label: "Planos e Preços", href: "/precos" },
+  { label: "Sobre o Projeto", href: "/como-funciona" },
 ];
 
 type HeaderMorph = {

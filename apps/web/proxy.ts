@@ -2,7 +2,17 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { isGuestAllowedPath } from "./lib/login-redirect";
 
-const PUBLIC_PATHS = ["/", "/login"];
+const PUBLIC_PATHS = [
+  "/",
+  "/login",
+  "/como-funciona",
+  "/precos",
+  "/tutor-ia",
+  "/trilha-personalizada",
+];
+
+const PROTECTED_APP_PREFIX =
+  /^\/(simulados|trilha|progresso|perfil|planos)(\/|$)/;
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -27,7 +37,7 @@ export function proxy(request: NextRequest) {
 
   if (
     !token &&
-    pathname.match(/^\/(simulados|trilha|progresso|perfil|planos)/)
+    PROTECTED_APP_PREFIX.test(pathname)
   ) {
     return NextResponse.redirect(new URL("/login", request.url));
   }

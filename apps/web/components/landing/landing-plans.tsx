@@ -19,7 +19,7 @@ const PLANS = {
     href: "/tutor",
     featureCount: "20",
     featureLabel: "tokens IA por dia, simulados ilimitados",
-    benefitsHref: "#plataforma",
+    benefitsHref: "/como-funciona",
   },
   support: {
     badge: "Apoio ao projeto",
@@ -34,7 +34,7 @@ const PLANS = {
     href: "/tutor",
     featureCount: "200",
     featureLabel: "tokens IA por dia + prioridade no tutor",
-    benefitsHref: "#depoimentos",
+    benefitsHref: "/precos",
   },
 };
 

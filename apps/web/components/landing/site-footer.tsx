@@ -22,9 +22,9 @@ function getLetterOffsets(index: number, total: number) {
 
 const FOOTER_LINKS = [
   { label: "Login", href: "/login" },
-  { label: "Planos", href: "#planos" },
-  { label: "Plataforma", href: "#plataforma" },
-  { label: "Depoimentos", href: "#depoimentos" },
+  { label: "Planos", href: "/precos" },
+  { label: "Como funciona", href: "/como-funciona" },
+  { label: "Tutor IA", href: "/tutor-ia" },
 ];
 
 export function SiteFooter() {
