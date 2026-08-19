@@ -10,8 +10,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useRef, type CSSProperties, type ReactNode } from "react";
 
-const HERO_VIDEO_URL =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_170732_8a9ccda6-5cff-4628-b164-059c500a2b41.mp4";
+import { LANDING_HERO_VIDEO_URL } from "@/lib/landing-hero-media";
 
 const HERO_REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -25,10 +24,12 @@ function HeroBlurReveal({
   children,
   delay = 0,
   className,
+  play = true,
 }: {
   children: ReactNode;
   delay?: number;
   className?: string;
+  play?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
 
@@ -39,7 +40,11 @@ function HeroBlurReveal({
   return (
     <motion.div
       initial={{ y: 72, opacity: 0, filter: "blur(16px)" }}
-      animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+      animate={
+        play
+          ? { y: 0, opacity: 1, filter: "blur(0px)" }
+          : { y: 72, opacity: 0, filter: "blur(16px)" }
+      }
       transition={heroRevealTransition(delay)}
       className={className}
     >
@@ -55,6 +60,7 @@ interface WordsPullUpProps {
   showAsterisk?: boolean;
   style?: CSSProperties;
   playOnMount?: boolean;
+  play?: boolean;
   baseDelay?: number;
 }
 
@@ -64,12 +70,13 @@ export const WordsPullUp = ({
   showAsterisk = false,
   style,
   playOnMount = false,
+  play,
   baseDelay = 0,
 }: WordsPullUpProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
   const reduceMotion = useReducedMotion();
-  const shouldAnimate = playOnMount || isInView;
+  const shouldAnimate = play ?? (playOnMount || isInView);
   const words = text.split(" ");
 
   return (
@@ -173,7 +180,7 @@ export const WordsPullUpMultiStyle = ({
 /* ---------------- Hero ENEM+ ---------------- */
 const HERO_BLEED = "clamp(4.5rem, 12vh, 9rem)";
 
-function EnemHero() {
+function EnemHero({ revealed = true }: { revealed?: boolean }) {
   return (
     <section
       className="relative w-full"
@@ -185,7 +192,7 @@ function EnemHero() {
         muted
         playsInline
         className="absolute inset-0 h-full w-full object-cover"
-        src={HERO_VIDEO_URL}
+        src={LANDING_HERO_VIDEO_URL}
         aria-hidden
       />
 
@@ -200,19 +207,19 @@ function EnemHero() {
         <div className="grid grid-cols-12 items-end gap-4">
           <div className="col-span-12 lg:col-span-8">
             <h1 className="font-display text-[22vw] leading-[0.85] font-normal tracking-[-0.06em] text-[#E1E0CC] sm:text-[20vw] md:text-[18vw] lg:text-[16vw] xl:text-[14vw]">
-              <WordsPullUp text="ENEM+" showAsterisk playOnMount />
+              <WordsPullUp text="ENEM+" showAsterisk play={revealed} />
             </h1>
           </div>
 
           <div className="col-span-12 flex flex-col gap-5 pb-2 lg:col-span-4 lg:pb-6">
-            <HeroBlurReveal delay={0.18}>
+            <HeroBlurReveal delay={0.18} play={revealed}>
               <p className="max-w-sm text-xs leading-snug text-[#E1E0CC]/75 sm:text-sm md:text-base">
                 Sua preparação adaptativa para o ENEM — simulados, tutor IA e
                 métricas ajustados ao que você ainda precisa dominar.
               </p>
             </HeroBlurReveal>
 
-            <HeroBlurReveal delay={0.32}>
+            <HeroBlurReveal delay={0.32} play={revealed}>
               <Link
                 href="/tutor"
                 className="group inline-flex items-center gap-2 self-start rounded-full bg-[#b0ff57] py-1 pr-1 pl-5 text-sm font-medium text-black transition-all hover:gap-3 sm:text-base"

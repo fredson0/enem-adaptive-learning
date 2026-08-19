@@ -170,6 +170,8 @@ Desenvolvido com 🩵 e foco em educação para o Trabalho de Conclusão de Curs
 | [Banco de questões ENEM](docs/BANCO-QUESTOES-ENEM.md) | api.enem.dev, rate limit, self-hosting e seed |
 | [Tutor IA — Perguntas e Endpoints](docs/TUTOR-IA-PERGUNTAS-E-ENDPOINTS.md) | Tipos de pergunta do aluno, o que funciona hoje e endpoints futuros |
 | [Workspace UI (OSMO)](docs/WORKSPACE-UI-OSMO.md) | Área logada do aluno — sidebar, rotas, checklist |
+| [Marketing UI (OSMO)](docs/MARKETING-UI-OSMO.md) | Páginas públicas — hero, rodinha, sticky scroll, títulos |
+| [Entrada da landing](docs/LANDING-ENTRANCE.md) | Animação ENEM+ → split → expand na primeira visita |
 | [Conceitos de Segurança e Performance](docs/CONCEITOS-SEGURANCA-E-PERFORMANCE.md) | 20 conceitos (idempotência, rate limit, JWT, etc.) com quando e onde implementar |
 | [Cronograma de Implementação](docs/CRONOGRAMA-IMPLEMENTACAO.md) | Roadmap em 5 fases — backend e frontend sincronizados |
 | [Backend API](apps/api/README.md) | Prisma, migrations e estrutura hexagonal |

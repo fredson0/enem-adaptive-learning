@@ -121,7 +121,13 @@ type MenuVisualState = {
   compact: number;
 };
 
-export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "auth" }) {
+export function SiteHeader({
+  variant = "landing",
+  revealed = true,
+}: {
+  variant?: "landing" | "auth";
+  revealed?: boolean;
+}) {
   const isAuth = variant === "auth";
   const lenis = useLenis();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -144,6 +150,7 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "aut
   const menuPanelRef = useRef<HTMLDivElement>(null);
   const menuInnerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
+  const revealTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const menuVisualRef = useRef<MenuVisualState | null>(null);
   const layoutAtOpenRef = useRef<HeaderMorph | null>(null);
   const widthAtOpenRef = useRef<number | null>(null);
@@ -189,17 +196,66 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "aut
     };
   }, [lenis, menuActive, syncFromScroll]);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        containerRef.current,
-        { opacity: 0, y: -16 },
-        { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" },
-      );
-    });
+  useLayoutEffect(() => {
+    if (!navShellRef.current) return;
 
-    return () => ctx.revert();
-  }, []);
+    if (!revealed) {
+      revealTimelineRef.current?.kill();
+      gsap.set(navShellRef.current, {
+        y: -28,
+        opacity: 0,
+        filter: "blur(14px)",
+      });
+      if (!isAuth && tickerOuterRef.current) {
+        gsap.set(tickerOuterRef.current, {
+          y: -14,
+          opacity: 0,
+          filter: "blur(10px)",
+        });
+      }
+      return;
+    }
+
+    revealTimelineRef.current?.kill();
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      tl.fromTo(
+        navShellRef.current,
+        { y: -28, opacity: 0, filter: "blur(14px)" },
+        {
+          y: 0,
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 0.85,
+          clearProps: "filter",
+        },
+      );
+
+      if (!isAuth && tickerOuterRef.current) {
+        tl.fromTo(
+          tickerOuterRef.current,
+          { y: -14, opacity: 0, filter: "blur(10px)" },
+          {
+            y: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 0.75,
+            clearProps: "filter",
+          },
+          "-=0.42",
+        );
+      }
+
+      revealTimelineRef.current = tl;
+    }, headerRef);
+
+    return () => {
+      ctx.revert();
+      revealTimelineRef.current = null;
+    };
+  }, [revealed, isAuth]);
 
   useLayoutEffect(() => {
     if (isAuth) return;
