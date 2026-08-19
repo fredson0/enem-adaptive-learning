@@ -5,6 +5,9 @@
 
 export const LANDING_ENTRANCE_STORAGE_KEY = "enem-landing-intro-v2";
 
+/** @deprecated legado — removido do sessionStorage; intro reinicia a cada F5 */
+export const LANDING_ENTRANCE_LEGACY_STORAGE_KEY = LANDING_ENTRANCE_STORAGE_KEY;
+
 export const LANDING_ENTRANCE_EASE = [0.22, 1, 0.36, 1] as const;
 
 /** Durações em milissegundos */
@@ -19,6 +22,8 @@ export const LANDING_ENTRANCE_TIMINGS = {
   expand: 2200,
   /** Fase 5 — overlay some e revela a hero montada por baixo */
   exit: 450,
+  /** Atraso após o expand antes de revelar header e textos da hero */
+  heroRevealDelay: 120,
 } as const;
 
 export const LANDING_ENTRANCE_COLORS = {

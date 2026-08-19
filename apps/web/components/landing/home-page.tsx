@@ -24,10 +24,14 @@ export function HomePage() {
 
   useEffect(() => {
     const skipIntro = shouldSkipLandingEntrance();
-    setIntroState(skipIntro ? "ready" : "intro");
     if (skipIntro) {
+      setIntroState("ready");
+      setRevealMain(true);
       setHeroRevealed(true);
+      return;
     }
+
+    setIntroState("intro");
   }, []);
 
   const handleExpandStart = useCallback(() => {
@@ -40,11 +44,12 @@ export function HomePage() {
 
   const handleIntroComplete = useCallback(() => {
     setIntroState("ready");
+    setRevealMain(true);
     setHeroRevealed(true);
   }, []);
 
   const showMain = introState === "ready" || revealMain;
-  const showHeroChrome = heroRevealed || introState === "ready";
+  const showIntro = introState === "intro";
 
   if (introState === "checking") {
     return (
@@ -61,11 +66,11 @@ export function HomePage() {
         <main
           className={cn(
             "relative min-h-screen bg-[#0d0d0d]",
-            introState === "intro" && "pointer-events-none",
+            showIntro && "pointer-events-none",
           )}
         >
-          <SiteHeader revealed={showHeroChrome} />
-          <HeroSection revealed={showHeroChrome} />
+          <SiteHeader revealed={heroRevealed} />
+          <HeroSection revealed={heroRevealed} />
           <LandingProductShowcase />
           <LandingPlatformShowcase />
           <LandingTestimonials />
@@ -74,7 +79,7 @@ export function HomePage() {
         </main>
       ) : null}
 
-      {introState === "intro" ? (
+      {showIntro ? (
         <LandingEntrance
           onExpandStart={handleExpandStart}
           onExpandComplete={handleExpandComplete}

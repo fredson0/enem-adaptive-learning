@@ -4,6 +4,7 @@ import { ScrollingTicker } from "@/components/landing/scrolling-ticker";
 import { SlideHoverButton } from "@/components/landing/slide-hover-button";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
+import { motion, useReducedMotion } from "framer-motion";
 import { Globe, Menu, Share2, Sparkles, X } from "lucide-react";
 import { useLenis } from "lenis/react";
 import Image from "next/image";
@@ -39,6 +40,7 @@ type HeaderMorph = {
 
 const COMPACT_MAX = 34;
 const MENU_MAX = 72;
+const HEADER_REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
 
 function morphFromScrollY(y: number): HeaderMorph {
   return {
@@ -56,6 +58,10 @@ function getScrollMaxWidthRem(compact: number) {
   return lerp(56, COMPACT_MAX, compact);
 }
 
+function morphEquals(a: HeaderMorph, b: HeaderMorph) {
+  return a.detach === b.detach && a.compact === b.compact;
+}
+
 function useHeaderMorph(
   menuActive: boolean,
   getScrollY: () => number,
@@ -63,17 +69,24 @@ function useHeaderMorph(
   const [morph, setMorph] = useState<HeaderMorph>({ detach: 0, compact: 0 });
   const morphRef = useRef<HeaderMorph>({ detach: 0, compact: 0 });
 
-  const syncFromScroll = () => {
+  const syncFromScroll = useCallback(() => {
     const next = readScrollMorph(getScrollY);
+    const prev = morphRef.current;
+    if (morphEquals(prev, next)) {
+      return prev;
+    }
     morphRef.current = next;
     setMorph(next);
     return next;
-  };
+  }, [getScrollY]);
 
-  const restoreMorph = (next: HeaderMorph) => {
+  const restoreMorph = useCallback((next: HeaderMorph) => {
+    if (morphEquals(morphRef.current, next)) {
+      return;
+    }
     morphRef.current = next;
     setMorph(next);
-  };
+  }, []);
 
   useEffect(() => {
     const update = () => {
@@ -84,7 +97,7 @@ function useHeaderMorph(
     update();
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
-  }, [menuActive, getScrollY]);
+  }, [menuActive, syncFromScroll]);
 
   return { morph, morphRef, syncFromScroll, restoreMorph };
 }
@@ -129,6 +142,7 @@ export function SiteHeader({
   revealed?: boolean;
 }) {
   const isAuth = variant === "auth";
+  const reduceMotion = useReducedMotion();
   const lenis = useLenis();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuActive, setMenuActive] = useState(false);
@@ -150,7 +164,6 @@ export function SiteHeader({
   const menuPanelRef = useRef<HTMLDivElement>(null);
   const menuInnerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
-  const revealTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const menuVisualRef = useRef<MenuVisualState | null>(null);
   const layoutAtOpenRef = useRef<HeaderMorph | null>(null);
   const widthAtOpenRef = useRef<number | null>(null);
@@ -197,70 +210,9 @@ export function SiteHeader({
   }, [lenis, menuActive, syncFromScroll]);
 
   useLayoutEffect(() => {
-    if (!navShellRef.current) return;
-
-    if (!revealed) {
-      revealTimelineRef.current?.kill();
-      gsap.set(navShellRef.current, {
-        y: -28,
-        opacity: 0,
-        filter: "blur(14px)",
-      });
-      if (!isAuth && tickerOuterRef.current) {
-        gsap.set(tickerOuterRef.current, {
-          y: -14,
-          opacity: 0,
-          filter: "blur(10px)",
-        });
-      }
-      return;
-    }
-
-    revealTimelineRef.current?.kill();
-
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
-      tl.fromTo(
-        navShellRef.current,
-        { y: -28, opacity: 0, filter: "blur(14px)" },
-        {
-          y: 0,
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 0.85,
-          clearProps: "filter",
-        },
-      );
-
-      if (!isAuth && tickerOuterRef.current) {
-        tl.fromTo(
-          tickerOuterRef.current,
-          { y: -14, opacity: 0, filter: "blur(10px)" },
-          {
-            y: 0,
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 0.75,
-            clearProps: "filter",
-          },
-          "-=0.42",
-        );
-      }
-
-      revealTimelineRef.current = tl;
-    }, headerRef);
-
-    return () => {
-      ctx.revert();
-      revealTimelineRef.current = null;
-    };
-  }, [revealed, isAuth]);
-
-  useLayoutEffect(() => {
     if (isAuth) return;
     syncFromScroll();
-  }, [isAuth]);
+  }, [isAuth, syncFromScroll]);
 
   const openMenu = () => {
     if (
@@ -522,6 +474,7 @@ export function SiteHeader({
     : lerp(0, 16, morph.compact);
 
   const useCssWidthTransition = !menuOpen;
+  const showChrome = revealed || reduceMotion === true;
 
   return (
     <header
@@ -536,13 +489,25 @@ export function SiteHeader({
         paddingRight: headerPaddingX,
       }}
     >
-      <div
+      <motion.div
         ref={containerRef}
         className={cn(
           "pointer-events-auto relative w-full",
           useCssWidthTransition && "transition-[max-width] duration-500 ease-out",
+          !showChrome && "pointer-events-none",
         )}
         style={{ maxWidth: containerMaxWidth }}
+        initial={false}
+        animate={
+          showChrome
+            ? { opacity: 1, y: 0, filter: "blur(0px)" }
+            : { opacity: 0, y: -28, filter: "blur(14px)" }
+        }
+        transition={
+          reduceMotion
+            ? { duration: 0 }
+            : { duration: 0.85, ease: HEADER_REVEAL_EASE }
+        }
       >
         <div
           ref={navShellRef}
@@ -587,7 +552,7 @@ export function SiteHeader({
             >
               {NAV_LINKS.map((link) => (
                 <Link
-                  key={link.href}
+                  key={link.label}
                   href={resolveNavHref(link.href, isAuth)}
                   className="text-xs text-[#E1E0CC]/75 transition-colors hover:text-[#E1E0CC] lg:text-sm"
                 >
@@ -656,7 +621,7 @@ export function SiteHeader({
                   </p>
                   <ul className="space-y-3.5">
                     {PRODUTO_LINKS.map((link) => (
-                      <li key={link.href}>
+                      <li key={link.label}>
                         <Link
                           href={resolveNavHref(link.href, isAuth)}
                           onClick={closeMenu}
@@ -680,7 +645,7 @@ export function SiteHeader({
                   </p>
                   <ul className="space-y-3.5">
                     {EXPLORAR_LINKS.map((link) => (
-                      <li key={link.href}>
+                      <li key={link.label}>
                         <Link
                           href={resolveNavHref(link.href, isAuth)}
                           onClick={closeMenu}
@@ -755,7 +720,7 @@ export function SiteHeader({
         >
           <ScrollingTicker variant="landing" />
         </div>
-      </div>
+      </motion.div>
 
       {menuOpen && (
         <button

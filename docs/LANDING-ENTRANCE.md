@@ -12,19 +12,23 @@ Mídia: `apps/web/lib/landing-hero-media.ts`
 
 | Condição | Comportamento |
 |----------|----------------|
-| Primeira visita ao `/` (navegador) | Animação completa |
-| `localStorage` `enem-landing-intro-v2` = `"1"` (sessionStorage) | Pula na mesma aba após ver uma vez |
+| **F5 / reload completo** em `/` | Animação roda de novo |
+| Navegação interna (SPA) na mesma aba após ver a intro | Pula (flag em memória) |
+| `?skip-intro=1` na URL | Pula a animação |
 | `?replay-intro=1` na URL | Força a animação de novo |
 | `prefers-reduced-motion` | Pula animação (acessibilidade) |
 
-Para testar de novo no DevTools:
+Para testar sem F5:
 
-```js
-sessionStorage.removeItem("enem-landing-intro-v2");
-location.reload();
+```
+http://localhost:3001/?replay-intro=1
 ```
 
-Ou abra: `http://localhost:3001/?replay-intro=1`
+Para pular:
+
+```
+http://localhost:3001/?skip-intro=1
+```
 
 ---
 

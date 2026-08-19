@@ -60,14 +60,37 @@ const sizeTransition = (seconds: number) => ({
   borderRadius: { duration: seconds, ease: LANDING_ENTRANCE_EASE },
 });
 
+/** Em memória — zera a cada reload (F5). Evita pular intro na mesma aba. */
+let introPlayedThisDocument = false;
+
+function clearLegacyIntroStorage() {
+  try {
+    sessionStorage.removeItem(LANDING_ENTRANCE_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+function markLandingEntrancePlayed() {
+  introPlayedThisDocument = true;
+  clearLegacyIntroStorage();
+}
+
 export function shouldSkipLandingEntrance(): boolean {
   if (typeof window === "undefined") return false;
+
+  clearLegacyIntroStorage();
+
   try {
-    if (new URLSearchParams(window.location.search).has("replay-intro")) {
-      sessionStorage.removeItem(LANDING_ENTRANCE_STORAGE_KEY);
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("replay-intro")) {
+      introPlayedThisDocument = false;
       return false;
     }
-    return sessionStorage.getItem(LANDING_ENTRANCE_STORAGE_KEY) === "1";
+    if (params.has("skip-intro")) {
+      return true;
+    }
+    return introPlayedThisDocument;
   } catch {
     return false;
   }
@@ -92,11 +115,7 @@ export function LandingEntrance({
     if (reduceMotion === null) return;
 
     if (reduceMotion === true) {
-      try {
-        sessionStorage.setItem(LANDING_ENTRANCE_STORAGE_KEY, "1");
-      } catch {
-        /* ignore */
-      }
+      markLandingEntrancePlayed();
       onExpandStartRef.current?.();
       onExpandCompleteRef.current?.();
       onCompleteRef.current();
@@ -116,16 +135,10 @@ export function LandingEntrance({
       onExpandStartRef.current?.();
       setPhase("expand");
     }, expandAt);
-    const t4 = window.setTimeout(() => {
-      onExpandCompleteRef.current?.();
-      setPhase("exit");
-    }, exitAt);
+    const t4 = window.setTimeout(() => setPhase("exit"), exitAt);
     const t5 = window.setTimeout(() => {
-      try {
-        sessionStorage.setItem(LANDING_ENTRANCE_STORAGE_KEY, "1");
-      } catch {
-        /* ignore */
-      }
+      onExpandCompleteRef.current?.();
+      markLandingEntrancePlayed();
       onCompleteRef.current();
     }, doneAt);
 

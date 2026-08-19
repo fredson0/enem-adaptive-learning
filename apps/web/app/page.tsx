@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import { HomePage } from "@/components/landing/home-page";
 
-export default function HomePageRoute() {
+export const metadata: Metadata = {
+  title: "ENEM+ | Plataforma Educacional Adaptativa",
+  description:
+    "Prepare-se para o ENEM com simulados adaptativos, tutor IA e métricas de proficiência. Inclusão digital para estudantes de escolas públicas.",
+};
+
+export default function Page() {
   return <HomePage />;
 }

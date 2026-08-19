@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useRef, type CSSProperties, type ReactNode } from "react";
 
 import { LANDING_HERO_VIDEO_URL } from "@/lib/landing-hero-media";
+import { cn } from "@/lib/utils";
 
 const HERO_REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -100,7 +101,7 @@ export const WordsPullUp = ({
                 ? { y: 0, opacity: 1, filter: "blur(0px)" }
                 : reduceMotion
                   ? undefined
-                  : {}
+                  : { y: 72, opacity: 0, filter: "blur(16px)" }
             }
             transition={heroRevealTransition(baseDelay + i * 0.06)}
             className="relative inline-block"
@@ -200,9 +201,15 @@ function EnemHero({ revealed = true }: { revealed?: boolean }) {
 
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/85" />
 
-      <div
-        className="absolute right-0 left-0 px-4 pb-8 sm:px-6 md:px-10 md:pb-10"
+      <motion.div
+        className={cn(
+          "absolute right-0 left-0 px-4 pb-8 sm:px-6 md:px-10 md:pb-10",
+          !revealed && "pointer-events-none",
+        )}
         style={{ bottom: HERO_BLEED }}
+        initial={false}
+        animate={{ opacity: revealed ? 1 : 0 }}
+        transition={{ duration: revealed ? 0.2 : 0 }}
       >
         <div className="grid grid-cols-12 items-end gap-4">
           <div className="col-span-12 lg:col-span-8">
@@ -232,7 +239,7 @@ function EnemHero({ revealed = true }: { revealed?: boolean }) {
             </HeroBlurReveal>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
