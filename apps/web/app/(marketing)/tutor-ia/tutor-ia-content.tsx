@@ -1,70 +1,80 @@
 "use client";
 
 import {
-  MarketingFeatureSection,
-  type MarketingFeatureItem,
-} from "@/components/marketing/marketing-feature-section";
+  ComoFuncionaStickyFeatures,
+  type StickyFeatureStep,
+} from "@/components/marketing/como-funciona-sticky-features";
 import { MarketingCtaBand } from "@/components/marketing/marketing-cta-band";
-import { MarketingHero } from "@/components/marketing/marketing-hero";
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
+import { MarketingOsmoHeroShell } from "@/components/marketing/marketing-osmo-hero-shell";
 import { MARKETING_IMAGES } from "@/lib/marketing-images";
-import {
-  Camera,
-  Lightbulb,
-  MessageSquare,
-  Sparkles,
-  Zap,
-} from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 
-const FEATURES: MarketingFeatureItem[] = [
+const TUTOR_STEPS: StickyFeatureStep[] = [
   {
-    icon: MessageSquare,
-    title: "Chat com contexto real",
+    step: "01",
+    label: "Chat",
+    title: "Conversa com contexto real",
     description:
       "Converse sobre qualquer matéria do ENEM. O tutor usa suas métricas de proficiência e histórico de simulados para personalizar explicações — sem respostas genéricas.",
-    imageSrc: MARKETING_IMAGES.tutorChat,
+    image: MARKETING_IMAGES.tutorChat,
     imageAlt: "Interface de chat do tutor IA",
   },
   {
-    icon: Camera,
+    step: "02",
+    label: "Visão",
     title: "Envie foto da questão",
     description:
       "Tire foto do caderno ou da prova. A IA analisa a imagem com modelos de visão (NVIDIA Llama Vision, com fallback Groq e Gemini) e explica passo a passo.",
-    imageSrc: MARKETING_IMAGES.tutorVision,
+    image: MARKETING_IMAGES.tutorVision,
     imageAlt: "Upload de foto para o tutor",
   },
   {
-    icon: Lightbulb,
+    step: "03",
+    label: "Erros",
     title: "Explicar erro e dicas",
     description:
       "Após um simulado, peça para explicar por que errou. Durante o simulado, receba dicas sem revelar a resposta — como um professor paciente ao seu lado.",
+    image: MARKETING_IMAGES.simulados,
+    imageAlt: "Explicação de erros pós-simulado",
   },
   {
-    icon: Zap,
+    step: "04",
+    label: "Limites",
     title: "Tokens com limite justo",
     description:
       "Plano gratuito com cota diária de tokens; plano Apoio amplia o uso. Rate limiting em tempo real garante que a plataforma continue acessível para todos.",
+    image: MARKETING_IMAGES.metricas,
+    imageAlt: "Controle de uso de tokens de IA",
   },
 ];
 
 export function TutorIaContent() {
   return (
     <>
-      <MarketingHero
-        eyebrow="( Tutor IA )"
+      <MarketingOsmoHeroShell
+        variant="dark"
+        eyebrowLeft="Produto"
+        eyebrowRight="Tutor IA"
+        badge={
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#b0ff57] px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-black uppercase">
+            <Check className="size-3" strokeWidth={2.5} />
+            Incluso no gratuito
+          </span>
+        }
         title="Seu professor particular, disponível 24h"
         description="Tire dúvidas, envie fotos de questões, peça explicações de erros e receba orientação alinhada ao seu nível real — powered by NVIDIA NIM com fallback Gemini."
-        imageSrc={MARKETING_IMAGES.tutorHero}
-        imageAlt="Estudante usando tutor virtual"
-        dark
+        accent="com contexto real do seu ENEM"
+        browserMockup
+        browserMockupPath="enemplus.app / tutor-ia"
       />
 
-      <MarketingFeatureSection
-        eyebrow="( Recursos )"
-        title="Muito mais que um chatbot"
-        description="O tutor foi pensado para o fluxo real de estudo ENEM — integrado a simulados, métricas e trilha."
-        items={FEATURES}
-        variant="white"
+      <ComoFuncionaStickyFeatures
+        sectionEyebrow="( Recursos )"
+        sectionTitle="Muito mais que um chatbot"
+        sectionDescription="O tutor foi pensado para o fluxo real de estudo ENEM — integrado a simulados, métricas e trilha."
+        steps={TUTOR_STEPS}
+        inactivePanelBlur={false}
       />
 
       <section className="bg-[#f3f3f1] px-4 py-20 md:px-8 md:py-28">

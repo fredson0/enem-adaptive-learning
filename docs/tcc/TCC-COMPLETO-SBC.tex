@@ -1,0 +1,297 @@
+% =============================================================================
+% TCC ENEM+ — Documento completo (template SBC)
+% Autor: Fredson Santana Machado Filho
+%
+% OVERLEAF — faça upload na RAIZ do projeto:
+%   main.tex (ou este arquivo), sbc-template.sty, sbc.bst, sbc-template.bib
+% Defina main.tex como "Main document" no menu do Overleaf.
+% NÃO use TCC-OVERLEAF-ATUALIZACOES.tex como main (não tem preâmbulo SBC).
+% =============================================================================
+
+\documentclass[12pt]{article}
+
+\usepackage[brazil]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{sbc-template}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{url}
+\graphicspath{{./}{figuras/}}
+
+\sloppy
+
+\title{Plataforma Web Baseada em Inteligência Artificial Generativa para Auxílio na Preparação de Estudantes para o ENEM}
+
+\author{Fredson Santana Machado Filho\inst{1}}
+
+\address{Curso de Ciência da Computação -- Centro Universitário Jorge Amado (Unijorge)\\
+  Salvador -- BA -- Brasil
+  \email{fredsonmachado02@gmail.com}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{resumo}
+  Este trabalho propõe e implementa um protótipo de plataforma web assistida por Inteligência Artificial (IA) generativa, voltada à preparação de estudantes para o Exame Nacional do Ensino Médio (ENEM). Utilizando Grandes Modelos de Linguagem (LLMs) integrados por meio de uma arquitetura hexagonal, o sistema atua como tutor personalizado, oferecendo simulados com questões reais, explicações contextualizadas, trilha de estudos adaptativa por regras de negócio e painel de métricas de proficiência. O protótipo, denominado ENEM+, foi desenvolvido em monorepo com frontend em Next.js e API em NestJS, com banco PostgreSQL e ORM Prisma, autenticação Google OAuth2 e roteamento de IA entre múltiplos provedores (NVIDIA NIM, Groq e Gemini). O objetivo é mitigar disparidades educacionais ao disponibilizar ferramentas de preparação acessíveis e de qualidade para alunos de diferentes contextos socioeconômicos, com modelo freemium planejado para sustentabilidade do serviço.
+\end{resumo}
+
+\begin{abstract}
+  This paper proposes and implements a prototype web platform assisted by Generative Artificial Intelligence (AI), focused on preparing students for the Brazilian National High School Exam (ENEM). By utilizing Large Language Models (LLMs) integrated through a hexagonal architecture, the system acts as a personalized tutor, providing mock exams with real questions, contextualized explanations, an adaptive study trail based on business rules, and a proficiency metrics dashboard. The prototype, named ENEM+, was developed in a monorepo with a Next.js frontend and NestJS API, PostgreSQL database with Prisma ORM, Google OAuth2 authentication, and AI routing across multiple providers (NVIDIA NIM, Groq, and Gemini). The goal is to mitigate educational disparities by offering accessible, high-quality preparation tools for students from diverse socioeconomic backgrounds, with a planned freemium model for service sustainability.
+\end{abstract}
+
+% =============================================================================
+\section{Introdução}
+% =============================================================================
+
+Segundo o estudo de Santos e Silva \cite{latitude2023}, a disparidade no acesso aos recursos educacionais de qualidade no Brasil molda um cenário competitivo desigual no ENEM, onde o desempenho acadêmico torna-se um reflexo direto do capital socioeconômico do candidato. Nesse sentido, compreende-se que tal fenômeno está enraizado em um contexto histórico de estratificação social, no qual famílias com maior poder aquisitivo conseguem transferir aos filhos oportunidades superiores, fruto de uma herança de instruções qualificadas que se perpetua entre gerações. Dessa forma, como reforça a referida pesquisa, estudantes que não dispõem desses privilégios acabam dependendo de um ensino público que, em comparação ao setor privado, ainda apresenta defasagens estruturais que comprometem a equidade do exame.
+
+Nesse cenário, é importante notar que a ausência de um suporte pedagógico competente e contínuo pode tornar a jornada de estudos totalmente prejudicada e pouco eficiente para quem não tem orientação especializada, como cursinhos preparatórios, professores particulares ou escolas elitizadas. A dificuldade em identificar lacunas no aprendizado e a falta de feedbacks imediatos e contínuos com exercícios complexos são barreiras que desestimulam o progresso do estudante, contribuindo para uma discrepância na competitividade do exame entre as diferentes classes de alunos. Embora existam ferramentas digitais, a carência de Sistemas Tutores Inteligentes (STI) que se adaptem ao perfil e ao ritmo de cada usuário \cite{unicamp2022} impede que o ensino seja verdadeiramente personalizado, reforçando a necessidade de soluções que transcendam a simples disponibilização de conteúdo estático.
+
+Para enfrentar as disparidades mencionadas, torna-se necessária uma inovação capaz de acompanhar o estudante, simulando a figura de um professor inteligente para suprir a carência de orientação qualificada. Nesse cenário, o avanço recente da Inteligência Artificial Generativa abre caminhos para democratizar o ensino de qualidade através de novas aplicações. Diferente de interfaces de conversação genéricas, a literatura técnica indica que o uso de Grandes Modelos de Linguagem (LLMs) permite o desenvolvimento de interações altamente contextualizadas \cite{sbc2024}, oferecendo uma base tecnológica robusta para o suporte ao usuário.
+
+Justifica-se, portanto, a urgência de sistemas que transcendam o fornecimento de respostas padronizadas e ofereçam correções comentadas e materiais de apoio personalizados, como simulados automatizados. Mais do que a simples entrega de conteúdo, a integração de métricas de desempenho surge como um pilar fundamental para suprir a ausência de um tutor particular. Ao permitir que o aluno identifique quais competências do exame exigem maior atenção, a jornada de aprendizado deixa de ser baseada apenas na intuição e passa a ser um processo guiado por dados pedagógicos.
+
+Este trabalho tem como objetivo principal analisar como a Inteligência Artificial Generativa pode ser integrada em plataformas de auxílio ao estudante para diminuir as barreiras de aprendizagem no contexto do ENEM, materializando essa discussão no protótipo \textbf{ENEM+}. Por conseguinte, a estrutura deste texto organiza-se da seguinte forma: a Seção~\ref{sec:fundamentacao} apresenta a fundamentação teórica; a Seção~\ref{sec:metodologia} descreve a metodologia, a arquitetura e a implementação do sistema; a Seção~\ref{sec:resultados} discute os resultados alcançados e as limitações do protótipo; e a Seção~\ref{sec:conclusao} traz as considerações finais e trabalhos futuros.
+
+% =============================================================================
+\section{Fundamentação Teórica}
+\label{sec:fundamentacao}
+% =============================================================================
+
+\subsection{Inteligência Artificial Generativa e Grandes Modelos de Linguagem (LLMs)}
+
+Separando da maneira em que conhecemos a Inteligência Artificial tradicional, focada na classificação e predição, a IA Generativa introduz a capacidade de síntese de novos dados a partir de padrões complexos aprendidos em vastos conjuntos de treinamento. No centro dessa mudança estão os Modelos de Linguagem de Grande Escala, conhecidos como LLMs (\textit{Large Language Models}), que se baseiam na arquitetura Transformer para processar e gerar sequências de texto que tendem a seguir com coerência semântica e contextual \cite{lo2023}.
+
+O funcionamento desses modelos não se limita a uma busca por palavras-chave, mas sim a um cálculo probabilístico de alta precisão que prevê o próximo token mais adequado em uma sentença por conta do treinamento. Essa característica permite que a tecnologia realize tarefas de raciocínio lógico e tradução de linguagem natural, tornando-a uma ferramenta altamente capacitada para o suporte ao aprendizado \cite{kasneci2023}. Conforme aponta Farias \cite{sbc2024}, a eficácia das LLMs no ambiente acadêmico reside justamente na sua flexibilidade, permitindo que uma mesma base tecnológica seja aplicada desde a correção de códigos de programação até a explicação de conceitos históricos.
+
+Entretanto, o uso dessas ferramentas exige uma compreensão sobre o fenômeno das ``alucinações'', em que o modelo pode gerar informações incorretas com alta confiança. Por essa razão, a literatura destaca que a integração de LLMs em sistemas educacionais deve ser acompanhada de mecanismos de controle e curadoria de conteúdo, garantindo que o tutor digital atue como um facilitador seguro para o estudante \cite{sebastiani2023}.
+
+\subsection{Inteligência Artificial na Educação: Sistemas Tutores Inteligentes (STI)}
+
+A inteligência artificial no âmbito da educação tem ganhado espaço com as novas tecnologias generativas. Os tutores inteligentes (STI) representam o esforço da computação em criar plataformas capazes de se aproximar da interação de um professor particular, oferecendo ao aluno suporte personalizado e imediato \cite{unicamp2022}. Diferente de repositórios de vídeos ou textos, um STI utiliza algoritmos para analisar o comportamento do usuário e adaptar o conteúdo em tempo real.
+
+Seguindo nesse contexto, a integração de modelos de linguagem modernos traz o que a literatura define como um campo de ``potencialidades e desafios'' \cite{bezerra2023}. Por um lado, as potencialidades estão direcionadas à democratização do conhecimento especializado, como se fossem professores altamente compreensivos que se adaptam ao estilo do aluno. Por outro viés, há o risco de que o pensamento crítico seja prejudicado pelo uso excessivo de direcionamento, de modo que o principal propósito da IA deve ser auxiliar como um andaime para a construção do saber \cite{bezerra2023}.
+
+Além disso, a eficácia de um tutor digital no contexto de exames de larga escala, como o ENEM, depende da sua habilidade em oferecer feedbacks que não sejam apenas respostas prontas, mas caminhos pedagógicos que guiem o estudante de forma assertiva. Como destacam Sebastiani et al. \cite{sebastiani2023}, o sucesso dessas ferramentas no ensino superior e básico está atrelado à criação de ambientes que incentivem a autonomia do aluno, transformando a IA em um assistente de aprendizagem que entende as dificuldades específicas de cada indivíduo.
+
+\subsection{Aprendizagem Adaptativa e Competências Digitais}
+
+No desenvolvimento de ferramentas educacionais modernas, não basta apenas entregar o conteúdo; é preciso entender como aquele estudante vai consumi-lo. A aprendizagem adaptativa surge como uma resposta a essa necessidade, pois a dificuldade precisa ser analisada com diferentes tipos de abordagem para aquele aluno. Seguindo esse viés, o uso de métricas de desempenho deixa de ser apenas um relatório de notas e passa a ser um componente ativo na personalização do ensino, permitindo que o sistema identifique padrões de erro e sugira caminhos de reforço específicos \cite{behar2023}.
+
+Para que essa interação seja produtiva, no entanto, o aluno precisa desenvolver o que a literatura chama de competências digitais. Como destaca Behar \cite{behar2023}, a ``alfabetização em IA'' não é apenas saber usar o chat, mas sim entender como interpretar os feedbacks que a máquina oferece para melhorar a própria autonomia. Sem esse entendimento, o estudante pode correr o risco de se perder em um mar de informações, reforçando a importância de interfaces que traduzam dados complexos em métricas visuais claras sobre sua evolução pedagógica.
+
+Complementando essa visão, Santana et al. \cite{santana2024} argumentam que a IA generativa tem o potencial de alterar o ritmo de estudo, tornando-o mais dinâmico e menos engessado que o modelo de sala de aula tradicional. Ao oferecer um ambiente em que o erro é transformado em dado para aprendizado imediato, a tecnologia cria uma perspectiva de ensino básico e pré-vestibular mais próxima das necessidades individuais de cada candidato. Isso justifica a implementação de painéis de métricas que acompanham a jornada do aluno, garantindo que ele tenha consciência de seu progresso real antes do dia do exame.
+
+\subsection{O Contexto do ENEM e as Desigualdades Digitais}
+
+Para que as tecnologias discutidas anteriormente tenham impacto real, é preciso considerar o cenário em que serão aplicadas. No Brasil, o ENEM não é apenas uma prova de conhecimentos, mas um divisor de águas que evidencia as disparidades educacionais do país. A desigualdade no acesso a recursos pedagógicos de ponta cria um abismo entre candidatos que possuem suporte privado e aqueles que dependem exclusivamente de um sistema público muitas vezes sobrecarregado \cite{latitude2023}.
+
+Nesse sentido, a tecnologia não deve ser vista apenas como um acessório, mas como uma ferramenta de inclusão. A aplicação de IA Generativa no contexto do pré-vestibular visa justamente reduzir essa distância, oferecendo um nível de tutoria que antes era restrito a uma elite econômica. Como reforçado pela literatura, o sucesso acadêmico no exame está diretamente ligado à constância e à qualidade do feedback recebido durante a preparação \cite{latitude2023}, algo que a automação inteligente pode escalar de forma democrática.
+
+Portanto, a fundamentação teórica deste trabalho sustenta a ideia de que a união entre a inteligência artificial e a aprendizagem adaptativa pode servir como um mecanismo de equilíbrio. Ao transformar o estudo em um processo personalizado e orientado por dados, é possível oferecer ao estudante de baixa renda condições semelhantes de identificar lacunas e evoluir que um aluno de ensino privado possui.
+
+\subsection{Aprendizagem Adaptativa Baseada em Regras e Métricas}
+\label{sec:adaptativa-regras}
+
+É importante distinguir, no contexto deste trabalho, aprendizagem adaptativa assistida por \textit{machine learning} clássico (como modelos de Teoria de Resposta ao Item ou Bayesian Knowledge Tracing) da abordagem adotada no protótipo ENEM+. Neste projeto, a personalização ocorre por meio de \textbf{regras de negócio explícitas} combinadas a métricas derivadas do desempenho real do estudante em simulados. A proficiência por área do ENEM, as lacunas identificadas e a autoavaliação coletada no diagnóstico inicial alimentam um algoritmo de priorização de áreas, permitindo que a trilha de estudos sugira etapas sequenciais (treino, modalidade, revisão, tutor e simulado cronometrado) sem depender de um modelo preditivo opaco. Essa escolha favorece transparência pedagógica e auditabilidade do sistema, alinhando-se à literatura que defende métricas visíveis como suporte à autonomia do aluno \cite{behar2023,santana2024}.
+
+\subsection{Segurança e Privacidade em Sistemas Educacionais com IA}
+\label{sec:seguranca}
+
+Sistemas tutores que processam dados de menores e utilizam APIs de terceiros exigem camadas adicionais de proteção. No ENEM+, a autenticação via Google OAuth2 é complementada por tokens JWT de curta duração e \textit{refresh tokens} rotativos armazenados de forma segura, com o frontend atuando como Backend-for-Frontend (BFF): o navegador não persiste o token de acesso em \texttt{localStorage}, reduzindo a superfície de ataque por XSS. O controle de consumo de IA por plano (gratuito versus apoio) é registrado em banco relacional, permitindo limitar o uso diário de tokens e viabilizar o modelo freemium. Por fim, anexos enviados ao tutor (fotos de questões ou resoluções) transitam por armazenamento configurável (local em desenvolvimento, objeto S3 em produção), com URLs pré-assinadas para upload direto, minimizando exposição desnecessária de arquivos.
+
+% =============================================================================
+\section{Metodologia e Desenvolvimento}
+\label{sec:metodologia}
+% =============================================================================
+
+Nesta seção descrevem-se os procedimentos metodológicos, a arquitetura de software, a \textit{stack} tecnológica e a implementação do protótipo ENEM+, com foco na integração resiliente de inteligência artificial ao processo pedagógico.
+
+\subsection{Tipo de Pesquisa, Abordagem e Forma de Coleta}
+
+Este trabalho caracteriza-se, quanto à natureza, como uma pesquisa \textbf{aplicada} e de abordagem \textbf{qualitativa}, com forte componente de engenharia de software. Segundo Gil \cite{gil2022como}, a pesquisa aplicada gera conhecimento para solução de problemas concretos --- neste caso, a mitigação de disparidades na preparação para o ENEM.
+
+A coleta estruturou-se em duas etapas complementares:
+\begin{itemize}
+    \item \textbf{Etapa de planejamento:} levantamento bibliográfico sobre STI, LLMs, aprendizagem adaptativa e desigualdade educacional; definição de requisitos e modelagem arquitetural.
+    \item \textbf{Etapa de implementação:} construção do protótipo funcional, com validação técnica por testes manuais de fluxo (autenticação, simulados, tutor, trilha e progresso) e coleta prevista de percepção de usabilidade com usuários voluntários.
+\end{itemize}
+
+\subsection{Arquitetura Hexagonal (Ports and Adapters)}
+
+A estrutura do backend adota Arquitetura Hexagonal para desacoplar regras de negócio de detalhes de infraestrutura \cite{martin2017clean}. O sistema organiza-se em \textbf{pacotes por funcionalidade} (\textit{package by feature}), cada um contendo:
+\begin{itemize}
+    \item \textbf{Domínio (Core):} entidades e regras puras (ex.: cálculo de proficiência, priorização da trilha).
+    \item \textbf{Portas (Ports):} interfaces que definem contratos (repositórios, motor de IA, OAuth, armazenamento).
+    \item \textbf{Adaptadores (Adapters):} implementações concretas (controllers HTTP NestJS, repositórios Prisma, adaptadores NVIDIA/Groq/Gemini, Google OAuth, S3/local).
+\end{itemize}
+
+A Figura~\ref{fig:arquitetura} ilustra a arquitetura implementada. Observa-se o frontend Next.js atuando como BFF, a API NestJS com núcleo hexagonal, o PostgreSQL gerenciado pelo Prisma e os adaptadores de IA externos. A justificativa mantém-se: a volatilidade do mercado de LLMs exige trocar provedores na camada de adaptadores sem alterar o núcleo pedagógico.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.95\textwidth]{arquitetura}
+    \caption{Arquitetura do ENEM+: frontend Next.js (BFF), API NestJS hexagonal, PostgreSQL/Prisma, Google OAuth e adaptadores de IA (NVIDIA NIM, Groq e Gemini).}
+    \label{fig:arquitetura}
+\end{figure}
+
+\subsection{Stack Tecnológica e Organização do Repositório}
+
+O projeto utiliza \textbf{monorepo} com NPM Workspaces, contendo:
+\begin{itemize}
+    \item \textbf{Frontend} (\texttt{apps/web}): Next.js~16, React~19, Tailwind CSS~4, TypeScript; animações com Framer Motion e GSAP; rolagem suave com Lenis.
+    \item \textbf{Backend} (\texttt{apps/api}): NestJS~11, TypeScript, validação e autenticação JWT \cite{nestjs2024}.
+    \item \textbf{Banco de dados:} PostgreSQL~16 (Docker local; Railway em produção) com Prisma~7 como ORM.
+    \item \textbf{Autenticação:} Google OAuth2; sessão via cookies HttpOnly no BFF; \textit{refresh tokens} rotativos na API.
+    \item \textbf{Inteligência Artificial:} roteamento entre NVIDIA NIM (texto e visão), Groq e Gemini (\textit{fallback}), configurável por variáveis de ambiente.
+    \item \textbf{Armazenamento de anexos:} sistema de arquivos local (desenvolvimento) ou bucket S3-compatível (produção).
+\end{itemize}
+
+Redis e integração Mercado Pago constam no planejamento de infraestrutura e no modelo de dados, porém \textbf{não estão plenamente implementados} na versão atual do protótipo; o controle de tokens de IA utiliza tabela relacional e \textit{rate limiting} HTTP via NestJS Throttler.
+
+A Figura~\ref{fig:mapa-telas} apresenta o mapa de telas do protótipo, separando páginas públicas de marketing e área logada (\textit{workspace}).
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.95\textwidth]{mapa-telas}
+    \caption{Mapa de telas do protótipo ENEM+: páginas públicas (marketing) e área logada (workspace).}
+    \label{fig:mapa-telas}
+\end{figure}
+
+\subsection{Módulos Implementados na API}
+
+A API expõe cinco módulos principais, descritos a seguir.
+
+\subsubsection{Módulo de Usuários e Autenticação}
+Responsável pelo login com Google (\texttt{POST /usuarios/login-google}), renovação e revogação de sessão, e gestão do perfil do aluno (\texttt{GET/PATCH /usuarios/perfil}), incluindo campos de onboarding (curso objetivo, série escolar, tipo de ensino médio, nível atual e flag de onboarding concluído).
+
+\subsubsection{Módulo de Questões}
+Integra banco com aproximadamente \textbf{10 mil questões reais} do ENEM, populado via \textit{seed} a partir da API pública \textit{api.enem.dev}. Endpoints de busca (\texttt{GET /questoes}) e contagem (\texttt{GET /questoes/contagem}) permitem filtrar por área, ano e termos no enunciado.
+
+\subsubsection{Módulo de Simulados e Avaliação Adaptativa}
+O estudante pode gerar simulados nos modos \textbf{treino} (sem pressão de tempo), \textbf{modalidade} (por área ENEM) e \textbf{cronometrado}. A criação ocorre por filtros manuais ou por linguagem natural (\texttt{POST /simulados/gerar-com-ia}), em que a IA interpreta o pedido e monta os filtros. Após responder (A--E) e finalizar, o sistema calcula desempenho e dispara recálculo de proficiência, alimentando o painel de progresso \cite{behar2023,santana2024}. A Figura~\ref{fig:ui-simulados} ilustra o hub de simulados na interface web.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{ui-simulados}
+    \caption{Hub de simulados do ENEM+: criação por filtros ou linguagem natural e modos treino, modalidade e cronometrado.}
+    \label{fig:ui-simulados}
+\end{figure}
+
+\subsubsection{Módulo de Métricas e Trilha Personalizada}
+Fornece proficiência por área, evolução temporal, lacunas e trilha sequencial. O diagnóstico inicial (autoavaliação por área, disciplinas fracas e meta) persiste em JSON no perfil. A priorização combina autoavaliação e proficiência:
+\begin{equation}
+    \textit{prioridade} = 0{,}45 \times \textit{autoavaliação} + 0{,}55 \times (100 - \textit{proficiência})
+\end{equation}
+Etapas por área incluem treino, modalidade, revisão, interação com tutor e simulado cronometrado. Há ainda fluxo de \textbf{personalização assistida por IA} (\texttt{/ia-tutor/trilha/*}) para refinamento conversacional do plano. A Figura~\ref{fig:ui-trilha} apresenta a interface da trilha.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{ui-trilha}
+    \caption{Trilha personalizada com etapas sequenciais por área do ENEM e diagnóstico inicial.}
+    \label{fig:ui-trilha}
+\end{figure}
+
+\subsubsection{Módulo de Tutoria Assistida por IA Generativa}
+Implementa conversas persistidas, envio de mensagens com contexto de métricas reais do aluno, explicação de erros pós-simulado, dicas durante o simulado (sem revelar gabarito), upload de imagens para análise por modelo de visão e geração de conteúdos para impressão (resumo e conjunto de questões) em formato estruturado. O fluxo da Figura~\ref{fig:fluxo_ia} detalha a orquestração do feedback pedagógico, incluindo o \textit{IaEngineRouter} e a injeção de contexto antes da chamada ao provedor externo, preservando o feedback socrático \cite{bezerra2023,sebastiani2023}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fluxograma_processo_ia}
+    \caption{Fluxograma de processo: orquestração do feedback pedagógico via IA com roteamento entre provedores.}
+    \label{fig:fluxo_ia}
+\end{figure}
+
+A Figura~\ref{fig:ui-tutor} mostra a interface do tutor com histórico de conversas e suporte a anexos multimodais.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{ui-tutor}
+    \caption{Interface do Tutor IA com histórico de conversas, contexto de métricas e entrada multimodal.}
+    \label{fig:ui-tutor}
+\end{figure}
+
+\subsection{Interface Web: Marketing e Área Logada}
+
+Além da API, o protótipo inclui interface completa em Next.js, dividida em:
+\begin{itemize}
+    \item \textbf{Páginas públicas} (\texttt{/}, \texttt{/como-funciona}, \texttt{/precos}, \texttt{/tutor-ia}, \texttt{/trilha-personalizada}): design inspirado em referências contemporâneas de \textit{landing pages} educacionais, com hero, seções \textit{sticky scroll}, FAQ e apresentação de planos.
+    \item \textbf{Animação de entrada da home:} sequência visual em que o título ENEM+ divide-se, um vídeo central expande até preencher a \textit{hero}, e então surgem cabeçalho, título e chamadas para ação --- reforçando identidade da marca e transição para o conteúdo principal (Figura~\ref{fig:ui-landing}).
+    \item \textbf{Área logada} (\textit{workspace}): tutor em tela cheia, hub de simulados, trilha, painel de progresso com gráficos e perfil do aluno, com navegação lateral persistente.
+\end{itemize}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{ui-landing}
+    \caption{Página inicial do ENEM+ após a animação de entrada, com hero e chamadas para ação.}
+    \label{fig:ui-landing}
+\end{figure}
+
+O painel de progresso (Figura~\ref{fig:ui-progresso}) consolida proficiência, evolução temporal e lacunas por área do ENEM.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{ui-progresso}
+    \caption{Painel de progresso com proficiência, evolução e lacunas por área ENEM.}
+    \label{fig:ui-progresso}
+\end{figure}
+
+A Figura~\ref{fig:modelo-er} apresenta o modelo entidade-relacionamento simplificado do banco de dados, gerado a partir do \textit{schema} Prisma.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.95\textwidth]{modelo-er}
+    \caption{Modelo entidade-relacionamento simplificado do banco PostgreSQL (Prisma).}
+    \label{fig:modelo-er}
+\end{figure}
+
+% =============================================================================
+\section{Análise de Resultados do Protótipo}
+\label{sec:resultados}
+% =============================================================================
+
+Diferentemente de uma proposta exclusivamente conceitual, este trabalho alcançou um \textbf{protótipo funcional} que permite avaliar viabilidade técnica e pedagógica preliminar.
+
+\subsection{Resultados Técnicos Alcançados}
+
+\begin{itemize}
+    \item \textbf{Arquitetura hexagonal validada na prática:} cinco módulos independentes, dezenas de casos de uso, troca de provedor de IA sem alteração do domínio.
+    \item \textbf{Fluxo ponta a ponta:} login Google $\rightarrow$ onboarding $\rightarrow$ simulado $\rightarrow$ métricas $\rightarrow$ trilha $\rightarrow$ tutor com histórico persistido.
+    \item \textbf{Banco de questões reais:} base alimentada com questões ENEM, viabilizando simulados representativos do exame.
+    \item \textbf{Segurança de sessão:} padrão BFF com cookies HttpOnly, alinhado a boas práticas para aplicações web modernas.
+    \item \textbf{Interface polida:} páginas de marketing e área logada com identidade visual coerente e animações de entrada na \textit{landing}.
+\end{itemize}
+
+\subsection{Resultados Pedagógicos Projetados}
+
+Com base na literatura, espera-se que o feedback contextualizado e a visualização de lacunas aumentem a autonomia e a constância de estudo \cite{behar2023,latitude2023}. A validação empírica com grupos de alunos (questionários de usabilidade e análise de evolução de proficiência ao longo de semanas) constitui etapa futura, não realizada em larga escala nesta entrega.
+
+\subsection{Limitações Atuais}
+
+\begin{itemize}
+    \item Pagamento via Mercado Pago e plano de apoio: modelados no banco, \textbf{sem checkout funcional}.
+    \item Cache Redis: documentado para produção, \textbf{não integrado}; limites de IA via PostgreSQL.
+    \item Adaptatividade por \textbf{regras}, não por modelos de ML calibrados item a item.
+    \item Cobertura de testes automatizados ainda reduzida.
+    \item Correção de redação e OCR avançado fora do escopo do MVP.
+    \item Risco de alucinações em LLMs exige curadoria e validação pedagógica contínua \cite{sebastiani2023,kasneci2023}.
+\end{itemize}
+
+% =============================================================================
+\section{Conclusão}
+\label{sec:conclusao}
+% =============================================================================
+
+Este trabalho apresentou a proposta e a \textbf{implementação de um protótipo} de plataforma web assistida por inteligência artificial generativa para apoiar estudantes na preparação para o ENEM, com ênfase em inclusão digital e redução de barreiras associadas à falta de tutoria especializada \cite{latitude2023}.
+
+A modelagem em Arquitetura Hexagonal, o banco de questões reais, os simulados em múltiplos modos, o painel de métricas, a trilha personalizada por regras de negócio e o tutor com roteamento entre provedores de LLM demonstram viabilidade técnica da solução. O protótipo ENEM+ materializa premissas pedagógicas contemporâneas --- feedback orientado, métricas visíveis e personalização transparente --- sem substituir o pensamento crítico do estudante \cite{bezerra2023}.
+
+Como trabalhos futuros, destacam-se: (i)~testes de usabilidade e percepção pedagógica com usuários reais; (ii)~integração de pagamentos (Mercado Pago) para o plano de apoio; (iii)~Redis para \textit{rate limiting} distribuído; (iv)~expansão da suíte de testes automatizados; (v)~mecanismos de mitigação e auditoria de alucinações; e (vi)~evolução da adaptatividade com técnicas estatísticas mais sofisticadas, se justificadas pelos dados coletados em campo.
+
+\bibliographystyle{sbc}
+\bibliography{sbc-template}
+
+\end{document}

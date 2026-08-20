@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L9,3 L0,6 Z" fill="#000"/>
+    </marker>
+    <style>
+      .box { fill:#fff; stroke:#000; stroke-width:1.5; }
+      .title { font: bold 16px Arial, sans-serif; fill:#000; }
+      .label { font: 13px Arial, sans-serif; fill:#000; text-anchor:middle; }
+      .small { font: 11px Arial, sans-serif; fill:#000; text-anchor:middle; }
+      .line { stroke:#000; stroke-width:1.5; fill:none; marker-end:url(#arrow); }
+      .line-no-arrow { stroke:#000; stroke-width:1.5; fill:none; }
+    </style>
+  </defs>
+
+  <!-- Título -->
+  <text x="550" y="30" class="title" text-anchor="middle">Arquitetura do ENEM+</text>
+
+  <!-- Linha 1: fluxo principal -->
+  <rect x="30" y="80" width="130" height="50" class="box"/>
+  <text x="95" y="102" class="label">Estudante /</text>
+  <text x="95" y="118" class="label">Navegador</text>
+
+  <line x1="160" y1="105" x2="200" y2="105" class="line"/>
+
+  <rect x="200" y="80" width="150" height="50" class="box"/>
+  <text x="275" y="102" class="label">Frontend</text>
+  <text x="275" y="118" class="label">Next.js (BFF)</text>
+
+  <line x1="350" y1="105" x2="390" y2="105" class="line"/>
+
+  <!-- API Hexagonal -->
+  <rect x="390" y="60" width="220" height="90" class="box"/>
+  <text x="500" y="82" class="label">API NestJS</text>
+  <text x="500" y="98" class="small">Arquitetura Hexagonal</text>
+  <rect x="410" y="108" width="55" height="28" class="box"/>
+  <text x="437" y="126" class="small">Domínio</text>
+  <rect x="472" y="108" width="55" height="28" class="box"/>
+  <text x="499" y="126" class="small">Ports</text>
+  <rect x="534" y="108" width="65" height="28" class="box"/>
+  <text x="566" y="126" class="small">Adapters</text>
+
+  <!-- Saídas da API -->
+  <line x1="500" y1="150" x2="500" y2="190" class="line-no-arrow"/>
+  <line x1="500" y1="190" x2="180" y2="190" class="line-no-arrow"/>
+  <line x1="500" y1="190" x2="500" y2="190" class="line-no-arrow"/>
+  <line x1="500" y1="190" x2="820" y2="190" class="line-no-arrow"/>
+
+  <line x1="180" y1="190" x2="180" y2="220" class="line"/>
+  <line x1="500" y1="190" x2="500" y2="220" class="line"/>
+  <line x1="820" y1="190" x2="820" y2="220" class="line"/>
+
+  <!-- Adaptadores externos -->
+  <rect x="105" y="220" width="150" height="50" class="box"/>
+  <text x="180" y="242" class="label">PostgreSQL</text>
+  <text x="180" y="258" class="label">+ Prisma</text>
+
+  <rect x="425" y="220" width="150" height="50" class="box"/>
+  <text x="500" y="242" class="label">Google</text>
+  <text x="500" y="258" class="label">OAuth2</text>
+
+  <rect x="745" y="220" width="150" height="50" class="box"/>
+  <text x="820" y="250" class="label">IaEngineRouter</text>
+
+  <!-- Provedores IA -->
+  <line x1="820" y1="270" x2="820" y2="310" class="line-no-arrow"/>
+  <line x1="820" y1="310" x2="280" y2="310" class="line-no-arrow"/>
+  <line x1="820" y1="310" x2="820" y2="310" class="line-no-arrow"/>
+  <line x1="820" y1="310" x2="960" y2="310" class="line-no-arrow"/>
+
+  <line x1="280" y1="310" x2="280" y2="340" class="line"/>
+  <line x1="820" y1="310" x2="820" y2="340" class="line"/>
+  <line x1="960" y1="310" x2="960" y2="340" class="line"/>
+
+  <rect x="205" y="340" width="150" height="45" class="box"/>
+  <text x="280" y="368" class="label">NVIDIA NIM</text>
+
+  <rect x="745" y="340" width="150" height="45" class="box"/>
+  <text x="820" y="368" class="label">Groq</text>
+
+  <rect x="885" y="340" width="150" height="45" class="box"/>
+  <text x="960" y="368" class="label">Gemini</text>
+
+  <!-- Legenda simples -->
+  <text x="30" y="480" class="small" text-anchor="start">Fluxo: Estudante ’ BFF ’ API (hexagonal) ’ adaptadores externos (banco, auth, IA)</text>
+</svg>

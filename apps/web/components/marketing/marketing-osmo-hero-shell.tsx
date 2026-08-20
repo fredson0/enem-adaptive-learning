@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useReducedMotion } from "framer-motion";
 import { Caveat } from "next/font/google";
 import type { ReactNode } from "react";
+import { MarketingOsmoBrowserMockup } from "@/components/marketing/marketing-osmo-browser-mockup";
 
 const caveat = Caveat({
   subsets: ["latin"],
@@ -28,6 +29,9 @@ type MarketingOsmoHeroShellProps = {
   children?: ReactNode;
   className?: string;
   titleOffset?: string;
+  /** Mockup estilo browser abaixo do hero (Como funciona / Tutor / Trilha). */
+  browserMockup?: boolean;
+  browserMockupPath?: string;
 };
 
 export function MarketingOsmoHeroShell({
@@ -41,6 +45,8 @@ export function MarketingOsmoHeroShell({
   children,
   className,
   titleOffset,
+  browserMockup = false,
+  browserMockupPath,
 }: MarketingOsmoHeroShellProps) {
   const isLight = variant === "light";
   const reduceMotion = useReducedMotion() ?? false;
@@ -185,6 +191,16 @@ export function MarketingOsmoHeroShell({
           </div>
           </div>
         </div>
+
+        {browserMockup && !isLight ? (
+          <>
+            <div
+              className="relative z-10 mx-auto mt-10 h-16 w-px bg-gradient-to-b from-white/20 to-white/5 md:mt-14 md:h-20"
+              aria-hidden
+            />
+            <MarketingOsmoBrowserMockup pathLabel={browserMockupPath} />
+          </>
+        ) : null}
       </div>
     </section>
   );

@@ -1,0 +1,30 @@
+LEIA ANTES DE COMPILAR NO OVERLEAF
+==================================
+
+1. Faça upload de TODOS os arquivos desta pasta para o Overleaf:
+   - main.tex
+   - sbc-template.sty   (OBRIGATÓRIO - sem ele dá erro "resumo undefined")
+   - sbc.bst
+   - sbc-template.bib
+   - pasta figuras/ (pode ficar vazia por enquanto)
+
+2. No Overleaf: Menu > Main document > selecione "main.tex"
+
+3. Clique em Recompile
+
+4. Coloque TODAS as imagens na pasta figuras/ (ou na raiz — o main.tex busca nos dois lugares).
+
+FIGURAS INCLUÍDAS (pasta figuras/):
+  arquitetura.png
+  mapa-telas.png
+  fluxograma_processo_ia.png
+  modelo-er.png
+  ui-landing.png
+  ui-simulados.png
+  ui-trilha.png
+  ui-tutor.png
+  ui-progresso.png
+
+Dica: as telas (ui-*) são wireframes. Substitua por screenshots reais do sistema quando puder.
+
+Se ainda der erro, verifique se sbc-template.sty está na mesma pasta que main.tex.

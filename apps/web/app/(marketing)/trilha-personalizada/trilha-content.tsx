@@ -1,17 +1,53 @@
 "use client";
 
+import {
+  ComoFuncionaStickyFeatures,
+  type StickyFeatureStep,
+} from "@/components/marketing/como-funciona-sticky-features";
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
 import { MarketingCtaBand } from "@/components/marketing/marketing-cta-band";
-import { MarketingHero } from "@/components/marketing/marketing-hero";
-import { MarketingPlaceholderImage } from "@/components/marketing/marketing-placeholder-image";
+import { MarketingOsmoHeroShell } from "@/components/marketing/marketing-osmo-hero-shell";
 import { MARKETING_IMAGES } from "@/lib/marketing-images";
-import {
-  CheckCircle2,
-  ClipboardList,
-  Map,
-  Route,
-  Sparkles,
-} from "lucide-react";
+import { Check, Route } from "lucide-react";
+
+const TRILHA_STEPS: StickyFeatureStep[] = [
+  {
+    step: "01",
+    label: "Diagnóstico",
+    title: "Prioridade onde dói mais",
+    description:
+      "O diagnóstico cruza autoavaliação com desempenho em simulados para ordenar as quatro áreas do ENEM e sugerir disciplinas dentro de cada uma.",
+    image: MARKETING_IMAGES.diagnostico,
+    imageAlt: "Diagnóstico inicial da trilha",
+  },
+  {
+    step: "02",
+    label: "Checklist",
+    title: "Monte sua rotina conversando",
+    description:
+      "Dentro de cada área, converse com a IA para montar uma checklist realista: quanto tempo você tem, o que revisar primeiro, teoria ou prática.",
+    image: MARKETING_IMAGES.checklist,
+    imageAlt: "Checklist de estudos personalizada",
+  },
+  {
+    step: "03",
+    label: "Áreas",
+    title: "Quatro áreas, um plano",
+    description:
+      "Linguagens, Matemática, Humanas e Natureza — cada uma com etapas sequenciais, simulados sugeridos e marcos de progresso visíveis.",
+    image: MARKETING_IMAGES.trilha,
+    imageAlt: "Trilha por área do ENEM",
+  },
+  {
+    step: "04",
+    label: "Etapas",
+    title: "Do macro ao detalhe",
+    description:
+      "Treino, modalidade, revisão, tutor e simulado cronometrado. Você sempre sabe o próximo passo e pode refinar o plano com a IA a qualquer momento.",
+    image: MARKETING_IMAGES.metricas,
+    imageAlt: "Etapas sequenciais da trilha",
+  },
+];
 
 const AREAS = [
   "Linguagens e Códigos",
@@ -20,54 +56,33 @@ const AREAS = [
   "Ciências da Natureza",
 ];
 
-const ETAPAS = [
-  "Diagnóstico e priorização por área",
-  "Checklist personalizada com IA",
-  "Simulados direcionados",
-  "Revisão de lacunas detectadas",
-];
-
 export function TrilhaPersonalizadaContent() {
   return (
     <>
-      <MarketingHero
-        eyebrow="( Trilha )"
+      <MarketingOsmoHeroShell
+        variant="dark"
+        eyebrowLeft="Produto"
+        eyebrowRight="Trilha"
+        badge={
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#b0ff57] px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-black uppercase">
+            <Check className="size-3" strokeWidth={2.5} />
+            Incluso no gratuito
+          </span>
+        }
         title="Um plano feito para onde você mais precisa evoluir"
         description="Após o diagnóstico, a plataforma monta uma trilha sequencial por área ENEM — com etapas, orientações e checklist conversacional com IA para adaptar o ritmo ao seu dia a dia."
-        imageSrc={MARKETING_IMAGES.trilhaHero}
-        imageAlt="Estudante seguindo trilha de estudos"
+        accent="prioridade com dados reais"
+        browserMockup
+        browserMockupPath="enemplus.app / trilha"
       />
 
-      <section className="bg-white px-4 py-20 md:px-8 md:py-28">
-        <div className="mx-auto grid max-w-[1200px] items-center gap-12 lg:grid-cols-2">
-          <MarketingPlaceholderImage
-            src={MARKETING_IMAGES.checklist}
-            alt="Checklist de estudos personalizada"
-            className="aspect-[4/3] w-full"
-          />
-          <MarketingBlurReveal>
-            <p className="font-mono text-xs tracking-[0.2em] text-[#7c6cff] uppercase">
-              ( Checklist com IA )
-            </p>
-            <h2 className="font-display mt-5 text-3xl font-semibold tracking-[-0.03em] text-[#0b1220] md:text-4xl">
-              Monte sua rotina conversando
-            </h2>
-            <p className="mt-5 text-base leading-relaxed text-[#0b1220]/65 md:text-lg">
-              Dentro de cada área, converse com a IA para montar uma checklist
-              realista: quanto tempo você tem, o que revisar primeiro, teoria ou
-              prática. O plano vira etapas concretas na sua trilha.
-            </p>
-            <div className="mt-8 flex items-start gap-3 rounded-2xl border border-[#7c6cff]/20 bg-[#7c6cff]/5 p-5">
-              <Sparkles className="mt-0.5 size-5 shrink-0 text-[#7c6cff]" />
-              <p className="text-sm leading-relaxed text-[#0b1220]/70 md:text-base">
-                Exemplo: &quot;Tenho 2h por dia para Matemática, quero focar em
-                Funções antes de Geometria&quot; — a IA estrutura dias e tarefas
-                para você.
-              </p>
-            </div>
-          </MarketingBlurReveal>
-        </div>
-      </section>
+      <ComoFuncionaStickyFeatures
+        sectionEyebrow="( O fluxo )"
+        sectionTitle="Do diagnóstico ao próximo passo"
+        sectionDescription="Não é uma lista genérica de tópicos. Cada etapa usa seu desempenho real e conversas com a IA para manter o plano vivo."
+        steps={TRILHA_STEPS}
+        inactivePanelBlur={false}
+      />
 
       <section className="bg-[#111111] px-4 py-20 md:px-8 md:py-28">
         <div className="mx-auto max-w-[1200px]">
@@ -76,12 +91,12 @@ export function TrilhaPersonalizadaContent() {
               ( Áreas ENEM )
             </p>
             <h2 className="font-display mt-5 text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.04em] text-white">
-              Prioridade onde dói mais
+              Quatro áreas, uma jornada
             </h2>
             <p className="mt-5 text-base leading-relaxed text-white/60 md:text-lg">
-              O diagnóstico cruza autoavaliação com desempenho em simulados para
-              ordenar as quatro áreas do ENEM e sugerir disciplinas dentro de
-              cada uma.
+              A trilha organiza Linguagens, Matemática, Humanas e Natureza com
+              priorização automática — você estuda primeiro o que mais impacta
+              sua nota.
             </p>
           </MarketingBlurReveal>
 
@@ -97,66 +112,6 @@ export function TrilhaPersonalizadaContent() {
               </MarketingBlurReveal>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="bg-[#f3f3f1] px-4 py-20 md:px-8 md:py-28">
-        <div className="mx-auto grid max-w-[1200px] gap-12 lg:grid-cols-2">
-          <MarketingBlurReveal>
-            <p className="font-mono text-xs tracking-[0.2em] text-[#7c6cff] uppercase">
-              ( Etapas )
-            </p>
-            <h2 className="font-display mt-5 text-3xl font-semibold tracking-[-0.03em] text-[#0b1220]">
-              Do macro ao detalhe
-            </h2>
-            <p className="mt-5 text-base leading-relaxed text-[#0b1220]/65">
-              Cada área tem etapas sequenciais: orientações, simulados
-              sugeridos e marcos de progresso. Você sempre sabe o próximo passo.
-            </p>
-            <ul className="mt-8 space-y-4">
-              {ETAPAS.map((etapa) => (
-                <li
-                  key={etapa}
-                  className="flex items-start gap-3 text-sm text-[#0b1220]/75 md:text-base"
-                >
-                  <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[#7c6cff]" />
-                  {etapa}
-                </li>
-              ))}
-            </ul>
-          </MarketingBlurReveal>
-
-          <MarketingBlurReveal delay={0.1}>
-            <div className="grid gap-4">
-              {[
-                { icon: Map, title: "Trilha geral", text: "Visão de todas as áreas" },
-                {
-                  icon: ClipboardList,
-                  title: "Checklist IA",
-                  text: "Rotina semanal personalizada",
-                },
-              ].map((card) => (
-                <div
-                  key={card.title}
-                  className="rounded-2xl border border-black/8 bg-white p-6"
-                >
-                  <card.icon
-                    className="size-5 text-[#7c6cff]"
-                    strokeWidth={1.75}
-                  />
-                  <h3 className="mt-4 font-semibold text-[#0b1220]">
-                    {card.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-[#0b1220]/65">{card.text}</p>
-                </div>
-              ))}
-              <MarketingPlaceholderImage
-                src={MARKETING_IMAGES.trilha}
-                alt="Painel da trilha personalizada"
-                className="aspect-[16/10] w-full"
-              />
-            </div>
-          </MarketingBlurReveal>
         </div>
       </section>
 

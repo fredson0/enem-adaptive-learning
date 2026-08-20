@@ -26,6 +26,8 @@ type ComoFuncionaStickyFeaturesProps = {
   sectionDescription?: string;
   sectionEyebrow?: string;
   steps: StickyFeatureStep[];
+  /** Desativa blur nos painéis inativos (primeira seção de Tutor/Trilha). */
+  inactivePanelBlur?: boolean;
 };
 
 function StickyImageFrame({
@@ -71,11 +73,13 @@ function FeaturePanel({
   isActive,
   reduceMotion,
   panelRef,
+  inactivePanelBlur = true,
 }: {
   step: StickyFeatureStep;
   isActive: boolean;
   reduceMotion: boolean;
   panelRef: (node: HTMLDivElement | null) => void;
+  inactivePanelBlur?: boolean;
 }) {
   return (
     <div
@@ -89,11 +93,16 @@ function FeaturePanel({
         animate={
           reduceMotion
             ? { opacity: isActive ? 1 : 0.25 }
-            : {
-                opacity: isActive ? 1 : 0.18,
-                y: isActive ? 0 : -28,
-                filter: isActive ? "blur(0px)" : "blur(2px)",
-              }
+            : inactivePanelBlur
+              ? {
+                  opacity: isActive ? 1 : 0.18,
+                  y: isActive ? 0 : -28,
+                  filter: isActive ? "blur(0px)" : "blur(2px)",
+                }
+              : {
+                  opacity: isActive ? 1 : 0.35,
+                  y: isActive ? 0 : -12,
+                }
         }
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="max-w-xl"
@@ -128,6 +137,7 @@ export function ComoFuncionaStickyFeatures({
   sectionDescription,
   sectionEyebrow,
   steps,
+  inactivePanelBlur = true,
 }: ComoFuncionaStickyFeaturesProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -222,6 +232,7 @@ export function ComoFuncionaStickyFeatures({
               isActive={activeIndex === index}
               reduceMotion={reduceMotion}
               panelRef={setPanelRef(index)}
+              inactivePanelBlur={inactivePanelBlur}
             />
           ))}
         </div>
