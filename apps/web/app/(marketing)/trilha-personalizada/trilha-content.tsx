@@ -69,7 +69,17 @@ export function TrilhaPersonalizadaContent() {
             Incluso no gratuito
           </span>
         }
-        title="Um plano feito para onde você mais precisa evoluir"
+        title={
+          <>
+            Um plano feito
+            <br />
+            para onde você
+            <br />
+            mais precisa evoluir
+          </>
+        }
+        titleOffset="pt-[clamp(5rem,13vw,9rem)] md:pt-[clamp(5.5rem,14vw,9.5rem)]"
+        titleClassName="max-w-[min(100%,26em)] text-[clamp(2.5rem,9vw,6.25rem)] leading-[0.92] tracking-[-0.05em]"
         description="Após o diagnóstico, a plataforma monta uma trilha sequencial por área ENEM — com etapas, orientações e checklist conversacional com IA para adaptar o ritmo ao seu dia a dia."
         accent="prioridade com dados reais"
         browserMockup

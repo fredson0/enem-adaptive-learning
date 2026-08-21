@@ -301,6 +301,7 @@ export class IaTutorController {
       userId: user.sub,
       assuntoId: dto.assuntoId,
       assuntoNome: dto.assuntoNome,
+      conteudoBase: dto.conteudoBase,
       areaSlug: dto.areaSlug,
       termosBusca: dto.termosBusca,
       quantidade: dto.quantidade,

@@ -1,4 +1,9 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+
+export const SIDEBAR_ACCORDION_EASE = [0.22, 1, 0.36, 1] as const;
 
 type SidebarAccordionProps = {
   open: boolean;
@@ -11,24 +16,30 @@ export function SidebarAccordion({
   children,
   className,
 }: SidebarAccordionProps) {
+  const reduceMotion = useReducedMotion() ?? false;
+
   return (
-    <div
-      className={cn(
-        "grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-        open ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
-        className,
-      )}
-    >
-      <div className="overflow-hidden">
-        <div
-          className={cn(
-            "transition-opacity duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-            open ? "opacity-100" : "opacity-0",
-          )}
-        >
-          {children}
-        </div>
-      </div>
+    <div className={className}>
+      <AnimatePresence initial={false}>
+        {open ? (
+          <motion.div
+            key="sidebar-accordion-panel"
+            initial={reduceMotion ? false : { height: 0 }}
+            animate={{ height: "auto" }}
+            exit={reduceMotion ? undefined : { height: 0 }}
+            transition={{
+              duration: reduceMotion ? 0 : 0.34,
+              ease: SIDEBAR_ACCORDION_EASE,
+            }}
+            className="overflow-hidden"
+            style={{ transformOrigin: "top" }}
+          >
+            {children}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
+
+export const sidebarAccordionEase = SIDEBAR_ACCORDION_EASE;

@@ -203,6 +203,7 @@ export function gerarPdfResumoTutor(body: GerarPdfResumoBody) {
 export type GerarPdfQuestoesBody = {
   assuntoId?: string;
   assuntoNome?: string;
+  conteudoBase?: string;
   areaSlug?: string;
   termosBusca?: string[];
   quantidade?: number;

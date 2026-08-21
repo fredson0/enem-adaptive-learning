@@ -18,6 +18,7 @@ export type GerarPdfQuestoesInput = {
   assuntoId?: string;
   assuntoNome?: string;
   areaSlug?: string;
+  conteudoBase?: string;
   termosBusca?: string[];
   quantidade?: number;
   questaoIds?: string[];
@@ -43,6 +44,7 @@ export class GerarPdfQuestoesUseCase {
     const termosBusca = [
       ...(input.termosBusca ?? []),
       ...extrairTermosBuscaPdf(input.assuntoNome),
+      ...extrairTermosBuscaPdf(input.conteudoBase),
       ...extrairTermosBuscaPdf(assuntoCatalogo?.nome),
     ].filter((termo, index, lista) => lista.indexOf(termo) === index);
 
@@ -51,13 +53,20 @@ export class GerarPdfQuestoesUseCase {
 
     let questoes = input.questaoIds?.length
       ? await this.questoesRepository.buscarPorIds(input.questaoIds)
-      : await this.questoesRepository.buscarAleatorias({
+      : await this.buscarQuestoesComFallback({
           area,
-          termosBusca: termosBusca.length ? termosBusca : undefined,
+          termosBusca,
           quantidade,
         });
 
     if (questoes.length === 0) {
+      const totalBanco = await this.questoesRepository.contar();
+      if (totalBanco === 0) {
+        throw new BadRequestException(
+          'O banco de questões ainda está vazio. Peça ao administrador para rodar o seed (npm run prisma:seed -w apps/api).',
+        );
+      }
+
       throw new BadRequestException(
         'Não encontramos questões para esse tema. Tente outro assunto ou área.',
       );
@@ -97,5 +106,38 @@ export class GerarPdfQuestoesUseCase {
         gabarito: questao.gabarito,
       })),
     };
+  }
+
+  private async buscarQuestoesComFallback(input: {
+    area?: ReturnType<typeof parseAreaEnem>;
+    termosBusca: string[];
+    quantidade: number;
+  }) {
+    const tentativas: {
+      area?: ReturnType<typeof parseAreaEnem>;
+      termosBusca?: string[];
+    }[] = [
+      {
+        area: input.area,
+        termosBusca: input.termosBusca.length ? input.termosBusca : undefined,
+      },
+      { area: input.area },
+      { termosBusca: input.termosBusca.length ? input.termosBusca : undefined },
+      {},
+    ];
+
+    for (const filtro of tentativas) {
+      const questoes = await this.questoesRepository.buscarAleatorias({
+        area: filtro.area,
+        termosBusca: filtro.termosBusca,
+        quantidade: input.quantidade,
+      });
+
+      if (questoes.length > 0) {
+        return questoes;
+      }
+    }
+
+    return [];
   }
 }

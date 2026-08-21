@@ -1,6 +1,8 @@
 "use client";
 
+import { SIDEBAR_ACCORDION_EASE } from "@/components/workspace/sidebar-accordion";
 import { cn } from "@/lib/utils";
+import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import {
   Children,
@@ -8,6 +10,48 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+
+const TREE_LIST_VARIANTS = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.04,
+      delayChildren: 0.02,
+    },
+  },
+  exit: {
+    transition: {
+      staggerChildren: 0.028,
+      staggerDirection: -1,
+    },
+  },
+} as const;
+
+const TREE_ITEM_VARIANTS = {
+  hidden: {
+    opacity: 0,
+    y: -12,
+    scaleY: 0.88,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    scaleY: 1,
+    transition: {
+      duration: 0.3,
+      ease: SIDEBAR_ACCORDION_EASE,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    scaleY: 0.9,
+    transition: {
+      duration: 0.2,
+      ease: SIDEBAR_ACCORDION_EASE,
+    },
+  },
+} as const;
 
 type SidebarTreeProps = {
   children: ReactNode;
@@ -22,23 +66,32 @@ export function SidebarTree({
   scrollable = false,
   maxHeightClassName = "max-h-[240px]",
 }: SidebarTreeProps) {
+  const reduceMotion = useReducedMotion() ?? false;
   const items = Children.toArray(children).filter(Boolean);
 
   const list = (
-    <div className="osmo-sidebar-tree__list">
+    <motion.div
+      className="osmo-sidebar-tree__list"
+      variants={reduceMotion ? undefined : TREE_LIST_VARIANTS}
+      initial={reduceMotion ? false : "hidden"}
+      animate={reduceMotion ? undefined : "show"}
+      exit={reduceMotion ? undefined : "exit"}
+    >
       {items.map((child, index) => (
-        <div
+        <motion.div
           key={getChildKey(child, index)}
           className={cn(
             "osmo-sidebar-tree__item",
             index === 0 && "osmo-sidebar-tree__item--first",
             index === items.length - 1 && "osmo-sidebar-tree__item--last",
           )}
+          variants={reduceMotion ? undefined : TREE_ITEM_VARIANTS}
+          style={{ transformOrigin: "top center" }}
         >
           {child}
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 
   return (
@@ -79,7 +132,7 @@ export function SidebarTreeLink({
       href={href}
       onClick={onClick}
       className={cn(
-        "block w-full rounded-[6px] px-3 py-2 text-sm transition-all duration-300",
+        "block w-full rounded-lg px-3.5 py-2.5 text-[14px] transition-all duration-300",
         active
           ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
           : "text-white/55 hover:bg-[var(--osmo-hover)] hover:text-white/85",
@@ -111,7 +164,7 @@ export function SidebarTreeButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-2 rounded-[6px] px-3 py-2 text-left text-sm transition-all duration-300",
+        "flex w-full items-center gap-2 rounded-lg px-3.5 py-2.5 text-left text-[14px] transition-all duration-300",
         dashed
           ? active
             ? "border border-[var(--osmo-border)] bg-[var(--osmo-active)] text-white"
@@ -145,7 +198,7 @@ export function SidebarTreeChatButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "block w-full rounded-[6px] px-3 py-2.5 text-left transition-all duration-300 ease-out",
+        "block w-full rounded-lg px-3.5 py-3 text-left transition-all duration-300 ease-out",
         active
           ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
           : "text-white/60 hover:bg-[var(--osmo-hover)] hover:text-white",

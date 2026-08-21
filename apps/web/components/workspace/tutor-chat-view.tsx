@@ -218,6 +218,7 @@ export function TutorChatView({
     try {
       const response = await gerarPdfQuestoesTutor({
         assuntoNome: mensagemUsuarioAnterior?.texto,
+        conteudoBase: mensagemAssistente.texto,
         quantidade: 5,
         incluirGabarito: true,
       });

@@ -5,14 +5,14 @@
  */
 export const OSMO = {
   canvas: "#111111",
-  sidebar: "#181818",
+  sidebar: "#141414",
   sidebarWidth: 320,
   surface: "#111111",
-  active: "#252525",
-  hover: "#1f1f1f",
+  active: "#1e1e1e",
+  hover: "#1a1a1a",
   card: "#161616",
   cardHover: "#1a1a1a",
-  border: "#2a2a2a",
+  border: "#262626",
   borderSubtle: "rgba(255,255,255,0.06)",
   muted: "rgba(255,255,255,0.55)",
   accent: "#b0ff57",

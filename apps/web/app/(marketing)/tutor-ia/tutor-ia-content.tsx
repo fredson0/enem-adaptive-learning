@@ -5,10 +5,10 @@ import {
   type StickyFeatureStep,
 } from "@/components/marketing/como-funciona-sticky-features";
 import { MarketingCtaBand } from "@/components/marketing/marketing-cta-band";
-import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
+import { MarketingIaRouterSection } from "@/components/marketing/marketing-ia-router-section";
 import { MarketingOsmoHeroShell } from "@/components/marketing/marketing-osmo-hero-shell";
 import { MARKETING_IMAGES } from "@/lib/marketing-images";
-import { Check, Sparkles } from "lucide-react";
+import { Check } from "lucide-react";
 
 const TUTOR_STEPS: StickyFeatureStep[] = [
   {
@@ -77,45 +77,7 @@ export function TutorIaContent() {
         inactivePanelBlur={false}
       />
 
-      <section className="bg-[#f3f3f1] px-4 py-20 md:px-8 md:py-28">
-        <div className="mx-auto max-w-[1200px]">
-          <MarketingBlurReveal className="mx-auto max-w-3xl text-center">
-            <p className="font-mono text-xs tracking-[0.2em] text-[#7c6cff] uppercase">
-              ( Tecnologia )
-            </p>
-            <h2 className="font-display mt-5 text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.04em] text-[#0b1220]">
-              IA robusta com fallback inteligente
-            </h2>
-            <p className="mt-5 text-base leading-relaxed text-[#0b1220]/65 md:text-lg">
-              Texto via NVIDIA Llama 3.1, visão via Llama 3.2 Vision. Se um
-              provedor falhar, o sistema tenta alternativas automaticamente para
-              você não ficar na mão.
-            </p>
-          </MarketingBlurReveal>
-
-          <div className="mt-12 grid gap-4 sm:grid-cols-3">
-            {[
-              { label: "Texto", value: "Llama 3.1 Instruct" },
-              { label: "Visão", value: "Llama 3.2 Vision" },
-              { label: "Fallback", value: "Groq → Gemini" },
-            ].map((item, index) => (
-              <MarketingBlurReveal
-                key={item.label}
-                delay={index * 0.06}
-                className="rounded-2xl border border-black/8 bg-white p-6 text-center"
-              >
-                <Sparkles className="mx-auto size-5 text-[#7c6cff]" />
-                <p className="mt-3 font-mono text-[10px] tracking-[0.2em] text-[#0b1220]/45 uppercase">
-                  {item.label}
-                </p>
-                <p className="mt-2 text-sm font-semibold text-[#0b1220]">
-                  {item.value}
-                </p>
-              </MarketingBlurReveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      <MarketingIaRouterSection />
 
       <MarketingCtaBand
         title="Converse com o tutor agora"

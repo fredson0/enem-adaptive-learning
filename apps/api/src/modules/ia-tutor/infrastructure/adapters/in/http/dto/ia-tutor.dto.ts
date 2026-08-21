@@ -134,6 +134,11 @@ export class GerarPdfQuestoesDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(8000)
+  conteudoBase?: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(20)
   areaSlug?: string;
 

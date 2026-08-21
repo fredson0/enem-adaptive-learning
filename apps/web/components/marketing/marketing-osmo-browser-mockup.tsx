@@ -1,10 +1,11 @@
 "use client";
 
+import { LANDING_PLATFORM_VIDEO_SRC } from "@/lib/landing-hero-media";
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
 import { Play } from "lucide-react";
 
-/** Cole a URL do vídeo da plataforma quando estiver pronto. */
-export const MARKETING_OSMO_VIDEO_SRC = "";
+/** Vídeo da plataforma nas páginas de marketing (browser mockup). */
+export const MARKETING_OSMO_VIDEO_SRC = LANDING_PLATFORM_VIDEO_SRC;
 
 type MarketingOsmoBrowserMockupProps = {
   pathLabel?: string;

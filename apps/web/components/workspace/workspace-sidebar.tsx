@@ -6,7 +6,7 @@ import {
   SidebarTree,
   SidebarTreeLink,
 } from "@/components/workspace/sidebar-tree-nav";
-import { SidebarAccordion } from "@/components/workspace/sidebar-accordion";
+import { SidebarAccordion, sidebarAccordionEase } from "@/components/workspace/sidebar-accordion";
 import { UserAvatar } from "@/components/workspace/user-avatar";
 import { useWorkspaceSidebar } from "@/components/workspace/workspace-sidebar-context";
 import { cn } from "@/lib/utils";
@@ -33,7 +33,19 @@ import { useEffect, useState, type MouseEvent } from "react";
 
 type SectionId = "tutor" | "simulados" | "trilha" | "progresso";
 
-const DRAWER_EASE = [0.22, 1, 0.36, 1] as const;
+const DRAWER_EASE = sidebarAccordionEase;
+const SECTION_TRANSITION =
+  "transition-all duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
+const CHEVRON_TRANSITION =
+  "transition-transform duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
+
+const SECTION_BUTTON =
+  "flex w-full items-center justify-between rounded-xl px-4 py-4 text-[15px] font-medium leading-none";
+const SECTION_BUTTON_ROW =
+  "flex w-full items-center gap-3.5 rounded-xl px-4 py-4 text-left text-[15px] font-medium leading-none";
+const SECTION_ICON =
+  "size-5 transition-colors duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
+const SECTION_CHEVRON = "size-4 text-white/40";
 
 function getSectionFromPath(pathname: string): SectionId | null {
   if (pathname.startsWith("/tutor")) return "tutor";
@@ -87,7 +99,7 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
 
   const sidebarPanel = (
     <>
-      <div className="flex shrink-0 items-center justify-between px-6 py-6">
+      <div className="flex shrink-0 items-center justify-between px-5 py-7">
         <Link
           href={TUTOR_CHAT_PATH}
           onClick={(event) => {
@@ -95,7 +107,7 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
             goToTutor();
             if (isMobile) close();
           }}
-          className="text-lg font-bold tracking-[0.18em] text-white uppercase"
+          className="text-xl font-bold tracking-[0.16em] text-white uppercase"
         >
           ENEM+
         </Link>
@@ -109,7 +121,7 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
             <X className="size-4" strokeWidth={2.25} />
           </button>
         ) : (
-          <Asterisk className="size-4 text-[#b0ff57]" strokeWidth={2} />
+          <Asterisk className="size-[18px] text-[#b0ff57]" strokeWidth={2} />
         )}
       </div>
 
@@ -121,16 +133,17 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
           type="button"
           onClick={() => handleSectionClick("tutor", TUTOR_NAV.href)}
           className={cn(
-            "flex w-full items-center justify-between rounded-[10px] px-3.5 py-3 text-sm font-medium transition-all duration-300 ease-out",
+            SECTION_BUTTON,
+            SECTION_TRANSITION,
             isTutorExpanded
               ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
               : "text-white/70 hover:bg-[var(--osmo-hover)] hover:text-white",
           )}
         >
-          <span className="inline-flex items-center gap-3">
+          <span className="inline-flex items-center gap-3.5">
             <TutorIcon
               className={cn(
-                "size-4 transition-colors duration-300",
+                SECTION_ICON,
                 isTutorExpanded ? "text-[#ff6b6b]" : "text-white/60",
               )}
               strokeWidth={1.75}
@@ -139,7 +152,8 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
           </span>
           <ChevronRight
             className={cn(
-              "size-3.5 text-white/40 transition-transform duration-300 ease-out",
+              SECTION_CHEVRON,
+              CHEVRON_TRANSITION,
               isTutorExpanded && "rotate-90",
             )}
             strokeWidth={1.75}
@@ -154,16 +168,18 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
           type="button"
           onClick={() => handleSectionClick("simulados", "/simulados")}
           className={cn(
-            "mb-1 flex w-full items-center justify-between rounded-[10px] px-3.5 py-3 text-sm font-medium transition-all duration-300 ease-out",
+            "mb-1",
+            SECTION_BUTTON,
+            SECTION_TRANSITION,
             isSimuladosExpanded || isSimuladosActive
               ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
               : "text-white/70 hover:bg-[var(--osmo-hover)] hover:text-white",
           )}
         >
-          <span className="inline-flex items-center gap-3">
+          <span className="inline-flex items-center gap-3.5">
             <ClipboardList
               className={cn(
-                "size-4 transition-colors duration-300",
+                SECTION_ICON,
                 isSimuladosExpanded || isSimuladosActive
                   ? "text-[#60a5fa]"
                   : "text-white/60",
@@ -174,7 +190,8 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
           </span>
           <ChevronRight
             className={cn(
-              "size-3.5 text-white/40 transition-transform duration-300 ease-out",
+              SECTION_CHEVRON,
+              CHEVRON_TRANSITION,
               isSimuladosExpanded && "rotate-90",
             )}
             strokeWidth={1.75}
@@ -199,7 +216,7 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
           </SidebarTree>
         </SidebarAccordion>
 
-        <nav className="space-y-1">
+        <nav className="space-y-1.5">
           {WORKSPACE_NAV.map((item) => {
             const sectionId = item.href.replace("/", "") as SectionId;
             const isExpanded = expandedSection === sectionId;
@@ -211,13 +228,14 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
                 type="button"
                 onClick={() => handleSectionClick(sectionId, item.href)}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-[10px] px-3.5 py-3 text-left text-sm font-medium transition-all duration-300 ease-out",
+                  SECTION_BUTTON_ROW,
+                  SECTION_TRANSITION,
                   isExpanded
                     ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
                     : "text-white/70 hover:bg-[var(--osmo-hover)] hover:text-white",
                 )}
               >
-                <Icon className="size-4 text-white/60" strokeWidth={1.75} />
+                <Icon className={cn(SECTION_ICON, "text-white/60")} strokeWidth={1.75} />
                 {item.label}
               </button>
             );
@@ -230,7 +248,8 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
           href={PROFILE_NAV.href}
           onClick={guardLink(PROFILE_NAV.href)}
           className={cn(
-            "flex items-center gap-3 rounded-[10px] px-2.5 py-2.5 transition-all duration-300 ease-out",
+            "flex items-center gap-3 rounded-[10px] px-2.5 py-2.5",
+            SECTION_TRANSITION,
             isActivePath(pathname, PROFILE_NAV.href)
               ? "bg-[var(--osmo-active)]"
               : "hover:bg-[var(--osmo-hover)]",

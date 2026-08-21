@@ -52,14 +52,14 @@
 
 :root {
   --osmo-canvas: #111111;
-  --osmo-sidebar: #181818;
+  --osmo-sidebar: #141414;
   --osmo-sidebar-width: 320px;
   --workspace-content-inset-left: calc(var(--osmo-sidebar-width) + 1.25rem + 24px);
   --osmo-surface: #111111;
-  --osmo-active: #252525;
-  --osmo-hover: #1f1f1f;
+  --osmo-active: #1e1e1e;
+  --osmo-hover: #1a1a1a;
   --osmo-card: #161616;
-  --osmo-border: #2a2a2a;
+  --osmo-border: #262626;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -216,7 +216,8 @@
 /* Sidebar tree — conectores em L (padrão Osmo Vault) */
 .osmo-sidebar-tree {
   margin-left: 1.25rem;
-  padding-top: 0.25rem;
+  margin-top: -2px;
+  padding-top: 0.125rem;
 }
 
 .osmo-sidebar-tree__list {

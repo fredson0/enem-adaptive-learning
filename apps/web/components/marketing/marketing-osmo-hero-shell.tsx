@@ -29,6 +29,7 @@ type MarketingOsmoHeroShellProps = {
   children?: ReactNode;
   className?: string;
   titleOffset?: string;
+  titleClassName?: string;
   /** Mockup estilo browser abaixo do hero (Como funciona / Tutor / Trilha). */
   browserMockup?: boolean;
   browserMockupPath?: string;
@@ -45,6 +46,7 @@ export function MarketingOsmoHeroShell({
   children,
   className,
   titleOffset,
+  titleClassName,
   browserMockup = false,
   browserMockupPath,
 }: MarketingOsmoHeroShellProps) {
@@ -144,6 +146,7 @@ export function MarketingOsmoHeroShell({
                     "font-display mx-auto max-w-[min(100%,22em)] text-center text-balance",
                     MARKETING_OSMO_HERO_TITLE,
                     isLight ? "text-[#0b1220]" : "text-white",
+                    titleClassName,
                   )}
                 >
                   {title}
