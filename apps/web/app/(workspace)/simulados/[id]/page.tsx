@@ -191,7 +191,7 @@ export default function SimuladoQuestaoPage() {
 
   if (loading && !simulado) {
     return (
-      <WorkspaceSection title="Simulado">
+      <WorkspaceSection>
         <p className="text-sm text-white/45">Carregando questão…</p>
       </WorkspaceSection>
     );
@@ -199,7 +199,7 @@ export default function SimuladoQuestaoPage() {
 
   if (error && !simulado) {
     return (
-      <WorkspaceSection title="Simulado">
+      <WorkspaceSection>
         <p className="text-sm text-red-400">{error}</p>
       </WorkspaceSection>
     );
@@ -213,11 +213,13 @@ export default function SimuladoQuestaoPage() {
     painelDicaVisivel && Boolean(dicaAtual || carregandoDica || erroDica);
 
   return (
-    <WorkspaceSection title="Simulado" contentClassName="flex min-h-0 flex-1 flex-col pb-6">
+    <WorkspaceSection contentClassName="pb-6">
       <div
         className={cn(
-          "mx-auto flex w-full min-h-0 flex-1 flex-col gap-4 transition-[max-width] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
-          painelDicaAberto ? "max-w-6xl" : "max-w-3xl",
+          "mx-auto flex w-full flex-col gap-5 transition-[max-width] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
+          painelDicaAberto
+            ? "max-w-6xl min-h-0 flex-1"
+            : "max-w-4xl",
         )}
       >
         <div className="shrink-0 space-y-3">
@@ -255,16 +257,18 @@ export default function SimuladoQuestaoPage() {
 
         <div
           className={cn(
-            "grid min-h-0 flex-1 gap-4 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none lg:gap-6",
-            painelDicaAberto ? "lg:grid-cols-2" : "grid-cols-1",
+            "grid gap-4 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none lg:gap-6",
+            painelDicaAberto && "min-h-0 flex-1 lg:grid-cols-2",
           )}
         >
           <div
-            data-lenis-prevent
-            className="min-h-0 overflow-y-auto overscroll-contain pr-1 tutor-prompt-scroll"
+            className={cn(
+              painelDicaAberto &&
+                "min-h-0 overflow-y-auto overscroll-contain pr-1 tutor-prompt-scroll lg:max-h-[calc(100vh-14rem)]",
+            )}
           >
             {questao ? (
-              <article className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-6 md:p-8">
+              <article className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-6 md:p-8 lg:p-10">
               <p className="mb-4 text-xs uppercase tracking-wider text-white/35">
                 ENEM {questao.ano} · Questão {questao.indice}
               </p>
@@ -274,11 +278,11 @@ export default function SimuladoQuestaoPage() {
                 <img
                   src={questao.imagemUrl}
                   alt=""
-                  className="mb-6 max-h-64 rounded-lg object-contain"
+                  className="mb-6 max-h-96 w-full rounded-lg object-contain"
                 />
               ) : null}
 
-              <div className="whitespace-pre-wrap text-sm leading-relaxed text-white/85">
+              <div className="whitespace-pre-wrap text-base leading-relaxed text-white/85">
                 {renderMarkdownLite(questao.contexto)}
               </div>
 
@@ -343,7 +347,7 @@ export default function SimuladoQuestaoPage() {
           />
         </div>
 
-        <div className="shrink-0 space-y-3 border-t border-white/[0.06] pt-4">
+        <div className="space-y-3 border-t border-white/[0.06] pt-5">
           <div className="flex flex-wrap gap-2">
             <button
               type="button"

@@ -1,5 +1,6 @@
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
 import { MarketingOsmoPlatformMock } from "@/components/marketing/marketing-osmo-platform-mock";
+import { MARKETING_IMAGE_PATHS } from "@/lib/marketing-images";
 import { MARKETING_OSMO_COLORS } from "@/lib/marketing-osmo-tokens";
 import { cn } from "@/lib/utils";
 import { Caveat } from "next/font/google";
@@ -12,10 +13,10 @@ const caveat = Caveat({
 });
 
 /**
- * Cole aqui o caminho do screenshot real da plataforma quando estiver pronto.
- * Ex.: "/marketing/cta-platform.png"
+ * Screenshot do CTA — `public/marketing/shared/MarketingOsmoPlatformMock.jpeg`
  */
-export const MARKETING_CTA_PLATFORM_IMAGE_SRC = "";
+export const MARKETING_CTA_PLATFORM_IMAGE_SRC =
+  MARKETING_IMAGE_PATHS.shared.ctaPlatform;
 
 type MarketingCtaBandProps = {
   title: string;

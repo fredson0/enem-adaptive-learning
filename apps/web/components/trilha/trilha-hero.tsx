@@ -92,8 +92,6 @@ export function TrilhaHero({ trilha }: TrilhaHeroProps) {
         </Link>
 
         <div className="relative mx-auto flex h-[min(360px,78vw)] w-full max-w-[min(100%,340px)] flex-col justify-between overflow-hidden rounded-full border border-white/[0.07] bg-[#161616] px-5 py-6 sm:h-[420px] sm:max-w-[500px] sm:px-10 sm:py-8 lg:mx-0 lg:ml-auto lg:h-[500px] lg:max-w-none">
-          <div className="pointer-events-none absolute inset-6 rounded-full border border-white/[0.04] sm:inset-8" />
-
           <div className="relative z-10 text-center">
             <p className="text-lg font-medium text-[#b0ff57] sm:text-2xl">
               Trilha geral
