@@ -6,6 +6,10 @@ import {
   MARKETING_OSMO_COLORS,
   MARKETING_OSMO_FEATURE_PANEL_HEIGHT,
   MARKETING_OSMO_FEATURE_TITLE,
+  MARKETING_SCREENSHOT_FRAME,
+  MARKETING_SCREENSHOT_IMAGE_CLASS,
+  MARKETING_SCREENSHOT_IMAGE_QUALITY,
+  MARKETING_SCREENSHOT_IMAGE_SIZES,
 } from "@/lib/marketing-osmo-tokens";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -42,7 +46,7 @@ function StickyImageFrame({
   const active = steps[activeIndex] ?? steps[0];
 
   return (
-    <div className="relative mx-auto aspect-[3/4] w-full max-w-[420px] overflow-hidden rounded-[2.5rem] border border-black/10 bg-[#e8e8e6] shadow-[0_32px_80px_rgba(0,0,0,0.1)] md:rounded-[3rem]">
+    <div className={MARKETING_SCREENSHOT_FRAME}>
       <AnimatePresence mode="sync">
         <motion.div
           key={active.image}
@@ -56,14 +60,12 @@ function StickyImageFrame({
             src={active.image}
             alt={active.imageAlt}
             fill
-            sizes="(max-width: 1024px) 100vw, 420px"
-            className="object-cover"
+            sizes={MARKETING_SCREENSHOT_IMAGE_SIZES}
+            quality={MARKETING_SCREENSHOT_IMAGE_QUALITY}
+            className={MARKETING_SCREENSHOT_IMAGE_CLASS}
           />
         </motion.div>
       </AnimatePresence>
-      <span className="absolute top-4 left-4 z-10 rounded-full bg-black/70 px-2.5 py-1 font-mono text-[9px] tracking-[0.18em] text-white/80 uppercase backdrop-blur-sm">
-        Substituir imagem
-      </span>
     </div>
   );
 }
@@ -194,7 +196,6 @@ export function ComoFuncionaStickyFeatures({
             <MarketingPlaceholderImage
               src={step.image}
               alt={step.imageAlt}
-              className="mx-auto aspect-[3/4] w-full max-w-[420px]"
             />
             <div className="mx-auto max-w-xl">
               <p
@@ -223,7 +224,7 @@ export function ComoFuncionaStickyFeatures({
       </div>
 
       {/* Desktop: sticky image + scroll de texto */}
-      <div className="relative mx-auto hidden max-w-[1200px] px-4 pb-28 lg:grid lg:grid-cols-2 lg:gap-16 lg:px-8">
+      <div className="relative mx-auto hidden max-w-[1360px] px-4 pb-28 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] lg:gap-12 xl:gap-16 lg:px-8">
         <div>
           {steps.map((step, index) => (
             <FeaturePanel

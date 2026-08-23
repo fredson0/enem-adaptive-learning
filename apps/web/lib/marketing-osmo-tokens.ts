@@ -49,3 +49,16 @@ export const MARKETING_OSMO_FEATURE_TITLE =
 
 /** Sticky features — altura de cada painel de scroll */
 export const MARKETING_OSMO_FEATURE_PANEL_HEIGHT = "min-h-[85vh] lg:min-h-screen";
+
+/** Screenshots do produto — proporção real dos exports (~1600×762) */
+export const MARKETING_SCREENSHOT_ASPECT = "aspect-[1600/762]";
+
+export const MARKETING_SCREENSHOT_FRAME =
+  "relative mx-auto aspect-[1600/762] w-full overflow-hidden rounded-2xl border border-black/10 shadow-[0_32px_80px_rgba(0,0,0,0.12)] md:rounded-3xl";
+
+export const MARKETING_SCREENSHOT_IMAGE_CLASS = "object-cover object-top";
+
+export const MARKETING_SCREENSHOT_IMAGE_QUALITY = 92;
+
+export const MARKETING_SCREENSHOT_IMAGE_SIZES =
+  "(max-width: 1024px) 100vw, (max-width: 1536px) 55vw, 720px";

@@ -8,9 +8,12 @@ import {
 } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
-import { LANDING_HERO_VIDEO_URL } from "@/lib/landing-hero-media";
+import {
+  LANDING_HERO_VIDEO_URL,
+  subscribeLandingHeroVideoHandoff,
+} from "@/lib/landing-hero-media";
 import { cn } from "@/lib/utils";
 
 const HERO_REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
@@ -182,24 +185,56 @@ export const WordsPullUpMultiStyle = ({
 const HERO_BLEED = "clamp(4.5rem, 12vh, 9rem)";
 
 function EnemHero({ revealed = true }: { revealed?: boolean }) {
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    return subscribeLandingHeroVideoHandoff((time) => {
+      const video = heroVideoRef.current;
+      if (!video) return;
+
+      const applyTime = () => {
+        try {
+          video.currentTime = time;
+        } catch {
+          /* ignore seek errors during load */
+        }
+      };
+
+      if (video.readyState >= 1) {
+        applyTime();
+      } else {
+        video.addEventListener("loadedmetadata", applyTime, { once: true });
+      }
+    });
+  }, []);
+
   return (
     <section
       className="relative w-full"
       style={{ height: `calc(100svh + ${HERO_BLEED})` }}
     >
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute inset-0 h-full w-full object-cover"
-        src={LANDING_HERO_VIDEO_URL}
+      <div className="absolute inset-x-0 top-0 h-svh overflow-hidden">
+        <video
+          ref={heroVideoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="h-full w-full object-cover"
+          src={LANDING_HERO_VIDEO_URL}
+          aria-hidden
+        />
+
+        <div className="noise-overlay pointer-events-none absolute inset-0 opacity-[0.7] mix-blend-overlay" />
+
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/85" />
+      </div>
+
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-b from-[#0a0a0a] to-black"
+        style={{ height: HERO_BLEED }}
         aria-hidden
       />
-
-      <div className="noise-overlay pointer-events-none absolute inset-0 opacity-[0.7] mix-blend-overlay" />
-
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/85" />
 
       <motion.div
         className={cn(

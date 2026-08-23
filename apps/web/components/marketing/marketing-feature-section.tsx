@@ -105,7 +105,7 @@ export function MarketingFeatureSection({
                   <MarketingPlaceholderImage
                     src={item.imageSrc}
                     alt={item.imageAlt ?? item.title}
-                    className="mt-6 aspect-[16/10] w-full"
+                    className="mt-6"
                   />
                 ) : null}
               </article>

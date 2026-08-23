@@ -30,9 +30,8 @@ type MarketingOsmoHeroShellProps = {
   className?: string;
   titleOffset?: string;
   titleClassName?: string;
-  /** Mockup estilo browser abaixo do hero (Como funciona / Tutor / Trilha). */
-  browserMockup?: boolean;
-  browserMockupPath?: string;
+  /** Vídeo da plataforma abaixo do hero (Tutor / Trilha). */
+  platformVideo?: boolean;
 };
 
 export function MarketingOsmoHeroShell({
@@ -47,8 +46,7 @@ export function MarketingOsmoHeroShell({
   className,
   titleOffset,
   titleClassName,
-  browserMockup = false,
-  browserMockupPath,
+  platformVideo = false,
 }: MarketingOsmoHeroShellProps) {
   const isLight = variant === "light";
   const reduceMotion = useReducedMotion() ?? false;
@@ -194,17 +192,17 @@ export function MarketingOsmoHeroShell({
           </div>
           </div>
         </div>
-
-        {browserMockup && !isLight ? (
-          <>
-            <div
-              className="relative z-10 mx-auto mt-10 h-16 w-px bg-gradient-to-b from-white/20 to-white/5 md:mt-14 md:h-20"
-              aria-hidden
-            />
-            <MarketingOsmoBrowserMockup pathLabel={browserMockupPath} />
-          </>
-        ) : null}
       </div>
+
+      {platformVideo && !isLight ? (
+        <div className="relative z-10 px-4 md:px-8">
+          <div
+            className="mx-auto mt-10 h-16 w-px bg-gradient-to-b from-white/20 to-white/5 md:mt-14 md:h-20"
+            aria-hidden
+          />
+          <MarketingOsmoBrowserMockup />
+        </div>
+      ) : null}
     </section>
   );
 }

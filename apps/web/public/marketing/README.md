@@ -1,7 +1,7 @@
 # Assets de marketing
 
 Coloque screenshots e imagens reais do produto nas pastas abaixo.
-Formatos recomendados: `.webp` ou `.png` (mantenha o nome do arquivo igual ao listado).
+Formatos: `.jpg` ou `.jpeg` (mantenha o nome do arquivo igual ao listado).
 
 ## Estrutura
 
@@ -9,32 +9,29 @@ Formatos recomendados: `.webp` ou `.png` (mantenha o nome do arquivo igual ao li
 marketing/
 ├── shared/                  # Usado em várias páginas
 │   ├── MarketingOsmoPlatformMock.jpeg   # CTA "Pronto para estudar com direção?"
-│   ├── entrance-poster.webp # Poster da animação de entrada (landing)
-│   └── menu-featured.webp   # Card do mega menu (header)
+│   ├── entrance-poster.jpg # Poster da animação de entrada (landing)
+│   └── menu-featured.jpg   # Card do mega menu (header)
 ├── landing/
-│   └── hero-poster.webp     # Hero da home (opcional)
+│   └── hero-poster.jpg     # Hero da home (opcional)
 ├── como-funciona/
-│   ├── hero.webp
-│   ├── diagnostico.webp
-│   ├── simulados.webp
-│   ├── metricas.webp
-│   └── trilha.webp
+│   ├── hero.jpg
+│   ├── diagnostico.jpg     ✓
+│   ├── simulados.jpg       ✓
+│   ├── metricas.jpg        ✓
+│   ├── checklist.jpg       ✓
+│   └── trilha.jpg
 ├── tutor-ia/
-│   ├── hero.webp
-│   ├── tutor-chat.webp
-│   ├── tutor-vision.webp
-│   ├── simulados.webp
-│   └── metricas.webp
+│   ├── hero.jpg
+│   ├── tutor-chat.jpg
+│   ├── tutor-vision.jpg
+│   ├── simulados.jpg
+│   └── metricas.jpg
 ├── trilha-personalizada/
-│   ├── hero.webp
-│   ├── diagnostico.webp
-│   ├── checklist.webp
-│   ├── trilha.webp
-│   └── metricas.webp
+│   └── hero.jpg            # demais reutilizam como-funciona/
 ├── precos/
-│   └── planos-impacto.webp
+│   └── planos-impacto.jpg
 └── escolas-publicas/
-    └── hero.webp
+    └── hero.jpg
 ```
 
 ## Onde cada caminho é usado no código

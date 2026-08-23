@@ -11,6 +11,7 @@ import {
 import {
   LANDING_ENTRANCE_IMAGE_SRC,
   LANDING_HERO_VIDEO_URL,
+  publishLandingHeroVideoHandoff,
 } from "@/lib/landing-hero-media";
 import { cn } from "@/lib/utils";
 import { motion, useReducedMotion } from "framer-motion";
@@ -25,7 +26,13 @@ type LandingEntranceProps = {
   onExpandComplete?: () => void;
 };
 
-function EntranceMedia({ className }: { className?: string }) {
+function EntranceMedia({
+  className,
+  videoRef,
+}: {
+  className?: string;
+  videoRef?: React.RefObject<HTMLVideoElement | null>;
+}) {
   const hasImage = LANDING_ENTRANCE_IMAGE_SRC.length > 0;
 
   if (hasImage) {
@@ -43,6 +50,7 @@ function EntranceMedia({ className }: { className?: string }) {
 
   return (
     <video
+      ref={videoRef}
       src={LANDING_HERO_VIDEO_URL}
       autoPlay
       muted
@@ -103,6 +111,7 @@ export function LandingEntrance({
 }: LandingEntranceProps) {
   const reduceMotion = useReducedMotion();
   const [phase, setPhase] = useState<EntrancePhase>("title");
+  const entranceVideoRef = useRef<HTMLVideoElement>(null);
   const onCompleteRef = useRef(onComplete);
   const onExpandStartRef = useRef(onExpandStart);
   const onExpandCompleteRef = useRef(onExpandComplete);
@@ -150,6 +159,14 @@ export function LandingEntrance({
       window.clearTimeout(t5);
     };
   }, [reduceMotion]);
+
+  useEffect(() => {
+    if (phase !== "exit") return;
+    const time = entranceVideoRef.current?.currentTime;
+    if (typeof time === "number" && Number.isFinite(time)) {
+      publishLandingHeroVideoHandoff(time);
+    }
+  }, [phase]);
 
   const isTitle = phase === "title";
   const isExpand = phase === "expand" || phase === "exit";
@@ -240,7 +257,10 @@ export function LandingEntrance({
               transition={sizeTransition(sizeTransitionSeconds)}
             >
               <div className="relative h-full w-full">
-                <EntranceMedia className="absolute inset-0" />
+                <EntranceMedia
+                  className="absolute inset-0"
+                  videoRef={entranceVideoRef}
+                />
               </div>
             </motion.div>
           </motion.div>

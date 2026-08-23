@@ -1,4 +1,7 @@
-import { MARKETING_IMAGE_PATHS, USE_LOCAL_MARKETING_ASSETS } from "./marketing-images";
+import {
+  MARKETING_IMAGE_PATHS,
+  hasLocalMarketingFile,
+} from "./marketing-images";
 
 /** Vídeo de fundo da hero da landing — também usado na animação de entrada. */
 export const LANDING_HERO_VIDEO_URL =
@@ -11,8 +14,29 @@ export const LANDING_PLATFORM_VIDEO_TYPE = "video/webm";
 
 /**
  * Imagem estática opcional no split da entrada (antes da expansão).
- * Arquivo: `public/marketing/landing/entrance-poster.webp`
+ * Arquivo: `public/marketing/landing/entrance-poster.jpg`
  */
-export const LANDING_ENTRANCE_IMAGE_SRC = USE_LOCAL_MARKETING_ASSETS
+export const LANDING_ENTRANCE_IMAGE_SRC = hasLocalMarketingFile(
+  MARKETING_IMAGE_PATHS.landing.entrancePoster,
+)
   ? MARKETING_IMAGE_PATHS.landing.entrancePoster
   : "";
+
+/** Sincroniza o frame do vídeo entre a intro e a hero (evita “pulo” na transição). */
+let landingHeroVideoHandoffTime: number | null = null;
+const landingHeroVideoHandoffListeners = new Set<(time: number) => void>();
+
+export function publishLandingHeroVideoHandoff(time: number) {
+  landingHeroVideoHandoffTime = time;
+  landingHeroVideoHandoffListeners.forEach((listener) => listener(time));
+}
+
+export function subscribeLandingHeroVideoHandoff(listener: (time: number) => void) {
+  landingHeroVideoHandoffListeners.add(listener);
+  if (landingHeroVideoHandoffTime !== null) {
+    listener(landingHeroVideoHandoffTime);
+  }
+  return () => {
+    landingHeroVideoHandoffListeners.delete(listener);
+  };
+}

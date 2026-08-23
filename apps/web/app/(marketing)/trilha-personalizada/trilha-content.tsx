@@ -82,8 +82,7 @@ export function TrilhaPersonalizadaContent() {
         titleClassName="max-w-[min(100%,26em)] text-[clamp(2.5rem,9vw,6.25rem)] leading-[0.92] tracking-[-0.05em]"
         description="Após o diagnóstico, a plataforma monta uma trilha sequencial por área ENEM — com etapas, orientações e checklist conversacional com IA para adaptar o ritmo ao seu dia a dia."
         accent="prioridade com dados reais"
-        browserMockup
-        browserMockupPath="enemplus.app / trilha"
+        platformVideo
       />
 
       <ComoFuncionaStickyFeatures

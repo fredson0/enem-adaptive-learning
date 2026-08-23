@@ -43,8 +43,8 @@ const STICKY_STEPS: StickyFeatureStep[] = [
     title: "Plano com direção",
     description:
       "Receba etapas sequenciais por área e converse com o tutor para montar checklists, tirar dúvidas e entender erros com contexto real.",
-    image: MARKETING_IMAGES.trilha,
-    imageAlt: "Trilha personalizada e tutor IA",
+    image: MARKETING_IMAGES.checklist,
+    imageAlt: "Checklist de estudos e trilha com tutor IA",
   },
 ];
 
