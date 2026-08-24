@@ -35,7 +35,7 @@ const TUTOR_STEPS: StickyFeatureStep[] = [
     title: "Explicar erro e dicas",
     description:
       "Após um simulado, peça para explicar por que errou. Durante o simulado, receba dicas sem revelar a resposta — como um professor paciente ao seu lado.",
-    image: MARKETING_IMAGES.simulados,
+    image: MARKETING_IMAGES.tutorErros,
     imageAlt: "Explicação de erros pós-simulado",
   },
   {
@@ -44,7 +44,7 @@ const TUTOR_STEPS: StickyFeatureStep[] = [
     title: "Tokens com limite justo",
     description:
       "Plano gratuito com cota diária de tokens; plano Apoio amplia o uso. Rate limiting em tempo real garante que a plataforma continue acessível para todos.",
-    image: MARKETING_IMAGES.metricas,
+    image: MARKETING_IMAGES.tutorTokens,
     imageAlt: "Controle de uso de tokens de IA",
   },
 ];

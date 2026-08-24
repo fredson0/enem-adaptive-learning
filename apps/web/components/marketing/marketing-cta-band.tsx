@@ -1,6 +1,6 @@
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
 import { MarketingOsmoPlatformMock } from "@/components/marketing/marketing-osmo-platform-mock";
-import { MARKETING_IMAGE_PATHS } from "@/lib/marketing-images";
+import { MARKETING_IMAGES } from "@/lib/marketing-images";
 import { MARKETING_OSMO_COLORS } from "@/lib/marketing-osmo-tokens";
 import { cn } from "@/lib/utils";
 import { Caveat } from "next/font/google";
@@ -12,11 +12,8 @@ const caveat = Caveat({
   weight: ["500", "600"],
 });
 
-/**
- * Screenshot do CTA — `public/marketing/shared/MarketingOsmoPlatformMock.jpeg`
- */
-export const MARKETING_CTA_PLATFORM_IMAGE_SRC =
-  MARKETING_IMAGE_PATHS.shared.ctaPlatform;
+/** Imagem padrão do CTA — `shared/HOMEIA.png`. */
+export const MARKETING_CTA_PLATFORM_IMAGE_SRC = MARKETING_IMAGES.ctaBand;
 
 type MarketingCtaBandProps = {
   title: string;
@@ -103,14 +100,12 @@ export function MarketingCtaBand({
                     <div className="relative h-full min-h-[320px] overflow-hidden rounded-tl-2xl rounded-tr-xl border border-white/10 border-r-0 border-b-0 bg-[#0d0d0d]">
                       <Image
                         src={resolvedImageSrc}
-                        alt="Captura da plataforma ENEM+"
+                        alt="Interface do Tutor IA na plataforma ENEM+"
                         fill
                         sizes="(max-width: 1024px) 100vw, 70vw"
+                        quality={92}
                         className="object-cover object-left-top"
                       />
-                      <span className="absolute top-3 left-3 rounded-full bg-black/70 px-2.5 py-1 font-mono text-[9px] tracking-[0.18em] text-white/80 uppercase backdrop-blur-sm">
-                        Screenshot
-                      </span>
                     </div>
                   ) : (
                     <MarketingOsmoPlatformMock

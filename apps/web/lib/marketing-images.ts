@@ -5,6 +5,7 @@
 export const MARKETING_IMAGE_PATHS = {
   shared: {
     ctaPlatform: "/marketing/shared/MarketingOsmoPlatformMock.jpeg",
+    ctaHome: "/marketing/shared/HOMEIA.png",
     menuFeatured: "/marketing/shared/menu-featured.jpg",
   },
   landing: {
@@ -20,18 +21,18 @@ export const MARKETING_IMAGE_PATHS = {
     trilha: "/marketing/como-funciona/trilha.jpg",
   },
   tutorIa: {
-    hero: "/marketing/tutor-ia/hero.jpg",
-    tutorChat: "/marketing/tutor-ia/tutor-chat.jpg",
-    tutorVision: "/marketing/tutor-ia/tutor-vision.jpg",
-    simulados: "/marketing/tutor-ia/simulados.jpg",
-    metricas: "/marketing/tutor-ia/metricas.jpg",
+    hero: "/marketing/tutor-ia/hero.webp",
+    tutorChat: "/marketing/tutor-ia/tutorIA1.webp",
+    tutorVision: "/marketing/tutor-ia/tutorIA2.webp",
+    tutorErros: "/marketing/tutor-ia/tutorIA3.webp",
+    tutorTokens: "/marketing/tutor-ia/tutorIA4.webp",
   },
   trilhaPersonalizada: {
     hero: "/marketing/trilha-personalizada/hero.jpg",
     diagnostico: "/marketing/como-funciona/diagnostico.jpg",
     checklist: "/marketing/como-funciona/checklist.jpg",
-    trilha: "/marketing/como-funciona/trilha.jpg",
-    metricas: "/marketing/como-funciona/metricas.jpg",
+    trilhaAreas: "/marketing/trilha-personalizada/trilhaIA3.png",
+    trilhaEtapas: "/marketing/trilha-personalizada/trilhaIA4.png",
   },
   precos: {
     planosImpacto: "/marketing/precos/planos-impacto.jpg",
@@ -44,10 +45,17 @@ export const MARKETING_IMAGE_PATHS = {
 /** Arquivos que já existem em `public/marketing/`. */
 const LOCAL_MARKETING_FILES = new Set([
   MARKETING_IMAGE_PATHS.shared.ctaPlatform,
+  MARKETING_IMAGE_PATHS.shared.ctaHome,
   MARKETING_IMAGE_PATHS.comoFunciona.diagnostico,
   MARKETING_IMAGE_PATHS.comoFunciona.simulados,
   MARKETING_IMAGE_PATHS.comoFunciona.metricas,
   MARKETING_IMAGE_PATHS.comoFunciona.checklist,
+  MARKETING_IMAGE_PATHS.tutorIa.tutorChat,
+  MARKETING_IMAGE_PATHS.tutorIa.tutorVision,
+  MARKETING_IMAGE_PATHS.tutorIa.tutorErros,
+  MARKETING_IMAGE_PATHS.tutorIa.tutorTokens,
+  MARKETING_IMAGE_PATHS.trilhaPersonalizada.trilhaAreas,
+  MARKETING_IMAGE_PATHS.trilhaPersonalizada.trilhaEtapas,
 ]);
 
 /**
@@ -67,6 +75,10 @@ function resolveMarketingImage(localPath: string, fallback: string) {
 }
 
 export const MARKETING_IMAGES = {
+  ctaBand: resolveMarketingImage(
+    MARKETING_IMAGE_PATHS.shared.ctaHome,
+    MARKETING_IMAGE_PATHS.tutorIa.tutorChat,
+  ),
   comoFuncionaHero: resolveMarketingImage(
     MARKETING_IMAGE_PATHS.comoFunciona.hero,
     U("photo-1523240795612-9a054b0db644", 1400),
@@ -102,6 +114,14 @@ export const MARKETING_IMAGES = {
     MARKETING_IMAGE_PATHS.tutorIa.tutorVision,
     U("photo-1588196749597-9ff075575d3e"),
   ),
+  tutorErros: resolveMarketingImage(
+    MARKETING_IMAGE_PATHS.tutorIa.tutorErros,
+    U("photo-1456513088650-9bda98d25708"),
+  ),
+  tutorTokens: resolveMarketingImage(
+    MARKETING_IMAGE_PATHS.tutorIa.tutorTokens,
+    U("photo-1551288049-bebda4e38f71"),
+  ),
   trilhaHero: resolveMarketingImage(
     MARKETING_IMAGE_PATHS.trilhaPersonalizada.hero,
     U("photo-1524178232363-1fb2b075b655", 1400),
@@ -109,6 +129,14 @@ export const MARKETING_IMAGES = {
   checklist: resolveMarketingImage(
     MARKETING_IMAGE_PATHS.comoFunciona.checklist,
     U("photo-1488190211105-8b0e65b80b4e"),
+  ),
+  trilhaAreas: resolveMarketingImage(
+    MARKETING_IMAGE_PATHS.trilhaPersonalizada.trilhaAreas,
+    U("photo-1503676260728-1c00da094a0b"),
+  ),
+  trilhaEtapas: resolveMarketingImage(
+    MARKETING_IMAGE_PATHS.trilhaPersonalizada.trilhaEtapas,
+    U("photo-1551288049-bebda4e38f71"),
   ),
   escolasPublicas: resolveMarketingImage(
     MARKETING_IMAGE_PATHS.escolasPublicas.hero,

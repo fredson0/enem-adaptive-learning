@@ -35,7 +35,7 @@ const TRILHA_STEPS: StickyFeatureStep[] = [
     title: "Quatro áreas, um plano",
     description:
       "Linguagens, Matemática, Humanas e Natureza — cada uma com etapas sequenciais, simulados sugeridos e marcos de progresso visíveis.",
-    image: MARKETING_IMAGES.trilha,
+    image: MARKETING_IMAGES.trilhaAreas,
     imageAlt: "Trilha por área do ENEM",
   },
   {
@@ -44,7 +44,7 @@ const TRILHA_STEPS: StickyFeatureStep[] = [
     title: "Do macro ao detalhe",
     description:
       "Treino, modalidade, revisão, tutor e simulado cronometrado. Você sempre sabe o próximo passo e pode refinar o plano com a IA a qualquer momento.",
-    image: MARKETING_IMAGES.metricas,
+    image: MARKETING_IMAGES.trilhaEtapas,
     imageAlt: "Etapas sequenciais da trilha",
   },
 ];
