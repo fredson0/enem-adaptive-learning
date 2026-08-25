@@ -54,6 +54,7 @@ export function SiteFooter() {
         ease: "none",
         scrollTrigger: {
           trigger: section,
+          scroller: document.documentElement,
           start: "top bottom",
           end: "bottom bottom",
           scrub: true,

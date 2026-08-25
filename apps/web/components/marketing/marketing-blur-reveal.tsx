@@ -1,9 +1,8 @@
 "use client";
 
+import { REVEAL_MOTION } from "@/lib/scroll-lenis-config";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useRef, type ReactNode } from "react";
-
-const REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
 
 export function MarketingBlurReveal({
   children,
@@ -22,17 +21,19 @@ export function MarketingBlurReveal({
   return (
     <motion.div
       ref={ref}
-      initial={
-        reduceMotion ? false : { y: 48, opacity: 0, filter: "blur(14px)" }
-      }
+      initial={reduceMotion ? false : { y: REVEAL_MOTION.y, opacity: 0 }}
       animate={
         animate
-          ? { y: 0, opacity: 1, filter: "blur(0px)" }
+          ? { y: 0, opacity: 1 }
           : reduceMotion
             ? undefined
             : {}
       }
-      transition={{ duration: 0.9, delay, ease: REVEAL_EASE }}
+      transition={{
+        duration: REVEAL_MOTION.duration,
+        delay,
+        ease: REVEAL_MOTION.ease,
+      }}
       className={className}
     >
       {children}

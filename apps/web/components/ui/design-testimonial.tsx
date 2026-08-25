@@ -1,6 +1,6 @@
 "use client";
 
-import { MARKETING_OSMO_COLORS } from "@/lib/marketing-osmo-tokens";
+import { MARKETING_OSMO_COLORS, MARKETING_OSMO_SECTION_TITLE } from "@/lib/marketing-osmo-tokens";
 import { cn } from "@/lib/utils";
 import { MOCK_TESTIMONIALS } from "@/lib/testimonials";
 import {
@@ -114,12 +114,20 @@ export function DesignTestimonial({
           animate={animate ? { opacity: 1, y: 0 } : reduceMotion ? undefined : {}}
           transition={{ duration: 0.7, ease: REVEAL_EASE }}
         >
-          <p className="font-mono text-xs tracking-[0.2em] text-[#0b1220]/40 uppercase">
+          <h2
+            className={cn(
+              "font-display text-[#0b1220]",
+              MARKETING_OSMO_SECTION_TITLE,
+            )}
+          >
             {eyebrow}
-          </p>
-          <h2 className="font-display mt-4 text-[clamp(1.75rem,4vw,3.25rem)] leading-[1.05] font-semibold tracking-[-0.04em] text-[#0b1220]">
-            {title}
           </h2>
+          <p
+            className="mx-auto mt-5 max-w-2xl text-base leading-relaxed md:text-lg"
+            style={{ color: MARKETING_OSMO_COLORS.textMutedDark }}
+          >
+            {title}
+          </p>
         </motion.div>
 
         <div

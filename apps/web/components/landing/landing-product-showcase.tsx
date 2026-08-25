@@ -1,13 +1,14 @@
 "use client";
 
 import { LandingArcCarousel } from "@/components/landing/landing-arc-carousel";
+import { REVEAL_MOTION } from "@/lib/scroll-lenis-config";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useRef, type ReactNode } from "react";
 
-const REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
-const REVEAL_DURATION = 1;
+const REVEAL_EASE = REVEAL_MOTION.ease;
+const REVEAL_DURATION = REVEAL_MOTION.duration;
 const IN_VIEW_MARGIN = "0px 0px -12% 0px";
 
 function BlurRevealInView({
@@ -27,12 +28,10 @@ function BlurRevealInView({
   return (
     <motion.div
       ref={ref}
-      initial={
-        reduceMotion ? false : { y: 48, opacity: 0, filter: "blur(14px)" }
-      }
+      initial={reduceMotion ? false : { y: REVEAL_MOTION.y, opacity: 0 }}
       animate={
         animate
-          ? { y: 0, opacity: 1, filter: "blur(0px)" }
+          ? { y: 0, opacity: 1 }
           : reduceMotion
             ? undefined
             : {}
@@ -59,12 +58,10 @@ function ProductShowcaseHeading() {
   return (
     <motion.h2
       ref={ref}
-      initial={
-        reduceMotion ? false : { y: 56, opacity: 0, filter: "blur(14px)" }
-      }
+      initial={reduceMotion ? false : { y: REVEAL_MOTION.y + 16, opacity: 0 }}
       animate={
         animate
-          ? { y: 0, opacity: 1, filter: "blur(0px)" }
+          ? { y: 0, opacity: 1 }
           : reduceMotion
             ? undefined
             : {}
