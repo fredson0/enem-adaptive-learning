@@ -86,6 +86,7 @@ model Usuario {
   refreshTokens   RefreshToken[]
   simulados       Simulado[]
   conversasTutor  ConversaTutor[]
+  depoimento      Depoimento?
 
   @@index([role])
   @@map("usuarios")
@@ -302,4 +303,20 @@ model MensagemTutor {
   @@unique([conversaId, ordem])
   @@index([conversaId])
   @@map("mensagens_tutor")
+}
+
+/// Depoimento público de um aluno (substitui mocks na landing conforme forem enviados).
+model Depoimento {
+  id           String   @id @default(uuid()) @db.Uuid
+  usuarioId    String   @unique @map("usuario_id") @db.Uuid
+  texto        String   @db.VarChar(600)
+  papel        String?  @db.VarChar(120)
+  aprovado     Boolean  @default(true) @map("aprovado")
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([aprovado, criadoEm])
+  @@map("depoimentos")
 }

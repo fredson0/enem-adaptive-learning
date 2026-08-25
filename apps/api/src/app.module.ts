@@ -8,6 +8,7 @@ import { PrismaModule } from './infrastructure/database/prisma.module';
 import { MetricasModule } from './modules/metricas/metricas.module';
 import { QuestoesModule } from './modules/questoes/questoes.module';
 import { SimuladosModule } from './modules/simulados/simulados.module';
+import { DepoimentosModule } from './modules/depoimentos/depoimentos.module';
 import { IaTutorModule } from './modules/ia-tutor/ia-tutor.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 
@@ -33,6 +34,7 @@ import { UsuariosModule } from './modules/usuarios/usuarios.module';
     SimuladosModule,
     IaTutorModule,
     MetricasModule,
+    DepoimentosModule,
   ],
   controllers: [AppController],
   providers: [
