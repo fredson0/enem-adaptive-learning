@@ -23,6 +23,7 @@
 | Tipo | Cadeia de fallback (`IaEngineRouter`) |
 |------|----------------------------------------|
 | **Só texto** | `IA_PROVIDER` (NVIDIA) → Gemini |
+| **Texto exatas** (Matemática/Natureza) | Groq 70B* → NVIDIA exatas → Gemini exatas |
 | **Com foto** | NVIDIA Vision → Groq Vision* → Gemini Vision |
 
 \*Groq entra na cadeia se `GROQ_API_KEY` estiver configurada.
@@ -32,15 +33,19 @@
 ```env
 IA_PROVIDER=nvidia
 NVIDIA_MODEL=meta/llama-3.1-8b-instruct
+NVIDIA_MODEL_EXATAS=meta/llama-3.3-70b-instruct
 NVIDIA_VISION_MODEL=meta/llama-3.2-11b-vision-instruct
 
-# Opcional — fallback vision
+# Opcional — exatas via Groq (prioridade no router para Matemática/Natureza)
 GROQ_API_KEY=sua_chave
+GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_MODEL_EXATAS=llama-3.3-70b-versatile
 GROQ_VISION_MODEL=llama-3.2-11b-vision-preview
 
 # Fallback final
 GEMINI_API_KEY=sua_chave
 GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL_EXATAS=gemini-2.5-flash
 ```
 
 ## O que o tutor precisa fazer (requisitos)

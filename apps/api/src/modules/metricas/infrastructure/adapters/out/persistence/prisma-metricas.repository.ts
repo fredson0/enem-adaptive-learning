@@ -14,6 +14,7 @@ import {
   type TrilhaEstado,
 } from '../../../../core/application/helpers/trilha.config';
 import { AREAS_ENEM } from '../../../../core/application/helpers/area-enem-labels';
+import { agregarCoberturaPorArea } from '../../../../core/application/helpers/cobertura-questoes.helper';
 
 @Injectable()
 export class PrismaMetricasRepository implements MetricasRepositoryPort {
@@ -23,6 +24,7 @@ export class PrismaMetricasRepository implements MetricasRepositoryPort {
     id: true,
     area: true,
     ano: true,
+    assuntoId: true,
     disciplina: true,
     contexto: true,
     introducaoAlternativas: true,
@@ -93,20 +95,7 @@ export class PrismaMetricasRepository implements MetricasRepositoryPort {
 
   async agregarPorArea(userId: string): Promise<EstatisticaAreaBruta[]> {
     const cobertura = await this.obterCoberturaBruta(userId);
-
-    const dominadasPorArea = new Map<AreaEnem, number>();
-    for (const questao of cobertura.dominadas) {
-      dominadasPorArea.set(
-        questao.area,
-        (dominadasPorArea.get(questao.area) ?? 0) + 1,
-      );
-    }
-
-    return AREAS_ENEM.map((area) => ({
-      area,
-      totalQuestoes: cobertura.disponiveisPorArea[area] ?? 0,
-      acertos: dominadasPorArea.get(area) ?? 0,
-    }));
+    return agregarCoberturaPorArea(cobertura);
   }
 
   async upsertProficiencia(

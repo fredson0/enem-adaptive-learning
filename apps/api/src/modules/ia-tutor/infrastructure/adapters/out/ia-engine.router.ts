@@ -4,6 +4,10 @@ import type {
   EnviarMensagemIaInput,
   IaEnginePort,
 } from '../../../core/application/ports/ia-engine.port';
+import {
+  enriquecerInputModelTier,
+  resolverModelTier,
+} from '../../../core/application/helpers/ia-model-tier.helper';
 import { GeminiIaAdapter } from './gemini/gemini-ia.adapter';
 import { GroqIaAdapter } from './groq/groq-ia.adapter';
 import { NvidiaIaAdapter } from './nvidia/nvidia-ia.adapter';
@@ -41,6 +45,14 @@ export class IaEngineRouter implements IaEnginePort {
     return (this.config.get<string>('IA_PROVIDER') ?? 'nvidia').toLowerCase();
   }
 
+  private hasGroqExatas(): boolean {
+    return Boolean(
+      this.config.get<string>('GROQ_API_KEY') &&
+        (this.config.get<string>('GROQ_MODEL_EXATAS') ||
+          this.config.get<string>('GROQ_MODEL')),
+    );
+  }
+
   private getVisionChain(): IaEnginePort[] {
     const chain: IaEnginePort[] = [this.nvidia];
 
@@ -52,6 +64,21 @@ export class IaEngineRouter implements IaEnginePort {
     }
 
     return chain;
+  }
+
+  /** Texto em Matemática/Natureza: prioriza Groq 70B quando configurado. */
+  private getTextChain(input: EnviarMensagemIaInput): IaEnginePort[] {
+    const exatas = resolverModelTier(input) === 'exatas';
+
+    if (exatas && this.hasGroqExatas()) {
+      return [this.groq, this.nvidia, this.gemini];
+    }
+
+    if (this.getProvider() === 'nvidia') {
+      return [this.nvidia];
+    }
+
+    return [this.gemini, this.nvidia];
   }
 
   private async runWithFallback(
@@ -81,14 +108,20 @@ export class IaEngineRouter implements IaEnginePort {
   }
 
   async enviarMensagem(input: EnviarMensagemIaInput): Promise<string> {
-    if (this.getProvider() === 'nvidia') {
-      return this.nvidia.enviarMensagem(input);
+    const enriched = enriquecerInputModelTier(input);
+
+    if (enriched.imagem) {
+      if (this.getProvider() === 'nvidia') {
+        return this.nvidia.enviarMensagem(enriched);
+      }
+      return this.runWithFallback(this.getVisionChain(), enriched);
     }
 
-    if (input.imagem) {
-      return this.runWithFallback(this.getVisionChain(), input);
+    const chain = this.getTextChain(enriched);
+    if (chain.length === 1) {
+      return chain[0]!.enviarMensagem(enriched);
     }
 
-    return this.runWithFallback([this.gemini, this.nvidia], input);
+    return this.runWithFallback(chain, enriched);
   }
 }

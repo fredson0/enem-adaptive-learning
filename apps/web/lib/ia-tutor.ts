@@ -33,6 +33,12 @@ export type EnviarMensagemTutorResponse = {
     etapasConcluidas: string[];
     checklistIa: import("@/lib/trilha").ChecklistItemIa[];
   };
+  simuladoGerado?: {
+    id: string;
+    href: string;
+    totalQuestoes: number;
+  };
+  foraEscopo?: boolean;
 };
 
 export type ConversaResumo = {

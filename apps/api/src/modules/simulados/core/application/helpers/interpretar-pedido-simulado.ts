@@ -1,6 +1,7 @@
 import { AreaEnem } from '@generated/prisma';
 import { parseAreaEnem } from '../../../../questoes/core/application/helpers/area-enem';
 import { montarTermosBuscaSimulado } from '../../../../questoes/core/application/helpers/termos-simulado.helper';
+import { parseJsonIa } from '../../../../ia-tutor/core/application/helpers/ia-json.helper';
 
 export type PedidoSimuladoInterpretado = {
   area: AreaEnem | null;
@@ -11,63 +12,8 @@ export type PedidoSimuladoInterpretado = {
   resumo: string;
 };
 
-function corrigirJsonIa(json: string): string {
-  let fixed = json
-    .replace(/```json\s*/gi, '')
-    .replace(/```/g, '')
-    .trim();
-
-  fixed = fixed.replace(/,\s*([}\]])/g, '$1');
-  fixed = fixed.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
-
-  const valoresString = ['matematica', 'linguagens', 'humanas', 'natureza'];
-  for (const valor of valoresString) {
-    fixed = fixed.replace(
-      new RegExp(`:\\s*${valor}\\s*([,}])`, 'gi'),
-      `: "${valor}"$1`,
-    );
-  }
-
-  fixed = fixed.replace(
-    /:\s*([a-zA-ZÀ-ÿ][a-zA-ZÀ-ÿ0-9_\s-]*?)\s*([,}\]])/g,
-    (full, value, end) => {
-      const trimmed = String(value).trim();
-      if (['null', 'true', 'false'].includes(trimmed)) {
-        return `: ${trimmed}${end}`;
-      }
-      if (/^\d+(\.\d+)?$/.test(trimmed)) {
-        return `: ${trimmed}${end}`;
-      }
-      if (trimmed.startsWith('"') || trimmed.startsWith('[')) {
-        return full;
-      }
-      return `: "${trimmed.replace(/"/g, '\\"')}"${end}`;
-    },
-  );
-
-  return fixed;
-}
-
 function tentarExtrairJsonSimulado(texto: string): Record<string, unknown> | null {
-  const cleaned = texto
-    .replace(/```json\s*/gi, '')
-    .replace(/```/g, '')
-    .trim();
-
-  const match = cleaned.match(/\{[\s\S]*\}/);
-  if (!match) return null;
-
-  const candidatos = [match[0], corrigirJsonIa(match[0])];
-
-  for (const candidato of candidatos) {
-    try {
-      return JSON.parse(candidato) as Record<string, unknown>;
-    } catch {
-      // tenta próximo candidato
-    }
-  }
-
-  return null;
+  return parseJsonIa<Record<string, unknown>>(texto);
 }
 
 function inferirAreaDoPedido(pedido: string): AreaEnem | null {

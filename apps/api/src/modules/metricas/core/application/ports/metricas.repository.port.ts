@@ -35,6 +35,7 @@ export type QuestaoDominioBruto = {
   id: string;
   area: AreaEnem;
   ano: number;
+  assuntoId?: string | null;
   disciplina: string;
   contexto: string;
   introducaoAlternativas: string | null;

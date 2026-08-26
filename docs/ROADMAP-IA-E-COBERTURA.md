@@ -20,21 +20,22 @@
 
 ## B. Tutor IA — inteligência por tipo de pergunta
 
-- [ ] **B1** Prompts por área ENEM (Matemática, Linguagens, Humanas, Natureza)
-- [ ] **B2** Passar contexto completo na **dica** (nível, área, disciplina)
-- [ ] **B3** **Explicar erro** com disciplina + link à trilha/lacuna
-- [ ] **B4** Classificador de intenção no chat (regex → endpoint certo)
-- [ ] **B5** Bridge chat → `POST /simulados/gerar-com-ia`
-- [ ] **B6** `GET /metricas/frequencia-temas` + injeção no chat (“o que mais cai?”)
-- [ ] **B7** JSON estruturado (trilha, PDF, simulado IA) — sem regex frágil
-- [ ] **B8** Prompt dedicado para **vision** (foto de questão)
-- [ ] **B9** Modelo maior só para exatas (Matemática/Natureza) no router
-- [ ] **B10** RAG suporte produto (como funciona simulado, trilha, etc.)
+- [x] **B1** Prompts por área ENEM (Matemática, Linguagens, Humanas, Natureza)
+- [x] **B2** Passar contexto completo na **dica** (nível, área, disciplina)
+- [x] **B3** **Explicar erro** com disciplina + link à trilha/lacuna
+- [x] **B4** Classificador de intenção no chat (regex → endpoint certo)
+- [x] **B5** Bridge chat → `POST /simulados/gerar-com-ia`
+- [x] **B6** `GET /metricas/frequencia-temas` + injeção no chat (“o que mais cai?”)
+- [x] **B7** JSON estruturado (trilha, PDF, simulado IA) — sem regex frágil
+- [x] **B8** Prompt dedicado para **vision** (foto de questão)
+- [x] **B9** Modelo maior só para exatas (Matemática/Natureza) no router
+- [x] **B10** RAG suporte produto (como funciona simulado, trilha, etc.)
+- [x] **B11** Guardrail de escopo — só ENEM; recusa programação e off-topic (sem gastar token)
 
 ---
 
 ## C. Qualidade e dados
 
-- [ ] **C1** Campo `assuntoId` nas questões (opcional, melhora matching)
-- [ ] **C2** Atualizar docs `TUTOR-IA-PERGUNTAS-E-ENDPOINTS.md`
-- [ ] **C3** Testes unitários cobertura + agregarPorArea
+- [x] **C1** Campo `assuntoId` nas questões (opcional, melhora matching)
+- [x] **C2** Atualizar docs `TUTOR-IA-PERGUNTAS-E-ENDPOINTS.md`
+- [x] **C3** Testes unitários cobertura + agregarPorArea

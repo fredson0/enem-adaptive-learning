@@ -21,6 +21,7 @@ import { IA_ENGINE } from '../ports/ia-engine.port';
 import type { IaEnginePort } from '../ports/ia-engine.port';
 import { UsoTokensIaService } from '../../../infrastructure/adapters/out/persistence/uso-tokens-ia.service';
 import { extrairJsonPlanoIa } from '../helpers/trilha-tutor.helper';
+import { parseAreaEnem } from '../../../../questoes/core/application/helpers/area-enem';
 @Injectable()
 export class PersonalizarTrilhaUseCase {
   constructor(
@@ -78,6 +79,8 @@ Regras:
     const respostaBruta = await this.iaEngine.enviarMensagem({
       texto: prompt,
       nivelAluno: perfil?.nivelAtual ?? 'INICIANTE',
+      responseFormat: 'json_object',
+      areaEnem: parseAreaEnem(foco.slug) ?? undefined,
     });
 
     const plano = extrairJsonPlanoIa(respostaBruta);

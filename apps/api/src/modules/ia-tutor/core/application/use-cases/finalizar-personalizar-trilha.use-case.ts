@@ -26,6 +26,7 @@ import {
   extrairJsonPlanoIa,
   formatarHistoricoParaExtracao,
 } from '../helpers/trilha-tutor.helper';
+import { parseAreaEnem } from '../../../../questoes/core/application/helpers/area-enem';
 
 export type FinalizarPersonalizarTrilhaInput = {
   userId: string;
@@ -74,7 +75,7 @@ export class FinalizarPersonalizarTrilhaUseCase {
     const assuntoNome =
       input.assuntoNome?.trim() || assuntoCatalogo?.nome || undefined;
 
-    const prompt = `Com base na conversa abaixo, monte o plano de estudos personalizado do aluno${assuntoNome ? ` em **${assuntoNome}**` : ` em ${area.label}`}.
+    const prompt = `Com base na conversa abaixo, monte o plano de estudos personalizado do aluno${assuntoNome ? ` em ${assuntoNome}` : ` em ${area.label}`}.
 
 Conversa:
 ${conversa}
@@ -96,6 +97,8 @@ Regras:
     const respostaBruta = await this.iaEngine.enviarMensagem({
       texto: prompt,
       nivelAluno: perfil?.nivelAtual ?? 'INICIANTE',
+      responseFormat: 'json_object',
+      areaEnem: parseAreaEnem(area.slug) ?? undefined,
     });
 
     const plano = extrairJsonPlanoIa(respostaBruta);

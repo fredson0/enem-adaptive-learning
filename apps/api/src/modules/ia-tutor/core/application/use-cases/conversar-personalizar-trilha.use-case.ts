@@ -11,6 +11,11 @@ import { IA_ENGINE } from '../ports/ia-engine.port';
 import type { IaEnginePort, MensagemHistorico } from '../ports/ia-engine.port';
 import { UsoTokensIaService } from '../../../infrastructure/adapters/out/persistence/uso-tokens-ia.service';
 import { buildPersonalizarTrilhaSystemPrompt } from '../helpers/trilha-tutor.helper';
+import {
+  avaliarEscopoMensagem,
+  respostaForaEscopo,
+} from '../helpers/tutor-escopo.helper';
+import { sanitizarRespostaTutor } from '../helpers/tutor-formato.helper';
 import { getAssuntoById } from '../../../../metricas/core/application/helpers/trilha-assuntos.catalog';
 
 export type ConversarPersonalizarTrilhaInput = {
@@ -58,6 +63,19 @@ export class ConversarPersonalizarTrilhaUseCase {
       throw new BadRequestException('Mensagem obrigatória.');
     }
 
+    if (input.mensagem?.trim()) {
+      const escopo = avaliarEscopoMensagem(input.mensagem);
+      if (escopo.escopo === 'fora_escopo') {
+        const tokens = await this.usoTokens.obterSaldo(input.userId);
+        return {
+          resposta: respostaForaEscopo(escopo.motivo),
+          areaSlug: area.slug,
+          podeFinalizar: false,
+          tokens,
+        };
+      }
+    }
+
     const perfil = await this.usuariosRepository.obterPerfilAluno(input.userId);
     await this.usoTokens.consumir(input.userId, 1);
 
@@ -84,12 +102,14 @@ export class ConversarPersonalizarTrilhaUseCase {
         : 'Olá! Quero montar minha checklist personalizada para esta área.'
       : input.mensagem!.trim();
 
-    const resposta = await this.iaEngine.enviarMensagem({
-      texto: textoUsuario,
-      historico,
-      nivelAluno: perfil?.nivelAtual ?? 'INICIANTE',
-      systemPromptOverride: systemPrompt,
-    });
+    const resposta = sanitizarRespostaTutor(
+      await this.iaEngine.enviarMensagem({
+        texto: textoUsuario,
+        historico,
+        nivelAluno: perfil?.nivelAtual ?? 'INICIANTE',
+        systemPromptOverride: systemPrompt,
+      }),
+    );
 
     const respostasUsuario =
       historico.filter((m) => m.role === 'user').length + (iniciar ? 0 : 1);

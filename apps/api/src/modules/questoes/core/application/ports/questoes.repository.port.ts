@@ -16,6 +16,12 @@ export type BuscarQuestoesResultado = {
   offset: number;
 };
 
+export type FrequenciaDisciplina = {
+  disciplina: string;
+  area: import('@generated/prisma').AreaEnem;
+  total: number;
+};
+
 export interface QuestoesRepositoryPort {
   buscarComFiltro(filtro: BuscarQuestoesFiltro): Promise<BuscarQuestoesResultado>;
   buscarAleatorias(
@@ -27,4 +33,8 @@ export interface QuestoesRepositoryPort {
   buscarPorId(id: string): Promise<Questao | null>;
   buscarPorIds(ids: string[]): Promise<Questao[]>;
   contar(filtro?: FiltroQuestoes): Promise<number>;
+  obterFrequenciaDisciplinas(filtro?: {
+    area?: import('@generated/prisma').AreaEnem;
+    limit?: number;
+  }): Promise<FrequenciaDisciplina[]>;
 }

@@ -12,6 +12,7 @@ import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { AreaEnem, PrismaClient } from '../generated/prisma/client';
 import { Pool } from 'pg';
+import { inferirAssuntoIdParaQuestao } from '../src/modules/metricas/core/application/helpers/cobertura-questoes.helper';
 
 const API_BASE = 'https://api.enem.dev/v1';
 const PAGE_LIMIT = 50;
@@ -162,10 +163,23 @@ async function main() {
         try {
           const existente = await prisma.questao.findUnique({
             where: { enemDevId },
-            select: { id: true },
+            select: { id: true, assuntoId: true },
+          });
+
+          const assuntoId = inferirAssuntoIdParaQuestao({
+            area,
+            disciplina: discipline,
+            contexto: q.context ?? '',
+            introducaoAlternativas: q.alternativesIntroduction ?? null,
           });
 
           if (existente) {
+            if (!existente.assuntoId && assuntoId) {
+              await prisma.questao.update({
+                where: { id: existente.id },
+                data: { assuntoId },
+              });
+            }
             jaExistiam++;
             continue;
           }
@@ -175,6 +189,7 @@ async function main() {
               enemDevId,
               ano: year,
               area,
+              assuntoId,
               indice: q.index,
               disciplina: discipline,
               contexto: q.context ?? '',

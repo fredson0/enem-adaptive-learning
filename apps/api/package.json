@@ -23,6 +23,7 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx prisma/seed-enem.ts",
+    "prisma:backfill-assunto": "tsx prisma/backfill-assunto-id.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -86,6 +87,10 @@
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^@generated/prisma$": "<rootDir>/../generated/prisma/client",
+      "^@generated/prisma/(.*)$": "<rootDir>/../generated/prisma/$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

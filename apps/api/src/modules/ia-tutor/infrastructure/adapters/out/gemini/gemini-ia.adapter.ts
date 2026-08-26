@@ -10,6 +10,10 @@ import type {
   IaEnginePort,
 } from '../../../../core/application/ports/ia-engine.port';
 import { buildTutorSystemPrompt } from '../../../../core/application/helpers/tutor-prompts';
+import {
+  montarCandidatosModelo,
+  resolverModelTier,
+} from '../../../../core/application/helpers/ia-model-tier.helper';
 
 /** Modelos estáveis no Google AI Studio (ver docs/ESCOLHA-MODELO-IA.md). */
 const MODEL_FALLBACKS = [
@@ -42,16 +46,15 @@ export class GeminiIaAdapter implements IaEnginePort {
     return this.client;
   }
 
-  private getModelCandidates(): string[] {
-    const configured = this.config.get<string>('GEMINI_MODEL');
-    if (!configured) {
-      return [...MODEL_FALLBACKS];
-    }
+  private getModelCandidates(input: EnviarMensagemIaInput): string[] {
+    const tier = resolverModelTier(input);
 
-    return [
-      configured,
-      ...MODEL_FALLBACKS.filter((model) => model !== configured),
-    ];
+    return montarCandidatosModelo({
+      tier,
+      configuredDefault: this.config.get<string>('GEMINI_MODEL'),
+      configuredExatas: this.config.get<string>('GEMINI_MODEL_EXATAS'),
+      fallbacks: MODEL_FALLBACKS,
+    });
   }
 
   private isRetryableError(message: string): boolean {
@@ -95,6 +98,8 @@ export class GeminiIaAdapter implements IaEnginePort {
     modelName: string,
     input: EnviarMensagemIaInput,
   ): Promise<string> {
+    const jsonMode = input.responseFormat === 'json_object' && !input.imagem;
+
     const model = this.getClient().getGenerativeModel({
       model: modelName,
       systemInstruction:
@@ -106,6 +111,8 @@ export class GeminiIaAdapter implements IaEnginePort {
         ),
       generationConfig: {
         maxOutputTokens: 2048,
+        temperature: jsonMode ? 0.2 : undefined,
+        ...(jsonMode ? { responseMimeType: 'application/json' } : {}),
       },
     });
 
@@ -146,7 +153,7 @@ export class GeminiIaAdapter implements IaEnginePort {
   }
 
   async enviarMensagem(input: EnviarMensagemIaInput): Promise<string> {
-    const candidates = this.getModelCandidates();
+    const candidates = this.getModelCandidates(input);
     let lastError: Error | null = null;
 
     for (const modelName of candidates) {

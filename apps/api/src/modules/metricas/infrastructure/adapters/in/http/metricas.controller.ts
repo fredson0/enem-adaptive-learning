@@ -4,6 +4,7 @@ import {
   Get,
   Inject,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser } from '../../../../../../infrastructure/auth/current-user.decorator';
@@ -11,6 +12,7 @@ import { JwtAuthGuard } from '../../../../../../infrastructure/auth/jwt-auth.gua
 import type { JwtPayload } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import { CalcularProficienciaUseCase } from '../../../../core/application/use-cases/calcular-proficiencia.use-case';
 import { ObterCoberturaUseCase } from '../../../../core/application/use-cases/obter-cobertura.use-case';
+import { ObterFrequenciaTemasUseCase } from '../../../../core/application/use-cases/obter-frequencia-temas.use-case';
 import {
   ObterEvolucaoUseCase,
   ObterLacunasUseCase,
@@ -50,7 +52,17 @@ export class MetricasController {
     private readonly marcarChecklistIaUseCase: MarcarChecklistIaUseCase,
     @Inject(ObterCoberturaUseCase)
     private readonly obterCoberturaUseCase: ObterCoberturaUseCase,
+    @Inject(ObterFrequenciaTemasUseCase)
+    private readonly obterFrequenciaTemasUseCase: ObterFrequenciaTemasUseCase,
   ) {}
+
+  @Get('frequencia-temas')
+  obterFrequenciaTemas(
+    @CurrentUser() user: JwtPayload,
+    @Query('area') area?: string,
+  ) {
+    return this.obterFrequenciaTemasUseCase.execute(area);
+  }
 
   @Get('cobertura')
   obterCobertura(@CurrentUser() user: JwtPayload) {

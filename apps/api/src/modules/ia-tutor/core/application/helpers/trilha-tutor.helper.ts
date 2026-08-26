@@ -6,6 +6,8 @@ import type {
 } from '../../../../metricas/core/application/helpers/trilha.config';
 import { isEtapaIdValida } from '../../../../metricas/core/application/helpers/trilha.config';
 import { criarItemChecklist } from '../../../../metricas/core/application/helpers/trilha-progresso.helper';
+import { REGRAS_FORMATO_RESPOSTA } from './tutor-formato.helper';
+import { parseJsonIa } from './ia-json.helper';
 
 export type ContextoTrilhaTutor = {
   diagnosticoCompleto: boolean;
@@ -104,9 +106,12 @@ export function buildPersonalizarTrilhaSystemPrompt(
       : 'tópicos mais cobrados'
   );
 
-  return `Você é o tutor IA do ENEM+ em modo de **co-criação de checklist**.
+  return `Você é o tutor IA do ENEM+ em modo de co-criação de checklist.
+${REGRAS_FORMATO_RESPOSTA}
 
-Objetivo: conversar com o aluno para montar um plano de estudos personalizado${ctx.assuntoNome ? ` em **${ctx.assuntoNome}**` : ` em ${ctx.areaLabel}`}. Você NÃO gera a checklist final agora — só coleta informações com perguntas.
+Objetivo: conversar com o aluno para montar um plano de estudos personalizado${ctx.assuntoNome ? ` em ${ctx.assuntoNome}` : ` em ${ctx.areaLabel}`}. Você NÃO gera a checklist final agora — só coleta informações com perguntas.
+
+Escopo: só fale sobre estudo para o ENEM nesta área/assunto. Recuse educadamente pedidos sobre programação, código ou assuntos sem relação com a prova.
 
 Contexto do aluno:
 - Área: ${ctx.areaLabel}
@@ -127,7 +132,7 @@ Regras da conversa:
   5. Algum evento ou prova próxima que influencia o ritmo
 - Todos os itens da checklist devem ser sobre ${focoPrincipal} — não misture outros assuntos
 - Não use "é em Filosofia" — use "é Filosofia" ou "são X e Y"
-- Quando tiver informações suficientes (após 3+ respostas do aluno), diga: "Perfeito! Clique em **Finalizar** para eu montar sua checklist personalizada."
+- Quando tiver informações suficientes (após 3+ respostas do aluno), diga: "Perfeito! Clique em Finalizar para eu montar sua checklist personalizada."
 - Não invente dados que o aluno não disse`;
 }
 
@@ -193,34 +198,27 @@ export function extrairJsonPlanoIa(texto: string): {
   resumo: string;
   checklist: string[];
 } | null {
-  const match = texto.match(/\{[\s\S]*"metaSemanal"[\s\S]*\}/);
-  if (!match) return null;
+  const data = parseJsonIa<{
+    metaSemanal?: string;
+    proximoPasso?: string;
+    resumo?: string;
+    checklist?: string[];
+  }>(texto);
 
-  try {
-    const data = JSON.parse(match[0]) as {
-      metaSemanal?: string;
-      proximoPasso?: string;
-      resumo?: string;
-      checklist?: string[];
-    };
+  if (!data?.metaSemanal || !data.proximoPasso) return null;
 
-    if (!data.metaSemanal || !data.proximoPasso) return null;
-
-    return {
-      metaSemanal: data.metaSemanal.trim(),
-      proximoPasso: data.proximoPasso.trim(),
-      resumo: data.resumo?.trim() ?? '',
-      checklist: Array.isArray(data.checklist)
-        ? data.checklist
-            .filter((item): item is string => typeof item === 'string')
-            .map((item) => item.trim())
-            .filter((item) => item.length >= 4)
-            .slice(0, 6)
-        : [],
-    };
-  } catch {
-    return null;
-  }
+  return {
+    metaSemanal: data.metaSemanal.trim(),
+    proximoPasso: data.proximoPasso.trim(),
+    resumo: data.resumo?.trim() ?? '',
+    checklist: Array.isArray(data.checklist)
+      ? data.checklist
+          .filter((item): item is string => typeof item === 'string')
+          .map((item) => item.trim())
+          .filter((item) => item.length >= 4)
+          .slice(0, 6)
+      : [],
+  };
 }
 
 export function formatarHistoricoParaExtracao(

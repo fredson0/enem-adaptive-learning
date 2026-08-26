@@ -83,4 +83,26 @@ export class PrismaQuestoesRepository implements QuestoesRepositoryPort {
   async contar(filtro?: Parameters<typeof buildQuestaoWhere>[0]) {
     return this.prisma.questao.count({ where: this.buildWhere(filtro) });
   }
+
+  async obterFrequenciaDisciplinas(filtro?: {
+    area?: import('@generated/prisma').AreaEnem;
+    limit?: number;
+  }) {
+    const limit = Math.min(Math.max(filtro?.limit ?? 15, 1), 30);
+    const where = filtro?.area ? { area: filtro.area } : undefined;
+
+    const rows = await this.prisma.questao.groupBy({
+      by: ['disciplina', 'area'],
+      where,
+      _count: { id: true },
+      orderBy: { _count: { id: 'desc' } },
+      take: limit,
+    });
+
+    return rows.map((row) => ({
+      disciplina: row.disciplina,
+      area: row.area,
+      total: row._count.id,
+    }));
+  }
 }

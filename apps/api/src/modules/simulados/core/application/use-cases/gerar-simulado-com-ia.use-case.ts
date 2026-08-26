@@ -11,6 +11,7 @@ import {
   buildInterpretarPedidoSimuladoPrompt,
   parsePedidoSimuladoJson,
 } from '../helpers/interpretar-pedido-simulado';
+import { detectarAreaEnem } from '../../../../ia-tutor/core/application/helpers/tutor-prompts';
 import { GerarSimuladoUseCase } from './gerar-simulado.use-case';
 
 export type GerarSimuladoComIaInput = {
@@ -49,6 +50,8 @@ export class GerarSimuladoComIaUseCase {
       respostaIa = await this.iaEngine.enviarMensagem({
         texto: buildInterpretarPedidoSimuladoPrompt(pedido),
         nivelAluno: 'INICIANTE',
+        responseFormat: 'json_object',
+        areaEnem: detectarAreaEnem(pedido) ?? undefined,
       });
     } catch (error) {
       if (error instanceof ServiceUnavailableException) {

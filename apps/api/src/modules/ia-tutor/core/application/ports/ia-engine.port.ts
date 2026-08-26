@@ -29,6 +29,11 @@ export type EnviarMensagemIaInput = {
   nivelAluno?: string;
   imagem?: ImagemAnexo;
   systemPromptOverride?: string;
+  areaEnem?: import('@generated/prisma').AreaEnem;
+  /** Força JSON válido na resposta (OpenAI/Groq/NVIDIA/Gemini). */
+  responseFormat?: 'json_object';
+  /** Tier de modelo — exatas usa modelo maior para Matemática/Natureza. */
+  modelTier?: 'default' | 'exatas';
 };
 
 export interface IaEnginePort {

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { SIMULADOS_REPOSITORY } from './core/application/ports/simulados.repository.port';
 import {
   EnviarRespostaUseCase,
@@ -18,7 +18,7 @@ import { MetricasModule } from '../metricas/metricas.module';
 import { UsuariosModule } from '../usuarios/usuarios.module';
 
 @Module({
-  imports: [UsuariosModule, QuestoesModule, MetricasModule, IaTutorModule],
+  imports: [UsuariosModule, QuestoesModule, MetricasModule, forwardRef(() => IaTutorModule)],
   controllers: [SimuladosController],
   providers: [
     GerarSimuladoUseCase,
@@ -32,5 +32,6 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
       useClass: PrismaSimuladosRepository,
     },
   ],
+  exports: [GerarSimuladoComIaUseCase],
 })
 export class SimuladosModule {}

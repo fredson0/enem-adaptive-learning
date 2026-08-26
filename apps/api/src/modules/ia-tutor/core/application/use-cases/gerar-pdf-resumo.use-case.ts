@@ -24,6 +24,7 @@ import {
 import { formatarHistoricoParaExtracao } from '../helpers/trilha-tutor.helper';
 import type { ContextoTrilhaTutor } from '../helpers/trilha-tutor.helper';
 import { buildTutorSystemPrompt } from '../helpers/tutor-prompts';
+import { parseAreaEnem } from '../../../../questoes/core/application/helpers/area-enem';
 import { UsoTokensIaService } from '../../../infrastructure/adapters/out/persistence/uso-tokens-ia.service';
 
 const AREA_LABELS: Record<string, string> = {
@@ -143,6 +144,8 @@ Responda somente com o JSON solicitado, sem texto antes ou depois.`;
       contextoMetricas,
       contextoTrilha,
       systemPromptOverride: systemPrompt,
+      responseFormat: 'json_object',
+      areaEnem: areaSlug ? (parseAreaEnem(areaSlug) ?? undefined) : undefined,
     });
 
     const resumo = extrairJsonPdfResumo(respostaBruta);

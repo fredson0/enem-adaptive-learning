@@ -1,4 +1,5 @@
 import { getAssuntoById } from '../../../../metricas/core/application/helpers/trilha-assuntos.catalog';
+import { parseJsonIa } from './ia-json.helper';
 
 export type PdfResumoGerado = {
   titulo: string;
@@ -54,22 +55,18 @@ Regras:
 }
 
 export function extrairJsonPdfResumo(texto: string): PdfResumoGerado | null {
-  const match = texto.match(/\{[\s\S]*"titulo"[\s\S]*"secoes"[\s\S]*\}/);
-  if (!match) return null;
-
-  try {
-    const data = JSON.parse(match[0]) as {
+  const data = parseJsonIa<{
+    titulo?: string;
+    subtitulo?: string;
+    secoes?: {
       titulo?: string;
-      subtitulo?: string;
-      secoes?: {
-        titulo?: string;
-        paragrafos?: string[];
-        topicos?: string[];
-      }[];
-      dicaFinal?: string;
-    };
+      paragrafos?: string[];
+      topicos?: string[];
+    }[];
+    dicaFinal?: string;
+  }>(texto);
 
-    if (!data.titulo?.trim() || !Array.isArray(data.secoes)) return null;
+  if (!data?.titulo?.trim() || !Array.isArray(data.secoes)) return null;
 
     const secoes = data.secoes
       .map((secao) => ({
@@ -97,9 +94,6 @@ export function extrairJsonPdfResumo(texto: string): PdfResumoGerado | null {
       secoes,
       dicaFinal: data.dicaFinal?.trim() || undefined,
     };
-  } catch {
-    return null;
-  }
 }
 
 export function resolverNomeAssuntoPdf(input: {

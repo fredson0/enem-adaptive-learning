@@ -1,5 +1,5 @@
 import {
-  ForbiddenException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -8,17 +8,34 @@ import { USUARIOS_REPOSITORY } from '../../../../usuarios/core/application/ports
 import type { UsuariosRepositoryPort } from '../../../../usuarios/core/application/ports/usuarios.repository.port';
 import { ObterContextoTutorUseCase } from '../../../../metricas/core/application/use-cases/obter-metricas.use-case';
 import { ObterTrilhaUseCase } from '../../../../metricas/core/application/use-cases/obter-trilha.use-case';
+import { ObterFrequenciaTemasUseCase } from '../../../../metricas/core/application/use-cases/obter-frequencia-temas.use-case';
+import { slugAreaEnem } from '../../../../metricas/core/application/helpers/area-enem-labels';
 import {
   METRICAS_REPOSITORY,
   type MetricasRepositoryPort,
 } from '../../../../metricas/core/application/ports/metricas.repository.port';
 import { estadoTrilhaVazio } from '../../../../metricas/core/application/helpers/trilha.config';
+import { GerarSimuladoComIaUseCase } from '../../../../simulados/core/application/use-cases/gerar-simulado-com-ia.use-case';
 import {
   aplicarTrilhaAcoes,
   parseTrilhaAcoes,
   type ContextoTrilhaTutor,
 } from '../helpers/trilha-tutor.helper';
 import { buildConversaTitulo } from '../helpers/conversa-title.helper';
+import {
+  avaliarEscopoMensagem,
+  respostaForaEscopo,
+} from '../helpers/tutor-escopo.helper';
+import { classificarIntencaoTutor } from '../helpers/tutor-intencao.helper';
+import {
+  buildTutorSystemPrompt,
+  detectarAreaEnem,
+  formatarRespostaFrequenciaTemas,
+} from '../helpers/tutor-prompts';
+import {
+  isPedidoExplicacao,
+  sanitizarRespostaTutor,
+} from '../helpers/tutor-formato.helper';
 import { IA_ENGINE } from '../ports/ia-engine.port';
 import type { IaEnginePort, ImagemAnexo } from '../ports/ia-engine.port';
 import {
@@ -50,12 +67,16 @@ export class EnviarMensagemTutorUseCase {
     private readonly obterContextoTutorUseCase: ObterContextoTutorUseCase,
     @Inject(ObterTrilhaUseCase)
     private readonly obterTrilhaUseCase: ObterTrilhaUseCase,
+    @Inject(ObterFrequenciaTemasUseCase)
+    private readonly obterFrequenciaTemasUseCase: ObterFrequenciaTemasUseCase,
     @Inject(METRICAS_REPOSITORY)
     private readonly metricasRepository: MetricasRepositoryPort,
     @Inject(CONVERSAS_TUTOR_REPOSITORY)
     private readonly conversasRepository: ConversasTutorRepositoryPort,
     @Inject(OBJECT_STORAGE)
     private readonly storage: ObjectStoragePort,
+    @Inject(forwardRef(() => GerarSimuladoComIaUseCase))
+    private readonly gerarSimuladoComIaUseCase: GerarSimuladoComIaUseCase,
   ) {}
 
   private async resolverImagem(anexoUrl?: string): Promise<ImagemAnexo | undefined> {
@@ -71,6 +92,33 @@ export class EnviarMensagemTutorUseCase {
       mimeType: arquivo.contentType,
       base64: arquivo.buffer.toString('base64'),
     };
+  }
+
+  private async persistirResposta(
+    conversaId: string,
+    mensagemUsuario: string,
+    anexoUrl: string | undefined,
+    resposta: string,
+    conversaMensagens: { role: 'user' | 'assistant'; texto: string }[] | undefined,
+  ) {
+    const novasMensagens = [
+      {
+        role: 'user' as const,
+        texto: mensagemUsuario,
+        anexoUrl,
+      },
+      { role: 'assistant' as const, texto: resposta },
+    ];
+
+    await this.conversasRepository.adicionarMensagens(conversaId, novasMensagens);
+
+    const todasMensagens = [...(conversaMensagens ?? []), ...novasMensagens];
+    if (todasMensagens.length <= 2) {
+      await this.conversasRepository.atualizarTitulo(
+        conversaId,
+        buildConversaTitulo(todasMensagens),
+      );
+    }
   }
 
   async execute(input: EnviarMensagemTutorInput) {
@@ -93,6 +141,27 @@ export class EnviarMensagemTutorUseCase {
       input.userId,
       conversaId,
     );
+
+    const escopo = avaliarEscopoMensagem(input.mensagem);
+    if (escopo.escopo === 'fora_escopo') {
+      const resposta = respostaForaEscopo(escopo.motivo);
+      const tokens = await this.usoTokens.obterSaldo(input.userId);
+
+      await this.persistirResposta(
+        conversaId,
+        input.mensagem,
+        input.anexoUrl,
+        resposta,
+        conversa?.mensagens,
+      );
+
+      return {
+        resposta,
+        conversaId,
+        tokens,
+        foraEscopo: true,
+      };
+    }
 
     const perfil = await this.usuariosRepository.obterPerfilAluno(input.userId);
     const contextoMetricas = await this.obterContextoTutorUseCase.execute(
@@ -120,6 +189,80 @@ export class EnviarMensagemTutorUseCase {
       checklistIa: trilha.checklistIa,
       planoIa: trilha.planoIa,
     };
+
+    const intencao = classificarIntencaoTutor(input.mensagem);
+    const areaDetectada = detectarAreaEnem(input.mensagem);
+
+    if (intencao === 'gerar_simulado') {
+      const tokens = await this.usoTokens.consumir(input.userId, 1);
+
+      try {
+        const simulado = await this.gerarSimuladoComIaUseCase.execute({
+          userId: input.userId,
+          pedido: input.mensagem,
+          modo: 'TREINO',
+        });
+
+        const resposta = sanitizarRespostaTutor(
+          `Montei um treino com ${simulado.totalQuestoes} questões para você.\n\nAbra em Simulados ou comece aqui: /simulados/${simulado.id}`,
+        );
+
+        await this.persistirResposta(
+          conversaId,
+          input.mensagem,
+          input.anexoUrl,
+          resposta,
+          conversa?.mensagens,
+        );
+
+        return {
+          resposta,
+          conversaId,
+          tokens,
+          simuladoGerado: {
+            id: simulado.id,
+            href: `/simulados/${simulado.id}`,
+            totalQuestoes: simulado.totalQuestoes,
+          },
+        };
+      } catch {
+        const resposta = sanitizarRespostaTutor(
+          'Não consegui montar o simulado automaticamente com esse pedido. Tente ser mais específico (ex.: "10 questões de matemática sobre funções") ou vá em Simulados → Novo treino.',
+        );
+
+        await this.persistirResposta(
+          conversaId,
+          input.mensagem,
+          input.anexoUrl,
+          resposta,
+          conversa?.mensagens,
+        );
+
+        return { resposta, conversaId, tokens };
+      }
+    }
+
+    if (intencao === 'frequencia_temas') {
+      const tokens = await this.usoTokens.obterSaldo(input.userId);
+      const { disciplinas } = await this.obterFrequenciaTemasUseCase.execute(
+        areaDetectada ? slugAreaEnem(areaDetectada) : undefined,
+      );
+      const resposta = formatarRespostaFrequenciaTemas(
+        disciplinas,
+        areaDetectada,
+      );
+
+      await this.persistirResposta(
+        conversaId,
+        input.mensagem,
+        input.anexoUrl,
+        resposta,
+        conversa?.mensagens,
+      );
+
+      return { resposta, conversaId, tokens };
+    }
+
     const custoTokens = input.anexoUrl ? 2 : 1;
     const tokens = await this.usoTokens.consumir(input.userId, custoTokens);
     const imagem = await this.resolverImagem(input.anexoUrl);
@@ -128,6 +271,31 @@ export class EnviarMensagemTutorUseCase {
       throw new NotFoundException('Anexo não encontrado. Envie a imagem novamente.');
     }
 
+    let frequencias: Awaited<
+      ReturnType<ObterFrequenciaTemasUseCase['execute']>
+    >['disciplinas'] = [];
+
+    if (intencao === 'chat_livre' && areaDetectada) {
+      const freq = await this.obterFrequenciaTemasUseCase.execute(
+        slugAreaEnem(areaDetectada),
+      );
+      frequencias = freq.disciplinas;
+    }
+
+    const pedidoExplicacao = isPedidoExplicacao(input.mensagem);
+
+    const systemPromptOverride = buildTutorSystemPrompt(
+      perfil?.nivelAtual ?? 'INICIANTE',
+      contextoMetricas,
+      contextoTrilha,
+      {
+        areaEnem: areaDetectada,
+        frequencias,
+        incluirProduto: intencao === 'produto_plataforma',
+        pedidoExplicacao,
+      },
+    );
+
     const respostaBruta = await this.iaEngine.enviarMensagem({
       texto: input.mensagem,
       historico: conversa?.mensagens,
@@ -135,6 +303,8 @@ export class EnviarMensagemTutorUseCase {
       contextoMetricas,
       contextoTrilha,
       imagem,
+      systemPromptOverride,
+      areaEnem: areaDetectada ?? undefined,
     });
 
     const acoes = parseTrilhaAcoes(respostaBruta);
@@ -164,29 +334,15 @@ export class EnviarMensagemTutorUseCase {
       };
     }
 
-    const resposta = acoes.textoLimpo || respostaBruta;
+    const resposta = sanitizarRespostaTutor(acoes.textoLimpo || respostaBruta);
 
-    const novasMensagens = [
-      {
-        role: 'user' as const,
-        texto: input.mensagem,
-        anexoUrl: input.anexoUrl,
-      },
-      { role: 'assistant' as const, texto: resposta },
-    ];
-
-    await this.conversasRepository.adicionarMensagens(
+    await this.persistirResposta(
       conversaId,
-      novasMensagens,
+      input.mensagem,
+      input.anexoUrl,
+      resposta,
+      conversa?.mensagens,
     );
-
-    const todasMensagens = [...(conversa?.mensagens ?? []), ...novasMensagens];
-    if (todasMensagens.length <= 2) {
-      await this.conversasRepository.atualizarTitulo(
-        conversaId,
-        buildConversaTitulo(todasMensagens),
-      );
-    }
 
     return {
       resposta,

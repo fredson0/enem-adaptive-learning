@@ -1,8 +1,23 @@
 import type { AreaEnem, Prisma } from '@generated/prisma';
+import type { EstatisticaAreaBruta } from '../ports/metricas.repository.port';
 import {
   TRILHA_ASSUNTOS,
   type TrilhaAssuntoCatalogo,
 } from './trilha-assuntos.catalog';
+
+const AREAS_ENEM: AreaEnem[] = [
+  'MATEMATICA',
+  'LINGUAGENS',
+  'HUMANAS',
+  'NATUREZA',
+] as AreaEnem[];
+
+const AREA_SLUGS: Record<AreaEnem, string> = {
+  MATEMATICA: 'matematica',
+  LINGUAGENS: 'linguagens',
+  HUMANAS: 'humanas',
+  NATUREZA: 'natureza',
+};
 
 export type CoberturaResumo = {
   dominadas: number;
@@ -32,6 +47,50 @@ export function textoMencionaAssunto(
   );
 }
 
+export function inferirAssuntoId(
+  texto: string,
+  areaSlug?: string,
+): string | undefined {
+  const candidatos = areaSlug
+    ? TRILHA_ASSUNTOS.filter((item) => item.areaSlug === areaSlug)
+    : TRILHA_ASSUNTOS;
+
+  let melhor: { id: string; score: number } | undefined;
+
+  for (const assunto of candidatos) {
+    let score = 0;
+    const textoNorm = normalizarTexto(texto);
+    const nomeNorm = normalizarTexto(assunto.nome);
+
+    if (textoNorm.includes(nomeNorm)) score += 10;
+
+    for (const palavra of assunto.palavrasChave) {
+      if (textoNorm.includes(normalizarTexto(palavra))) score += 5;
+    }
+
+    if (score > 0 && (!melhor || score > melhor.score)) {
+      melhor = { id: assunto.id, score };
+    }
+  }
+
+  return melhor?.id;
+}
+
+export function inferirAssuntoIdParaQuestao(questao: {
+  area: AreaEnem;
+  disciplina: string;
+  contexto: string;
+  introducaoAlternativas?: string | null;
+}): string | undefined {
+  const texto = [
+    questao.disciplina,
+    questao.contexto,
+    questao.introducaoAlternativas ?? '',
+  ].join(' ');
+
+  return inferirAssuntoId(texto, AREA_SLUGS[questao.area]);
+}
+
 export function buildAssuntoQuestaoWhere(
   assunto: TrilhaAssuntoCatalogo,
 ): Prisma.QuestaoWhereInput {
@@ -43,19 +102,19 @@ export function buildAssuntoQuestaoWhere(
   };
 
   const area = areaMap[assunto.areaSlug];
-  const termos = [
-    assunto.nome,
-    ...assunto.palavrasChave,
-  ].filter(Boolean);
+  const termos = [assunto.nome, ...assunto.palavrasChave].filter(Boolean);
 
-  const orConditions: Prisma.QuestaoWhereInput[] = termos.flatMap((termo) => {
-    const contains = { contains: termo, mode: 'insensitive' as const };
-    return [
-      { contexto: contains },
-      { disciplina: contains },
-      { introducaoAlternativas: contains },
-    ];
-  });
+  const orConditions: Prisma.QuestaoWhereInput[] = [
+    { assuntoId: assunto.id },
+    ...termos.flatMap((termo) => {
+      const contains = { contains: termo, mode: 'insensitive' as const };
+      return [
+        { contexto: contains },
+        { disciplina: contains },
+        { introducaoAlternativas: contains },
+      ];
+    }),
+  ];
 
   return {
     area,
@@ -65,12 +124,15 @@ export function buildAssuntoQuestaoWhere(
 
 export function questaoCombinaAssunto(
   questao: {
+    assuntoId?: string | null;
     disciplina: string;
     contexto: string;
     introducaoAlternativas: string | null;
   },
   assunto: TrilhaAssuntoCatalogo,
 ): boolean {
+  if (questao.assuntoId === assunto.id) return true;
+
   const texto = [
     questao.disciplina,
     questao.contexto,
@@ -99,6 +161,26 @@ export function montarCoberturaResumo(
     tentadas,
     percentual: calcularPercentualCobertura(dominadas, disponiveis),
   };
+}
+
+export function agregarCoberturaPorArea(input: {
+  dominadas: { area: AreaEnem }[];
+  disponiveisPorArea: Record<AreaEnem, number>;
+}): EstatisticaAreaBruta[] {
+  const dominadasPorArea = new Map<AreaEnem, number>();
+
+  for (const questao of input.dominadas) {
+    dominadasPorArea.set(
+      questao.area,
+      (dominadasPorArea.get(questao.area) ?? 0) + 1,
+    );
+  }
+
+  return AREAS_ENEM.map((area) => ({
+    area,
+    totalQuestoes: input.disponiveisPorArea[area] ?? 0,
+    acertos: dominadasPorArea.get(area) ?? 0,
+  }));
 }
 
 export const ASSUNTOS_CATALOGO = TRILHA_ASSUNTOS;

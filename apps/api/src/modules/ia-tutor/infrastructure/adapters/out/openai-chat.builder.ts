@@ -1,4 +1,7 @@
-import { buildTutorSystemPrompt } from '../../../core/application/helpers/tutor-prompts';
+import {
+  buildTutorSystemPrompt,
+  buildVisionSystemPrompt,
+} from '../../../core/application/helpers/tutor-prompts';
 import type { EnviarMensagemIaInput } from '../../../core/application/ports/ia-engine.port';
 
 export type OpenAiContentPart =
@@ -15,11 +18,14 @@ export function buildOpenAiChatMessages(
 ): OpenAiChatMessage[] {
   const systemContent =
     input.systemPromptOverride ??
-    buildTutorSystemPrompt(
-      input.nivelAluno,
-      input.contextoMetricas,
-      input.contextoTrilha,
-    );
+    (input.imagem
+      ? buildVisionSystemPrompt(input.nivelAluno)
+      : buildTutorSystemPrompt(
+          input.nivelAluno,
+          input.contextoMetricas,
+          input.contextoTrilha,
+          { areaEnem: input.areaEnem ?? null },
+        ));
 
   const messages: OpenAiChatMessage[] = [
     {

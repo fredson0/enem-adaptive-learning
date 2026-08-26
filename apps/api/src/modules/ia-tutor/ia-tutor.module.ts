@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CONVERSAS_TUTOR_REPOSITORY } from './core/application/ports/conversas-tutor.repository.port';
 import { IA_ENGINE } from './core/application/ports/ia-engine.port';
@@ -31,9 +31,15 @@ import { S3ObjectStorageAdapter } from './infrastructure/adapters/out/storage/s3
 import { QuestoesModule } from '../questoes/questoes.module';
 import { MetricasModule } from '../metricas/metricas.module';
 import { UsuariosModule } from '../usuarios/usuarios.module';
+import { SimuladosModule } from '../simulados/simulados.module';
 
 @Module({
-  imports: [UsuariosModule, QuestoesModule, MetricasModule],
+  imports: [
+    UsuariosModule,
+    QuestoesModule,
+    MetricasModule,
+    forwardRef(() => SimuladosModule),
+  ],
   controllers: [IaTutorController, DevUploadsController],
   providers: [
     EnviarMensagemTutorUseCase,

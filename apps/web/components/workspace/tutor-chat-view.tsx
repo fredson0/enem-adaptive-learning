@@ -409,8 +409,8 @@ export function TutorChatView({
         docked={hasMessages}
         extendLeftPx={0}
         title="Pergunte ao tutor ENEM+"
-        subtitle="Peça explicações ou questões — depois baixe em PDF explicativo (IA) ou PDF de questões oficiais do ENEM."
-        basePlaceholder="Me explica"
+        subtitle="Dúvidas sobre o ENEM, simulados e trilha. Peça explicações ou treinos — não responde programação ou assuntos fora do ENEM."
+        basePlaceholder="Me explica funções do 2º grau"
         buttonText="Enviar"
         loading={loading}
         onPromptSubmit={handleSubmit}

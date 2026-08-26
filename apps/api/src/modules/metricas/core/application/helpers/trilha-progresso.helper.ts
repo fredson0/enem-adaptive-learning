@@ -1,58 +1,14 @@
 import type { ChecklistItemIa } from './trilha.config';
 import {
+  inferirAssuntoId,
+  textoMencionaAssunto,
+} from './cobertura-questoes.helper';
+import {
   TRILHA_ASSUNTOS,
   type TrilhaAssuntoCatalogo,
 } from './trilha-assuntos.catalog';
 
-function normalizarTexto(texto: string): string {
-  return texto
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-}
-
-function textoMencionaAssunto(
-  texto: string,
-  assunto: TrilhaAssuntoCatalogo,
-): boolean {
-  const normalizado = normalizarTexto(texto);
-  const nome = normalizarTexto(assunto.nome);
-
-  if (normalizado.includes(nome)) return true;
-
-  return assunto.palavrasChave.some((palavra) =>
-    normalizado.includes(normalizarTexto(palavra)),
-  );
-}
-
-export function inferirAssuntoId(
-  texto: string,
-  areaSlug?: string,
-): string | undefined {
-  const candidatos = areaSlug
-    ? TRILHA_ASSUNTOS.filter((item) => item.areaSlug === areaSlug)
-    : TRILHA_ASSUNTOS;
-
-  let melhor: { id: string; score: number } | undefined;
-
-  for (const assunto of candidatos) {
-    let score = 0;
-    const textoNorm = normalizarTexto(texto);
-    const nomeNorm = normalizarTexto(assunto.nome);
-
-    if (textoNorm.includes(nomeNorm)) score += 10;
-
-    for (const palavra of assunto.palavrasChave) {
-      if (textoNorm.includes(normalizarTexto(palavra))) score += 5;
-    }
-
-    if (score > 0 && (!melhor || score > melhor.score)) {
-      melhor = { id: assunto.id, score };
-    }
-  }
-
-  return melhor?.id;
-}
+export { inferirAssuntoId } from './cobertura-questoes.helper';
 
 export function enriquecerChecklistComAssunto(
   checklist: ChecklistItemIa[],

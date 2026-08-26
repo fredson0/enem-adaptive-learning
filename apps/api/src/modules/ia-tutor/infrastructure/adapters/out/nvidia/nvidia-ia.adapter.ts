@@ -12,10 +12,20 @@ import {
   buildOpenAiChatMessages,
   type OpenAiChatMessage,
 } from '../openai-chat.builder';
+import {
+  montarCandidatosModelo,
+  resolverModelTier,
+} from '../../../../core/application/helpers/ia-model-tier.helper';
 
 const NVIDIA_BASE_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
 const TEXT_MODEL_FALLBACKS = [
+  'nvidia/nemotron-3.5-lightning-30b-a3b',
+  'nvidia/nemotron-3-nano-30b-a3b',
+] as const;
+
+const TEXT_MODEL_EXATAS_FALLBACKS = [
+  'meta/llama-3.3-70b-instruct',
   'nvidia/nemotron-3.5-lightning-30b-a3b',
   'nvidia/nemotron-3-nano-30b-a3b',
 ] as const;
@@ -52,12 +62,15 @@ export class NvidiaIaAdapter implements IaEnginePort {
       ];
     }
 
-    const configured = this.config.get<string>('NVIDIA_MODEL');
-    if (!configured) return [...TEXT_MODEL_FALLBACKS];
-    return [
-      configured,
-      ...TEXT_MODEL_FALLBACKS.filter((model) => model !== configured),
-    ];
+    const tier = resolverModelTier(input);
+
+    return montarCandidatosModelo({
+      tier,
+      configuredDefault: this.config.get<string>('NVIDIA_MODEL'),
+      configuredExatas: this.config.get<string>('NVIDIA_MODEL_EXATAS'),
+      fallbacks:
+        tier === 'exatas' ? TEXT_MODEL_EXATAS_FALLBACKS : TEXT_MODEL_FALLBACKS,
+    });
   }
 
   private isRetryableError(message: string): boolean {
@@ -84,6 +97,7 @@ export class NvidiaIaAdapter implements IaEnginePort {
     modelName: string,
     messages: OpenAiChatMessage[],
     timeoutMs: number,
+    jsonMode: boolean,
   ): Promise<string> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -98,10 +112,11 @@ export class NvidiaIaAdapter implements IaEnginePort {
         body: JSON.stringify({
           model: modelName,
           messages,
-          temperature: 0.7,
+          temperature: jsonMode ? 0.2 : 0.7,
           top_p: 0.9,
           max_tokens: 2048,
           stream: false,
+          ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
         }),
         signal: controller.signal,
       });
@@ -151,9 +166,11 @@ export class NvidiaIaAdapter implements IaEnginePort {
     const timeoutMs = input.imagem ? VISION_TIMEOUT_MS : TEXT_TIMEOUT_MS;
     let lastError: Error | null = null;
 
+    const jsonMode = input.responseFormat === 'json_object' && !input.imagem;
+
     for (const modelName of candidates) {
       try {
-        return await this.callModel(modelName, messages, timeoutMs);
+        return await this.callModel(modelName, messages, timeoutMs, jsonMode);
       } catch (error) {
         if (error instanceof ServiceUnavailableException) {
           throw error;

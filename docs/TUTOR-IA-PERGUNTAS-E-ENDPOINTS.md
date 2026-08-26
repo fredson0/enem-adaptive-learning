@@ -4,7 +4,9 @@
 
 **Relacionado:** [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md) · [ESCOLHA-MODELO-IA.md](./ESCOLHA-MODELO-IA.md) · [WORKSPACE-UI-OSMO.md](./WORKSPACE-UI-OSMO.md)
 
-**Modelo atual:** `IA_PROVIDER=nvidia` → `meta/llama-3.1-8b-instruct` (fallback: Gemini `gemini-2.5-flash`)
+**Modelo atual:** `IA_PROVIDER=nvidia` → `NVIDIA_MODEL` (texto) / `NVIDIA_VISION_MODEL` (foto). Fallback: Gemini `gemini-2.5-flash`.
+
+**Exatas (Matemática / Natureza):** o `IaEngineRouter` detecta a área e usa tier `exatas` — prioriza Groq 70B (se `GROQ_API_KEY`) e modelos `*_MODEL_EXATAS` no `.env`. Respostas JSON (trilha, PDF, simulado IA) usam `response_format: json_object` + parser robusto (`ia-json.helper`).
 
 ---
 

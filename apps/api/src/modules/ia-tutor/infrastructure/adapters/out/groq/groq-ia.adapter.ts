@@ -12,6 +12,10 @@ import {
   buildOpenAiChatMessages,
   type OpenAiChatMessage,
 } from '../openai-chat.builder';
+import {
+  montarCandidatosModelo,
+  resolverModelTier,
+} from '../../../../core/application/helpers/ia-model-tier.helper';
 
 const GROQ_BASE_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -52,12 +56,14 @@ export class GroqIaAdapter implements IaEnginePort {
       ];
     }
 
-    const configured = this.config.get<string>('GROQ_MODEL');
-    if (!configured) return [...TEXT_MODEL_FALLBACKS];
-    return [
-      configured,
-      ...TEXT_MODEL_FALLBACKS.filter((model) => model !== configured),
-    ];
+    const tier = resolverModelTier(input);
+
+    return montarCandidatosModelo({
+      tier,
+      configuredDefault: this.config.get<string>('GROQ_MODEL'),
+      configuredExatas: this.config.get<string>('GROQ_MODEL_EXATAS'),
+      fallbacks: TEXT_MODEL_FALLBACKS,
+    });
   }
 
   private isRetryableError(message: string): boolean {
@@ -78,6 +84,7 @@ export class GroqIaAdapter implements IaEnginePort {
     modelName: string,
     messages: OpenAiChatMessage[],
     timeoutMs: number,
+    jsonMode: boolean,
   ): Promise<string> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -92,10 +99,11 @@ export class GroqIaAdapter implements IaEnginePort {
         body: JSON.stringify({
           model: modelName,
           messages,
-          temperature: 0.7,
+          temperature: jsonMode ? 0.2 : 0.7,
           top_p: 0.9,
           max_tokens: 2048,
           stream: false,
+          ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
         }),
         signal: controller.signal,
       });
@@ -142,9 +150,11 @@ export class GroqIaAdapter implements IaEnginePort {
     const timeoutMs = input.imagem ? VISION_TIMEOUT_MS : TEXT_TIMEOUT_MS;
     let lastError: Error | null = null;
 
+    const jsonMode = input.responseFormat === 'json_object' && !input.imagem;
+
     for (const modelName of candidates) {
       try {
-        return await this.callModel(modelName, messages, timeoutMs);
+        return await this.callModel(modelName, messages, timeoutMs, jsonMode);
       } catch (error) {
         if (error instanceof ServiceUnavailableException) {
           throw error;

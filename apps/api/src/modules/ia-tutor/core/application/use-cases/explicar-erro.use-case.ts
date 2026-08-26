@@ -7,7 +7,12 @@ import { QUESTOES_REPOSITORY } from '../../../../questoes/core/application/ports
 import type { QuestoesRepositoryPort } from '../../../../questoes/core/application/ports/questoes.repository.port';
 import { USUARIOS_REPOSITORY } from '../../../../usuarios/core/application/ports/usuarios.repository.port';
 import type { UsuariosRepositoryPort } from '../../../../usuarios/core/application/ports/usuarios.repository.port';
-import { buildExplicarErroUserPrompt } from '../helpers/tutor-prompts';
+import {
+  buildExplicarErroUserPrompt,
+  buildTutorSystemPrompt,
+  montarHrefTrilhaArea,
+} from '../helpers/tutor-prompts';
+import { sanitizarRespostaTutor } from '../helpers/tutor-formato.helper';
 import { IA_ENGINE } from '../ports/ia-engine.port';
 import type { IaEnginePort } from '../ports/ia-engine.port';
 import { UsoTokensIaService } from '../../../infrastructure/adapters/out/persistence/uso-tokens-ia.service';
@@ -41,7 +46,13 @@ export class ExplicarErroUseCase {
     }
 
     const perfil = await this.usuariosRepository.obterPerfilAluno(input.userId);
+    const nivel = perfil?.nivelAtual ?? 'INICIANTE';
+    const contextoMetricas = await this.obterContextoTutorUseCase.execute(
+      input.userId,
+    );
     const tokens = await this.usoTokens.consumir(input.userId);
+
+    const trilhaHref = montarHrefTrilhaArea(questao.area);
 
     const texto = buildExplicarErroUserPrompt(
       {
@@ -53,20 +64,28 @@ export class ExplicarErroUseCase {
         disciplina: questao.disciplina,
       },
       input.perguntaExtra,
+      trilhaHref,
     );
 
-    const resposta = await this.iaEngine.enviarMensagem({
-      texto,
-      nivelAluno: perfil?.nivelAtual ?? 'INICIANTE',
-      contextoMetricas: await this.obterContextoTutorUseCase.execute(
-        input.userId,
-      ),
-    });
+    const resposta = sanitizarRespostaTutor(
+      await this.iaEngine.enviarMensagem({
+        texto,
+        nivelAluno: nivel,
+        contextoMetricas,
+        areaEnem: questao.area,
+        systemPromptOverride: buildTutorSystemPrompt(nivel, contextoMetricas, undefined, {
+          areaEnem: questao.area,
+          incluirProduto: false,
+          pedidoExplicacao: true,
+        }),
+      }),
+    );
 
     return {
       resposta,
       questaoId: questao.id,
       tokens,
+      trilhaHref,
     };
   }
 }
