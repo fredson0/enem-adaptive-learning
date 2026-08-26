@@ -3,7 +3,7 @@ import { PrismaService } from '../../../../../../infrastructure/database/prisma.
 import type {
   DepoimentoRecord,
   DepoimentosRepositoryPort,
-} from '../../../core/application/ports/depoimentos.repository.port';
+} from '../../../../core/application/ports/depoimentos.repository.port';
 
 @Injectable()
 export class PrismaDepoimentosRepository implements DepoimentosRepositoryPort {

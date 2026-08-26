@@ -2,6 +2,7 @@
 
 import { ProgressArcGauge } from "@/components/progresso/progress-arc-gauge";
 import { ProgressoAreasList } from "@/components/progresso/progresso-areas-list";
+import { ProgressoEnemAnos } from "@/components/progresso/progresso-enem-anos";
 import { ProgressoCard } from "@/components/progresso/progresso-card";
 import { ProgressoEvolucaoChart } from "@/components/progresso/progresso-evolucao-chart";
 import { ProgressoRadarChart } from "@/components/progresso/progresso-radar-chart";
@@ -10,6 +11,7 @@ import { ProgressoStreakCard } from "@/components/progresso/progresso-streak-car
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
 import type {
   LacunasResponse,
+  CoberturaResponse,
   ProficienciaResponse,
   PontoEvolucao,
 } from "@/lib/metricas";
@@ -49,6 +51,7 @@ export type ProgressoDataProps = {
   evolucao: PontoEvolucao[];
   lacunas: LacunasResponse;
   trilha: TrilhaResponse | null;
+  cobertura?: CoberturaResponse | null;
 };
 
 function LinhaTendencia({ texto }: { texto: string }) {
@@ -59,9 +62,9 @@ function LinhaTendencia({ texto }: { texto: string }) {
     <p
       className={cn(
         "text-sm",
-        positivo && "text-[#b0ff57]/90",
+        positivo && "text-osmo-accent",
         negativo && "text-red-400/85",
-        !positivo && !negativo && "text-white/40",
+        !positivo && !negativo && "text-osmo-subtle",
       )}
     >
       {texto}
@@ -75,6 +78,7 @@ export function ProgressoView({
   evolucao,
   lacunas,
   trilha,
+  cobertura,
 }: ProgressoDataProps) {
   const { startChatWithSeed } = useTutorSession();
   const [abrindoTutor, setAbrindoTutor] = useState(false);
@@ -125,20 +129,20 @@ export function ProgressoView({
     return (
       <div className="mx-auto flex w-full max-w-md flex-col items-center gap-8 py-4 text-center">
         <div className="space-y-3">
-          <p className="text-xs uppercase tracking-[0.18em] text-white/30">
+          <p className="text-xs uppercase tracking-[0.18em] text-osmo-subtle">
             Progresso
           </p>
-          <h2 className="text-2xl font-medium tracking-tight text-white md:text-3xl">
+          <h2 className="text-2xl font-medium tracking-tight text-osmo md:text-3xl">
             Comece hoje
           </h2>
-          <p className="text-sm leading-relaxed text-white/45">
+          <p className="text-sm leading-relaxed text-osmo-muted">
             5 questões bastam para ver seu mapa de proficiência por área.
           </p>
         </div>
 
         <Link
           href="/simulados/treino/novo?quantidade=5"
-          className="inline-flex items-center gap-2 rounded-full bg-[#b0ff57] px-6 py-3 text-sm font-medium text-black transition hover:bg-[#c4ff7a]"
+          className="inline-flex items-center gap-2 rounded-full bg-osmo-accent px-6 py-3 text-sm font-medium transition hover:opacity-90"
         >
           Fazer primeiro treino
           <ArrowRight className="size-4" />
@@ -150,7 +154,7 @@ export function ProgressoView({
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 py-1 sm:gap-4 sm:py-2">
       <header className="px-0.5 pt-1">
-        <p className="inline-flex max-w-full rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs leading-snug text-white/50">
+        <p className="inline-flex max-w-full rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-hover)] px-3 py-1.5 text-xs leading-snug text-osmo-muted">
           {subtitulo}
         </p>
       </header>
@@ -184,16 +188,16 @@ export function ProgressoView({
           footer={
             <Link
               href="/progresso/detalhes"
-              className="flex w-full items-center justify-center rounded-full border border-white/10 py-2.5 text-sm text-white/55 transition hover:border-white/20 hover:text-white/80"
+              className="flex w-full items-center justify-center rounded-full border border-[var(--osmo-border)] py-2.5 text-sm text-osmo-muted transition hover:border-[color-mix(in_srgb,var(--osmo-text)_20%,transparent)] hover:text-osmo"
             >
               Ver análise completa
             </Link>
           }
         >
-          <p className="text-[10px] uppercase tracking-wide text-white/35">
+          <p className="text-[10px] uppercase tracking-wide text-osmo-subtle">
             Total de questões
           </p>
-          <p className="mt-0.5 text-2xl font-medium tabular-nums text-white sm:mt-1 sm:text-3xl">
+          <p className="mt-0.5 text-2xl font-medium tabular-nums text-osmo sm:mt-1 sm:text-3xl">
             {totalQuestoes}
           </p>
           <div className="mt-4 sm:mt-5">
@@ -206,7 +210,7 @@ export function ProgressoView({
 
         <section
           className={cn(
-            "overflow-hidden rounded-2xl border p-4 sm:rounded-[20px] sm:p-5 md:col-span-2",
+            "osmo-surface-dark overflow-hidden rounded-2xl border p-4 sm:rounded-[20px] sm:p-5 md:col-span-2",
             lacunaPrincipal
               ? cn(
                   "border-white/[0.08] bg-gradient-to-br",
@@ -236,7 +240,7 @@ export function ProgressoView({
             <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
               <Link
                 href={hrefSimuladoFocado}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#b0ff57] px-5 py-2.5 text-sm font-medium text-black transition hover:bg-[#c4ff7a] sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-osmo-accent px-5 py-2.5 text-sm font-medium transition hover:opacity-90 sm:w-auto"
               >
                 Começar
                 <ArrowRight className="size-4" />
@@ -249,7 +253,7 @@ export function ProgressoView({
                   disabled={abrindoTutor}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-white/85 transition hover:border-white/25 hover:bg-white/[0.08] disabled:opacity-60 sm:w-auto"
                 >
-                  <MessageSquare className="size-4 text-[#b0ff57]" />
+                  <MessageSquare className="size-4 text-osmo-accent" />
                   {abrindoTutor ? "Abrindo…" : "Tutor IA"}
                 </button>
               ) : null}
@@ -282,7 +286,7 @@ export function ProgressoView({
           footer={
             <Link
               href="/trilha"
-              className="text-xs text-white/40 transition hover:text-white/65"
+              className="text-xs text-osmo-subtle transition hover:text-osmo-muted"
             >
               Trilha completa →
             </Link>
@@ -297,6 +301,24 @@ export function ProgressoView({
 
         <ProgressoRadarChart areas={proficiencia.areas} />
 
+        {cobertura?.anos?.length ? (
+          <ProgressoCard
+            icon={<Target className="size-4" />}
+            title="Provas ENEM"
+            className="md:col-span-2"
+            footer={
+              <Link
+                href="/simulados/treino/novo?priorizar=1"
+                className="text-xs text-osmo-subtle transition hover:text-osmo-muted"
+              >
+                Simulado com questões novas →
+              </Link>
+            }
+          >
+            <ProgressoEnemAnos anos={cobertura.anos} />
+          </ProgressoCard>
+        ) : null}
+
         {temGraficoEvolucao ? (
           <ProgressoCard
             icon={<TrendingUp className="size-4" />}
@@ -305,7 +327,7 @@ export function ProgressoView({
             footer={
               <Link
                 href="/progresso/detalhes"
-                className="text-xs text-white/40 transition hover:text-white/65"
+                className="text-xs text-osmo-subtle transition hover:text-osmo-muted"
               >
                 Histórico completo →
               </Link>
@@ -324,20 +346,20 @@ export function ProgressoView({
           title="Meta da semana"
           className="md:col-span-2"
         >
-          <p className="text-[13px] leading-relaxed text-white/55 sm:text-sm">
+          <p className="text-[13px] leading-relaxed text-osmo-muted sm:text-sm">
             {lacunas.metaSemanal}
           </p>
           {trilha?.metaEnem ? (
-            <p className="mt-2.5 text-[13px] text-white/45 sm:mt-3 sm:text-sm">
-              <span className="text-[#b0ff57]">Objetivo ENEM:</span>{" "}
+            <p className="mt-2.5 text-[13px] text-osmo-subtle sm:mt-3 sm:text-sm">
+              <span className="text-osmo-accent">Objetivo ENEM:</span>{" "}
               {trilha.metaEnem}
             </p>
           ) : null}
           {proficiencia.ultimoSimulado ? (
-            <p className="mt-3 border-t border-white/[0.06] pt-3 text-[11px] text-white/35 sm:mt-4 sm:pt-4 sm:text-xs">
+            <p className="mt-3 border-t border-[var(--osmo-border)] pt-3 text-[11px] text-osmo-subtle sm:mt-4 sm:pt-4 sm:text-xs">
               <Link
                 href={`/simulados/${proficiencia.ultimoSimulado.id}/resultado`}
-                className="underline-offset-2 hover:text-white/55 hover:underline"
+                className="underline-offset-2 hover:text-osmo-muted hover:underline"
               >
                 Último simulado: {proficiencia.ultimoSimulado.acertos}/
                 {proficiencia.ultimoSimulado.totalQuestoes} ·{" "}
@@ -357,6 +379,7 @@ export function ProgressoDetalheView({
   evolucao,
   lacunas,
   trilha,
+  cobertura,
 }: ProgressoDataProps) {
   const lacunaPrincipal = lacunas.lacunas[0] ?? null;
   const tendenciasArea = calcularTendenciasPorArea(evolucao);
@@ -372,17 +395,17 @@ export function ProgressoDetalheView({
     <div className="mx-auto max-w-3xl space-y-4">
       <Link
         href="/progresso"
-        className="inline-flex items-center gap-2 text-sm text-white/45 transition hover:text-white/75"
+        className="inline-flex items-center gap-2 text-sm text-osmo-muted transition hover:text-osmo"
       >
         <ArrowLeft className="size-4" />
         Voltar ao resumo
       </Link>
 
       <header className="space-y-2 px-1">
-        <h2 className="text-2xl font-medium tracking-tight text-white">
+        <h2 className="text-2xl font-medium tracking-tight text-osmo">
           Análise completa
         </h2>
-        <p className="text-sm text-white/45">
+        <p className="text-sm text-osmo-muted">
           {proficiencia.resumo.simuladosConcluidos} simulados ·{" "}
           {proficiencia.resumo.questoesRespondidas} questões respondidas
         </p>
@@ -404,9 +427,9 @@ export function ProgressoDetalheView({
           title="Distribuição por área"
           className="md:col-span-2"
         >
-          <p className="mb-4 text-2xl font-medium text-white">
+          <p className="mb-4 text-2xl font-medium text-osmo">
             {totalQuestoes}{" "}
-            <span className="text-base font-normal text-white/40">questões</span>
+            <span className="text-base font-normal text-osmo-subtle">questões</span>
           </p>
           <ProgressoSegmentedBar segmentos={segmentos} total={totalQuestoes} />
         </ProgressoCard>
@@ -425,17 +448,27 @@ export function ProgressoDetalheView({
 
         <ProgressoRadarChart areas={proficiencia.areas} />
 
+        {cobertura?.anos?.length ? (
+          <ProgressoCard
+            icon={<Target className="size-4" />}
+            title="Provas ENEM por ano"
+            className="md:col-span-2"
+          >
+            <ProgressoEnemAnos anos={cobertura.anos} />
+          </ProgressoCard>
+        ) : null}
+
         <ProgressoCard
           icon={<Target className="size-4" />}
           title="Meta da semana"
           className="md:col-span-2"
         >
-          <p className="text-[13px] leading-relaxed text-white/55 sm:text-sm">
+          <p className="text-[13px] leading-relaxed text-osmo-muted sm:text-sm">
             {lacunas.metaSemanal}
           </p>
           {trilha?.metaEnem ? (
-            <p className="mt-2.5 text-[13px] text-white/45 sm:mt-3 sm:text-sm">
-              <span className="text-[#b0ff57]">Objetivo ENEM:</span>{" "}
+            <p className="mt-2.5 text-[13px] text-osmo-subtle sm:mt-3 sm:text-sm">
+              <span className="text-osmo-accent">Objetivo ENEM:</span>{" "}
               {trilha.metaEnem}
             </p>
           ) : null}
@@ -443,11 +476,11 @@ export function ProgressoDetalheView({
       </div>
 
       {proficiencia.ultimoSimulado ? (
-        <p className="text-center text-xs text-white/30">
+        <p className="text-center text-xs text-osmo-subtle">
           <Link
             href={`/simulados/${proficiencia.ultimoSimulado.id}/resultado`}
             className={cn(
-              "underline-offset-2 hover:text-white/50 hover:underline",
+              "underline-offset-2 hover:text-osmo-muted hover:underline",
             )}
           >
             Ver resultado do último simulado (

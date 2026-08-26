@@ -17,10 +17,10 @@ export function ProgressoStreakCard({ ritmo }: ProgressoStreakCardProps) {
 
   return (
     <ProgressoCard icon={<Flame className="size-4" />} title="Ritmo da semana">
-      <p className="text-2xl font-medium tracking-tight text-white sm:text-3xl">
+      <p className="text-2xl font-medium tracking-tight text-osmo sm:text-3xl">
         {labelDias}
       </p>
-      <p className="mt-0.5 text-[11px] text-white/40 sm:mt-1 sm:text-xs">
+      <p className="mt-0.5 text-[11px] text-osmo-subtle sm:mt-1 sm:text-xs">
         com prática esta semana
       </p>
 
@@ -31,8 +31,8 @@ export function ProgressoStreakCard({ ritmo }: ProgressoStreakCardProps) {
               className={cn(
                 "flex size-6 items-center justify-center rounded-full border transition sm:size-7",
                 dia.ativo
-                  ? "border-[#b0ff57]/40 bg-[#b0ff57] text-black"
-                  : "border-white/10 bg-white/[0.03] text-white/20",
+                  ? "border-[color-mix(in_srgb,var(--osmo-accent)_40%,transparent)] bg-osmo-accent text-[var(--osmo-accent-fg)]"
+                  : "border-[var(--osmo-border)] bg-[var(--osmo-hover)] text-osmo-subtle",
                 dia.hoje && !dia.ativo && "ring-1 ring-white/25",
               )}
             >
@@ -45,7 +45,7 @@ export function ProgressoStreakCard({ ritmo }: ProgressoStreakCardProps) {
             <span
               className={cn(
                 "text-[8px] uppercase tracking-wide sm:text-[9px]",
-                dia.hoje ? "text-white/70" : "text-white/30",
+                dia.hoje ? "text-osmo-muted" : "text-osmo-subtle",
               )}
             >
               {dia.label}
@@ -54,15 +54,15 @@ export function ProgressoStreakCard({ ritmo }: ProgressoStreakCardProps) {
         ))}
       </div>
 
-      <div className="mt-4 flex flex-col gap-2 border-t border-white/[0.06] pt-3 text-[11px] text-white/45 sm:mt-5 sm:flex-row sm:items-center sm:gap-4 sm:pt-4 sm:text-xs">
+      <div className="mt-4 flex flex-col gap-2 border-t border-[var(--osmo-border)] pt-3 text-[11px] text-osmo-muted sm:mt-5 sm:flex-row sm:items-center sm:gap-4 sm:pt-4 sm:text-xs">
         <span className="inline-flex items-center gap-1.5">
-          <Flame className="size-3.5 text-[#b0ff57]" />
+          <Flame className="size-3.5 text-osmo-accent" />
           {ritmo.sequenciaAtual > 0
             ? `${ritmo.sequenciaAtual} dia${ritmo.sequenciaAtual === 1 ? "" : "s"} seguidos`
             : "Sem sequência ativa"}
         </span>
         {ritmo.melhorSequencia > 0 ? (
-          <span className="text-white/30">
+          <span className="text-osmo-subtle">
             Melhor: {ritmo.melhorSequencia} dia
             {ritmo.melhorSequencia === 1 ? "" : "s"}
           </span>

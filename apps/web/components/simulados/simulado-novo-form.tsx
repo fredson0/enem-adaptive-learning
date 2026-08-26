@@ -40,6 +40,7 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
   const [anosSelecionados, setAnosSelecionados] = useState<number[]>([]);
   const [termosBusca, setTermosBusca] = useState("");
   const [pedidoIa, setPedidoIa] = useState("");
+  const [priorizarNaoDominadas, setPriorizarNaoDominadas] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [disponiveis, setDisponiveis] = useState<number | null>(null);
@@ -49,6 +50,12 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
     const areaParam = searchParams.get("area");
     const quantidadeParam = searchParams.get("quantidade");
     const assuntoParam = searchParams.get("assunto");
+    const anoParam = searchParams.get("ano");
+    const priorizarParam = searchParams.get("priorizar");
+
+    if (priorizarParam === "1" || priorizarParam === "true") {
+      setPriorizarNaoDominadas(true);
+    }
 
     if (areaParam && AREA_OPTIONS.some((option) => option.value === areaParam)) {
       setArea(areaParam);
@@ -70,6 +77,13 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
       setPedidoIa(
         `${quantidadeParam ?? modo.quantidades[0]} questões de ${areaLabel.toLowerCase()} sobre ${assunto.toLowerCase()}`,
       );
+    }
+
+    if (anoParam) {
+      const ano = Number(anoParam);
+      if (Number.isFinite(ano)) {
+        setAnosSelecionados([ano]);
+      }
     }
   }, [searchParams, modo.quantidades, area]);
 
@@ -117,6 +131,7 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
         quantidade,
         ...(anosSelecionados.length ? { anos: anosSelecionados } : {}),
         ...(termos.length ? { termosBusca: termos } : {}),
+        priorizarNaoDominadas,
       });
 
       router.push(`/simulados/${result.id}`);
@@ -152,9 +167,9 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-5">
-        <p className="text-sm font-medium text-white">{modo.label}</p>
-        <p className="mt-1 text-sm text-white/50">{modo.description}</p>
+      <div className="rounded-[14px] border border-[var(--osmo-border)] bg-[var(--osmo-card)] p-5">
+        <p className="text-sm font-medium text-osmo">{modo.label}</p>
+        <p className="mt-1 text-sm text-osmo-muted">{modo.description}</p>
         {modo.usaCronometro ? (
           <p className="mt-3 text-xs text-amber-200/80">
             Gabarito revelado apenas no resultado · ~4 minutos por questão
@@ -163,15 +178,15 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
       </div>
 
       {modo.permitePedidoIa ? (
-        <div className="flex gap-2 rounded-full border border-white/10 bg-[#111] p-1">
+        <div className="flex gap-2 rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-hover)] p-1">
           <button
             type="button"
             onClick={() => setFormModo("ia")}
             className={cn(
               "flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm transition",
               formModo === "ia"
-                ? "bg-white text-black"
-                : "text-white/55 hover:text-white",
+                ? "bg-[var(--osmo-text)] text-[var(--osmo-canvas)]"
+                : "text-osmo-muted hover:text-osmo",
             )}
           >
             <Sparkles className="size-4" strokeWidth={1.75} />
@@ -183,8 +198,8 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
             className={cn(
               "flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm transition",
               formModo === "manual"
-                ? "bg-white text-black"
-                : "text-white/55 hover:text-white",
+                ? "bg-[var(--osmo-text)] text-[var(--osmo-canvas)]"
+                : "text-osmo-muted hover:text-osmo",
             )}
           >
             <SlidersHorizontal className="size-4" strokeWidth={1.75} />
@@ -196,16 +211,16 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
       {formModo === "ia" && modo.permitePedidoIa ? (
         <form
           onSubmit={handleIaSubmit}
-          className="space-y-6 rounded-[14px] border border-white/[0.06] bg-[#161616] p-8"
+          className="space-y-6 rounded-[14px] border border-[var(--osmo-border)] bg-[var(--osmo-card)] p-8"
         >
           <label className="block">
-            <span className="text-sm text-white/55">O que você quer praticar?</span>
+            <span className="text-sm text-osmo-muted">O que você quer praticar?</span>
             <textarea
               value={pedidoIa}
               onChange={(e) => setPedidoIa(e.target.value)}
               rows={4}
               placeholder="Descreva área, quantidade, assuntos e anos..."
-              className="mt-2 w-full resize-none rounded-[10px] border border-white/10 bg-[#111] px-4 py-3 text-white outline-none focus:border-white/20"
+              className="mt-2 w-full resize-none rounded-[10px] border border-[var(--osmo-border)] bg-[var(--osmo-hover)] px-4 py-3 text-osmo outline-none focus:border-[color-mix(in_srgb,var(--osmo-text)_20%,transparent)]"
             />
           </label>
 
@@ -215,7 +230,7 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
                 key={exemplo}
                 type="button"
                 onClick={() => setPedidoIa(exemplo)}
-                className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/55 transition hover:border-white/20 hover:text-white/80"
+                className="rounded-full border border-[var(--osmo-border)] px-3 py-1 text-xs text-osmo-muted transition hover:border-[color-mix(in_srgb,var(--osmo-text)_15%,transparent)] hover:text-osmo"
               >
                 {exemplo}
               </button>
@@ -227,7 +242,7 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
           <button
             type="submit"
             disabled={loading || pedidoIa.trim().length < 10}
-            className="w-full rounded-full bg-white px-4 py-3 text-sm font-medium text-black transition hover:bg-white/90 disabled:opacity-60"
+            className="w-full rounded-full bg-osmo-accent px-4 py-3 text-sm font-medium transition hover:opacity-90 disabled:opacity-60"
           >
             {loading ? "IA montando simulado…" : "Gerar simulado com IA"}
           </button>
@@ -235,17 +250,17 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
       ) : (
         <form
           onSubmit={handleManualSubmit}
-          className="space-y-6 rounded-[14px] border border-white/[0.06] bg-[#161616] p-8"
+          className="space-y-6 rounded-[14px] border border-[var(--osmo-border)] bg-[var(--osmo-card)] p-8"
         >
           {(modo.areaObrigatoria || formModo === "manual") && (
             <label className="block">
-              <span className="text-sm text-white/55">
+              <span className="text-sm text-osmo-muted">
                 Área {modo.areaObrigatoria ? "" : "(opcional)"}
               </span>
               <select
                 value={area}
                 onChange={(e) => setArea(e.target.value)}
-                className="mt-2 w-full rounded-[10px] border border-white/10 bg-[#111] px-4 py-3 text-white outline-none focus:border-white/20"
+                className="mt-2 w-full rounded-[10px] border border-[var(--osmo-border)] bg-[var(--osmo-hover)] px-4 py-3 text-osmo outline-none focus:border-[color-mix(in_srgb,var(--osmo-text)_20%,transparent)]"
               >
                 {AREA_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -257,11 +272,11 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
           )}
 
           <label className="block">
-            <span className="text-sm text-white/55">Quantidade de questões</span>
+            <span className="text-sm text-osmo-muted">Quantidade de questões</span>
             <select
               value={quantidade}
               onChange={(e) => setQuantidade(Number(e.target.value))}
-              className="mt-2 w-full rounded-[10px] border border-white/10 bg-[#111] px-4 py-3 text-white outline-none focus:border-white/20"
+              className="mt-2 w-full rounded-[10px] border border-[var(--osmo-border)] bg-[var(--osmo-hover)] px-4 py-3 text-osmo outline-none focus:border-[color-mix(in_srgb,var(--osmo-text)_20%,transparent)]"
             >
               {modo.quantidades.map((qtd) => (
                 <option key={qtd} value={qtd}>
@@ -272,9 +287,9 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
           </label>
 
           <div>
-            <span className="text-sm text-white/55">
+            <span className="text-sm text-osmo-muted">
               Anos{" "}
-              <span className="text-white/35">(vazio = todos)</span>
+              <span className="text-osmo-subtle">(vazio = todos)</span>
             </span>
             <div className="mt-3 flex max-h-32 flex-wrap gap-2 overflow-y-auto tutor-prompt-scroll">
               {ANOS_ENEM.map((ano) => {
@@ -287,8 +302,8 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
                     className={cn(
                       "rounded-full px-3 py-1 text-xs transition",
                       ativo
-                        ? "bg-white text-black"
-                        : "border border-white/10 text-white/55 hover:border-white/20",
+                        ? "bg-[var(--osmo-text)] text-[var(--osmo-canvas)]"
+                        : "border border-[var(--osmo-border)] text-osmo-muted hover:border-[color-mix(in_srgb,var(--osmo-text)_15%,transparent)]",
                     )}
                   >
                     {ano}
@@ -299,20 +314,35 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
           </div>
 
           <label className="block">
-            <span className="text-sm text-white/55">
+            <span className="text-sm text-osmo-muted">
               Assunto no enunciado{" "}
-              <span className="text-white/35">(opcional)</span>
+              <span className="text-osmo-subtle">(opcional)</span>
             </span>
             <input
               type="text"
               value={termosBusca}
               onChange={(e) => setTermosBusca(e.target.value)}
               placeholder="Ex.: função, gráfico, interpretação"
-              className="mt-2 w-full rounded-[10px] border border-white/10 bg-[#111] px-4 py-3 text-white outline-none focus:border-white/20"
+              className="mt-2 w-full rounded-[10px] border border-[var(--osmo-border)] bg-[var(--osmo-hover)] px-4 py-3 text-osmo outline-none focus:border-[color-mix(in_srgb,var(--osmo-text)_20%,transparent)]"
             />
           </label>
 
-          <p className="text-sm text-white/45">
+          <label className="flex cursor-pointer items-start gap-3 rounded-[10px] border border-[var(--osmo-border)] bg-[var(--osmo-hover)] px-4 py-3">
+            <input
+              type="checkbox"
+              checked={priorizarNaoDominadas}
+              onChange={(e) => setPriorizarNaoDominadas(e.target.checked)}
+              className="mt-0.5 size-4 rounded border-[var(--osmo-border)] bg-transparent accent-[var(--osmo-accent)]"
+            />
+            <span className="text-sm leading-snug text-osmo-muted">
+              Priorizar questões que você ainda não dominou
+              <span className="mt-0.5 block text-xs text-osmo-subtle">
+                Cada acerto conta uma vez no progresso — repetir não aumenta a cobertura.
+              </span>
+            </span>
+          </label>
+
+          <p className="text-sm text-osmo-subtle">
             {contando
               ? "Contando questões disponíveis…"
               : disponiveis !== null
@@ -325,7 +355,7 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
           <button
             type="submit"
             disabled={loading || (disponiveis !== null && disponiveis < quantidade)}
-            className="w-full rounded-full bg-white px-4 py-3 text-sm font-medium text-black transition hover:bg-white/90 disabled:opacity-60"
+            className="w-full rounded-full bg-osmo-accent px-4 py-3 text-sm font-medium transition hover:opacity-90 disabled:opacity-60"
           >
             {loading ? "Gerando…" : "Começar simulado"}
           </button>
@@ -337,7 +367,7 @@ function NovoSimuladoFormInner({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
 
 export function SimuladoNovoForm({ modoSlug }: { modoSlug: ModoSimuladoSlug }) {
   return (
-    <Suspense fallback={<p className="text-sm text-white/45">Carregando…</p>}>
+    <Suspense fallback={<p className="text-sm text-osmo-muted">Carregando…</p>}>
       <NovoSimuladoFormInner modoSlug={modoSlug} />
     </Suspense>
   );

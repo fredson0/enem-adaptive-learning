@@ -54,7 +54,7 @@ export function ProgressoRadarChart({ areas }: ProgressoRadarChartProps) {
   return (
     <ProgressoCard icon={<Radar className="size-4" />} title="Mapa ENEM">
       {!temDados ? (
-        <p className="py-8 text-center text-sm text-white/40">
+        <p className="py-8 text-center text-sm text-osmo-muted">
           Faça treinos em diferentes áreas para ver seu mapa.
         </p>
       ) : (
@@ -71,7 +71,7 @@ export function ProgressoRadarChart({ areas }: ProgressoRadarChartProps) {
                   key={nivel}
                   d={d}
                   fill="none"
-                  stroke="rgba(255,255,255,0.08)"
+                  stroke="var(--osmo-border)"
                   strokeWidth={1}
                 />
               );
@@ -86,23 +86,24 @@ export function ProgressoRadarChart({ areas }: ProgressoRadarChartProps) {
                   y1={cy}
                   x2={fim.x}
                   y2={fim.y}
-                  stroke="rgba(255,255,255,0.06)"
+                  stroke="var(--osmo-border)"
                   strokeWidth={1}
+                  strokeOpacity={0.65}
                 />
               );
             })}
 
             <polygon
               points={pontosData}
-              fill="rgba(176,255,87,0.15)"
-              stroke="#b0ff57"
+              fill="color-mix(in srgb, var(--osmo-accent) 18%, transparent)"
+              stroke="var(--osmo-accent)"
               strokeWidth={2}
             />
 
             {valores.map((valor, indice) => {
               if (valor <= 0) return null;
               const p = pontoNoEixo(indice, valor, raioMax, cx, cy, total);
-              const cor = AREA_CORES[AREA_ORDEM_RADAR[indice]] ?? "#b0ff57";
+              const cor = AREA_CORES[AREA_ORDEM_RADAR[indice]] ?? "var(--osmo-accent)";
               return (
                 <circle
                   key={AREA_ORDEM_RADAR[indice]}
@@ -110,7 +111,7 @@ export function ProgressoRadarChart({ areas }: ProgressoRadarChartProps) {
                   cy={p.y}
                   r={4}
                   fill={cor}
-                  stroke="#161616"
+                  stroke="var(--osmo-card)"
                   strokeWidth={1.5}
                 />
               );
@@ -121,21 +122,21 @@ export function ProgressoRadarChart({ areas }: ProgressoRadarChartProps) {
             {AREA_ORDEM_RADAR.map((slug) => {
               const area = porSlug.get(slug);
               const semPratica = !area || area.totalQuestoes === 0;
-              const cor = AREA_CORES[slug] ?? "#b0ff57";
+              const cor = AREA_CORES[slug] ?? "var(--osmo-accent)";
 
               return (
                 <div
                   key={slug}
                   className="flex items-center justify-between gap-1.5 text-[10px] sm:gap-2 sm:text-[11px]"
                 >
-                  <span className="flex items-center gap-1.5 text-white/50">
+                  <span className="flex items-center gap-1.5 text-osmo-muted">
                     <span
                       className="size-1.5 rounded-full"
                       style={{ backgroundColor: cor }}
                     />
                     {AREA_SIGLAS[slug]}
                   </span>
-                  <span className="tabular-nums text-white/70">
+                  <span className="tabular-nums text-osmo">
                     {semPratica ? "—" : `${area.score}%`}
                   </span>
                 </div>

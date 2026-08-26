@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { METRICAS_REPOSITORY } from './core/application/ports/metricas.repository.port';
 import { CalcularProficienciaUseCase } from './core/application/use-cases/calcular-proficiencia.use-case';
+import { ObterCoberturaUseCase } from './core/application/use-cases/obter-cobertura.use-case';
 import {
   ObterContextoTutorUseCase,
   ObterEvolucaoUseCase,
@@ -30,6 +31,7 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
     SalvarDiagnosticoTrilhaUseCase,
     MarcarEtapaTrilhaUseCase,
     MarcarChecklistIaUseCase,
+    ObterCoberturaUseCase,
     {
       provide: METRICAS_REPOSITORY,
       useClass: PrismaMetricasRepository,
@@ -40,6 +42,7 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
     ObterContextoTutorUseCase,
     ObterLacunasUseCase,
     ObterTrilhaUseCase,
+    ObterCoberturaUseCase,
     METRICAS_REPOSITORY,
   ],
 })

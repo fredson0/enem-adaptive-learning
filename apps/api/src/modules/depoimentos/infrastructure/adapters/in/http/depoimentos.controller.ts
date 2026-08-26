@@ -9,9 +9,9 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import {
   CurrentUser,
-  type JwtPayload,
 } from '../../../../../../infrastructure/auth/current-user.decorator';
 import { JwtAuthGuard } from '../../../../../../infrastructure/auth/jwt-auth.guard';
+import type { JwtPayload } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import { CriarDepoimentoUseCase } from '../../../../core/application/use-cases/criar-depoimento.use-case';
 import { ListarDepoimentosPublicosUseCase } from '../../../../core/application/use-cases/listar-depoimentos-publicos.use-case';
 import { ObterMeuDepoimentoUseCase } from '../../../../core/application/use-cases/obter-meu-depoimento.use-case';

@@ -67,6 +67,43 @@ export type LacunasResponse = {
   }[];
 };
 
+export type CoberturaResumo = {
+  dominadas: number;
+  disponiveis: number;
+  tentadas: number;
+  percentual: number;
+};
+
+export type CoberturaArea = CoberturaResumo & {
+  area: string;
+  slug: string;
+  label: string;
+  score: number;
+};
+
+export type CoberturaAssunto = CoberturaResumo & {
+  assuntoId: string;
+  nome: string;
+  areaSlug: string;
+};
+
+export type CoberturaAno = CoberturaResumo & {
+  ano: number;
+  completo: boolean;
+};
+
+export type CoberturaResponse = {
+  areas: CoberturaArea[];
+  assuntos: CoberturaAssunto[];
+  anos: CoberturaAno[];
+  progressoPorAssunto: Record<string, number>;
+  coberturaPorAssunto: Record<string, CoberturaResumo>;
+};
+
+export function fetchCobertura() {
+  return apiFetch<CoberturaResponse>("/metricas/cobertura");
+}
+
 export function fetchProficiencia() {
   return apiFetch<ProficienciaResponse>("/metricas/proficiencia");
 }

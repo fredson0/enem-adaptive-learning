@@ -15,7 +15,7 @@ function TendenciaMini({ valor }: { valor: TendenciaArea }) {
   if (valor === null) return null;
   if (valor > 0) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-[#b0ff57]">
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-osmo-accent">
         <TrendingUp className="size-2.5" />+{valor}%
       </span>
     );
@@ -43,13 +43,20 @@ export function ProgressoAreasList({
   tendencias,
 }: ProgressoAreasListProps) {
   return (
-    <ul className="divide-y divide-white/[0.06]">
+    <ul className="divide-y divide-[var(--osmo-border)]">
       {areas.map((area) => {
-        const cor = AREA_CORES[area.slug] ?? "#b0ff57";
+        const cor = AREA_CORES[area.slug] ?? "var(--osmo-accent)";
         const sigla = AREA_SIGLAS[area.slug] ?? "—";
         const ehPrioridade = lacunaSlug === area.slug;
-        const semPratica = area.totalQuestoes === 0;
+        const semPratica = area.acertos === 0;
         const tendencia = tendencias.get(area.slug) ?? null;
+
+        const subtitulo =
+          semPratica && area.totalQuestoes > 0
+            ? "Sem prática ainda"
+            : semPratica
+              ? "Sem questões no banco"
+              : `${area.acertos}/${area.totalQuestoes} dominadas`;
 
         return (
           <li key={area.area}>
@@ -57,7 +64,8 @@ export function ProgressoAreasList({
               href={`/trilha/${area.slug}`}
               className={cn(
                 "flex items-center gap-2.5 py-2.5 transition first:pt-0 last:pb-0 sm:gap-3 sm:py-3.5",
-                ehPrioridade && "rounded-xl bg-white/[0.03] px-2 -mx-2",
+                ehPrioridade &&
+                  "rounded-xl bg-[var(--osmo-hover)] px-2 -mx-2",
               )}
             >
               <div
@@ -76,22 +84,20 @@ export function ProgressoAreasList({
                     className={cn(
                       "truncate text-[13px] sm:text-sm",
                       ehPrioridade
-                        ? "font-medium text-white"
-                        : "text-white/75",
+                        ? "font-medium text-osmo"
+                        : "text-osmo-muted",
                     )}
                   >
                     {area.label}
                   </p>
                   {ehPrioridade ? (
-                    <span className="shrink-0 rounded-full bg-[#b0ff57]/15 px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-wide text-[#b0ff57] sm:text-[9px]">
+                    <span className="shrink-0 rounded-full bg-[color-mix(in_srgb,var(--osmo-accent)_15%,transparent)] px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-wide text-osmo-accent sm:text-[9px]">
                       Foco
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-0.5 text-[10px] text-white/35 sm:text-[11px]">
-                  {semPratica
-                    ? "Sem prática ainda"
-                    : `${area.acertos}/${area.totalQuestoes} acertos`}
+                <p className="mt-0.5 text-[10px] text-osmo-subtle sm:text-[11px]">
+                  {subtitulo}
                 </p>
               </div>
 
@@ -115,7 +121,7 @@ export function ProgressoAreasList({
                   strokeWidth={3}
                   className="hidden sm:block"
                 />
-                <ChevronRight className="hidden size-4 text-white/20 sm:block" />
+                <ChevronRight className="hidden size-4 text-osmo-subtle sm:block" />
               </div>
             </Link>
           </li>

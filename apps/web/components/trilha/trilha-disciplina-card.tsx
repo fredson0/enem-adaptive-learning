@@ -12,6 +12,8 @@ type TrilhaAssuntoCardProps = {
   assunto: TrilhaAssuntoCatalogo;
   emFoco?: boolean;
   progresso?: number;
+  dominadas?: number;
+  disponiveis?: number;
 };
 
 function montarHrefAssunto(assunto: TrilhaAssuntoCatalogo): string {
@@ -30,6 +32,8 @@ export function TrilhaAssuntoCard({
   assunto,
   emFoco = false,
   progresso = 0,
+  dominadas,
+  disponiveis,
 }: TrilhaAssuntoCardProps) {
   const href = montarHrefAssunto(assunto);
   const inicial = assunto.nome.charAt(0).toUpperCase();
@@ -41,7 +45,7 @@ export function TrilhaAssuntoCard({
     <Link href={href} className="group block">
       <div
         className={cn(
-          "relative aspect-[5/4] overflow-hidden rounded-[12px] border border-white/[0.06] bg-[#161616] transition duration-300 group-hover:border-white/15 group-hover:-translate-y-0.5",
+          "osmo-surface-dark relative aspect-[5/4] overflow-hidden rounded-[12px] border border-white/[0.06] bg-[#161616] transition duration-300 group-hover:border-white/15 group-hover:-translate-y-0.5",
           emFoco && "ring-1 ring-[#b0ff57]/40",
         )}
       >
@@ -86,9 +90,14 @@ export function TrilhaAssuntoCard({
         </div>
       </div>
 
-      <p className="mt-2 line-clamp-2 text-xs text-white/70 transition group-hover:text-white sm:mt-2.5 sm:text-sm">
+      <p className="mt-2 line-clamp-2 text-xs text-osmo-muted transition group-hover:text-osmo sm:mt-2.5 sm:text-sm">
         {assunto.nome}
       </p>
+      {disponiveis !== undefined && disponiveis > 0 ? (
+        <p className="mt-0.5 text-[10px] tabular-nums text-osmo-subtle sm:text-[11px]">
+          {dominadas ?? 0}/{disponiveis} dominadas
+        </p>
+      ) : null}
     </Link>
   );
 }
@@ -112,7 +121,7 @@ export function TrilhaDisciplinaCard({
     <Link href={href} className="group block">
       <div
         className={cn(
-          "relative aspect-[5/4] overflow-hidden rounded-[12px] border border-white/[0.06] bg-[#161616] transition duration-300 group-hover:border-white/15 group-hover:-translate-y-0.5",
+          "osmo-surface-dark relative aspect-[5/4] overflow-hidden rounded-[12px] border border-white/[0.06] bg-[#161616] transition duration-300 group-hover:border-white/15 group-hover:-translate-y-0.5",
           emFoco && "ring-1 ring-[#b0ff57]/40",
         )}
       >
@@ -157,10 +166,10 @@ export function TrilhaDisciplinaCard({
         </div>
       </div>
 
-      <p className="mt-2 line-clamp-2 text-xs text-white/70 transition group-hover:text-white sm:mt-2.5 sm:text-sm">
+      <p className="mt-2 line-clamp-2 text-xs text-osmo-muted transition group-hover:text-osmo sm:mt-2.5 sm:text-sm">
         {disciplina.nome}
       </p>
-      <p className="mt-0.5 text-[10px] text-white/35 sm:text-[11px]">
+      <p className="mt-0.5 text-[10px] text-osmo-subtle sm:text-[11px]">
         {disciplina.assuntos.length} assunto
         {disciplina.assuntos.length === 1 ? "" : "s"}
       </p>

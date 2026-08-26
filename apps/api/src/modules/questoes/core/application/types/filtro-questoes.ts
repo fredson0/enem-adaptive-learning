@@ -8,4 +8,6 @@ export type FiltroQuestoes = {
   anos?: number[];
   /** Busca no enunciado (OR entre termos) — ex.: função, eletromagnetismo */
   termosBusca?: string[];
+  /** Questões já dominadas (acertou ao menos 1x) — excluídas na geração. */
+  excluirIds?: string[];
 };

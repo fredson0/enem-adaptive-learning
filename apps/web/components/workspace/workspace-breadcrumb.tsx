@@ -33,7 +33,7 @@ export function WorkspaceBreadcrumb() {
             >
               {index > 0 && (
                 <ChevronRight
-                  className="size-3 shrink-0 text-white/25"
+                  className="size-3 shrink-0 text-osmo-subtle"
                   strokeWidth={2}
                   aria-hidden
                 />
@@ -44,8 +44,8 @@ export function WorkspaceBreadcrumb() {
                   className={cn(
                     "block max-w-[34vw] truncate px-2.5 py-1.5 text-xs sm:max-w-none sm:px-3 sm:text-[13px]",
                     isDeepCurrent
-                      ? "rounded-[8px] bg-[#2a2a2a] text-white/90"
-                      : "rounded-full bg-[#1c1c1c] text-white/60",
+                      ? "rounded-[8px] bg-[var(--osmo-chip-active)] text-osmo"
+                      : "rounded-full bg-[var(--osmo-chip)] text-osmo-muted",
                   )}
                 >
                   {crumb.label}
@@ -53,7 +53,7 @@ export function WorkspaceBreadcrumb() {
               ) : (
                 <Link
                   href={crumb.href}
-                  className="block max-w-[34vw] truncate rounded-full bg-[#1c1c1c] px-2.5 py-1.5 text-xs text-white/60 transition-colors hover:bg-[#222] hover:text-white/85 sm:max-w-none sm:px-3 sm:text-[13px]"
+                  className="block max-w-[34vw] truncate rounded-full bg-[var(--osmo-chip)] px-2.5 py-1.5 text-xs text-osmo-muted transition-colors hover:bg-[var(--osmo-hover)] hover:text-osmo sm:max-w-none sm:px-3 sm:text-[13px]"
                 >
                   {crumb.label}
                 </Link>

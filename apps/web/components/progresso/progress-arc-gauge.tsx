@@ -45,7 +45,7 @@ export function ProgressArcGauge({
               y1={y1}
               x2={x2}
               y2={y2}
-              stroke={active ? "white" : "rgba(255,255,255,0.28)"}
+              stroke={active ? "var(--osmo-text)" : "var(--osmo-border)"}
               strokeWidth={2}
               strokeLinecap="round"
             />
@@ -55,10 +55,10 @@ export function ProgressArcGauge({
 
       <div className="pointer-events-none absolute inset-x-0 top-[36%] flex justify-center sm:top-[38%]">
         <div className="flex max-w-[92%] items-center">
-          <span className="truncate rounded-l-full bg-black px-2 py-1 text-xs font-medium text-white sm:px-3 sm:py-1.5 sm:text-sm">
+          <span className="truncate rounded-l-full bg-[var(--osmo-text)] px-2 py-1 text-xs font-medium text-[var(--osmo-canvas)] sm:px-3 sm:py-1.5 sm:text-sm">
             {labelLeft ?? `${clamped}%`}
           </span>
-          <span className="truncate rounded-r-full bg-white/20 px-2 py-1 text-xs font-medium text-white/90 backdrop-blur-sm sm:px-3 sm:py-1.5 sm:text-sm">
+          <span className="truncate rounded-r-full bg-[var(--osmo-hover)] px-2 py-1 text-xs font-medium text-osmo-muted sm:px-3 sm:py-1.5 sm:text-sm">
             {labelRight ?? (clamped >= 100 ? "Concluída" : "Em andamento")}
           </span>
         </div>

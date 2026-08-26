@@ -31,6 +31,22 @@ export type ResumoSimuladosBruto = {
   mediaGeralPercentual: number | null;
 };
 
+export type QuestaoDominioBruto = {
+  id: string;
+  area: AreaEnem;
+  ano: number;
+  disciplina: string;
+  contexto: string;
+  introducaoAlternativas: string | null;
+};
+
+export type CoberturaBruta = {
+  dominadas: QuestaoDominioBruto[];
+  tentadas: QuestaoDominioBruto[];
+  disponiveisPorArea: Record<AreaEnem, number>;
+  disponiveisPorAno: { ano: number; total: number }[];
+};
+
 export interface MetricasRepositoryPort {
   agregarPorArea(userId: string): Promise<EstatisticaAreaBruta[]>;
   upsertProficiencia(
@@ -55,4 +71,6 @@ export interface MetricasRepositoryPort {
   obterTrilhaEstado(userId: string): Promise<TrilhaEstado | null>;
   salvarTrilhaEstado(userId: string, estado: TrilhaEstado): Promise<void>;
   obterTempoDiarioMinutos(userId: string): Promise<number>;
+  obterCoberturaBruta(userId: string): Promise<CoberturaBruta>;
+  obterIdsQuestoesDominadas(userId: string): Promise<string[]>;
 }

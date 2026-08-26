@@ -65,6 +65,9 @@ export class CriarSimuladoDto {
   @IsIn(QUANTIDADES)
   quantidade!: number;
 
+  @IsOptional()
+  priorizarNaoDominadas?: boolean;
+
   get areaEnum() {
     return this.area ? parseAreaEnem(this.area) : undefined;
   }

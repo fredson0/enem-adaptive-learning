@@ -47,7 +47,7 @@ export default function TrilhaPage() {
   if (loading) {
     return (
       <WorkspaceSection contentClassName={trilhaContentClass}>
-        <p className="text-center text-sm text-white/45">
+        <p className="text-center text-sm text-osmo-muted">
           Montando sua trilha personalizada…
         </p>
       </WorkspaceSection>

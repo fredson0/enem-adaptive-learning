@@ -28,7 +28,7 @@ export function WorkspaceChrome() {
     <div
       className={cn(
         "pointer-events-none fixed inset-x-0 top-0 z-40 transition-[transform,opacity] duration-300 ease-out",
-        "border-b border-white/[0.05] bg-[#111111]/95 backdrop-blur-md lg:border-b-0 lg:bg-transparent lg:backdrop-blur-none",
+        "border-b border-[var(--osmo-border)] bg-[var(--osmo-header)]/95 backdrop-blur-md lg:border-b-0 lg:bg-transparent lg:backdrop-blur-none",
         workspaceChromeOffsetClass,
         chromeVisible
           ? "translate-y-0 opacity-100"
@@ -41,7 +41,7 @@ export function WorkspaceChrome() {
             type="button"
             onClick={open}
             aria-label="Abrir menu"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-[var(--osmo-sidebar)] text-white/80 transition-colors hover:text-white"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-sidebar)] text-osmo-muted transition-colors hover:text-osmo"
           >
             <Menu className="size-4" strokeWidth={1.75} />
           </button>

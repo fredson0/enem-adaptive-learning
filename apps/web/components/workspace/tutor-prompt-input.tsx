@@ -192,7 +192,7 @@ export function TutorPromptInput({
   const promptField = (expanded: boolean) => (
     <div
       className={cn(
-        "relative rounded-2xl border border-white/10 bg-[rgba(15,15,20,0.55)] backdrop-blur-md",
+        "relative rounded-2xl border border-[var(--osmo-border)] bg-[var(--osmo-card)]",
         "shadow-[0_1px_2px_0_rgba(0,0,0,0.06)]",
         expanded && "flex min-h-0 flex-1 flex-col",
       )}
@@ -249,7 +249,7 @@ export function TutorPromptInput({
             : { scrollBehavior: "smooth" }
         }
         className={cn(
-          "w-full resize-none bg-transparent px-3 py-2.5 text-sm leading-relaxed text-white outline-none placeholder:text-white/40 sm:px-4 sm:py-3.5 sm:text-[15px]",
+          "w-full resize-none bg-transparent px-3 py-2.5 text-sm leading-relaxed text-osmo outline-none placeholder:text-osmo-subtle sm:px-4 sm:py-3.5 sm:text-[15px]",
           "overflow-y-auto disabled:cursor-not-allowed disabled:opacity-60 tutor-prompt-scroll",
           expanded ? "min-h-0 flex-1 pr-10 pt-3 sm:pr-12 sm:pt-4" : "pr-10 sm:pr-12",
         )}

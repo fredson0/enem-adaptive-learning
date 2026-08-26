@@ -47,7 +47,7 @@ export function UserAvatar({
     return (
       <div
         className={cn(
-          "flex shrink-0 items-center justify-center rounded-full bg-[#2a2a2a] text-xs font-semibold text-white",
+          "flex shrink-0 items-center justify-center rounded-full bg-[var(--osmo-active)] text-xs font-semibold text-osmo",
           className,
           initialsClassName,
         )}

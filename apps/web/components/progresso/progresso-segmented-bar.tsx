@@ -18,7 +18,7 @@ export function ProgressoSegmentedBar({
     return (
       <div
         className={cn(
-          "h-3 rounded-full border border-dashed border-white/10 bg-white/[0.03]",
+          "h-3 rounded-full border border-dashed border-[var(--osmo-border)] bg-[var(--osmo-hover)]",
           className,
         )}
       />
@@ -54,14 +54,14 @@ export function ProgressoSegmentedBar({
             key={segmento.slug}
             className="flex items-center justify-between gap-2 text-xs sm:gap-3 sm:text-sm"
           >
-            <span className="flex min-w-0 items-center gap-2 text-white/65">
+            <span className="flex min-w-0 items-center gap-2 text-osmo-muted">
               <span
                 className="size-2 shrink-0 rounded-full"
                 style={{ backgroundColor: segmento.cor }}
               />
               <span className="truncate">{segmento.label}</span>
             </span>
-            <span className="shrink-0 tabular-nums text-white/40">
+            <span className="shrink-0 tabular-nums text-osmo-subtle">
               {segmento.valor} questões
             </span>
           </li>

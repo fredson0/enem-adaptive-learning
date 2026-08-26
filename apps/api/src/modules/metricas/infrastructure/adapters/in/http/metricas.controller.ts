@@ -10,6 +10,7 @@ import { CurrentUser } from '../../../../../../infrastructure/auth/current-user.
 import { JwtAuthGuard } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import type { JwtPayload } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import { CalcularProficienciaUseCase } from '../../../../core/application/use-cases/calcular-proficiencia.use-case';
+import { ObterCoberturaUseCase } from '../../../../core/application/use-cases/obter-cobertura.use-case';
 import {
   ObterEvolucaoUseCase,
   ObterLacunasUseCase,
@@ -47,7 +48,14 @@ export class MetricasController {
     private readonly marcarEtapaTrilhaUseCase: MarcarEtapaTrilhaUseCase,
     @Inject(MarcarChecklistIaUseCase)
     private readonly marcarChecklistIaUseCase: MarcarChecklistIaUseCase,
+    @Inject(ObterCoberturaUseCase)
+    private readonly obterCoberturaUseCase: ObterCoberturaUseCase,
   ) {}
+
+  @Get('cobertura')
+  obterCobertura(@CurrentUser() user: JwtPayload) {
+    return this.obterCoberturaUseCase.execute(user.sub);
+  }
 
   @Get('proficiencia')
   obterProficiencia(@CurrentUser() user: JwtPayload) {

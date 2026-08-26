@@ -15,7 +15,7 @@ export function ProgressRing({
   percent,
   size = 48,
   strokeWidth = 3.5,
-  color = "#b0ff57",
+  color = "var(--osmo-accent)",
   empty = false,
   className,
 }: ProgressRingProps) {
@@ -38,7 +38,7 @@ export function ProgressRing({
         cy={size / 2}
         r={radius}
         fill="none"
-        stroke="rgba(255,255,255,0.08)"
+        stroke="var(--osmo-border)"
         strokeWidth={strokeWidth}
       />
       {!empty ? (
@@ -60,7 +60,9 @@ export function ProgressRing({
         y="50%"
         dominantBaseline="central"
         textAnchor="middle"
-        className="fill-white/80 text-[9px] font-medium"
+        fill="var(--osmo-text)"
+        fillOpacity={0.85}
+        className="text-[9px] font-medium"
       >
         {label}
       </text>

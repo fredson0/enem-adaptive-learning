@@ -37,5 +37,9 @@ export function buildQuestaoWhere(filtro?: FiltroQuestoes): Prisma.QuestaoWhereI
     where.OR = termos.flatMap((termo) => condicaoTermoBusca(termo));
   }
 
+  if (filtro.excluirIds?.length) {
+    where.id = { notIn: filtro.excluirIds };
+  }
+
   return where;
 }

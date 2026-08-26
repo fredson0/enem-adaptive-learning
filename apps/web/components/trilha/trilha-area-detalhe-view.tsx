@@ -9,6 +9,7 @@ import {
   adaptarAreaParaAssunto,
   getChecklistArea,
   getMetaAreaContextual,
+  getCoberturaAssunto,
   getProgressoAssunto,
 } from "@/lib/trilha-progresso";
 import type { TrilhaAssuntoCatalogo } from "@/lib/trilha-catalogo";
@@ -219,6 +220,9 @@ export function TrilhaAreaDetalheView({
   const progressoExibido = assuntoFoco
     ? getProgressoAssunto(trilha, assuntoFoco.id)
     : area.progresso;
+  const coberturaAssunto = assuntoFoco
+    ? getCoberturaAssunto(trilha, assuntoFoco.id)
+    : undefined;
   const assuntos = formatarAssuntos(areaContextual.disciplinasSugeridas);
   const metaArea = getMetaAreaContextual(
     trilha,
@@ -266,7 +270,7 @@ export function TrilhaAreaDetalheView({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               className={cn(
-                "overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br p-4 sm:rounded-[20px] sm:p-6",
+                "osmo-surface-dark overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br p-4 sm:rounded-[20px] sm:p-6",
                 AREA_GRADIENTS[area.slug] ?? "from-[#161616] to-[#111]",
               )}
             >
@@ -288,7 +292,7 @@ export function TrilhaAreaDetalheView({
                   {assuntoFoco && modalidadeId ? (
                     <Link
                       href={`/trilha/geral?modalidade=${encodeURIComponent(modalidadeId)}`}
-                      className="mt-3 inline-block text-xs text-[#b0ff57]/80 transition hover:text-[#b0ff57]"
+                      className="mt-3 inline-block text-xs text-osmo-accent transition hover:opacity-80"
                     >
                       Ver todos os assuntos desta modalidade
                     </Link>
@@ -337,10 +341,10 @@ export function TrilhaAreaDetalheView({
                       className={cn(
                         "rounded-[14px] border p-3 transition sm:rounded-[16px] sm:p-4",
                         etapa.concluida
-                          ? "border-[#b0ff57]/15 bg-[#b0ff57]/5"
+                          ? "border-[color-mix(in_srgb,var(--osmo-accent)_15%,transparent)] bg-[color-mix(in_srgb,var(--osmo-accent)_5%,transparent)]"
                           : isProxima
-                            ? "border-[#b0ff57]/25 bg-[#b0ff57]/[0.07] ring-1 ring-[#b0ff57]/10"
-                            : "border-white/[0.06] bg-black/20",
+                            ? "border-[color-mix(in_srgb,var(--osmo-accent)_25%,transparent)] bg-[color-mix(in_srgb,var(--osmo-accent)_7%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--osmo-accent)_10%,transparent)]"
+                            : "border-[var(--osmo-border)] bg-[var(--osmo-hover)]",
                       )}
                     >
                       <div className="flex items-start gap-3">
@@ -358,10 +362,10 @@ export function TrilhaAreaDetalheView({
                           className={cn(
                             "flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-medium transition",
                             etapa.concluida
-                              ? "bg-[#b0ff57]/20 text-[#b0ff57] hover:bg-[#b0ff57]/30"
+                              ? "bg-[color-mix(in_srgb,var(--osmo-accent)_20%,transparent)] text-osmo-accent hover:bg-[color-mix(in_srgb,var(--osmo-accent)_30%,transparent)]"
                               : isProxima
-                                ? "bg-[#b0ff57] text-black hover:bg-[#c4ff7a]"
-                                : "border border-white/15 bg-white/[0.04] text-white/45 hover:border-white/25",
+                                ? "bg-osmo-accent text-[var(--osmo-accent-fg)] hover:opacity-90"
+                                : "border border-[var(--osmo-border)] bg-[var(--osmo-card)] text-osmo-subtle hover:border-[color-mix(in_srgb,var(--osmo-text)_15%,transparent)]",
                             toggling && "opacity-50",
                           )}
                         >
@@ -377,21 +381,21 @@ export function TrilhaAreaDetalheView({
                         <div className="min-w-0 flex-1 space-y-1">
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div>
-                              <p className="text-[10px] uppercase tracking-[0.12em] text-white/35">
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-osmo-subtle">
                                 Etapa {index + 1}
                                 {etapa.concluida ? " · Concluída" : ""}
                               </p>
-                              <h2 className="text-sm font-medium text-white">
+                              <h2 className="text-sm font-medium text-osmo">
                                 {etapa.titulo}
                               </h2>
                             </div>
                             {isProxima ? (
-                              <span className="shrink-0 rounded-full bg-[#b0ff57]/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[#b0ff57]">
+                              <span className="shrink-0 rounded-full bg-[color-mix(in_srgb,var(--osmo-accent)_15%,transparent)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-osmo-accent">
                                 Agora
                               </span>
                             ) : null}
                           </div>
-                          <p className="text-sm text-white/45">
+                          <p className="text-sm text-osmo-muted">
                             {etapa.descricao}
                           </p>
 
@@ -428,6 +432,7 @@ export function TrilhaAreaDetalheView({
             checklistConcluidos={checklistConcluidos}
             metaArea={metaArea}
             assuntoFocoNome={assuntoFoco?.nome}
+            coberturaAssunto={coberturaAssunto}
             onToggleChecklist={onToggleChecklist}
             togglingChecklistId={togglingChecklistId}
           />

@@ -287,8 +287,8 @@ export function TutorChatView({
                   className={cn(
                     "rounded-2xl px-4 py-3 text-sm leading-relaxed sm:text-[15px]",
                     message.role === "user"
-                      ? "bg-[#1f3dbc]/90 text-white"
-                      : "border border-white/10 bg-[rgba(15,15,20,0.75)] text-white/90 backdrop-blur-md",
+                      ? "osmo-surface-dark bg-[#1f3dbc]/90 text-white"
+                      : "border border-[var(--osmo-border)] bg-[var(--osmo-card)] text-osmo backdrop-blur-md",
                   )}
                 >
                   {message.anexoUrl ? (
@@ -377,7 +377,7 @@ export function TutorChatView({
             ))}
 
             {loading && (
-              <div className="mr-auto inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-[rgba(15,15,20,0.75)] px-4 py-3 text-sm text-white/70 backdrop-blur-md">
+              <div className="mr-auto inline-flex items-center gap-2 rounded-2xl border border-[var(--osmo-border)] bg-[var(--osmo-card)] px-4 py-3 text-sm text-osmo-muted">
                 <Loader2 className="size-4 animate-spin" />
                 O tutor está pensando…
               </div>

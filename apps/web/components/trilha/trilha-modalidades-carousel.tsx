@@ -18,7 +18,7 @@ function ModalidadePreviewCard({
     >
       <div
         className={cn(
-          "relative h-[96px] overflow-hidden rounded-[12px] border border-white/[0.08] sm:h-[120px] sm:rounded-[14px]",
+          "osmo-surface-dark relative h-[96px] overflow-hidden rounded-[12px] border border-white/[0.08] sm:h-[120px] sm:rounded-[14px]",
           "transition duration-300 group-hover:border-white/20 group-hover:brightness-110",
         )}
       >

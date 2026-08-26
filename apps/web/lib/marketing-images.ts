@@ -43,7 +43,7 @@ export const MARKETING_IMAGE_PATHS = {
 } as const;
 
 /** Arquivos que já existem em `public/marketing/`. */
-const LOCAL_MARKETING_FILES = new Set([
+const LOCAL_MARKETING_FILES = new Set<string>([
   MARKETING_IMAGE_PATHS.shared.ctaPlatform,
   MARKETING_IMAGE_PATHS.shared.ctaHome,
   MARKETING_IMAGE_PATHS.comoFunciona.diagnostico,

@@ -30,16 +30,16 @@ export function TrilhaEtapasProgressBar({
               className={cn(
                 "h-full flex-1 rounded-full transition-colors",
                 etapa.concluida
-                  ? "bg-[#b0ff57]"
+                  ? "bg-osmo-accent"
                   : isProxima
-                    ? "bg-[#b0ff57]/35"
-                    : "bg-white/[0.08]",
+                    ? "bg-[color-mix(in_srgb,var(--osmo-accent)_35%,transparent)]"
+                    : "bg-[var(--osmo-border)]",
               )}
             />
           );
         })}
       </div>
-      <p className="text-[11px] text-white/35">
+      <p className="text-[11px] text-osmo-subtle">
         {etapas.filter((e) => e.concluida).length}/{etapas.length} etapas
         concluídas
       </p>

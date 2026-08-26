@@ -8,6 +8,7 @@ import {
 } from "@/components/workspace/sidebar-tree-nav";
 import { SidebarAccordion, sidebarAccordionEase } from "@/components/workspace/sidebar-accordion";
 import { UserAvatar } from "@/components/workspace/user-avatar";
+import { OsmoThemeToggle } from "@/components/workspace/osmo-theme-toggle";
 import { useWorkspaceSidebar } from "@/components/workspace/workspace-sidebar-context";
 import { cn } from "@/lib/utils";
 import {
@@ -45,7 +46,7 @@ const SECTION_BUTTON_ROW =
   "flex w-full items-center gap-3.5 rounded-xl px-4 py-4 text-left text-[15px] font-medium leading-none";
 const SECTION_ICON =
   "size-5 transition-colors duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
-const SECTION_CHEVRON = "size-4 text-white/40";
+const SECTION_CHEVRON = "size-4 text-osmo-subtle";
 
 function getSectionFromPath(pathname: string): SectionId | null {
   if (pathname.startsWith("/tutor")) return "tutor";
@@ -107,7 +108,7 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
             goToTutor();
             if (isMobile) close();
           }}
-          className="text-xl font-bold tracking-[0.16em] text-white uppercase"
+          className="text-xl font-bold tracking-[0.16em] text-osmo uppercase"
         >
           ENEM+
         </Link>
@@ -116,12 +117,12 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
             type="button"
             onClick={close}
             aria-label="Fechar menu"
-            className="flex size-9 items-center justify-center rounded-full bg-[#b0ff57] text-black transition-transform hover:scale-105"
+            className="flex size-9 items-center justify-center rounded-full bg-osmo-accent transition-transform hover:scale-105"
           >
             <X className="size-4" strokeWidth={2.25} />
           </button>
         ) : (
-          <Asterisk className="size-[18px] text-[#b0ff57]" strokeWidth={2} />
+          <Asterisk className="size-[18px] text-osmo-accent" strokeWidth={2} />
         )}
       </div>
 
@@ -136,15 +137,15 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
             SECTION_BUTTON,
             SECTION_TRANSITION,
             isTutorExpanded
-              ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
-              : "text-white/70 hover:bg-[var(--osmo-hover)] hover:text-white",
+              ? "bg-[var(--osmo-active)] text-osmo ring-1 ring-[var(--osmo-ring)]"
+              : "text-osmo-muted hover:bg-[var(--osmo-hover)] hover:text-osmo",
           )}
         >
           <span className="inline-flex items-center gap-3.5">
             <TutorIcon
               className={cn(
                 SECTION_ICON,
-                isTutorExpanded ? "text-[#ff6b6b]" : "text-white/60",
+                isTutorExpanded ? "text-[#ff6b6b]" : "text-osmo-subtle",
               )}
               strokeWidth={1.75}
             />
@@ -172,8 +173,8 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
             SECTION_BUTTON,
             SECTION_TRANSITION,
             isSimuladosExpanded || isSimuladosActive
-              ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
-              : "text-white/70 hover:bg-[var(--osmo-hover)] hover:text-white",
+              ? "bg-[var(--osmo-active)] text-osmo ring-1 ring-[var(--osmo-ring)]"
+              : "text-osmo-muted hover:bg-[var(--osmo-hover)] hover:text-osmo",
           )}
         >
           <span className="inline-flex items-center gap-3.5">
@@ -182,7 +183,7 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
                 SECTION_ICON,
                 isSimuladosExpanded || isSimuladosActive
                   ? "text-[#60a5fa]"
-                  : "text-white/60",
+                  : "text-osmo-subtle",
               )}
               strokeWidth={1.75}
             />
@@ -231,11 +232,11 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
                   SECTION_BUTTON_ROW,
                   SECTION_TRANSITION,
                   isExpanded
-                    ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
-                    : "text-white/70 hover:bg-[var(--osmo-hover)] hover:text-white",
+                    ? "bg-[var(--osmo-active)] text-osmo ring-1 ring-[var(--osmo-ring)]"
+                    : "text-osmo-muted hover:bg-[var(--osmo-hover)] hover:text-osmo",
                 )}
               >
-                <Icon className={cn(SECTION_ICON, "text-white/60")} strokeWidth={1.75} />
+                <Icon className={cn(SECTION_ICON, "text-osmo-subtle")} strokeWidth={1.75} />
                 {item.label}
               </button>
             );
@@ -243,17 +244,12 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
         </nav>
       </div>
 
-      <div className="shrink-0 p-4">
+      <div className="shrink-0 px-4 pb-4">
+        <OsmoThemeToggle />
         <Link
           href={PROFILE_NAV.href}
           onClick={guardLink(PROFILE_NAV.href)}
-          className={cn(
-            "flex items-center gap-3 rounded-[10px] px-2.5 py-2.5",
-            SECTION_TRANSITION,
-            isActivePath(pathname, PROFILE_NAV.href)
-              ? "bg-[var(--osmo-active)]"
-              : "hover:bg-[var(--osmo-hover)]",
-          )}
+          className="flex items-center gap-3 px-1 py-2"
         >
           <UserAvatar
             name={user?.nome ?? "Visitante"}
@@ -261,15 +257,15 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
             className="size-9"
           />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-white">
+            <p className="truncate text-sm font-medium text-osmo">
               {user?.nome ?? "Entrar"}
             </p>
-            <p className="truncate text-xs text-white/40">
+            <p className="truncate text-xs text-osmo-subtle">
               {user?.email ?? "Faça login para salvar"}
             </p>
           </div>
           <MoreHorizontal
-            className="size-4 shrink-0 text-white/30"
+            className="size-4 shrink-0 text-osmo-subtle"
             strokeWidth={1.75}
           />
         </Link>

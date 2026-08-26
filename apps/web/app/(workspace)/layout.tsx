@@ -21,7 +21,7 @@ export default function WorkspaceLayout({
           <TutorSessionProvider>
             <WorkspaceScrollProvider>
               <WorkspaceSidebarProvider>
-                <div className="osmo-canvas-bg relative h-screen w-screen overflow-hidden">
+                <div className="osmo-workspace osmo-canvas-bg relative h-screen w-screen overflow-hidden">
                   <WorkspaceLenisGuard />
                   <OnboardingGuard />
                   <WorkspacePageTransition>{children}</WorkspacePageTransition>

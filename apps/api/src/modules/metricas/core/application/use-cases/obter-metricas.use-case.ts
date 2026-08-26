@@ -126,12 +126,12 @@ export class ObterLacunasUseCase {
         prioridade: prio,
         mensagem:
           score === 0
-            ? `Você ainda não praticou ${label}. Comece com um simulado focado.`
+            ? `Você ainda não dominou questões de ${label}. Comece com um simulado focado.`
             : prio === 'Alta'
-              ? `${label} é sua maior lacuna (${score}% de acerto). Priorize esta semana.`
+              ? `${label} tem baixa cobertura (${score}% do banco dominado). Priorize esta semana.`
               : prio === 'Média'
-                ? `${label} precisa de reforço (${score}% de acerto).`
-                : `${label} está em bom nível (${score}%). Mantenha revisões leves.`,
+                ? `${label} precisa de mais prática (${score}% do banco dominado).`
+                : `${label} está bem coberto (${score}% do banco dominado). Mantenha revisões leves.`,
         simuladoSugerido: {
           area: slug,
           quantidade: score < 50 ? 10 : 5,

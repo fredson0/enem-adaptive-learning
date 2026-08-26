@@ -32,14 +32,14 @@ export function ProgressoEvolucaoChart({
 
   if (recentes.length < 3) {
     return (
-      <div className="rounded-[14px] border border-dashed border-white/10 bg-[#161616]/50 p-8 text-center">
-        <p className="text-sm text-white/50">
+      <div className="rounded-[14px] border border-dashed border-[var(--osmo-border)] bg-[var(--osmo-hover)] p-8 text-center">
+        <p className="text-sm text-osmo-muted">
           Complete mais {3 - recentes.length} simulado
           {3 - recentes.length === 1 ? "" : "s"} para ver sua evolução.
         </p>
         <Link
           href="/simulados/treino/novo"
-          className="mt-4 inline-flex rounded-full bg-[#b0ff57] px-5 py-2 text-sm font-medium text-black transition hover:bg-[#c4ff7a]"
+          className="mt-4 inline-flex rounded-full bg-osmo-accent px-5 py-2 text-sm font-medium transition hover:opacity-90"
         >
           Fazer treino de 5 questões
         </Link>
@@ -73,10 +73,10 @@ export function ProgressoEvolucaoChart({
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] uppercase tracking-wide text-white/35">
+            <p className="text-[10px] uppercase tracking-wide text-osmo-subtle">
               Último resultado
             </p>
-            <p className="text-2xl font-medium tabular-nums text-white">
+            <p className="text-2xl font-medium tabular-nums text-osmo">
               {ultimo.percentual}%
             </p>
           </div>
@@ -85,8 +85,8 @@ export function ProgressoEvolucaoChart({
               className={cn(
                 "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium",
                 tendencia > 0
-                  ? "bg-[#b0ff57]/15 text-[#b0ff57]"
-                  : "bg-red-500/15 text-red-300",
+                  ? "bg-[color-mix(in_srgb,var(--osmo-accent)_15%,transparent)] text-osmo-accent"
+                  : "bg-red-500/15 text-red-400",
               )}
             >
               {tendencia > 0 ? (
@@ -115,7 +115,7 @@ export function ProgressoEvolucaoChart({
                   y1={y}
                   x2={width - padX}
                   y2={y}
-                  stroke="rgba(255,255,255,0.06)"
+                  stroke="var(--osmo-border)"
                   strokeDasharray="3 4"
                 />
               );
@@ -124,7 +124,7 @@ export function ProgressoEvolucaoChart({
             <polyline
               points={linha}
               fill="none"
-              stroke="#b0ff57"
+              stroke="var(--osmo-accent)"
               strokeWidth={2}
               strokeLinejoin="round"
               strokeLinecap="round"
@@ -136,8 +136,8 @@ export function ProgressoEvolucaoChart({
                   cx={coord.x}
                   cy={coord.y}
                   r={ativo === index ? 6 : 4}
-                  fill={ativo === index ? "#b0ff57" : "#161616"}
-                  stroke="#b0ff57"
+                  fill={ativo === index ? "var(--osmo-accent)" : "var(--osmo-card)"}
+                  stroke="var(--osmo-accent)"
                   strokeWidth={2}
                   className="cursor-pointer"
                   onMouseEnter={() => setAtivo(index)}
@@ -146,22 +146,20 @@ export function ProgressoEvolucaoChart({
             ))}
 
             {pontoAtivo ? (
-              <>
-                <line
-                  x1={pontoAtivo.x}
-                  y1={padY}
-                  x2={pontoAtivo.x}
-                  y2={padY + chartH}
-                  stroke="rgba(255,255,255,0.15)"
-                  strokeDasharray="3 3"
-                />
-              </>
+              <line
+                x1={pontoAtivo.x}
+                y1={padY}
+                x2={pontoAtivo.x}
+                y2={padY + chartH}
+                stroke="var(--osmo-border)"
+                strokeDasharray="3 3"
+              />
             ) : null}
           </svg>
 
           {pontoAtivo ? (
             <div
-              className="pointer-events-none absolute rounded-full border border-white/10 bg-[#1a1a1a] px-2.5 py-1 text-[10px] text-white/80 shadow-lg"
+              className="pointer-events-none absolute rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-card)] px-2.5 py-1 text-[10px] text-osmo shadow-lg"
               style={{
                 left: `${(pontoAtivo.x / width) * 100}%`,
                 top: `${(pontoAtivo.y / height) * 100}%`,
@@ -178,7 +176,7 @@ export function ProgressoEvolucaoChart({
           {recentes.map((ponto) => (
             <span
               key={ponto.simuladoId}
-              className="flex-1 truncate text-center text-[9px] text-white/30"
+              className="flex-1 truncate text-center text-[9px] text-osmo-subtle"
             >
               {formatDateCurta(ponto.finalizadoEm)}
             </span>
@@ -203,14 +201,14 @@ export function ProgressoEvolucaoChart({
           >
             <span
               className={cn(
-                "font-medium text-white/70",
+                "font-medium text-osmo-muted",
                 compact ? "text-[10px]" : "text-[11px]",
               )}
             >
               {ponto.percentual}%
             </span>
             <div
-              className="w-full rounded-t-md bg-white/25 transition group-hover:bg-white/90"
+              className="w-full rounded-t-md bg-[color-mix(in_srgb,var(--osmo-accent)_35%,transparent)] transition group-hover:bg-osmo-accent"
               style={{
                 height: `${Math.max((ponto.percentual / max) * 100, 10)}%`,
               }}
@@ -218,7 +216,7 @@ export function ProgressoEvolucaoChart({
             />
             <span
               className={cn(
-                "truncate text-white/35",
+                "truncate text-osmo-subtle",
                 compact ? "text-[9px]" : "text-[10px]",
               )}
             >
@@ -228,7 +226,7 @@ export function ProgressoEvolucaoChart({
         ))}
       </div>
       {!compact ? (
-        <p className="text-[11px] text-white/30">
+        <p className="text-[11px] text-osmo-subtle">
           Últimos {recentes.length} simulados · passe o mouse para ver detalhes
         </p>
       ) : null}

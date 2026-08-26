@@ -1,4 +1,5 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { ObterCoberturaUseCase } from './obter-cobertura.use-case';
 import {
   AREAS_ENEM,
   labelAreaEnem,
@@ -20,7 +21,6 @@ import {
 } from '../helpers/trilha-texto.helper';
 import {
   calcularProgressoArea,
-  calcularProgressoPorAssunto,
   enriquecerChecklistComAssunto,
 } from '../helpers/trilha-progresso.helper';
 import {
@@ -82,6 +82,8 @@ export class ObterTrilhaUseCase {
   constructor(
     @Inject(METRICAS_REPOSITORY)
     private readonly metricasRepository: MetricasRepositoryPort,
+    @Inject(ObterCoberturaUseCase)
+    private readonly obterCoberturaUseCase: ObterCoberturaUseCase,
   ) {}
 
   async execute(userId: string) {
@@ -155,17 +157,9 @@ export class ObterTrilhaUseCase {
       };
     }).sort((a, b) => b.scoreCombinado - a.scoreCombinado);
 
-    const etapasPorArea = new Map(
-      areas.map((area) => [area.slug, area.etapas]),
-    );
-    const disciplinasFocoPorArea = new Map(
-      areas.map((area) => [area.slug, area.disciplinasSugeridas]),
-    );
-    const progressoPorAssunto = calcularProgressoPorAssunto(
-      checklistIa,
-      etapasPorArea,
-      disciplinasFocoPorArea,
-    );
+    const cobertura = await this.obterCoberturaUseCase.execute(userId);
+    const progressoPorAssunto = cobertura.progressoPorAssunto;
+    const coberturaPorAssunto = cobertura.coberturaPorAssunto;
 
     const foco = areas[0];
     const minutosPorDia = Math.max(30, Math.round(tempoDiario / 4));
@@ -191,6 +185,7 @@ export class ObterTrilhaUseCase {
       planoIa: estado.planoIa ?? null,
       checklistIa,
       progressoPorAssunto,
+      coberturaPorAssunto,
       tempoDiarioMinutos: tempoDiario,
       areas,
       areaPrioritaria: foco?.slug ?? null,

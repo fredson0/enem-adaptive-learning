@@ -128,7 +128,7 @@ export class GerarPdfQuestoesUseCase {
 
     for (const filtro of tentativas) {
       const questoes = await this.questoesRepository.buscarAleatorias({
-        area: filtro.area,
+        area: filtro.area ?? undefined,
         termosBusca: filtro.termosBusca,
         quantidade: input.quantidade,
       });

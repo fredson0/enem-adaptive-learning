@@ -44,10 +44,10 @@ export function WorkspaceSection({
         )}
       >
         {title ? (
-          <h1 className="text-[2.5rem] leading-none font-medium tracking-tight text-white md:text-5xl">
+          <h1 className="text-[2.5rem] leading-none font-medium tracking-tight text-osmo md:text-5xl">
             {title}
             {typeof count === "number" ? (
-              <sup className="ml-1.5 align-super text-base font-normal tracking-normal text-white/35 md:text-lg">
+              <sup className="ml-1.5 align-super text-base font-normal tracking-normal text-osmo-subtle md:text-lg">
                 {count}
               </sup>
             ) : null}

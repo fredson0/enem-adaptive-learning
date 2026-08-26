@@ -77,6 +77,7 @@ export class GerarSimuladoComIaUseCase {
       anos: plano.anos ?? undefined,
       termosBusca: plano.termosBusca.length ? plano.termosBusca : undefined,
       quantidade: plano.quantidade,
+      priorizarNaoDominadas: true,
     });
 
     return {

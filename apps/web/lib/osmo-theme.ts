@@ -4,16 +4,17 @@
  * Área de conteúdo usa o canvas; cards usam tons neutros sem tint azulado.
  */
 export const OSMO = {
-  canvas: "#111111",
-  sidebar: "#141414",
+  canvas: "var(--osmo-canvas)",
+  sidebar: "var(--osmo-sidebar)",
   sidebarWidth: 320,
-  surface: "#111111",
-  active: "#1e1e1e",
-  hover: "#1a1a1a",
-  card: "#161616",
-  cardHover: "#1a1a1a",
-  border: "#262626",
-  borderSubtle: "rgba(255,255,255,0.06)",
-  muted: "rgba(255,255,255,0.55)",
-  accent: "#b0ff57",
+  surface: "var(--osmo-surface)",
+  header: "var(--osmo-header)",
+  active: "var(--osmo-active)",
+  hover: "var(--osmo-hover)",
+  card: "var(--osmo-card)",
+  cardHover: "var(--osmo-hover)",
+  border: "var(--osmo-border)",
+  borderSubtle: "var(--osmo-border)",
+  muted: "var(--osmo-text-muted)",
+  accent: "var(--osmo-accent)",
 } as const;

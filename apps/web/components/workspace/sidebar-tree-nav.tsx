@@ -134,8 +134,8 @@ export function SidebarTreeLink({
       className={cn(
         "block w-full rounded-lg px-3.5 py-2.5 text-[14px] transition-all duration-300",
         active
-          ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
-          : "text-white/55 hover:bg-[var(--osmo-hover)] hover:text-white/85",
+          ? "bg-[var(--osmo-active)] text-osmo ring-1 ring-[var(--osmo-ring)]"
+          : "text-osmo-muted hover:bg-[var(--osmo-hover)] hover:text-osmo",
         className,
       )}
     >
@@ -167,11 +167,11 @@ export function SidebarTreeButton({
         "flex w-full items-center gap-2 rounded-lg px-3.5 py-2.5 text-left text-[14px] transition-all duration-300",
         dashed
           ? active
-            ? "border border-[var(--osmo-border)] bg-[var(--osmo-active)] text-white"
-            : "border border-dashed border-[var(--osmo-border)] text-white/60 hover:border-white/20 hover:bg-[var(--osmo-hover)] hover:text-white"
+            ? "border border-[var(--osmo-border)] bg-[var(--osmo-active)] text-osmo"
+            : "border border-dashed border-[var(--osmo-border)] text-osmo-muted hover:border-[var(--osmo-border)] hover:bg-[var(--osmo-hover)] hover:text-osmo"
           : active
-            ? "bg-[var(--osmo-active)] text-white"
-            : "text-white/55 hover:bg-[var(--osmo-hover)] hover:text-white/85",
+            ? "bg-[var(--osmo-active)] text-osmo"
+            : "text-osmo-muted hover:bg-[var(--osmo-hover)] hover:text-osmo",
         className,
       )}
     >
@@ -200,12 +200,12 @@ export function SidebarTreeChatButton({
       className={cn(
         "block w-full rounded-lg px-3.5 py-3 text-left transition-all duration-300 ease-out",
         active
-          ? "bg-[var(--osmo-active)] text-white ring-1 ring-white/10"
-          : "text-white/60 hover:bg-[var(--osmo-hover)] hover:text-white",
+          ? "bg-[var(--osmo-active)] text-osmo ring-1 ring-[var(--osmo-ring)]"
+          : "text-osmo-muted hover:bg-[var(--osmo-hover)] hover:text-osmo",
       )}
     >
       <p className="truncate text-sm font-medium">{title}</p>
-      <p className="mt-0.5 truncate text-xs text-white/40">{preview}</p>
+      <p className="mt-0.5 truncate text-xs text-osmo-subtle">{preview}</p>
     </button>
   );
 }

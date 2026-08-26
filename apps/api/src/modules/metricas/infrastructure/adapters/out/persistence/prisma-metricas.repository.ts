@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AreaEnem, StatusSimulado } from '@generated/prisma';
 import { PrismaService } from '../../../../../../infrastructure/database/prisma.service';
 import type {
+  CoberturaBruta,
   EstatisticaAreaBruta,
   MetricasRepositoryPort,
   PontoEvolucaoBruto,
@@ -12,55 +13,99 @@ import {
   parseTrilhaEstado,
   type TrilhaEstado,
 } from '../../../../core/application/helpers/trilha.config';
+import { AREAS_ENEM } from '../../../../core/application/helpers/area-enem-labels';
 
 @Injectable()
 export class PrismaMetricasRepository implements MetricasRepositoryPort {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
+  private readonly questaoDominioSelect = {
+    id: true,
+    area: true,
+    ano: true,
+    disciplina: true,
+    contexto: true,
+    introducaoAlternativas: true,
+  } as const;
+
+  async obterIdsQuestoesDominadas(userId: string): Promise<string[]> {
+    const rows = await this.prisma.respostaSimulado.findMany({
+      where: {
+        simulado: { userId },
+        correto: true,
+      },
+      distinct: ['questaoId'],
+      select: { questaoId: true },
+    });
+
+    return rows.map((row) => row.questaoId);
+  }
+
+  async obterCoberturaBruta(userId: string): Promise<CoberturaBruta> {
+    const [respostasCorretas, respostasTodas, porArea, porAno] =
+      await Promise.all([
+        this.prisma.respostaSimulado.findMany({
+          where: {
+            simulado: { userId },
+            correto: true,
+          },
+          distinct: ['questaoId'],
+          select: {
+            questao: { select: this.questaoDominioSelect },
+          },
+        }),
+        this.prisma.respostaSimulado.findMany({
+          where: { simulado: { userId } },
+          distinct: ['questaoId'],
+          select: {
+            questao: { select: this.questaoDominioSelect },
+          },
+        }),
+        this.prisma.questao.groupBy({
+          by: ['area'],
+          _count: { _all: true },
+        }),
+        this.prisma.questao.groupBy({
+          by: ['ano'],
+          _count: { _all: true },
+          orderBy: { ano: 'desc' },
+        }),
+      ]);
+
+    const disponiveisPorArea = {} as Record<AreaEnem, number>;
+    for (const area of AREAS_ENEM) {
+      disponiveisPorArea[area] = 0;
+    }
+    for (const row of porArea) {
+      disponiveisPorArea[row.area] = row._count._all;
+    }
+
+    return {
+      dominadas: respostasCorretas.map((row) => row.questao),
+      tentadas: respostasTodas.map((row) => row.questao),
+      disponiveisPorArea,
+      disponiveisPorAno: porAno.map((row) => ({
+        ano: row.ano,
+        total: row._count._all,
+      })),
+    };
+  }
+
   async agregarPorArea(userId: string): Promise<EstatisticaAreaBruta[]> {
-    const rows = await this.prisma.respostaSimulado.groupBy({
-      by: ['questaoId'],
-      where: {
-        simulado: { userId },
-      },
-      _count: { _all: true },
-    });
+    const cobertura = await this.obterCoberturaBruta(userId);
 
-    if (rows.length === 0) {
-      return [];
+    const dominadasPorArea = new Map<AreaEnem, number>();
+    for (const questao of cobertura.dominadas) {
+      dominadasPorArea.set(
+        questao.area,
+        (dominadasPorArea.get(questao.area) ?? 0) + 1,
+      );
     }
 
-    const questaoIds = rows.map((r) => r.questaoId);
-    const questoes = await this.prisma.questao.findMany({
-      where: { id: { in: questaoIds } },
-      select: { id: true, area: true },
-    });
-    const areaPorQuestao = new Map(questoes.map((q) => [q.id, q.area]));
-
-    const respostas = await this.prisma.respostaSimulado.findMany({
-      where: {
-        simulado: { userId },
-        questaoId: { in: questaoIds },
-      },
-      select: { questaoId: true, correto: true },
-    });
-
-    const acumulo = new Map<AreaEnem, { total: number; acertos: number }>();
-
-    for (const resposta of respostas) {
-      const area = areaPorQuestao.get(resposta.questaoId);
-      if (!area) continue;
-
-      const atual = acumulo.get(area) ?? { total: 0, acertos: 0 };
-      atual.total += 1;
-      if (resposta.correto) atual.acertos += 1;
-      acumulo.set(area, atual);
-    }
-
-    return [...acumulo.entries()].map(([area, stats]) => ({
+    return AREAS_ENEM.map((area) => ({
       area,
-      totalQuestoes: stats.total,
-      acertos: stats.acertos,
+      totalQuestoes: cobertura.disponiveisPorArea[area] ?? 0,
+      acertos: dominadasPorArea.get(area) ?? 0,
     }));
   }
 

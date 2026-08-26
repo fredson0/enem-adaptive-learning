@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { GoogleAuthProvider } from "@/components/providers/google-auth-provider";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ThemeScript } from "@/components/providers/theme-script";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,12 +36,18 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`dark ${inter.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full overflow-x-hidden bg-[#05070d] text-white">
-        <GoogleAuthProvider>
-          <SmoothScrollProvider>{children}</SmoothScrollProvider>
-        </GoogleAuthProvider>
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="min-h-full overflow-x-hidden bg-background text-foreground">
+        <ThemeProvider>
+          <GoogleAuthProvider>
+            <SmoothScrollProvider>{children}</SmoothScrollProvider>
+          </GoogleAuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

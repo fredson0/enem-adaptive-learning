@@ -17,8 +17,9 @@ import {
   getModalidadeById,
   modalidadeTemDisciplinas,
   TRILHA_MODALIDADES,
+  type TrilhaAssuntoCatalogo,
 } from "@/lib/trilha-catalogo";
-import { calcularProgressoPorAssunto } from "@/lib/trilha-progresso";
+import { calcularProgressoPorAssunto, getCoberturaAssunto } from "@/lib/trilha-progresso";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Search } from "lucide-react";
 import Link from "next/link";
@@ -44,7 +45,7 @@ function BuscaAssuntos({
     <>
       <div className="relative mx-auto max-w-xl">
         <Search
-          className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white/30 sm:left-5"
+          className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-osmo-subtle sm:left-5"
           strokeWidth={1.75}
         />
         <input
@@ -53,15 +54,15 @@ function BuscaAssuntos({
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           className={cn(
-            "w-full rounded-full border border-white/[0.08] bg-[#1a1a1a] py-3 pr-4 pl-11 text-sm text-white sm:py-3.5 sm:pr-5 sm:pl-12",
-            "placeholder:text-white/30 outline-none transition",
-            "focus:border-white/20 focus:bg-[#1e1e1e]",
+            "w-full rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-card)] py-3 pr-4 pl-11 text-sm text-osmo sm:py-3.5 sm:pr-5 sm:pl-12",
+            "placeholder:text-osmo-subtle outline-none transition",
+            "focus:border-[color-mix(in_srgb,var(--osmo-text)_20%,transparent)] focus:bg-[var(--osmo-hover)]",
           )}
         />
       </div>
 
       {busca.trim() && resultadoCount !== undefined ? (
-        <p className="text-xs text-white/35">
+        <p className="text-xs text-osmo-subtle">
           {resultadoCount === 0
             ? "Nenhum resultado encontrado."
             : `${resultadoCount} resultado${resultadoCount === 1 ? "" : "s"}`}
@@ -94,6 +95,20 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
     () => trilha.progressoPorAssunto ?? calcularProgressoPorAssunto(trilha),
     [trilha],
   );
+
+  const renderAssuntoCard = (assunto: TrilhaAssuntoCatalogo, emFoco: boolean) => {
+    const cobertura = getCoberturaAssunto(trilha, assunto.id);
+    return (
+      <TrilhaAssuntoCard
+        key={assunto.id}
+        assunto={assunto}
+        emFoco={emFoco}
+        progresso={progressoPorAssunto[assunto.id] ?? 0}
+        dominadas={cobertura?.dominadas}
+        disponiveis={cobertura?.disponiveis}
+      />
+    );
+  };
 
   const mapaArea = useMemo(
     () => new Map(trilha.areas.map((area) => [area.slug, area])),
@@ -160,12 +175,12 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
       <div className="mx-auto max-w-6xl space-y-6 pb-6 sm:space-y-8">
         <Link
           href="/trilha/geral"
-          className="inline-flex items-center gap-2 text-sm text-white/45 transition hover:text-white/75"
+          className="inline-flex items-center gap-2 text-sm text-osmo-muted transition hover:text-osmo-muted"
         >
           <ArrowLeft className="size-4" />
           Todas as modalidades
         </Link>
-        <p className="text-sm text-white/45">Modalidade não encontrada.</p>
+        <p className="text-sm text-osmo-muted">Modalidade não encontrada.</p>
       </div>
     );
   }
@@ -175,12 +190,12 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
       <div className="mx-auto max-w-6xl space-y-6 pb-6 sm:space-y-8">
         <Link
           href={`/trilha/geral?modalidade=${encodeURIComponent(modalidadeAtiva.id)}`}
-          className="inline-flex items-center gap-2 text-sm text-white/45 transition hover:text-white/75"
+          className="inline-flex items-center gap-2 text-sm text-osmo-muted transition hover:text-osmo-muted"
         >
           <ArrowLeft className="size-4" />
           {modalidadeAtiva.nome}
         </Link>
-        <p className="text-sm text-white/45">Matéria não encontrada.</p>
+        <p className="text-sm text-osmo-muted">Matéria não encontrada.</p>
       </div>
     );
   }
@@ -193,7 +208,7 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
         <button
           type="button"
           onClick={voltar}
-          className="inline-flex items-center gap-2 text-sm text-white/45 transition hover:text-white/75"
+          className="inline-flex items-center gap-2 text-sm text-osmo-muted transition hover:text-osmo-muted"
         >
           <ArrowLeft className="size-4" />
           {modalidadeAtiva.nome}
@@ -207,15 +222,15 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
             >
               {modalidadeAtiva.nome}
             </p>
-            <h1 className="text-2xl font-medium tracking-tight text-white sm:text-3xl md:text-5xl">
+            <h1 className="text-2xl font-medium tracking-tight text-osmo sm:text-3xl md:text-5xl">
               {disciplinaAtiva.nome}
             </h1>
-            <p className="text-xs text-white/40 sm:text-sm md:text-base">
+            <p className="text-xs text-osmo-muted sm:text-sm md:text-base">
               {disciplinaAtiva.assuntos.length} assuntos — escolha por onde
               começar.
             </p>
             {area ? (
-              <p className="text-xs text-white/30">
+              <p className="text-xs text-osmo-subtle">
                 {area.progresso}% da trilha · {area.prioridade}
               </p>
             ) : null}
@@ -230,14 +245,12 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
         </header>
 
         <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 sm:gap-x-4 sm:gap-y-8 md:grid-cols-4 lg:grid-cols-5">
-          {assuntosFiltrados.map((assunto) => (
-            <TrilhaAssuntoCard
-              key={assunto.id}
-              assunto={assunto}
-              emFoco={assuntosEmFoco.has(assunto.nome.toLowerCase())}
-              progresso={progressoPorAssunto[assunto.id] ?? 0}
-            />
-          ))}
+          {assuntosFiltrados.map((assunto) =>
+            renderAssuntoCard(
+              assunto,
+              assuntosEmFoco.has(assunto.nome.toLowerCase()),
+            ),
+          )}
         </div>
       </div>
     );
@@ -252,7 +265,7 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
         <button
           type="button"
           onClick={voltar}
-          className="inline-flex items-center gap-2 text-sm text-white/45 transition hover:text-white/75"
+          className="inline-flex items-center gap-2 text-sm text-osmo-muted transition hover:text-osmo-muted"
         >
           <ArrowLeft className="size-4" />
           Todas as modalidades
@@ -266,16 +279,16 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
             >
               {modalidadeAtiva.areaTag}
             </p>
-            <h1 className="text-2xl font-medium tracking-tight text-white sm:text-3xl md:text-5xl">
+            <h1 className="text-2xl font-medium tracking-tight text-osmo sm:text-3xl md:text-5xl">
               {modalidadeAtiva.nome}
             </h1>
-            <p className="text-xs text-white/40 sm:text-sm md:text-base">
+            <p className="text-xs text-osmo-muted sm:text-sm md:text-base">
               {temDisciplinas
                 ? `${modalidadeAtiva.disciplinas?.length ?? 0} matérias — escolha por onde começar.`
                 : `${contarAssuntosModalidade(modalidadeAtiva)} assuntos — escolha por onde começar.`}
             </p>
             {area ? (
-              <p className="text-xs text-white/30">
+              <p className="text-xs text-osmo-subtle">
                 {area.progresso}% da trilha · {area.prioridade}
               </p>
             ) : null}
@@ -308,14 +321,12 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
                   )}
                 />
               ))
-            : assuntosFiltrados.map((assunto) => (
-                <TrilhaAssuntoCard
-                  key={assunto.id}
-                  assunto={assunto}
-                  emFoco={assuntosEmFoco.has(assunto.nome.toLowerCase())}
-                  progresso={progressoPorAssunto[assunto.id] ?? 0}
-                />
-              ))}
+            : assuntosFiltrados.map((assunto) =>
+                renderAssuntoCard(
+                  assunto,
+                  assuntosEmFoco.has(assunto.nome.toLowerCase()),
+                ),
+              )}
         </div>
       </div>
     );
@@ -325,7 +336,7 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
     <div className="mx-auto max-w-6xl space-y-12 pb-8">
       <Link
         href="/trilha"
-        className="inline-flex items-center gap-2 text-sm text-white/45 transition hover:text-white/75"
+        className="inline-flex items-center gap-2 text-sm text-osmo-muted transition hover:text-osmo-muted"
       >
         <ArrowLeft className="size-4" />
         Voltar
@@ -333,10 +344,10 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
 
       <header className="mx-auto max-w-2xl space-y-5 text-center sm:space-y-8">
         <div className="space-y-2 sm:space-y-3">
-          <h1 className="text-2xl font-medium tracking-tight text-white sm:text-3xl md:text-5xl">
+          <h1 className="text-2xl font-medium tracking-tight text-osmo sm:text-3xl md:text-5xl">
             Todas as modalidades
           </h1>
-          <p className="text-xs text-white/40 sm:text-sm md:text-base">
+          <p className="text-xs text-osmo-muted sm:text-sm md:text-base">
             {TRILHA_MODALIDADES.length} modalidades do ENEM — escolha uma para
             ver os assuntos.
           </p>
@@ -358,7 +369,7 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
 
           return (
             <section key={grupo.areaSlug} className="space-y-4 sm:space-y-5">
-              <div className="flex flex-wrap items-end justify-between gap-2 border-b border-white/[0.06] pb-3 sm:gap-3 sm:pb-4">
+              <div className="flex flex-wrap items-end justify-between gap-2 border-b border-[var(--osmo-border)] pb-3 sm:gap-3 sm:pb-4">
                 <div>
                   <p
                     className="text-[10px] uppercase tracking-[0.18em] sm:text-[11px]"
@@ -366,12 +377,12 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
                   >
                     {grupo.tag}
                   </p>
-                  <h2 className="mt-0.5 text-lg font-medium text-white sm:mt-1 sm:text-xl md:text-2xl">
+                  <h2 className="mt-0.5 text-lg font-medium text-osmo sm:mt-1 sm:text-xl md:text-2xl">
                     {grupo.label}
                   </h2>
                 </div>
                 {area ? (
-                  <p className="text-xs text-white/35">
+                  <p className="text-xs text-osmo-subtle">
                     {area.progresso}% da trilha · {area.prioridade}
                   </p>
                 ) : null}

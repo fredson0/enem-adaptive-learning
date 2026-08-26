@@ -14,6 +14,10 @@ import {
   validarQuantidadeModo,
 } from '../helpers/modo-simulado.config';
 import {
+  METRICAS_REPOSITORY,
+  type MetricasRepositoryPort,
+} from '../../../../metricas/core/application/ports/metricas.repository.port';
+import {
   SIMULADOS_REPOSITORY,
   type SimuladosRepositoryPort,
 } from '../ports/simulados.repository.port';
@@ -22,6 +26,8 @@ export type GerarSimuladoInput = {
   userId: string;
   quantidade: number;
   modo?: ModoSimulado;
+  /** Prioriza questões ainda não acertadas pelo usuário. */
+  priorizarNaoDominadas?: boolean;
 } & FiltroQuestoes;
 
 @Injectable()
@@ -31,6 +37,8 @@ export class GerarSimuladoUseCase {
     private readonly simuladosRepository: SimuladosRepositoryPort,
     @Inject(QUESTOES_REPOSITORY)
     private readonly questoesRepository: QuestoesRepositoryPort,
+    @Inject(METRICAS_REPOSITORY)
+    private readonly metricasRepository: MetricasRepositoryPort,
   ) {}
 
   async execute(input: GerarSimuladoInput) {
@@ -47,18 +55,35 @@ export class GerarSimuladoUseCase {
     const quantidade = Math.min(Math.max(input.quantidade, 1), 45);
     const modoRuntime = resolverConfigModo(modo, quantidade);
 
+    const excluirIds = input.priorizarNaoDominadas
+      ? await this.metricasRepository.obterIdsQuestoesDominadas(input.userId)
+      : input.excluirIds;
+
     const filtro: FiltroQuestoes = {
       area: input.area,
       ano: input.anos?.length ? undefined : input.ano,
       anos: input.anos?.length ? input.anos : undefined,
       termosBusca: input.termosBusca,
+      excluirIds,
     };
 
-    const questoes = await buscarQuestoesAleatoriasComFallback({
+    let questoes = await buscarQuestoesAleatoriasComFallback({
       questoesRepository: this.questoesRepository,
       filtro,
       quantidade,
     });
+
+    if (
+      questoes.length < quantidade &&
+      excluirIds?.length &&
+      input.priorizarNaoDominadas
+    ) {
+      questoes = await buscarQuestoesAleatoriasComFallback({
+        questoesRepository: this.questoesRepository,
+        filtro: { ...filtro, excluirIds: undefined },
+        quantidade,
+      });
+    }
 
     if (questoes.length === 0) {
       const totalBanco = await this.questoesRepository.contar();

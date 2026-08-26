@@ -37,7 +37,7 @@ export function WorkspacePageTransition({
   return (
     <div
       ref={ref}
-      className="absolute inset-0 flex min-h-0 flex-col overflow-hidden bg-[var(--osmo-surface)] text-white"
+      className="absolute inset-0 flex min-h-0 flex-col overflow-hidden bg-[var(--osmo-surface)] text-osmo"
     >
       <WorkspaceChrome />
 

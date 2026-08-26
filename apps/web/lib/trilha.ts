@@ -60,6 +60,10 @@ export type TrilhaResponse = {
   planoIa: PlanoIa | null;
   checklistIa: ChecklistItemIa[];
   progressoPorAssunto?: Record<string, number>;
+  coberturaPorAssunto?: Record<
+    string,
+    { dominadas: number; disponiveis: number; tentadas: number; percentual: number }
+  >;
   tempoDiarioMinutos: number;
   areas: TrilhaArea[];
   areaPrioritaria: AreaEnemSlug | null;

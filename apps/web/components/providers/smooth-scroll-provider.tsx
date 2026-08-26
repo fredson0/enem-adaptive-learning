@@ -32,7 +32,7 @@ function LenisGsapSync() {
 
     ScrollTrigger.scrollerProxy(root, {
       scrollTop(value) {
-        if (arguments.length) {
+        if (arguments.length && value !== undefined) {
           lenis.scrollTo(value, { immediate: true });
         }
         return lenis.scroll;

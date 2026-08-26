@@ -161,10 +161,12 @@ export function recalcularTrilhaProgresso(
     return { ...area, progresso };
   });
 
-  const progressoPorAssunto = calcularProgressoPorAssunto({
-    checklistIa,
-    areas,
-  });
+  const progressoPorAssunto =
+    trilha.progressoPorAssunto ??
+    calcularProgressoPorAssunto({
+      checklistIa,
+      areas,
+    });
 
   return {
     ...trilha,
@@ -183,6 +185,13 @@ export function getProgressoAssunto(
     calcularProgressoPorAssunto(trilha)[assuntoId] ??
     0
   );
+}
+
+export function getCoberturaAssunto(
+  trilha: TrilhaResponse,
+  assuntoId: string,
+) {
+  return trilha.coberturaPorAssunto?.[assuntoId];
 }
 
 export function getChecklistArea(

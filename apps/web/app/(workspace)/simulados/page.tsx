@@ -6,7 +6,7 @@ export default function SimuladosHubPage() {
   return (
     <WorkspaceSection title="Simulados">
       <div className="mx-auto max-w-5xl space-y-12">
-        <p className="text-center text-sm leading-relaxed text-white/45">
+        <p className="text-center text-sm leading-relaxed text-osmo-muted">
           Escolha o modo. Cada um tem histórico e configurações separados.
         </p>
 

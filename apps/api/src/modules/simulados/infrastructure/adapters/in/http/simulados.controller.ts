@@ -56,6 +56,7 @@ export class SimuladosController {
       anos: dto.anos,
       termosBusca: dto.termosBusca,
       quantidade: dto.quantidade,
+      priorizarNaoDominadas: dto.priorizarNaoDominadas ?? false,
     });
   }
 

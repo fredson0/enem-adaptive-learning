@@ -24,8 +24,8 @@ export function SimuladoHubCard({ modoSlug, className }: SimuladoHubCardProps) {
       href={modo.href}
       className={cn("group mx-auto block w-full max-w-[280px]", className)}
     >
-      <div
-        className="overflow-hidden rounded-[16px] p-2.5 pb-0 transition duration-300 group-hover:brightness-110"
+        <div
+        className="osmo-surface-dark overflow-hidden rounded-[16px] p-2.5 pb-0 transition duration-300 group-hover:brightness-110"
         style={{ backgroundColor: visual.frame }}
       >
         {/* Capa — imagem dentro da moldura */}
@@ -72,7 +72,7 @@ export function SimuladoHubCard({ modoSlug, className }: SimuladoHubCardProps) {
         </div>
       </div>
 
-      <p className="mt-3 px-1 text-center text-xs leading-relaxed text-white/40">
+      <p className="mt-3 px-1 text-center text-xs leading-relaxed text-osmo-muted">
         {modo.description}
       </p>
     </Link>

@@ -67,6 +67,7 @@ export function criarSimulado(body: {
   quantidade: number;
   anos?: number[];
   termosBusca?: string[];
+  priorizarNaoDominadas?: boolean;
 }) {
   return apiFetch<{ id: string }>("/simulados", {
     method: "POST",

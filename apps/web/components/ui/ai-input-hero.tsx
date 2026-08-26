@@ -1050,10 +1050,10 @@ export function HeroWave({
         >
           {variant === "workspace" ? (
             <div ref={headerRef} className="overflow-hidden text-center">
-              <h1 className="text-2xl font-semibold tracking-tight text-white drop-shadow-[0_1px_8px_rgba(31,61,188,0.25)] sm:text-3xl md:text-5xl">
+              <h1 className="text-2xl font-semibold tracking-tight text-osmo sm:text-3xl md:text-5xl">
                 {title}
               </h1>
-              <p className="mt-2 text-xs text-gray-300/90 sm:mt-3 sm:text-sm md:mt-4 md:text-base">
+              <p className="mt-2 text-xs text-osmo-muted sm:mt-3 sm:text-sm md:mt-4 md:text-base">
                 {subtitle}
               </p>
             </div>
