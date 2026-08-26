@@ -16,14 +16,13 @@ import {
 const NVIDIA_BASE_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
 const TEXT_MODEL_FALLBACKS = [
-  'meta/llama-3.1-8b-instruct',
-  'meta/llama-3.1-70b-instruct',
-  'meta/llama-3.3-70b-instruct',
+  'nvidia/nemotron-3.5-lightning-30b-a3b',
+  'nvidia/nemotron-3-nano-30b-a3b',
 ] as const;
 
 const VISION_MODEL_FALLBACKS = [
   'meta/llama-3.2-11b-vision-instruct',
-  'microsoft/phi-3-vision-128k-instruct',
+  'meta/llama-3.2-90b-vision-instruct',
 ] as const;
 
 const TEXT_TIMEOUT_MS = 30_000;
@@ -65,6 +64,9 @@ export class NvidiaIaAdapter implements IaEnginePort {
     const lower = message.toLowerCase();
     return (
       lower.includes('404') ||
+      lower.includes('410') ||
+      lower.includes('gone') ||
+      lower.includes('end of life') ||
       lower.includes('not found') ||
       lower.includes('fetch failed') ||
       lower.includes('econnreset') ||
@@ -107,11 +109,14 @@ export class NvidiaIaAdapter implements IaEnginePort {
       const data = (await response.json().catch(() => null)) as {
         choices?: { message?: { content?: string } }[];
         error?: { message?: string };
+        detail?: string;
       } | null;
 
       if (!response.ok) {
         const detail =
-          data?.error?.message ?? `HTTP ${response.status} da API NVIDIA`;
+          data?.error?.message ??
+          data?.detail ??
+          `HTTP ${response.status} da API NVIDIA`;
         throw new Error(detail);
       }
 

@@ -1,5 +1,6 @@
 import { AreaEnem } from '@generated/prisma';
 import { parseAreaEnem } from '../../../../questoes/core/application/helpers/area-enem';
+import { montarTermosBuscaSimulado } from '../../../../questoes/core/application/helpers/termos-simulado.helper';
 
 export type PedidoSimuladoInterpretado = {
   area: AreaEnem | null;
@@ -10,40 +11,103 @@ export type PedidoSimuladoInterpretado = {
   resumo: string;
 };
 
-export function buildInterpretarPedidoSimuladoPrompt(pedido: string) {
-  return `Você é o planejador de simulados do ENEM+. Converta o pedido do aluno em filtros para buscar questões REAIS no banco (não invente questões).
+function corrigirJsonIa(json: string): string {
+  let fixed = json
+    .replace(/```json\s*/gi, '')
+    .replace(/```/g, '')
+    .trim();
 
-Retorne APENAS um JSON válido, sem markdown, neste formato:
-{
-  "area": "matematica" | "linguagens" | "humanas" | "natureza" | null,
-  "quantidade": número entre 5 e 20,
-  "anos": [lista de anos] ou null para TODOS os anos disponíveis,
-  "termosBusca": ["palavras", "sinônimos"] para buscar no enunciado,
-  "titulo": "título curto do simulado",
-  "resumo": "1 frase explicando o que será sorteado"
-}
+  fixed = fixed.replace(/,\s*([}\]])/g, '$1');
+  fixed = fixed.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
 
-Regras:
-- Se o aluno pedir "todos os anos", "vários anos" ou não citar ano, use anos: null
-- Para assuntos (funções, eletromagnetismo, interpretação de texto), preencha termosBusca com sinônimos em português (mín. 2 termos quando possível)
-- quantidade padrão: 10
-- area null só se o pedido for realmente misto entre áreas (raro)
-
-Pedido do aluno:
-${pedido.trim()}`;
-}
-
-export function parsePedidoSimuladoJson(texto: string): PedidoSimuladoInterpretado {
-  const match = texto.match(/\{[\s\S]*\}/);
-  if (!match) {
-    throw new Error('A IA não retornou um plano de simulado válido.');
+  const valoresString = ['matematica', 'linguagens', 'humanas', 'natureza'];
+  for (const valor of valoresString) {
+    fixed = fixed.replace(
+      new RegExp(`:\\s*${valor}\\s*([,}])`, 'gi'),
+      `: "${valor}"$1`,
+    );
   }
 
-  const raw = JSON.parse(match[0]) as Record<string, unknown>;
+  fixed = fixed.replace(
+    /:\s*([a-zA-ZÀ-ÿ][a-zA-ZÀ-ÿ0-9_\s-]*?)\s*([,}\]])/g,
+    (full, value, end) => {
+      const trimmed = String(value).trim();
+      if (['null', 'true', 'false'].includes(trimmed)) {
+        return `: ${trimmed}${end}`;
+      }
+      if (/^\d+(\.\d+)?$/.test(trimmed)) {
+        return `: ${trimmed}${end}`;
+      }
+      if (trimmed.startsWith('"') || trimmed.startsWith('[')) {
+        return full;
+      }
+      return `: "${trimmed.replace(/"/g, '\\"')}"${end}`;
+    },
+  );
 
+  return fixed;
+}
+
+function tentarExtrairJsonSimulado(texto: string): Record<string, unknown> | null {
+  const cleaned = texto
+    .replace(/```json\s*/gi, '')
+    .replace(/```/g, '')
+    .trim();
+
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  if (!match) return null;
+
+  const candidatos = [match[0], corrigirJsonIa(match[0])];
+
+  for (const candidato of candidatos) {
+    try {
+      return JSON.parse(candidato) as Record<string, unknown>;
+    } catch {
+      // tenta próximo candidato
+    }
+  }
+
+  return null;
+}
+
+function inferirAreaDoPedido(pedido: string): AreaEnem | null {
+  const texto = pedido.toLowerCase();
+
+  if (/matem[aá]tica|matematica/.test(texto)) return AreaEnem.MATEMATICA;
+  if (/linguagens?/.test(texto)) return AreaEnem.LINGUAGENS;
+  if (/humanas|hist[oó]ria|geografia|filosofia|sociologia/.test(texto)) {
+    return AreaEnem.HUMANAS;
+  }
+  if (/natureza|f[ií]sica|qu[ií]mica|biologia/.test(texto)) {
+    return AreaEnem.NATUREZA;
+  }
+
+  return null;
+}
+
+export function inferirPlanoDoPedido(pedido: string): PedidoSimuladoInterpretado {
+  const quantidadeMatch = pedido.match(/(\d+)\s*quest/i);
+  let quantidade = quantidadeMatch ? Number(quantidadeMatch[1]) : 10;
+  if (!Number.isFinite(quantidade)) quantidade = 10;
+  quantidade = Math.min(Math.max(Math.round(quantidade), 5), 20);
+
+  const area = inferirAreaDoPedido(pedido);
+  const termosBusca = montarTermosBuscaSimulado({ pedido, area });
+
+  return {
+    area,
+    quantidade,
+    anos: null,
+    termosBusca,
+    titulo: 'Simulado personalizado',
+    resumo: 'Simulado montado a partir do seu pedido.',
+  };
+}
+
+function normalizarPlano(raw: Record<string, unknown>): PedidoSimuladoInterpretado {
   const areaRaw = raw.area;
   const area =
-    typeof areaRaw === 'string' && areaRaw.trim()
+    typeof areaRaw === 'string' && areaRaw.trim() && areaRaw.trim() !== 'null'
       ? parseAreaEnem(areaRaw.trim().toLowerCase())
       : null;
 
@@ -85,4 +149,57 @@ export function parsePedidoSimuladoJson(texto: string): PedidoSimuladoInterpreta
     titulo,
     resumo,
   };
+}
+
+export function buildInterpretarPedidoSimuladoPrompt(pedido: string) {
+  return `Você é o planejador de simulados do ENEM+. Converta o pedido do aluno em filtros para buscar questões REAIS no banco (não invente questões).
+
+Retorne APENAS um JSON válido, sem markdown, com aspas duplas em todos os valores string, neste formato:
+{
+  "area": "matematica" | "linguagens" | "humanas" | "natureza" | null,
+  "quantidade": número entre 5 e 20,
+  "anos": [lista de anos] ou null para TODOS os anos disponíveis,
+  "termosBusca": ["palavras", "sinônimos"] para buscar no enunciado,
+  "titulo": "título curto do simulado",
+  "resumo": "1 frase explicando o que será sorteado"
+}
+
+Regras:
+- Se o aluno pedir "todos os anos", "vários anos" ou não citar ano, use anos: null
+- Para assuntos, preencha termosBusca com palavras-chave curtas (ex.: ["função", "domínio"]), nunca frases longas
+- Se pedir "o que mais cai", use termos dos assuntos mais frequentes do ENEM na área (função, geometria, estatística em matemática)
+- Se o aluno citar uma área (matemática, linguagens etc.), preencha "area" corretamente — nunca null nesse caso
+- quantidade padrão: 10
+
+Pedido do aluno:
+${pedido.trim()}`;
+}
+
+export function parsePedidoSimuladoJson(
+  texto: string,
+  pedidoFallback?: string,
+): PedidoSimuladoInterpretado {
+  const raw = tentarExtrairJsonSimulado(texto);
+
+  if (raw) {
+    const plano = normalizarPlano(raw);
+    const fallback = pedidoFallback ? inferirPlanoDoPedido(pedidoFallback) : null;
+    const area = plano.area ?? fallback?.area ?? null;
+
+    return {
+      ...plano,
+      area,
+      termosBusca: montarTermosBuscaSimulado({
+        termosIa: plano.termosBusca,
+        pedido: pedidoFallback,
+        area,
+      }),
+    };
+  }
+
+  if (pedidoFallback) {
+    return inferirPlanoDoPedido(pedidoFallback);
+  }
+
+  throw new Error('A IA não retornou um plano de simulado válido.');
 }

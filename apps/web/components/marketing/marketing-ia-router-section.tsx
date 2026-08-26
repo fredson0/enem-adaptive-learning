@@ -17,7 +17,7 @@ const ROUTER_LANES: RouterLane[] = [
   {
     step: "01",
     role: "Entrada de texto",
-    model: "meta/llama-3.1-8b-instruct",
+    model: "nvidia/nemotron-3.5-lightning-30b-a3b",
     provider: "NVIDIA NIM",
     detail:
       "Tutor, trilha e criação de simulados por linguagem natural — com contexto real do aluno.",

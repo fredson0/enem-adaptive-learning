@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { IA_ENGINE } from '../../../../ia-tutor/core/application/ports/ia-engine.port';
 import type { IaEnginePort } from '../../../../ia-tutor/core/application/ports/ia-engine.port';
@@ -42,12 +43,32 @@ export class GerarSimuladoComIaUseCase {
       );
     }
 
-    const respostaIa = await this.iaEngine.enviarMensagem({
-      texto: buildInterpretarPedidoSimuladoPrompt(pedido),
-      nivelAluno: 'INICIANTE',
-    });
+    let respostaIa: string;
 
-    const plano = parsePedidoSimuladoJson(respostaIa);
+    try {
+      respostaIa = await this.iaEngine.enviarMensagem({
+        texto: buildInterpretarPedidoSimuladoPrompt(pedido),
+        nivelAluno: 'INICIANTE',
+      });
+    } catch (error) {
+      if (error instanceof ServiceUnavailableException) {
+        throw error;
+      }
+
+      throw new BadRequestException(
+        'Não foi possível interpretar seu pedido com a IA. Tente novamente ou use os filtros manuais.',
+      );
+    }
+
+    let plano;
+
+    try {
+      plano = parsePedidoSimuladoJson(respostaIa, pedido);
+    } catch {
+      throw new BadRequestException(
+        'A IA retornou um plano inválido. Reformule o pedido ou use os filtros manuais.',
+      );
+    }
 
     const simulado = await this.gerarSimuladoUseCase.execute({
       userId: input.userId,
@@ -63,6 +84,7 @@ export class GerarSimuladoComIaUseCase {
       plano: {
         titulo: plano.titulo,
         resumo: plano.resumo,
+        area: plano.area,
         termosBusca: plano.termosBusca,
         anos: plano.anos,
       },

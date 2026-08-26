@@ -37,14 +37,20 @@ export class IaEngineRouter implements IaEnginePort {
     @Inject(GroqIaAdapter) private readonly groq: GroqIaAdapter,
   ) {}
 
+  private getProvider(): string {
+    return (this.config.get<string>('IA_PROVIDER') ?? 'nvidia').toLowerCase();
+  }
+
   private getVisionChain(): IaEnginePort[] {
     const chain: IaEnginePort[] = [this.nvidia];
 
-    if (this.config.get<string>('GROQ_API_KEY')) {
-      chain.push(this.groq);
+    if (this.getProvider() !== 'nvidia') {
+      if (this.config.get<string>('GROQ_API_KEY')) {
+        chain.push(this.groq);
+      }
+      chain.push(this.gemini);
     }
 
-    chain.push(this.gemini);
     return chain;
   }
 
@@ -75,14 +81,14 @@ export class IaEngineRouter implements IaEnginePort {
   }
 
   async enviarMensagem(input: EnviarMensagemIaInput): Promise<string> {
+    if (this.getProvider() === 'nvidia') {
+      return this.nvidia.enviarMensagem(input);
+    }
+
     if (input.imagem) {
       return this.runWithFallback(this.getVisionChain(), input);
     }
 
-    const provider = (this.config.get<string>('IA_PROVIDER') ?? 'gemini').toLowerCase();
-    const primary = provider === 'nvidia' ? this.nvidia : this.gemini;
-    const fallback = provider === 'nvidia' ? this.gemini : this.nvidia;
-
-    return this.runWithFallback([primary, fallback], input);
+    return this.runWithFallback([this.gemini, this.nvidia], input);
   }
 }

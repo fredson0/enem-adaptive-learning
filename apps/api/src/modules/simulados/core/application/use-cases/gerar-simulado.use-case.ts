@@ -4,6 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import type { ModoSimulado } from '@generated/prisma';
+import { buscarQuestoesAleatoriasComFallback } from '../../../../questoes/core/application/helpers/buscar-questoes-fallback';
 import { QUESTOES_REPOSITORY } from '../../../../questoes/core/application/ports/questoes.repository.port';
 import type { QuestoesRepositoryPort } from '../../../../questoes/core/application/ports/questoes.repository.port';
 import type { FiltroQuestoes } from '../../../../questoes/core/application/types/filtro-questoes';
@@ -53,22 +54,33 @@ export class GerarSimuladoUseCase {
       termosBusca: input.termosBusca,
     };
 
-    const questoes = await this.questoesRepository.buscarAleatorias({
-      ...filtro,
+    const questoes = await buscarQuestoesAleatoriasComFallback({
+      questoesRepository: this.questoesRepository,
+      filtro,
       quantidade,
     });
 
-    if (questoes.length < quantidade) {
-      const total = await this.questoesRepository.contar(filtro);
+    if (questoes.length === 0) {
+      const totalBanco = await this.questoesRepository.contar();
 
-      if (total === 0) {
+      if (totalBanco === 0) {
         throw new BadRequestException(
-          'Não há questões no banco para esses filtros. Tente outros termos ou rode o seed.',
+          'Não há questões no banco. Rode o seed (npm run prisma:seed -w apps/api).',
         );
       }
 
       throw new BadRequestException(
-        `Só há ${questoes.length} questão(ões) disponíveis para esses filtros (total no banco: ${total}).`,
+        'Não há questões no banco para esses filtros. Tente outros termos ou rode o seed.',
+      );
+    }
+
+    if (questoes.length < quantidade) {
+      const total = await this.questoesRepository.contar(filtro);
+
+      throw new BadRequestException(
+        total === 0
+          ? 'Não há questões no banco para esses filtros. Tente outros termos ou rode o seed.'
+          : `Só há ${questoes.length} questão(ões) disponíveis para esses filtros (total no banco: ${total}).`,
       );
     }
 

@@ -1,5 +1,17 @@
 import type { Prisma } from '@generated/prisma';
+import { getFaixaIndiceArea } from '../../../../core/application/helpers/faixa-indice-enem.helper';
+import { expandirTermosBusca } from '../../../../core/application/helpers/termos-busca.helper';
 import type { FiltroQuestoes } from '../../../../core/application/types/filtro-questoes';
+
+function condicaoTermoBusca(termo: string): Prisma.QuestaoWhereInput[] {
+  const contains = { contains: termo, mode: 'insensitive' as const };
+
+  return [
+    { contexto: contains },
+    { disciplina: contains },
+    { introducaoAlternativas: contains },
+  ];
+}
 
 export function buildQuestaoWhere(filtro?: FiltroQuestoes): Prisma.QuestaoWhereInput {
   if (!filtro) return {};
@@ -8,6 +20,9 @@ export function buildQuestaoWhere(filtro?: FiltroQuestoes): Prisma.QuestaoWhereI
 
   if (filtro.area) {
     where.area = filtro.area;
+
+    const faixa = getFaixaIndiceArea(filtro.area);
+    where.indice = { gte: faixa.min, lte: faixa.max };
   }
 
   if (filtro.anos?.length) {
@@ -16,14 +31,10 @@ export function buildQuestaoWhere(filtro?: FiltroQuestoes): Prisma.QuestaoWhereI
     where.ano = filtro.ano;
   }
 
-  const termos = (filtro.termosBusca ?? [])
-    .map((t) => t.trim())
-    .filter((t) => t.length >= 2);
+  const termos = expandirTermosBusca(filtro.termosBusca ?? []);
 
   if (termos.length > 0) {
-    where.OR = termos.map((termo) => ({
-      contexto: { contains: termo, mode: 'insensitive' as const },
-    }));
+    where.OR = termos.flatMap((termo) => condicaoTermoBusca(termo));
   }
 
   return where;
