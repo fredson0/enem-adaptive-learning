@@ -56,31 +56,33 @@ function ProductShowcaseHeading() {
   };
 
   return (
-    <motion.h2
-      ref={ref}
-      initial={reduceMotion ? false : { y: REVEAL_MOTION.y + 16, opacity: 0 }}
-      animate={
-        animate
-          ? { y: 0, opacity: 1 }
-          : reduceMotion
-            ? undefined
-            : {}
-      }
-      transition={transition}
-      className="font-display mx-auto max-w-4xl px-2 text-[clamp(1.65rem,4.2vw,5.25rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-balance text-[#0b1220] md:max-w-5xl lg:max-w-none lg:w-max lg:text-[clamp(2rem,4.6vw,5.25rem)] lg:leading-[0.9] lg:tracking-[-0.055em] lg:whitespace-nowrap"
-    >
-      Preparação ENEM{" "}
-      <motion.span
-        className="mx-[0.08em] inline-block origin-center align-middle text-[#7c6cff]"
-        aria-hidden
-        initial={reduceMotion ? false : { rotate: 0 }}
-        animate={animate ? { rotate: 360 } : reduceMotion ? undefined : {}}
+    <div className="flex w-full justify-center px-2">
+      <motion.h2
+        ref={ref}
+        initial={reduceMotion ? false : { y: REVEAL_MOTION.y + 16, opacity: 0 }}
+        animate={
+          animate
+            ? { y: 0, opacity: 1 }
+            : reduceMotion
+              ? undefined
+              : {}
+        }
         transition={transition}
+        className="font-display text-center text-[clamp(1.65rem,4.2vw,5.25rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-balance text-[#0b1220] md:text-[clamp(1.85rem,4.4vw,5.25rem)] lg:whitespace-nowrap lg:text-[clamp(2rem,4.6vw,5.25rem)] lg:leading-[0.9] lg:tracking-[-0.055em]"
       >
-        ✦
-      </motion.span>{" "}
-      que se adapta a você
-    </motion.h2>
+        Preparação ENEM{" "}
+        <motion.span
+          className="mx-[0.08em] inline-block origin-center align-middle text-[#7c6cff]"
+          aria-hidden
+          initial={reduceMotion ? false : { rotate: 0 }}
+          animate={animate ? { rotate: 360 } : reduceMotion ? undefined : {}}
+          transition={transition}
+        >
+          ✦
+        </motion.span>{" "}
+        que se adapta a você
+      </motion.h2>
+    </div>
   );
 }
 
