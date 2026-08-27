@@ -64,6 +64,8 @@ export interface SimuladosRepositoryPort {
   }): Promise<SimuladoDetalhe>;
 
   finalizar(simuladoId: string, userId: string): Promise<SimuladoDetalhe>;
+
+  excluir(simuladoId: string, userId: string): Promise<void>;
 }
 
 export type SimuladoComQuestaoAtual = {

@@ -100,4 +100,29 @@ export function obterResultadoSimulado(simuladoId: string) {
   );
 }
 
+export function obterSimulado(simuladoId: string, ordem?: number) {
+  const query = ordem !== undefined ? `?ordem=${ordem}` : "";
+  return apiFetch<import("@/lib/simulados").SimuladoDetalhe>(
+    `/simulados/${simuladoId}${query}`,
+    { auth: true },
+  );
+}
+
+export function excluirSimulado(simuladoId: string) {
+  return apiFetch<{ ok: boolean }>(`/simulados/${simuladoId}`, {
+    method: "DELETE",
+    auth: true,
+  });
+}
+
+export function refazerErrosSimulado(simuladoId: string) {
+  return apiFetch<{ id: string; totalQuestoes: number }>(
+    `/simulados/${simuladoId}/refazer-erros`,
+    {
+      method: "POST",
+      auth: true,
+    },
+  );
+}
+
 export { ANOS_ENEM, AREA_OPTIONS, QUANTIDADE_OPTIONS };

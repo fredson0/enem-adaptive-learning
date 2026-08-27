@@ -53,6 +53,14 @@ export type QuestaoPublica = {
   imagemUrl: string | null;
 };
 
+export type SimuladoNavegacaoItem = {
+  ordem: number;
+  questaoId: string;
+  respondida: boolean;
+  correto?: boolean;
+  alternativa?: string;
+};
+
 export type SimuladoDetalhe = {
   id: string;
   area: string | null;
@@ -64,6 +72,7 @@ export type SimuladoDetalhe = {
   acertos: number;
   status: 'EM_ANDAMENTO' | 'CONCLUIDO';
   questaoAtualIdx: number;
+  indiceProgresso?: number;
   iniciadoEm: string;
   finalizadoEm: string | null;
   concluido: boolean;
@@ -74,6 +83,12 @@ export type SimuladoDetalhe = {
     correto: boolean;
     respondidoEm: string;
   }[];
+  navegacao?: SimuladoNavegacaoItem[];
+  modoVisualizacao?: 'ativa' | 'revisao';
+  respostaAtual?: {
+    alternativa: string;
+    correto: boolean;
+  } | null;
 };
 
 export type SimuladoResultado = {

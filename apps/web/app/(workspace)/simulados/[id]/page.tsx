@@ -2,12 +2,14 @@
 
 import { SimuladoDicaPanel } from "@/components/simulados/simulado-dica-panel";
 import { SimuladoFinalizarDialog } from "@/components/simulados/simulado-finalizar-dialog";
+import { SimuladoNavegacaoStrip } from "@/components/simulados/simulado-navegacao-strip";
 import { SimuladoProgressBar } from "@/components/simulados/simulado-progress-bar";
 import { SimuladoTimer } from "@/components/simulados/simulado-timer";
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
 import { useTokensIa } from "@/components/workspace/tokens-ia-provider";
 import { apiFetch } from "@/lib/api";
 import { pedirDicaQuestao } from "@/lib/ia-tutor";
+import { obterSimulado } from "@/lib/simulados-api";
 import { cn } from "@/lib/utils";
 import { formatModoSimulado } from "@/lib/simulado-modos";
 import type { SimuladoDetalhe } from "@/lib/simulados";
@@ -23,6 +25,14 @@ function renderMarkdownLite(text: string) {
     .trim();
 }
 
+const ATALHOS_ALTERNATIVA: Record<string, string> = {
+  a: "A",
+  b: "B",
+  c: "C",
+  d: "D",
+  e: "E",
+};
+
 export default function SimuladoQuestaoPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -31,6 +41,7 @@ export default function SimuladoQuestaoPage() {
   const finalizandoRef = useRef(false);
 
   const [simulado, setSimulado] = useState<SimuladoDetalhe | null>(null);
+  const [ordemVisualizada, setOrdemVisualizada] = useState<number | null>(null);
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -44,34 +55,63 @@ export default function SimuladoQuestaoPage() {
   const [erroDica, setErroDica] = useState<string | null>(null);
   const [dialogFinalizarAberto, setDialogFinalizarAberto] = useState(false);
 
-  const carregar = useCallback(async () => {
-    try {
-      const data = await apiFetch<SimuladoDetalhe>(`/simulados/${simuladoId}`, {
-        auth: true,
-      });
+  const carregar = useCallback(
+    async (ordem?: number) => {
+      try {
+        const data = await obterSimulado(
+          simuladoId,
+          ordem !== undefined ? ordem : undefined,
+        );
 
-      if (data.status === "CONCLUIDO" || data.concluido) {
-        router.replace(`/simulados/${simuladoId}/resultado`);
-        return;
+        if (data.status === "CONCLUIDO" || data.concluido) {
+          router.replace(`/simulados/${simuladoId}/resultado`);
+          return;
+        }
+
+        setSimulado(data);
+        setOrdemVisualizada(data.questaoAtualIdx);
+
+        if (data.modoVisualizacao === "revisao" && data.respostaAtual) {
+          setSelecionada(data.respostaAtual.alternativa);
+        } else {
+          setSelecionada(null);
+        }
+
+        setFeedback(null);
+        setPainelDicaVisivel(false);
+        setErroDica(null);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Não foi possível carregar o simulado.",
+        );
+      } finally {
+        setLoading(false);
       }
-
-      setSimulado(data);
-      setSelecionada(null);
-      setFeedback(null);
-      setPainelDicaVisivel(false);
-      setErroDica(null);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Não foi possível carregar o simulado.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [simuladoId, router]);
+    },
+    [simuladoId, router],
+  );
 
   useEffect(() => {
     carregar();
   }, [carregar]);
+
+  const emRevisao = simulado?.modoVisualizacao === "revisao";
+  const indiceProgresso = simulado?.indiceProgresso ?? simulado?.respondidas ?? 0;
+
+  const handleNavegar = useCallback(
+    (ordem: number) => {
+      if (ordem === ordemVisualizada) return;
+      setLoading(true);
+      carregar(ordem);
+    },
+    [carregar, ordemVisualizada],
+  );
+
+  const voltarQuestaoAtual = () => {
+    if (indiceProgresso === ordemVisualizada) return;
+    setLoading(true);
+    carregar(indiceProgresso);
+  };
 
   const handleFinalizar = useCallback(async () => {
     if (finalizandoRef.current) return;
@@ -95,7 +135,7 @@ export default function SimuladoQuestaoPage() {
   }, [simuladoId, router]);
 
   const handlePedirDica = async () => {
-    if (!simulado?.questaoAtual) return;
+    if (!simulado?.questaoAtual || emRevisao) return;
 
     const questaoId = simulado.questaoAtual.id;
     const dicaEmCache = dicasPorQuestao[questaoId];
@@ -131,8 +171,8 @@ export default function SimuladoQuestaoPage() {
     setCarregandoDica(false);
   };
 
-  const handleResponder = async () => {
-    if (!simulado?.questaoAtual || !selecionada) return;
+  const handleResponder = useCallback(async () => {
+    if (!simulado?.questaoAtual || !selecionada || emRevisao) return;
 
     setSubmitting(true);
     setError(null);
@@ -187,7 +227,43 @@ export default function SimuladoQuestaoPage() {
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [simulado, selecionada, emRevisao, simuladoId, handleFinalizar, carregar]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (emRevisao || submitting || !simulado?.questaoAtual) return;
+
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      const letra = ATALHOS_ALTERNATIVA[event.key.toLowerCase()];
+      if (letra) {
+        const existe = simulado.questaoAtual.alternativas.some(
+          (alt) => alt.letra === letra,
+        );
+        if (existe) {
+          event.preventDefault();
+          setSelecionada(letra);
+        }
+        return;
+      }
+
+      if (event.key === "Enter" && selecionada) {
+        event.preventDefault();
+        handleResponder();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [emRevisao, submitting, simulado, selecionada, handleResponder]);
 
   if (loading && !simulado) {
     return (
@@ -206,7 +282,7 @@ export default function SimuladoQuestaoPage() {
   }
 
   const questao = simulado?.questaoAtual;
-  const questaoNumero = (simulado?.respondidas ?? 0) + 1;
+  const questaoNumero = (ordemVisualizada ?? simulado?.respondidas ?? 0) + 1;
   const dicaAtual = questao ? (dicasPorQuestao[questao.id] ?? null) : null;
   const jaTemDica = Boolean(dicaAtual);
   const painelDicaAberto =
@@ -242,6 +318,39 @@ export default function SimuladoQuestaoPage() {
               total={simulado.totalQuestoes}
             />
           ) : null}
+
+          {simulado?.navegacao?.length ? (
+            <SimuladoNavegacaoStrip
+              navegacao={simulado.navegacao}
+              ordemAtual={ordemVisualizada ?? simulado.questaoAtualIdx}
+              indiceProgresso={indiceProgresso}
+              onSelecionar={handleNavegar}
+            />
+          ) : null}
+
+          {emRevisao ? (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-[10px] border border-white/10 bg-white/5 px-4 py-2">
+              <p className="text-xs text-white/55">
+                Modo revisão — questão {questaoNumero}
+                {simulado?.respostaAtual
+                  ? simulado.respostaAtual.correto
+                    ? " · acerto"
+                    : " · erro"
+                  : ""}
+              </p>
+              <button
+                type="button"
+                onClick={voltarQuestaoAtual}
+                className="text-xs text-white/70 underline-offset-2 hover:text-white hover:underline"
+              >
+                Voltar à questão atual
+              </button>
+            </div>
+          ) : (
+            <p className="text-xs text-white/30">
+              Atalhos: teclas A–E para marcar · Enter para confirmar
+            </p>
+          )}
 
           <div className="flex justify-end">
             <button
@@ -296,18 +405,26 @@ export default function SimuladoQuestaoPage() {
                 {questao.alternativas.map((alt) => (
                   <label
                     key={alt.letra}
-                    className={`flex cursor-pointer items-start gap-3 rounded-[10px] border px-4 py-3 text-sm transition ${
+                    className={cn(
+                      "flex items-start gap-3 rounded-[10px] border px-4 py-3 text-sm transition",
+                      emRevisao ? "cursor-default" : "cursor-pointer",
                       selecionada === alt.letra
-                        ? "border-white/30 bg-white/10 text-white"
-                        : "border-white/10 bg-[#111] text-white/80 hover:border-white/20"
-                    }`}
+                        ? emRevisao && simulado?.respostaAtual?.correto
+                          ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-100"
+                          : emRevisao && !simulado?.respostaAtual?.correto
+                            ? "border-red-500/40 bg-red-500/10 text-red-100"
+                            : "border-white/30 bg-white/10 text-white"
+                        : "border-white/10 bg-[#111] text-white/80",
+                      !emRevisao && selecionada !== alt.letra && "hover:border-white/20",
+                    )}
                   >
                     <input
                       type="radio"
                       name="alternativa"
                       value={alt.letra}
                       checked={selecionada === alt.letra}
-                      onChange={() => setSelecionada(alt.letra)}
+                      onChange={() => !emRevisao && setSelecionada(alt.letra)}
+                      disabled={emRevisao}
                       className="mt-1"
                     />
                     <span>
@@ -347,60 +464,62 @@ export default function SimuladoQuestaoPage() {
           />
         </div>
 
-        <div className="space-y-3 border-t border-white/[0.06] pt-5">
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={handlePedirDica}
-              disabled={
-                !questao ||
-                carregandoDica ||
-                submitting ||
-                (painelDicaVisivel && jaTemDica)
-              }
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-sm text-white/75 transition hover:border-white/25 hover:text-white disabled:opacity-50"
-            >
-              {carregandoDica ? (
-                <Loader2 className="size-4 animate-spin" />
+        {!emRevisao ? (
+          <div className="space-y-3 border-t border-white/[0.06] pt-5">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={handlePedirDica}
+                disabled={
+                  !questao ||
+                  carregandoDica ||
+                  submitting ||
+                  (painelDicaVisivel && jaTemDica)
+                }
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-sm text-white/75 transition hover:border-white/25 hover:text-white disabled:opacity-50"
+              >
+                {carregandoDica ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Lightbulb className="size-4" strokeWidth={1.75} />
+                )}
+                {carregandoDica
+                  ? "Buscando dica…"
+                  : jaTemDica
+                    ? painelDicaVisivel
+                      ? "Dica aberta"
+                      : "Ver dica"
+                    : "Pedir dica (1 token IA)"}
+              </button>
+              {!simulado?.revelarGabaritoImediato ? (
+                <p className="self-center text-xs text-white/35">
+                  Gabarito só no resultado final
+                </p>
               ) : (
-                <Lightbulb className="size-4" strokeWidth={1.75} />
+                <p className="self-center text-xs text-white/35">
+                  Sem revelar gabarito na dica
+                </p>
               )}
-              {carregandoDica
-                ? "Buscando dica…"
-                : jaTemDica
-                  ? painelDicaVisivel
-                    ? "Dica aberta"
-                    : "Ver dica"
-                  : "Pedir dica (1 token IA)"}
-            </button>
-            {!simulado?.revelarGabaritoImediato ? (
-              <p className="self-center text-xs text-white/35">
-                Gabarito só no resultado final
-              </p>
-            ) : (
-              <p className="self-center text-xs text-white/35">
-                Sem revelar gabarito na dica
-              </p>
-            )}
-          </div>
+            </div>
 
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={handleResponder}
-              disabled={!selecionada || submitting}
-              className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90 disabled:opacity-50"
-            >
-              {submitting ? "Enviando…" : "Confirmar resposta"}
-            </button>
-            <Link
-              href="/simulados"
-              className="rounded-full border border-white/15 px-6 py-3 text-sm text-white/70 transition hover:border-white/25"
-            >
-              Voltar
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={handleResponder}
+                disabled={!selecionada || submitting}
+                className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90 disabled:opacity-50"
+              >
+                {submitting ? "Enviando…" : "Confirmar resposta"}
+              </button>
+              <Link
+                href="/simulados"
+                className="rounded-full border border-white/15 px-6 py-3 text-sm text-white/70 transition hover:border-white/25"
+              >
+                Voltar
+              </Link>
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
 
       <SimuladoFinalizarDialog

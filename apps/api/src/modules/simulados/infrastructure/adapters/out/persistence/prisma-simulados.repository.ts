@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { StatusSimulado } from '@generated/prisma';
 import { PrismaService } from '../../../../../../infrastructure/database/prisma.service';
 import type {
@@ -208,5 +213,23 @@ export class PrismaSimuladosRepository implements SimuladosRepositoryPort {
 
     const row = await this.loadSimulado(simuladoId, userId);
     return this.mapDetalhe(row);
+  }
+
+  async excluir(simuladoId: string, userId: string): Promise<void> {
+    const simulado = await this.prisma.simulado.findFirst({
+      where: { id: simuladoId, userId },
+    });
+
+    if (!simulado) {
+      throw new NotFoundException('Simulado não encontrado');
+    }
+
+    if (simulado.status !== StatusSimulado.EM_ANDAMENTO) {
+      throw new BadRequestException(
+        'Só é possível excluir simulados em andamento',
+      );
+    }
+
+    await this.prisma.simulado.delete({ where: { id: simuladoId } });
   }
 }

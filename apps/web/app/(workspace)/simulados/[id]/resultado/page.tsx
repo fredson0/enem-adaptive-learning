@@ -7,11 +7,11 @@ import { useTutorSession } from "@/components/workspace/tutor-session-provider";
 import { ApiError } from "@/lib/api";
 import { explicarErroQuestao } from "@/lib/ia-tutor";
 import { formatModoSimulado } from "@/lib/simulado-modos";
-import { obterResultadoSimulado } from "@/lib/simulados-api";
+import { obterResultadoSimulado, refazerErrosSimulado } from "@/lib/simulados-api";
 import { formatArea, type SimuladoResultado } from "@/lib/simulados";
 import { Loader2, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 function buildPerguntaErro(
@@ -25,6 +25,7 @@ function buildPerguntaErro(
 
 export default function SimuladoResultadoPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const simuladoId = params.id;
   const { setTokens } = useTokensIa();
   const { startChatWithSeed } = useTutorSession();
@@ -37,6 +38,8 @@ export default function SimuladoResultadoPage() {
   const [questaoEmRevisao, setQuestaoEmRevisao] = useState<
     SimuladoResultado["questoes"][number] | null
   >(null);
+  const [refazendoErros, setRefazendoErros] = useState(false);
+  const [refazerErro, setRefazerErro] = useState<string | null>(null);
 
   useEffect(() => {
     obterResultadoSimulado(simuladoId)
@@ -86,6 +89,24 @@ export default function SimuladoResultadoPage() {
     }
   };
 
+  const handleRefazerErros = async () => {
+    setRefazendoErros(true);
+    setRefazerErro(null);
+
+    try {
+      const novo = await refazerErrosSimulado(simuladoId);
+      router.push(`/simulados/${novo.id}`);
+    } catch (err) {
+      setRefazerErro(
+        err instanceof ApiError
+          ? err.message
+          : "Não foi possível criar o simulado de revisão.",
+      );
+    } finally {
+      setRefazendoErros(false);
+    }
+  };
+
   if (loading) {
     return (
       <WorkspaceSection title="Resultado">
@@ -125,6 +146,12 @@ export default function SimuladoResultadoPage() {
             </p>
           ) : null}
         </div>
+
+        {refazerErro ? (
+          <p className="rounded-[10px] border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {refazerErro}
+          </p>
+        ) : null}
 
         {explicarErro ? (
           <p className="rounded-[10px] border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
@@ -210,6 +237,16 @@ export default function SimuladoResultadoPage() {
         ) : null}
 
         <div className="flex flex-wrap gap-3">
+          {erros.length > 0 ? (
+            <button
+              type="button"
+              disabled={refazendoErros}
+              onClick={handleRefazerErros}
+              className="rounded-full bg-[#b0ff57] px-6 py-3 text-sm font-medium text-black transition hover:bg-[#b0ff57]/90 disabled:opacity-50"
+            >
+              {refazendoErros ? "Criando simulado…" : `Refazer ${erros.length} erro${erros.length === 1 ? "" : "s"}`}
+            </button>
+          ) : null}
           <Link
             href="/trilha"
             className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90"

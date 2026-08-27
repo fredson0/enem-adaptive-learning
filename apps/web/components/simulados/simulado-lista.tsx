@@ -3,7 +3,7 @@
 import { SimuladoCard } from "@/components/simulados/simulado-card";
 import type { ModoSimuladoSlug } from "@/lib/simulado-modos";
 import { getModoBySlug } from "@/lib/simulado-modos";
-import { listarSimulados } from "@/lib/simulados-api";
+import { listarSimulados, excluirSimulado } from "@/lib/simulados-api";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -19,11 +19,12 @@ export function SimuladoLista({ modoSlug }: SimuladoListaProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filtroStatus, setFiltroStatus] = useState<"todos" | "EM_ANDAMENTO" | "CONCLUIDO">("todos");
+  const [excluindoId, setExcluindoId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const carregar = () => {
     setLoading(true);
     setError(null);
-    listarSimulados({
+    return listarSimulados({
       modo: modo.api,
       status: filtroStatus === "todos" ? undefined : filtroStatus,
       limit: 30,
@@ -41,7 +42,30 @@ export function SimuladoLista({ modoSlug }: SimuladoListaProps) {
         ),
       )
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    carregar();
   }, [modo.api, filtroStatus]);
+
+  const handleExcluir = async (id: string) => {
+    if (!window.confirm("Cancelar este simulado em andamento? Esta ação não pode ser desfeita.")) {
+      return;
+    }
+
+    setExcluindoId(id);
+    try {
+      await excluirSimulado(id);
+      setItems((atual) => atual.filter((s) => s.id !== id));
+      setTotal((atual) => Math.max(0, atual - 1));
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Não foi possível excluir o simulado.",
+      );
+    } finally {
+      setExcluindoId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -107,7 +131,12 @@ export function SimuladoLista({ modoSlug }: SimuladoListaProps) {
           </p>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {items.map((simulado) => (
-              <SimuladoCard key={simulado.id} simulado={simulado} />
+              <SimuladoCard
+                key={simulado.id}
+                simulado={simulado}
+                onExcluir={handleExcluir}
+                excluindoId={excluindoId}
+              />
             ))}
           </div>
         </>

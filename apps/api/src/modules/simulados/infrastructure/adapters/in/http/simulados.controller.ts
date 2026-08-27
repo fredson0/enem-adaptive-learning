@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Inject,
@@ -20,6 +21,8 @@ import { GerarSimuladoUseCase } from '../../../../core/application/use-cases/ger
 import { GerarSimuladoComIaUseCase } from '../../../../core/application/use-cases/gerar-simulado-com-ia.use-case';
 import { ListarSimuladosUseCase } from '../../../../core/application/use-cases/listar-simulados.use-case';
 import { ObterSimuladoUseCase } from '../../../../core/application/use-cases/obter-simulado.use-case';
+import { ExcluirSimuladoUseCase } from '../../../../core/application/use-cases/excluir-simulado.use-case';
+import { RefazerErrosSimuladoUseCase } from '../../../../core/application/use-cases/refazer-erros-simulado.use-case';
 import {
   CriarSimuladoDto,
   EnviarRespostaDto,
@@ -44,6 +47,10 @@ export class SimuladosController {
     private readonly enviarRespostaUseCase: EnviarRespostaUseCase,
     @Inject(FinalizarSimuladoUseCase)
     private readonly finalizarSimuladoUseCase: FinalizarSimuladoUseCase,
+    @Inject(ExcluirSimuladoUseCase)
+    private readonly excluirSimuladoUseCase: ExcluirSimuladoUseCase,
+    @Inject(RefazerErrosSimuladoUseCase)
+    private readonly refazerErrosSimuladoUseCase: RefazerErrosSimuladoUseCase,
   ) {}
 
   @Post()
@@ -93,8 +100,19 @@ export class SimuladosController {
   }
 
   @Get(':id')
-  async obter(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
-    const resultado = await this.obterSimuladoUseCase.execute(id, user.sub);
+  async obter(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @Query('ordem') ordem?: string,
+  ) {
+    const ordemNum =
+      ordem !== undefined && ordem !== '' ? Number.parseInt(ordem, 10) : undefined;
+
+    const resultado = await this.obterSimuladoUseCase.execute({
+      simuladoId: id,
+      userId: user.sub,
+      ordem: ordemNum,
+    });
 
     return {
       id: resultado.simulado.id,
@@ -107,11 +125,15 @@ export class SimuladosController {
       acertos: resultado.simulado.acertos,
       status: resultado.simulado.status,
       questaoAtualIdx: resultado.indiceAtual,
+      indiceProgresso: resultado.indiceProgresso,
       iniciadoEm: resultado.simulado.iniciadoEm,
       finalizadoEm: resultado.simulado.finalizadoEm,
       concluido: resultado.concluido,
       questaoAtual: resultado.questaoAtual?.toPublico() ?? null,
       respostas: resultado.respostas,
+      navegacao: resultado.navegacao,
+      modoVisualizacao: resultado.modoVisualizacao,
+      respostaAtual: resultado.respostaAtual,
     };
   }
 
@@ -134,5 +156,16 @@ export class SimuladosController {
   @HttpCode(200)
   finalizar(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.finalizarSimuladoUseCase.execute(id, user.sub);
+  }
+
+  @Post(':id/refazer-erros')
+  refazerErros(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.refazerErrosSimuladoUseCase.execute(id, user.sub);
+  }
+
+  @Delete(':id')
+  @HttpCode(200)
+  excluir(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.excluirSimuladoUseCase.execute(id, user.sub);
   }
 }

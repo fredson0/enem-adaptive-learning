@@ -10,6 +10,8 @@ import { ListarSimuladosUseCase } from './core/application/use-cases/listar-simu
 import {
   ObterSimuladoUseCase,
 } from './core/application/use-cases/obter-simulado.use-case';
+import { ExcluirSimuladoUseCase } from './core/application/use-cases/excluir-simulado.use-case';
+import { RefazerErrosSimuladoUseCase } from './core/application/use-cases/refazer-erros-simulado.use-case';
 import { SimuladosController } from './infrastructure/adapters/in/http/simulados.controller';
 import { PrismaSimuladosRepository } from './infrastructure/adapters/out/persistence/prisma-simulados.repository';
 import { IaTutorModule } from '../ia-tutor/ia-tutor.module';
@@ -27,6 +29,8 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
     ObterSimuladoUseCase,
     EnviarRespostaUseCase,
     FinalizarSimuladoUseCase,
+    ExcluirSimuladoUseCase,
+    RefazerErrosSimuladoUseCase,
     {
       provide: SIMULADOS_REPOSITORY,
       useClass: PrismaSimuladosRepository,

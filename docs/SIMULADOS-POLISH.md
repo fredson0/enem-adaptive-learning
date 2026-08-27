@@ -104,7 +104,9 @@ Colunas em `simulados`:
 | `GET` | `/simulados?modo=&status=&limit=&offset=` | Lista paginada |
 | `GET` | `/simulados/:id/resultado` | Resultado idempotente |
 | `POST` | `/simulados` | Body inclui `modo` |
-| `POST` | `/simulados/gerar-com-ia` | Body inclui `modo` (bloqueado em cronometrado) |
+| `POST` | `/simulados/:id/refazer-erros` | Novo simulado só com questões erradas |
+| `DELETE` | `/simulados/:id` | Cancela simulado em andamento |
+| `GET` | `/simulados/:id?ordem=` | Revisão de questão já respondida |
 
 ---
 
@@ -124,12 +126,12 @@ Colunas em `simulados`:
 
 ## Pendências (próximas iterações)
 
-- [ ] Navegação entre questões já respondidas (revisão)
+- [x] Navegação entre questões já respondidas (revisão)
 - [ ] Render LaTeX no enunciado
-- [ ] Atalhos de teclado A–E
-- [ ] `DELETE /simulados/:id` (cancelar abandonado)
-- [ ] Simulado “refazer só erros”
-- [ ] Mobile: sidebar drawer
+- [x] Atalhos de teclado A–E
+- [x] `DELETE /simulados/:id` (cancelar abandonado)
+- [x] Simulado “refazer só erros”
+- [x] Mobile: sidebar drawer (já em `workspace-chrome.tsx`)
 
 ---
 
