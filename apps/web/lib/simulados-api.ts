@@ -25,12 +25,14 @@ export type ContagemQuestoesResponse = {
 export function listarSimulados(params?: {
   modo?: ModoSimuladoApi;
   status?: "EM_ANDAMENTO" | "CONCLUIDO";
+  area?: string;
   limit?: number;
   offset?: number;
 }) {
   const search = new URLSearchParams();
   if (params?.modo) search.set("modo", params.modo.toLowerCase());
   if (params?.status) search.set("status", params.status);
+  if (params?.area) search.set("area", params.area);
   if (params?.limit) search.set("limit", String(params.limit));
   if (params?.offset) search.set("offset", String(params.offset));
 

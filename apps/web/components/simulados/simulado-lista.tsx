@@ -4,6 +4,7 @@ import { SimuladoCard } from "@/components/simulados/simulado-card";
 import type { ModoSimuladoSlug } from "@/lib/simulado-modos";
 import { getModoBySlug } from "@/lib/simulado-modos";
 import { listarSimulados, excluirSimulado } from "@/lib/simulados-api";
+import { AREA_OPTIONS, type AreaEnemSlug } from "@/lib/simulados";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -19,6 +20,7 @@ export function SimuladoLista({ modoSlug }: SimuladoListaProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filtroStatus, setFiltroStatus] = useState<"todos" | "EM_ANDAMENTO" | "CONCLUIDO">("todos");
+  const [filtroArea, setFiltroArea] = useState<"todas" | AreaEnemSlug>("todas");
   const [excluindoId, setExcluindoId] = useState<string | null>(null);
 
   const carregar = () => {
@@ -27,6 +29,7 @@ export function SimuladoLista({ modoSlug }: SimuladoListaProps) {
     return listarSimulados({
       modo: modo.api,
       status: filtroStatus === "todos" ? undefined : filtroStatus,
+      area: filtroArea === "todas" ? undefined : filtroArea,
       limit: 30,
     })
       .then((response) => {
@@ -46,7 +49,7 @@ export function SimuladoLista({ modoSlug }: SimuladoListaProps) {
 
   useEffect(() => {
     carregar();
-  }, [modo.api, filtroStatus]);
+  }, [modo.api, filtroStatus, filtroArea]);
 
   const handleExcluir = async (id: string) => {
     if (!window.confirm("Cancelar este simulado em andamento? Esta ação não pode ser desfeita.")) {
@@ -97,6 +100,34 @@ export function SimuladoLista({ modoSlug }: SimuladoListaProps) {
               }`}
             >
               {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-1 rounded-full border border-white/10 bg-[#111] p-1">
+          <button
+            type="button"
+            onClick={() => setFiltroArea("todas")}
+            className={`rounded-full px-3 py-1.5 text-xs transition ${
+              filtroArea === "todas"
+                ? "bg-white text-black"
+                : "text-white/55 hover:text-white"
+            }`}
+          >
+            Todas áreas
+          </button>
+          {AREA_OPTIONS.map((area) => (
+            <button
+              key={area.value}
+              type="button"
+              onClick={() => setFiltroArea(area.value)}
+              className={`rounded-full px-3 py-1.5 text-xs transition ${
+                filtroArea === area.value
+                  ? "bg-white text-black"
+                  : "text-white/55 hover:text-white"
+              }`}
+            >
+              {area.label}
             </button>
           ))}
         </div>

@@ -66,18 +66,27 @@ export default function SimuladoResultadoPage() {
 
       setTokens(response.tokens);
 
-      startChatWithSeed([
+      await startChatWithSeed(
+        [
+          {
+            role: "user",
+            texto: buildPerguntaErro(
+              questao.ano,
+              questao.indice,
+              questao.alternativaMarcada,
+              questao.gabarito,
+            ),
+          },
+          { role: "assistant", texto: response.resposta },
+        ],
         {
-          role: "user",
-          texto: buildPerguntaErro(
-            questao.ano,
-            questao.indice,
-            questao.alternativaMarcada,
-            questao.gabarito,
-          ),
+          questaoId: questao.id,
+          ano: questao.ano,
+          indice: questao.indice,
+          simuladoId,
+          area: questao.area ?? undefined,
         },
-        { role: "assistant", texto: response.resposta },
-      ]);
+      );
     } catch (err) {
       setExplicarErro(
         err instanceof ApiError

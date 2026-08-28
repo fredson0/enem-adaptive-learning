@@ -31,6 +31,7 @@ export type SimuladoDetalhe = SimuladoResumo & {
 
 export type ListarSimuladosFiltro = {
   modo?: ModoSimulado;
+  area?: AreaEnem;
   status?: StatusSimulado;
   limit?: number;
   offset?: number;

@@ -16,6 +16,7 @@ import { AtualizarPerfilUseCase } from '../../../../core/application/use-cases/a
 import { LoginGoogleUseCase } from '../../../../core/application/use-cases/login-google.use-case';
 import { LogoutUseCase } from '../../../../core/application/use-cases/logout.use-case';
 import { ObterPerfilUseCase } from '../../../../core/application/use-cases/obter-perfil.use-case';
+import { ObterPlanoUseCase } from '../../../../core/application/use-cases/obter-plano.use-case';
 import { RefreshSessionUseCase } from '../../../../core/application/use-cases/refresh-session.use-case';
 import {
   AtualizarPerfilDto,
@@ -42,6 +43,8 @@ export class UsuariosController {
     private readonly logoutUseCase: LogoutUseCase,
     @Inject(ObterPerfilUseCase)
     private readonly obterPerfilUseCase: ObterPerfilUseCase,
+    @Inject(ObterPlanoUseCase)
+    private readonly obterPlanoUseCase: ObterPlanoUseCase,
     @Inject(AtualizarPerfilUseCase)
     private readonly atualizarPerfilUseCase: AtualizarPerfilUseCase,
   ) {}
@@ -85,6 +88,12 @@ export class UsuariosController {
   @UseGuards(JwtAuthGuard)
   obterPerfil(@CurrentUser() user: JwtPayload) {
     return this.obterPerfilUseCase.execute(user.sub);
+  }
+
+  @Get('plano')
+  @UseGuards(JwtAuthGuard)
+  obterPlano(@CurrentUser() user: JwtPayload) {
+    return this.obterPlanoUseCase.execute(user.sub);
   }
 
   @Patch('perfil')

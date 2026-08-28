@@ -11,6 +11,12 @@ export type PerfilAlunoData = {
   onboardingCompleto: boolean;
 };
 
+export type PlanoAssinaturaData = {
+  tipo: string;
+  tokensDiarios: number;
+  ativo: boolean;
+};
+
 export interface UsuariosRepositoryPort {
   buscarPorEmail(email: string): Promise<Usuario | null>;
   buscarPorId(id: string): Promise<Usuario | null>;
@@ -19,6 +25,7 @@ export interface UsuariosRepositoryPort {
     meta?: { googleSub?: string },
   ): Promise<Usuario>;
   obterPerfilAluno(userId: string): Promise<PerfilAlunoData | null>;
+  obterPlanoAssinatura(userId: string): Promise<PlanoAssinaturaData | null>;
   atualizarPerfilAluno(
     userId: string,
     data: {

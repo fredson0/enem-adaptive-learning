@@ -9,6 +9,7 @@ import { AtualizarPerfilUseCase } from './core/application/use-cases/atualizar-p
 import { LoginGoogleUseCase } from './core/application/use-cases/login-google.use-case';
 import { LogoutUseCase } from './core/application/use-cases/logout.use-case';
 import { ObterPerfilUseCase } from './core/application/use-cases/obter-perfil.use-case';
+import { ObterPlanoUseCase } from './core/application/use-cases/obter-plano.use-case';
 import { RefreshSessionUseCase } from './core/application/use-cases/refresh-session.use-case';
 import { UsuariosController } from './infrastructure/adapters/in/http/usuarios.controller';
 import { GoogleOAuthService } from './infrastructure/adapters/out/google-oauth.service';
@@ -32,6 +33,7 @@ import { PrismaUsuariosRepository } from './infrastructure/adapters/out/persiste
     RefreshSessionUseCase,
     LogoutUseCase,
     ObterPerfilUseCase,
+    ObterPlanoUseCase,
     AtualizarPerfilUseCase,
     JwtAuthGuard,
     {

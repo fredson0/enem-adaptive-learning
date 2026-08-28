@@ -2,6 +2,8 @@
 
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
 import { LogoutButton } from "@/components/workspace/logout-button";
+import { PerfilEditPanel } from "@/components/workspace/perfil-edit-panel";
+import { usePlano } from "@/components/workspace/plano-provider";
 import { UserAvatar } from "@/components/workspace/user-avatar";
 import { apiFetch, fetchMe } from "@/lib/api";
 import { type User } from "@/lib/auth";
@@ -15,6 +17,7 @@ import { useEffect, useState } from "react";
 
 export default function PerfilPage() {
   const router = useRouter();
+  const { plano } = usePlano();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -80,7 +83,7 @@ export default function PerfilPage() {
         <div className="space-y-5 text-sm">
           <div>
             <p className="text-white/40">Plano atual</p>
-            <p className="mt-1.5 text-white">Gratuito</p>
+            <p className="mt-1.5 text-white">{plano.label}</p>
           </div>
           <div>
             <p className="text-white/40">Curso ou objetivo</p>
@@ -107,6 +110,8 @@ export default function PerfilPage() {
             </p>
           </div>
         </div>
+
+        <PerfilEditPanel user={user} onSaved={setUser} />
 
         <LogoutButton />
       </div>

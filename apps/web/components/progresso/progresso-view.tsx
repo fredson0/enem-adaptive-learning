@@ -2,9 +2,11 @@
 
 import { ProgressArcGauge } from "@/components/progresso/progress-arc-gauge";
 import { ProgressoAreasList } from "@/components/progresso/progresso-areas-list";
+import { ProgressoComparativoSemana } from "@/components/progresso/progresso-comparativo-semana";
 import { ProgressoEnemAnos } from "@/components/progresso/progresso-enem-anos";
 import { ProgressoCard } from "@/components/progresso/progresso-card";
 import { ProgressoEvolucaoChart } from "@/components/progresso/progresso-evolucao-chart";
+import { ProgressoLinhaTempo } from "@/components/progresso/progresso-linha-tempo";
 import { ProgressoRadarChart } from "@/components/progresso/progresso-radar-chart";
 import { ProgressoSegmentedBar } from "@/components/progresso/progresso-segmented-bar";
 import { ProgressoStreakCard } from "@/components/progresso/progresso-streak-card";
@@ -16,10 +18,12 @@ import type {
   PontoEvolucao,
 } from "@/lib/metricas";
 import {
+  calcularComparativoSemanal,
   calcularRitmoSemanal,
   calcularTendenciaGeral,
   calcularTendenciasPorArea,
   formatarLinhaTendencia,
+  montarLinhaTempo30Dias,
   montarSegmentosPorArea,
   montarSubtituloProgresso,
   obterProximaAcaoTrilha,
@@ -86,6 +90,8 @@ export function ProgressoView({
   const lacunaPrincipal = lacunas.lacunas[0] ?? null;
   const tendenciaGeral = calcularTendenciaGeral(evolucao);
   const tendenciasArea = calcularTendenciasPorArea(evolucao);
+  const comparativoSemanal = calcularComparativoSemanal(evolucao);
+  const linhaTempo30Dias = montarLinhaTempo30Dias(evolucao);
   const ritmoSemanal = calcularRitmoSemanal(evolucao);
   const mediaExibida = proficiencia.resumo.mediaGeralPercentual ?? 0;
   const areasOrdenadas = ordenarAreasPorPrioridade(
@@ -161,6 +167,22 @@ export function ProgressoView({
 
       <div className="grid gap-3 md:grid-cols-2 md:gap-4">
         <ProgressoStreakCard ritmo={ritmoSemanal} />
+
+        <ProgressoCard
+          icon={<TrendingUp className="size-4" />}
+          title="Esta semana vs anterior"
+          className="md:col-span-2"
+        >
+          <ProgressoComparativoSemana comparativo={comparativoSemanal} />
+        </ProgressoCard>
+
+        <ProgressoCard
+          icon={<BarChart3 className="size-4" />}
+          title="Linha do tempo"
+          className="md:col-span-2"
+        >
+          <ProgressoLinhaTempo dias={linhaTempo30Dias} />
+        </ProgressoCard>
 
         <ProgressoCard
           icon={<Target className="size-4" />}
@@ -383,6 +405,8 @@ export function ProgressoDetalheView({
 }: ProgressoDataProps) {
   const lacunaPrincipal = lacunas.lacunas[0] ?? null;
   const tendenciasArea = calcularTendenciasPorArea(evolucao);
+  const comparativoSemanal = calcularComparativoSemanal(evolucao);
+  const linhaTempo30Dias = montarLinhaTempo30Dias(evolucao);
   const areasOrdenadas = ordenarAreasPorPrioridade(
     proficiencia.areas,
     lacunas.lacunas,
@@ -412,6 +436,26 @@ export function ProgressoDetalheView({
       </header>
 
       <div className="grid gap-4 md:grid-cols-2">
+        {!semDados ? (
+          <ProgressoCard
+            icon={<TrendingUp className="size-4" />}
+            title="Esta semana vs anterior"
+            className="md:col-span-2"
+          >
+            <ProgressoComparativoSemana comparativo={comparativoSemanal} />
+          </ProgressoCard>
+        ) : null}
+
+        {!semDados ? (
+          <ProgressoCard
+            icon={<BarChart3 className="size-4" />}
+            title="Linha do tempo (30 dias)"
+            className="md:col-span-2"
+          >
+            <ProgressoLinhaTempo dias={linhaTempo30Dias} />
+          </ProgressoCard>
+        ) : null}
+
         {!semDados ? (
           <ProgressoCard
             icon={<TrendingUp className="size-4" />}

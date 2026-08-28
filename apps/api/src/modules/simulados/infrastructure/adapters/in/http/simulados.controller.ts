@@ -88,6 +88,7 @@ export class SimuladosController {
     return this.listarSimuladosUseCase.execute({
       userId: user.sub,
       modo: modoQuery ? parseModoSimulado(modoQuery) : undefined,
+      area: query.areaEnum ?? undefined,
       status: query.status,
       limit: query.limit,
       offset: query.offset,

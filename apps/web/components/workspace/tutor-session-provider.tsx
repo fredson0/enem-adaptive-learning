@@ -20,12 +20,21 @@ import {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
+export type TutorQuestaoContext = {
+  questaoId: string;
+  ano: number;
+  indice: number;
+  simuladoId?: string;
+  area?: string;
+};
+
 export type TutorChatSession = {
   id: string;
   title: string;
   messages: MensagemHistorico[];
   updatedAt: number;
   preview?: string;
+  questaoContext?: TutorQuestaoContext | null;
 };
 
 const PINNED_CHATS_STORAGE_KEY = "enem-tutor-pinned-chats";
@@ -58,7 +67,10 @@ type TutorSessionContextValue = {
   loading: boolean;
   pinnedSessionIds: string[];
   startNewChat: () => void;
-  startChatWithSeed: (messages: MensagemHistorico[]) => Promise<void>;
+  startChatWithSeed: (
+    messages: MensagemHistorico[],
+    questaoContext?: TutorQuestaoContext,
+  ) => Promise<void>;
   goToTutor: () => void;
   openSession: (id: string) => Promise<void>;
   registerConversation: (session: TutorChatSession) => void;
@@ -131,9 +143,15 @@ export function TutorSessionProvider({ children }: { children: ReactNode }) {
   }, [router]);
 
   const startChatWithSeed = useCallback(
-    async (messages: MensagemHistorico[]) => {
+    async (
+      messages: MensagemHistorico[],
+      questaoContext?: TutorQuestaoContext,
+    ) => {
       const conversa = await criarConversaTutor(messages);
-      const session = toSession(conversa);
+      const session: TutorChatSession = {
+        ...toSession(conversa),
+        questaoContext: questaoContext ?? null,
+      };
 
       setSessions((current) => {
         const without = current.filter((item) => item.id !== session.id);

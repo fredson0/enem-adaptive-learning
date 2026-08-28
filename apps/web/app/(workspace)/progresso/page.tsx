@@ -1,5 +1,6 @@
 "use client";
 
+import { ProgressoSkeleton } from "@/components/progresso/progresso-skeleton";
 import { ProgressoView } from "@/components/progresso/progresso-view";
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
 import {
@@ -53,9 +54,7 @@ export default function ProgressoPage() {
 
   return (
     <WorkspaceSection contentClassName="flex min-h-0 flex-1 flex-col py-2 sm:py-4">
-      {loading ? (
-        <p className="text-sm text-white/45">Carregando seu progresso…</p>
-      ) : null}
+      {loading ? <ProgressoSkeleton /> : null}
 
       {error ? <p className="text-sm text-red-400">{error}</p> : null}
 

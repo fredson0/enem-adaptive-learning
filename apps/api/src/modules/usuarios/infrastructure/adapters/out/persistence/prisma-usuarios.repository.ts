@@ -95,6 +95,22 @@ export class PrismaUsuariosRepository implements UsuariosRepositoryPort {
     };
   }
 
+  async obterPlanoAssinatura(userId: string) {
+    const plano = await this.prisma.planoAssinatura.findUnique({
+      where: { userId },
+    });
+
+    if (!plano) {
+      return null;
+    }
+
+    return {
+      tipo: plano.tipo,
+      tokensDiarios: plano.tokensDiarios,
+      ativo: plano.ativo,
+    };
+  }
+
   async atualizarPerfilAluno(
     userId: string,
     data: {

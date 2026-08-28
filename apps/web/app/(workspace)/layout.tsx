@@ -1,6 +1,7 @@
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { OnboardingGuard } from "@/components/auth/onboarding-guard";
+import { PlanoProvider } from "@/components/workspace/plano-provider";
 import { TokensIaProvider } from "@/components/workspace/tokens-ia-provider";
 import { TutorSessionProvider } from "@/components/workspace/tutor-session-provider";
 import { WorkspaceLenisGuard } from "@/components/workspace/workspace-lenis-guard";
@@ -8,6 +9,7 @@ import { WorkspaceScrollProvider } from "@/components/workspace/workspace-scroll
 import { WorkspaceSidebarProvider } from "@/components/workspace/workspace-sidebar-context";
 import { WorkspaceSidebar } from "@/components/workspace/workspace-sidebar";
 import { WorkspacePageTransition } from "@/components/workspace/workspace-page-transition";
+import { WorkspaceToastProvider } from "@/components/workspace/workspace-toast";
 
 export default function WorkspaceLayout({
   children,
@@ -18,7 +20,9 @@ export default function WorkspaceLayout({
     <AuthProvider>
       <AuthGuard>
         <TokensIaProvider>
-          <TutorSessionProvider>
+          <PlanoProvider>
+            <WorkspaceToastProvider>
+              <TutorSessionProvider>
             <WorkspaceScrollProvider>
               <WorkspaceSidebarProvider>
                 <div className="osmo-workspace osmo-canvas-bg relative h-screen w-screen overflow-hidden">
@@ -29,7 +33,9 @@ export default function WorkspaceLayout({
                 </div>
               </WorkspaceSidebarProvider>
             </WorkspaceScrollProvider>
-          </TutorSessionProvider>
+              </TutorSessionProvider>
+            </WorkspaceToastProvider>
+          </PlanoProvider>
         </TokensIaProvider>
       </AuthGuard>
     </AuthProvider>

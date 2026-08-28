@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { ModoSimulado, StatusSimulado } from '@generated/prisma';
+import type { AreaEnem, ModoSimulado, StatusSimulado } from '@generated/prisma';
 import {
   SIMULADOS_REPOSITORY,
   type SimuladosRepositoryPort,
@@ -8,6 +8,7 @@ import {
 export type ListarSimuladosInput = {
   userId: string;
   modo?: ModoSimulado;
+  area?: AreaEnem;
   status?: StatusSimulado;
   limit?: number;
   offset?: number;
@@ -25,6 +26,7 @@ export class ListarSimuladosUseCase {
       input.userId,
       {
         modo: input.modo,
+        area: input.area,
         status: input.status,
         limit: input.limit,
         offset: input.offset,

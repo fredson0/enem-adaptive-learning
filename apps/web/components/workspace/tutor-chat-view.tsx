@@ -1,12 +1,15 @@
 "use client";
 
 import { HeroWave } from "@/components/ui/ai-input-hero";
+import { TutorQuestaoContextBanner } from "@/components/workspace/tutor-questao-context-banner";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useTokensIa } from "@/components/workspace/tokens-ia-provider";
+import { useWorkspaceToast } from "@/components/workspace/workspace-toast";
 import { useWorkspaceScrollReporter } from "@/components/workspace/workspace-scroll-context";
 import { workspaceContentOffsetClass } from "@/components/workspace/workspace-sidebar-context";
 import { useTutorSession } from "@/components/workspace/tutor-session-provider";
 import { ApiError } from "@/lib/api";
+import { isLimiteTokensError } from "@/lib/api-errors";
 import { compressImageForUpload } from "@/lib/image-compress";
 import {
   enviarMensagemTutor,
@@ -48,8 +51,10 @@ export function TutorChatView({
     tipo: "resumo" | "questoes";
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [contextDismissed, setContextDismissed] = useState(false);
   const { isAuthenticated, isLoading, requireAuth } = useAuth();
   const { setTokens } = useTokensIa();
+  const { showToast } = useWorkspaceToast();
   const { registerConversation, sessionKey, activeSession, activeSessionId } =
     useTutorSession();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -63,11 +68,43 @@ export function TutorChatView({
   useEffect(() => {
     setMessages(activeSession?.messages ?? initialMessages);
     setError(null);
+    setContextDismissed(false);
   }, [sessionKey, activeSession, initialMessages]);
+
+  const questaoContext = activeSession?.questaoContext ?? null;
+  const showQuestaoContext = questaoContext && !contextDismissed;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  const tratarErroIa = (err: unknown, fallback: string) => {
+    if (isLimiteTokensError(err)) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : "Limite diário de tokens IA atingido.";
+      showToast({
+        message,
+        actionLabel: "Ver planos",
+        actionHref: "/planos",
+      });
+      setError(message);
+      return;
+    }
+
+    if (err instanceof ApiError) {
+      setError(err.message);
+      return;
+    }
+
+    if (err instanceof Error) {
+      setError(err.message);
+      return;
+    }
+
+    setError(fallback);
+  };
 
   const handleSubmit = async (value: string, attachment?: File) => {
     const mensagem = value.trim();
@@ -130,13 +167,7 @@ export function TutorChatView({
       });
     } catch (err) {
       setMessages(historico);
-      if (err instanceof ApiError) {
-        setError(err.message);
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Não foi possível enviar a mensagem. Tente novamente.");
-      }
+      tratarErroIa(err, "Não foi possível enviar a mensagem. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -182,13 +213,7 @@ export function TutorChatView({
       }
     } catch (err) {
       janelaImpressao?.close();
-      if (err instanceof ApiError) {
-        setError(err.message);
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Não foi possível gerar o PDF explicativo. Tente novamente.");
-      }
+      tratarErroIa(err, "Não foi possível gerar o PDF explicativo. Tente novamente.");
     } finally {
       setPdfLoading(null);
     }
@@ -239,13 +264,7 @@ export function TutorChatView({
       }
     } catch (err) {
       janelaImpressao?.close();
-      if (err instanceof ApiError) {
-        setError(err.message);
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Não foi possível gerar o PDF de questões. Tente novamente.");
-      }
+      tratarErroIa(err, "Não foi possível gerar o PDF de questões. Tente novamente.");
     } finally {
       setPdfLoading(null);
     }
@@ -275,6 +294,12 @@ export function TutorChatView({
           )}
         >
           <div className="space-y-4 pb-4">
+            {showQuestaoContext ? (
+              <TutorQuestaoContextBanner
+                context={questaoContext}
+                onDismiss={() => setContextDismissed(true)}
+              />
+            ) : null}
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}

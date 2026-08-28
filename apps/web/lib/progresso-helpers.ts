@@ -264,3 +264,111 @@ export function formatDateCurta(iso: string) {
     month: "short",
   }).format(new Date(iso));
 }
+
+export type ComparativoSemanal = {
+  simuladosSemanaAtual: number;
+  simuladosSemanaAnterior: number;
+  mediaSemanaAtual: number | null;
+  mediaSemanaAnterior: number | null;
+  deltaMedia: number | null;
+};
+
+function inicioSemana(date: Date): Date {
+  return startOfWeekMonday(date);
+}
+
+/** Compara prática e média de acertos entre esta semana e a anterior. */
+export function calcularComparativoSemanal(
+  pontos: PontoEvolucao[],
+): ComparativoSemanal {
+  const hoje = new Date();
+  hoje.setHours(12, 0, 0, 0);
+
+  const inicioAtual = inicioSemana(hoje);
+  const inicioAnterior = new Date(inicioAtual);
+  inicioAnterior.setDate(inicioAnterior.getDate() - 7);
+  const fimAnterior = new Date(inicioAtual);
+  fimAnterior.setMilliseconds(-1);
+
+  const semanaAtual: PontoEvolucao[] = [];
+  const semanaAnterior: PontoEvolucao[] = [];
+
+  for (const ponto of pontos) {
+    const data = new Date(ponto.finalizadoEm);
+    if (data >= inicioAtual) {
+      semanaAtual.push(ponto);
+    } else if (data >= inicioAnterior && data <= fimAnterior) {
+      semanaAnterior.push(ponto);
+    }
+  }
+
+  const media = (lista: PontoEvolucao[]) => {
+    if (lista.length === 0) return null;
+    const soma = lista.reduce((acc, item) => acc + item.percentual, 0);
+    return Math.round((soma / lista.length) * 10) / 10;
+  };
+
+  const mediaSemanaAtual = media(semanaAtual);
+  const mediaSemanaAnterior = media(semanaAnterior);
+
+  return {
+    simuladosSemanaAtual: semanaAtual.length,
+    simuladosSemanaAnterior: semanaAnterior.length,
+    mediaSemanaAtual,
+    mediaSemanaAnterior,
+    deltaMedia:
+      mediaSemanaAtual !== null && mediaSemanaAnterior !== null
+        ? Math.round((mediaSemanaAtual - mediaSemanaAnterior) * 10) / 10
+        : null,
+  };
+}
+
+export type DiaLinhaTempo = {
+  label: string;
+  data: string;
+  ativo: boolean;
+  simulados: number;
+  mediaPercentual: number | null;
+};
+
+/** Últimos 30 dias de atividade (simulados concluídos). */
+export function montarLinhaTempo30Dias(pontos: PontoEvolucao[]): DiaLinhaTempo[] {
+  const porDia = new Map<string, PontoEvolucao[]>();
+
+  for (const ponto of pontos) {
+    const key = toDateKey(new Date(ponto.finalizadoEm));
+    const lista = porDia.get(key) ?? [];
+    lista.push(ponto);
+    porDia.set(key, lista);
+  }
+
+  const hoje = new Date();
+  hoje.setHours(12, 0, 0, 0);
+
+  const dias: DiaLinhaTempo[] = [];
+
+  for (let offset = 29; offset >= 0; offset -= 1) {
+    const dia = new Date(hoje);
+    dia.setDate(dia.getDate() - offset);
+    const key = toDateKey(dia);
+    const lista = porDia.get(key) ?? [];
+    const media =
+      lista.length > 0
+        ? Math.round(
+            (lista.reduce((acc, item) => acc + item.percentual, 0) /
+              lista.length) *
+              10,
+          ) / 10
+        : null;
+
+    dias.push({
+      label: new Intl.DateTimeFormat("pt-BR", { day: "2-digit" }).format(dia),
+      data: key,
+      ativo: lista.length > 0,
+      simulados: lista.length,
+      mediaPercentual: media,
+    });
+  }
+
+  return dias;
+}

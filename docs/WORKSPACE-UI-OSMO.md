@@ -119,7 +119,7 @@ Reutiliza tokens da landing, adaptados ao workspace:
 - [x] `WorkspaceSidebar` com chat list mock + nav + perfil
 - [x] `WorkspaceTopbar` com badge de plano/tokens
 - [x] Páginas placeholder: tutor, simulados, trilha, progresso, perfil, planos
-- [ ] Validar responsividade mobile (sidebar colapsável)
+- [x] Validar responsividade mobile (sidebar colapsável)
 - [x] Integrar template de chat (`ai-input-hero`) em `/tutor`
 
 ### Fase 1 — Fundação (auth) ✅
@@ -130,7 +130,7 @@ Reutiliza tokens da landing, adaptados ao workspace:
 - [x] `app/onboarding/page.tsx` — nome, curso, ano escolar, tipo ensino médio
 - [x] Conectar perfil real em `WorkspaceSidebar`
 - [x] `/perfil` com dados reais da API
-- [ ] `GET /usuarios/plano` no `PlanBadge`
+- [x] `GET /usuarios/plano` no `PlanBadge`
 
 ### Fase 2 — Simulados ✅
 
@@ -153,16 +153,16 @@ Reutiliza tokens da landing, adaptados ao workspace:
 - [ ] Persistir conversas no Postgres (`GET /ia-tutor/conversas`)
 - [x] Upload imagem → presign local (dev) / S3 Railway Bucket (prod) + vision NVIDIA → Groq → Gemini
 - [x] `PlanBadge` com tokens restantes (saldo inicial + após cada msg)
-- [ ] `/planos` — cards Gratuito / Apoio
+- [x] `/planos` — cards Gratuito / Apoio
 - [ ] Checkout Mercado Pago + feedback pós-pagamento
-- [ ] Rate limit UX (toast quando tokens acabam)
+- [x] Rate limit UX (toast quando tokens acabam)
 
 ### Fase 4 — Trilha + Progresso ✅
 
 - [x] `/progresso` — barras por área ENEM + evolução + último simulado
 - [x] `/trilha` — lacunas + meta semanal + CTA "Simulado focado" + tutor
 - [x] `/simulados/novo` — gerar com IA + filtros (multi-ano, termos no enunciado)
-- [ ] Cache visual (skeleton enquanto carrega métricas)
+- [x] Cache visual (skeleton enquanto carrega métricas)
 
 ### Fase 5 — Piloto TCC
 
@@ -183,9 +183,8 @@ Reutiliza tokens da landing, adaptados ao workspace:
 - [x] Chat real com API (`lib/ia-tutor.ts` + `TutorChatView`)
 - [x] Nova conversa (sem `?r=` na URL; `TutorSessionProvider`)
 - [x] Sessões na sidebar via API (`GET /ia-tutor/conversas`)
-- [ ] Lista de conversas da API (Postgres)
 - [ ] Mensagens com streaming (opcional)
-- [ ] Contexto de questão quando veio do simulado
+- [x] Contexto de questão quando veio do simulado
 - [x] **Botão anexar imagem** (UI + preview + remover)
 - [x] Upload via presign → `POST /ia-tutor/anexos/presign` (local dev / S3 prod)
 - [ ] Vision Gemini no envio com foto
@@ -198,7 +197,7 @@ Reutiliza tokens da landing, adaptados ao workspace:
 
 - [x] Lista de simulados da API (status: em andamento, concluído)
 - [x] CTA "Novo simulado"
-- [ ] Filtro por área
+- [x] Filtro por área
 - [x] Empty state para primeiro simulado
 
 ### `/simulados/novo`
@@ -230,23 +229,23 @@ Reutiliza tokens da landing, adaptados ao workspace:
 
 - [x] Proficiência por área + resumo (`GET /metricas/proficiencia`)
 - [x] Gráfico de evolução (`GET /metricas/evolucao`)
-- [ ] Gráfico radar 5 áreas
-- [ ] Linha do tempo (últimos 30 dias)
-- [ ] Comparativo "vs. semana passada"
+- [x] Gráfico radar 5 áreas
+- [x] Linha do tempo (últimos 30 dias)
+- [x] Comparativo "vs. semana passada"
 
 ### `/planos`
 
 - [x] Placeholder Gratuito / Apoio
-- [ ] Detalhe de tokens/dia
+- [x] Detalhe de tokens/dia
 - [ ] CTA Mercado Pago
-- [ ] Mensagem inclusão digital (escola pública)
+- [x] Mensagem inclusão digital (escola pública)
 
 ### `/perfil`
 
 - [x] Avatar + nome + email reais (API)
 - [x] Exibir plano, curso, ano escolar, tipo ensino médio, nível
-- [ ] Editar perfil inline
-- [ ] Logout
+- [x] Editar perfil inline
+- [x] Logout
 
 ---
 

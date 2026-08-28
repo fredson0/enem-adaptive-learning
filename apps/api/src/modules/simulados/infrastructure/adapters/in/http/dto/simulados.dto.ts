@@ -111,6 +111,11 @@ export class ListarSimuladosQueryDto {
   status?: (typeof STATUS)[number];
 
   @IsOptional()
+  @IsString()
+  @IsIn(AREAS)
+  area?: string;
+
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
@@ -125,6 +130,10 @@ export class ListarSimuladosQueryDto {
 
   get modoEnum() {
     return this.modo ? parseModoSimulado(this.modo) : undefined;
+  }
+
+  get areaEnum() {
+    return this.area ? parseAreaEnem(this.area) : undefined;
   }
 }
 

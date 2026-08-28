@@ -104,6 +104,7 @@ export class PrismaSimuladosRepository implements SimuladosRepositoryPort {
     const where = {
       userId,
       ...(filtro.modo ? { modo: filtro.modo } : {}),
+      ...(filtro.area ? { area: filtro.area } : {}),
       ...(filtro.status ? { status: filtro.status } : {}),
     };
 
