@@ -2,6 +2,7 @@
 
 import { ScrollingTicker } from "@/components/landing/scrolling-ticker";
 import { SlideHoverButton } from "@/components/landing/slide-hover-button";
+import { MARKETING_OSMO_COLORS } from "@/lib/marketing-osmo-tokens";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
 import { motion, useReducedMotion } from "framer-motion";
@@ -11,6 +12,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+
+const HEADER_LOGO_CLASS =
+  "font-display text-[1.85rem] leading-none font-black tracking-[-0.08em] text-white uppercase sm:text-[2.15rem] md:text-[2.4rem]";
 
 const NAV_LINKS = [
   { label: "Como funciona", href: "/como-funciona" },
@@ -512,18 +516,19 @@ export function SiteHeader({
         <div
           ref={navShellRef}
           className={cn(
-            "relative z-20 overflow-hidden bg-black transition-[border-radius,padding] duration-500 ease-out",
+            "relative z-20 overflow-hidden transition-[border-radius,padding] duration-500 ease-out",
             useCompactShell
               ? "rounded-xl border border-white/10"
               : "rounded-b-2xl md:rounded-b-3xl",
           )}
+          style={{ backgroundColor: MARKETING_OSMO_COLORS.osmoHeader }}
         >
           <div
             className="relative flex items-center justify-between gap-3 transition-[padding] duration-500 ease-out"
             style={{
               padding: useCompactShell
-                ? "10px 16px"
-                : `${lerp(10, 8, layoutMorph.compact)}px ${lerp(24, 14, layoutMorph.compact)}px`,
+                ? "12px 16px"
+                : `${lerp(12, 10, layoutMorph.compact)}px ${lerp(24, 14, layoutMorph.compact)}px`,
             }}
           >
             <button
@@ -563,7 +568,10 @@ export function SiteHeader({
 
             <Link
               href="/"
-              className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold tracking-[0.18em] text-[#E1E0CC] uppercase md:hidden"
+              className={cn(
+                "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:hidden",
+                HEADER_LOGO_CLASS,
+              )}
             >
               ENEM+
             </Link>
@@ -571,10 +579,11 @@ export function SiteHeader({
             <Link
               href="/"
               className={cn(
-                "absolute left-1/2 hidden -translate-x-1/2 text-base font-semibold tracking-[0.18em] text-[#E1E0CC] uppercase transition-all duration-500 ease-out md:block",
+                "absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 transition-opacity duration-500 ease-out md:block",
+                HEADER_LOGO_CLASS,
                 showLogo
-                  ? "pointer-events-auto translate-y-0 opacity-100"
-                  : "pointer-events-none translate-y-1 opacity-0",
+                  ? "pointer-events-auto opacity-100"
+                  : "pointer-events-none opacity-0",
               )}
               aria-hidden={!showLogo}
             >

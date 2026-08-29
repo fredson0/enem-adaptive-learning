@@ -1,14 +1,28 @@
 "use client";
 
-import { SiteHeader } from "@/components/landing/site-header";
 import { LandingArcCarousel } from "@/components/landing/landing-arc-carousel";
+import { OsmoGoogleLoginButton } from "@/components/landing/osmo-google-login-button";
+import { SiteFooter } from "@/components/landing/site-footer";
+import { SiteHeader } from "@/components/landing/site-header";
+import { MarketingOsmoFaq } from "@/components/marketing/marketing-osmo-faq";
 import { loginWithGoogleIdToken, fetchMe } from "@/lib/api";
 import { isOnboardingComplete } from "@/lib/auth";
 import { getSafeRedirectPath } from "@/lib/login-redirect";
-import { GoogleLogin } from "@react-oauth/google";
+import { MARKETING_FAQ_CATEGORIES } from "@/lib/marketing-faq";
+import { MARKETING_OSMO_COLORS } from "@/lib/marketing-osmo-tokens";
+import { Caveat } from "next/font/google";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+});
+
+const LOGIN_FAQ = MARKETING_FAQ_CATEGORIES.filter((category) =>
+  ["geral", "ia-planos"].includes(category.id),
+);
 
 function LoginContent() {
   const router = useRouter();
@@ -71,7 +85,10 @@ function LoginContent() {
 
   if (checkingSession) {
     return (
-      <main className="relative min-h-screen overflow-hidden bg-[#201d1d]">
+      <main
+        className="relative min-h-screen overflow-hidden"
+        style={{ backgroundColor: MARKETING_OSMO_COLORS.osmoCanvas }}
+      >
         <SiteHeader variant="auth" />
         <div className="flex min-h-screen items-center justify-center">
           <div className="size-8 animate-pulse rounded-full bg-white/10" />
@@ -81,63 +98,94 @@ function LoginContent() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#201d1d]">
-      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
-        <LandingArcCarousel variant="background" />
-        <div className="absolute inset-0 bg-[#201d1d]/75 md:bg-[#201d1d]/60" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#201d1d_78%)] md:bg-[radial-gradient(circle_at_center,transparent_0%,#201d1d_72%)]" />
-      </div>
-
-      <SiteHeader variant="auth" />
-
-      <div className="relative z-20 flex min-h-screen flex-col items-center justify-center px-5 pt-24 pb-10 sm:px-6 sm:pt-28 sm:pb-12">
-        <h1 className="font-display text-center text-[clamp(2.25rem,10vw,4.5rem)] leading-[1.02] font-semibold tracking-[-0.04em] text-white">
-          Entrar
-        </h1>
-
-        <div className="relative z-30 mt-6 w-full max-w-md rounded-2xl border border-black/[0.06] bg-white p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:mt-8 sm:p-8 md:p-10">
-          <p className="text-sm leading-relaxed text-[#111111]/65">
-            Use sua conta Google para acessar o tutor IA, simulados e trilha
-            personalizada.
-          </p>
-
-          <div className="mt-8 flex justify-center">
-            {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? (
-              <GoogleLogin
-                onSuccess={(response) => handleSuccess(response.credential)}
-                onError={() => setError("Login com Google cancelado.")}
-                theme="outline"
-                shape="pill"
-                size="large"
-                text="continue_with"
-                width="320"
-              />
-            ) : (
-              <p className="text-center text-sm text-amber-700">
-                Configure `NEXT_PUBLIC_GOOGLE_CLIENT_ID` no `.env.local`.
-              </p>
-            )}
-          </div>
-
-          {loading ? (
-            <p className="mt-4 text-center text-sm text-[#111111]/50">Entrando…</p>
-          ) : null}
-
-          {error ? (
-            <p className="mt-4 text-center text-sm text-red-600">{error}</p>
-          ) : null}
+    <main
+      className="relative min-h-screen overflow-x-hidden"
+      style={{ backgroundColor: MARKETING_OSMO_COLORS.osmoCanvas }}
+    >
+      <section className="relative min-h-svh overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+          <LandingArcCarousel variant="background" />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `radial-gradient(circle at center, transparent 0%, ${MARKETING_OSMO_COLORS.osmoCanvas} 78%)`,
+            }}
+          />
         </div>
 
-        <p className="mt-8 text-center text-sm text-white/70">
-          Ainda não tem conta?{" "}
-          <Link
-            href={`/login?next=${encodeURIComponent(nextPath)}`}
-            className="font-medium text-white underline underline-offset-4 transition hover:text-white/85"
-          >
-            Comece com Google
-          </Link>
-        </p>
-      </div>
+        <SiteHeader variant="auth" />
+
+        <div className="relative z-20 flex min-h-svh flex-col items-center justify-center px-5 pt-24 pb-16 sm:px-6 sm:pt-28">
+          <h1 className="font-display text-center text-[clamp(2.25rem,10vw,4.5rem)] leading-[1.02] font-semibold tracking-[-0.04em] text-white">
+            Entrar
+          </h1>
+
+          <div className="relative mt-8 w-full max-w-md">
+            <p
+              className={`${caveat.className} pointer-events-none absolute -top-7 right-0 hidden text-lg text-[#b0ff57] sm:block`}
+            >
+              Try ENEM+
+              <span className="ml-1 inline-block rotate-[-12deg]">↑</span>
+            </p>
+
+            <div
+              className="rounded-[1.75rem] p-6 sm:p-8 md:p-10"
+              style={{ backgroundColor: MARKETING_OSMO_COLORS.osmoCard }}
+            >
+              <p className="text-[11px] font-medium tracking-[0.18em] text-white/70 uppercase">
+                Acesso
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-white/50">
+                Use sua conta Google para acessar o tutor IA, simulados e trilha
+                personalizada.
+              </p>
+
+              <div className="mt-8">
+                {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? (
+                  <OsmoGoogleLoginButton
+                    onSuccess={handleSuccess}
+                    onError={() => setError("Login com Google cancelado.")}
+                  />
+                ) : (
+                  <p className="text-center text-sm text-amber-400">
+                    Configure `NEXT_PUBLIC_GOOGLE_CLIENT_ID` no `.env.local`.
+                  </p>
+                )}
+              </div>
+
+              {loading ? (
+                <p className="mt-4 text-center text-sm text-white/45">
+                  Entrando…
+                </p>
+              ) : null}
+
+              {error ? (
+                <p className="mt-4 text-center text-sm text-red-400">{error}</p>
+              ) : null}
+            </div>
+          </div>
+
+          <p className="mt-8 text-center text-sm text-white/55">
+            Ainda não tem conta?{" "}
+            <Link
+              href={`/login?next=${encodeURIComponent(nextPath)}`}
+              className="font-medium text-white underline underline-offset-4 transition hover:text-white/85"
+            >
+              Comece com Google
+            </Link>
+          </p>
+        </div>
+      </section>
+
+      <MarketingOsmoFaq
+        categories={LOGIN_FAQ}
+        title="Dúvidas?"
+        titleLine2="Temos respostas."
+        accentNote="sem ChatGPT escondido ;)"
+        className="bg-[#f3f3f1]"
+      />
+
+      <SiteFooter />
     </main>
   );
 }
@@ -146,7 +194,10 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <main className="relative min-h-screen overflow-hidden bg-[#201d1d]">
+        <main
+          className="relative min-h-screen overflow-hidden"
+          style={{ backgroundColor: MARKETING_OSMO_COLORS.osmoCanvas }}
+        >
           <SiteHeader variant="auth" />
           <div className="flex min-h-screen items-center justify-center">
             <div className="size-8 animate-pulse rounded-full bg-white/10" />

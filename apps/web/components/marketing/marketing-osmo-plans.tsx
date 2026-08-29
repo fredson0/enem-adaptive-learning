@@ -157,7 +157,7 @@ export function MarketingOsmoPlans({
 
               <Link
                 href={PLANS.free.href}
-                className="mt-10 inline-flex w-full items-center justify-center rounded-xl bg-[#111111] px-5 py-4 text-base font-medium text-white transition hover:bg-black"
+                className="mt-10 inline-flex w-full items-center justify-center rounded-xl bg-[#1f1e1c] px-5 py-4 text-base font-medium text-white transition hover:bg-[#151314]"
               >
                 {PLANS.free.cta}
               </Link>
@@ -181,7 +181,7 @@ export function MarketingOsmoPlans({
           </MarketingBlurReveal>
 
           <MarketingBlurReveal delay={0.08}>
-            <article className="relative flex min-h-[28rem] flex-col rounded-3xl bg-[#111111] p-8 text-white md:min-h-[30rem] md:p-10">
+            <article className="relative flex min-h-[28rem] flex-col rounded-3xl bg-[#1f1e1c] p-8 text-white md:min-h-[30rem] md:p-10">
               {billing === "annual" && (
                 <p
                   className={cn(

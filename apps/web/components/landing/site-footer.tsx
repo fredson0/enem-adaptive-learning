@@ -103,7 +103,7 @@ export function SiteFooter() {
             <Link
               key={link.label}
               href={link.href}
-              className="rounded-full bg-black px-3.5 py-1.5 text-[10px] font-medium tracking-[0.14em] text-white uppercase transition hover:bg-black/85"
+              className="rounded-full bg-[#1f1e1c] px-3.5 py-1.5 text-[10px] font-medium tracking-[0.14em] text-white uppercase transition hover:bg-[#1f1e1c]/85"
             >
               {link.label}
             </Link>

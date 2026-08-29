@@ -49,22 +49,22 @@ export function LandingPlans() {
     <section
       id="planos"
       data-scroll-section
-      className="bg-[#201d1d] px-4 py-20 md:px-8 md:py-28"
+      className="bg-white px-4 py-20 md:px-8 md:py-28"
     >
       <div className="mx-auto max-w-[1200px]">
-        <h2 className="font-display text-center text-[clamp(1.75rem,4.2vw,3.5rem)] leading-[1.05] font-semibold tracking-[-0.04em] text-white">
+        <h2 className="font-display text-center text-[clamp(1.75rem,4.2vw,3.5rem)] leading-[1.05] font-semibold tracking-[-0.04em] text-[#0b1220]">
           Tudo que você precisa em um só lugar
         </h2>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-          <div className="inline-flex rounded-full border border-white/15 bg-white/5 p-1">
+          <div className="inline-flex rounded-full border border-[#0b1220]/10 bg-[#f3f3f1] p-1">
             <button
               type="button"
               onClick={() => setBilling("monthly")}
               className={`rounded-full px-5 py-2 text-sm font-medium transition ${
                 billing === "monthly"
-                  ? "bg-white text-[#111111]"
-                  : "text-white/65 hover:text-white"
+                  ? "bg-[#0b1220] text-white"
+                  : "text-[#0b1220]/60 hover:text-[#0b1220]"
               }`}
             >
               Mensal
@@ -74,15 +74,15 @@ export function LandingPlans() {
               onClick={() => setBilling("annual")}
               className={`rounded-full px-5 py-2 text-sm font-medium transition ${
                 billing === "annual"
-                  ? "bg-white text-[#111111]"
-                  : "text-white/65 hover:text-white"
+                  ? "bg-[#0b1220] text-white"
+                  : "text-[#0b1220]/60 hover:text-[#0b1220]"
               }`}
             >
               Anual
             </button>
           </div>
 
-          <p className="text-sm font-medium text-[#b0ff57]">
+          <p className="text-sm font-medium text-[#e04545]">
             Economize 20% no plano anual
           </p>
         </div>
@@ -107,7 +107,7 @@ export function LandingPlans() {
 
             <Link
               href={PLANS.free.href}
-              className="mt-10 inline-flex w-full items-center justify-center rounded-xl bg-[#111111] px-5 py-4 text-base font-medium text-white transition hover:bg-black"
+              className="mt-10 inline-flex w-full items-center justify-center rounded-xl bg-[#1f1e1c] px-5 py-4 text-base font-medium text-white transition hover:bg-[#151314]"
             >
               {PLANS.free.cta}
             </Link>
@@ -175,7 +175,7 @@ export function LandingPlans() {
           </article>
         </div>
 
-        <p className="mx-auto mt-8 max-w-lg text-center text-xs text-white/40">
+        <p className="mx-auto mt-8 max-w-lg text-center text-xs text-[#0b1220]/40">
           Checkout com Mercado Pago em breve. Por enquanto, entre com Google para
           testar.
         </p>

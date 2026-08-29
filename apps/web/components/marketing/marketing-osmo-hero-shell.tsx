@@ -10,7 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useReducedMotion } from "framer-motion";
 import { Caveat } from "next/font/google";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { MarketingOsmoBrowserMockup } from "@/components/marketing/marketing-osmo-browser-mockup";
 
 const caveat = Caveat({
@@ -28,6 +28,7 @@ type MarketingOsmoHeroShellProps = {
   badge?: ReactNode;
   children?: ReactNode;
   className?: string;
+  style?: CSSProperties;
   titleOffset?: string;
   titleClassName?: string;
   /** Vídeo da plataforma abaixo do hero (Tutor / Trilha). */
@@ -44,6 +45,7 @@ export function MarketingOsmoHeroShell({
   badge,
   children,
   className,
+  style,
   titleOffset,
   titleClassName,
   platformVideo = false,
@@ -60,9 +62,10 @@ export function MarketingOsmoHeroShell({
     <section
       className={cn(
         "relative overflow-hidden",
-        isLight ? "bg-white text-[#0b1220]" : "bg-[#111111] text-white",
+        isLight ? "bg-white text-[#0b1220]" : "bg-[#151314] text-white",
         className,
       )}
+      style={style}
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.35]"

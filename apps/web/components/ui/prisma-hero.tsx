@@ -231,7 +231,7 @@ function EnemHero({ revealed = true }: { revealed?: boolean }) {
       </div>
 
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-b from-[#0a0a0a] to-black"
+        className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-b from-[#151314] to-[#151314]"
         style={{ height: HERO_BLEED }}
         aria-hidden
       />

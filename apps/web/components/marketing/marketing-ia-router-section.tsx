@@ -95,7 +95,7 @@ export function MarketingIaRouterSection() {
         delay={0.08}
         className="mx-auto max-w-[1200px] px-4 pb-20 md:px-8 md:pb-28"
       >
-        <div className="overflow-hidden rounded-[1.75rem] border border-black/10 bg-[#141414] shadow-[0_32px_80px_rgba(0,0,0,0.14)] md:rounded-[2.25rem]">
+        <div className="overflow-hidden rounded-[1.75rem] border border-black/10 bg-[#1e1d1b] shadow-[0_32px_80px_rgba(0,0,0,0.14)] md:rounded-[2.25rem]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-3.5 sm:px-8">
             <div className="flex items-center gap-2">
               <span className="size-2.5 rounded-full bg-[#ff5f57]" />

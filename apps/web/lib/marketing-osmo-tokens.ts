@@ -4,12 +4,18 @@
  */
 
 export const MARKETING_OSMO_COLORS = {
-  heroBg: "#111111",
+  /** Canvas Osmo amostrado do print "Unlock the Demo". */
+  heroBg: "#151314",
+  osmoCanvas: "#151314",
+  /** Barra do header Osmo — amostrada do print (RGB 49,46,46). */
+  osmoHeader: "#312e2e",
+  /** Card do formulário Osmo. */
+  osmoCard: "#1e1d1b",
   sectionBg: "#f3f3f1",
   titleDark: "#0b1220",
   accentLime: "#b0ff57",
   accentPurple: "#7c6cff",
-  ctaCardBg: "#212121",
+  ctaCardBg: "#1e1d1b",
   ctaButton: "#6840ff",
   ctaButtonHover: "#5a36e0",
   textMuted: "rgba(255,255,255,0.55)",

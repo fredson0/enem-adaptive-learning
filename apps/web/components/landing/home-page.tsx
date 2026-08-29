@@ -11,6 +11,7 @@ import { LandingProductShowcase } from "@/components/landing/landing-product-sho
 import { LandingTestimonials } from "@/components/landing/landing-testimonials";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteHeader } from "@/components/landing/site-header";
+import { MarketingOsmoFaq } from "@/components/marketing/marketing-osmo-faq";
 import { LANDING_ENTRANCE_COLORS } from "@/lib/landing-entrance-tokens";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
@@ -65,7 +66,7 @@ export function HomePage() {
       {showMain ? (
         <main
           className={cn(
-            "relative min-h-screen bg-[#0d0d0d]",
+            "relative min-h-screen bg-[#151314]",
             showIntro && "pointer-events-none",
           )}
         >
@@ -75,6 +76,7 @@ export function HomePage() {
           <LandingPlatformShowcase />
           <LandingTestimonials />
           <LandingPlans />
+          <MarketingOsmoFaq className="bg-[#f3f3f1]" />
           <SiteFooter />
         </main>
       ) : null}

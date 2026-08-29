@@ -97,17 +97,17 @@ export default function OnboardingPage() {
 
   if (bootstrapping) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#111111] px-6">
+      <main className="flex min-h-screen items-center justify-center bg-[#151314] px-6">
         <p className="text-sm text-white/45">Carregando…</p>
       </main>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#111111] px-6">
+    <main className="flex min-h-screen items-center justify-center bg-[#151314] px-6">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-lg rounded-[14px] border border-white/[0.06] bg-[#161616] p-8"
+        className="w-full max-w-lg rounded-[14px] border border-white/[0.06] bg-[#1e1d1b] p-8"
       >
         <h1 className="text-2xl font-medium text-white">Bem-vindo ao ENEM+</h1>
         <p className="mt-2 text-sm text-white/50">
@@ -120,7 +120,7 @@ export default function OnboardingPage() {
             <input
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              className="mt-2 w-full rounded-[10px] border border-white/10 bg-[#111] px-4 py-3 text-white outline-none focus:border-white/20"
+              className="mt-2 w-full rounded-[10px] border border-white/10 bg-[#302f2d] px-4 py-3 text-white outline-none focus:border-white/20"
               required
             />
           </label>
@@ -132,7 +132,7 @@ export default function OnboardingPage() {
             <input
               value={cursoObjetivo}
               onChange={(e) => setCursoObjetivo(e.target.value)}
-              className="mt-2 w-full rounded-[10px] border border-white/10 bg-[#111] px-4 py-3 text-white outline-none focus:border-white/20"
+              className="mt-2 w-full rounded-[10px] border border-white/10 bg-[#302f2d] px-4 py-3 text-white outline-none focus:border-white/20"
               required
             />
           </label>
@@ -144,7 +144,7 @@ export default function OnboardingPage() {
               onChange={(e) =>
                 setSerieEscolar(e.target.value as SerieEscolar | "")
               }
-              className="mt-2 w-full rounded-[10px] border border-white/10 bg-[#111] px-4 py-3 text-white outline-none focus:border-white/20"
+              className="mt-2 w-full rounded-[10px] border border-white/10 bg-[#302f2d] px-4 py-3 text-white outline-none focus:border-white/20"
               required
             >
               <option value="" disabled>
@@ -166,7 +166,7 @@ export default function OnboardingPage() {
               {TIPO_ENSINO_MEDIO_OPTIONS.map((option) => (
                 <label
                   key={option.value}
-                  className="flex cursor-pointer items-start gap-3 rounded-[10px] border border-white/10 bg-[#111] px-4 py-3 text-sm text-white transition hover:border-white/20"
+                  className="flex cursor-pointer items-start gap-3 rounded-[10px] border border-white/10 bg-[#302f2d] px-4 py-3 text-sm text-white transition hover:border-white/20"
                 >
                   <input
                     type="radio"
@@ -190,7 +190,7 @@ export default function OnboardingPage() {
             <select
               value={nivelAtual}
               onChange={(e) => setNivelAtual(e.target.value)}
-              className="mt-2 w-full rounded-[10px] border border-white/10 bg-[#111] px-4 py-3 text-white outline-none focus:border-white/20"
+              className="mt-2 w-full rounded-[10px] border border-white/10 bg-[#302f2d] px-4 py-3 text-white outline-none focus:border-white/20"
             >
               <option value="INICIANTE">Iniciante</option>
               <option value="INTERMEDIARIO">Intermediário</option>

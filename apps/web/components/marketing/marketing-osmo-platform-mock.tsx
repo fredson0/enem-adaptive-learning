@@ -85,7 +85,7 @@ export function MarketingOsmoPlatformMock({
           </nav>
         </aside>
 
-        <div className="flex flex-1 flex-col bg-[#111111]">
+        <div className="flex flex-1 flex-col bg-[#151314]">
           <div className="border-b border-white/10 px-4 py-3">
             <p className="text-[10px] text-white/35">Recursos gratuitos</p>
             <p className="mt-0.5 text-sm font-medium text-white/90">

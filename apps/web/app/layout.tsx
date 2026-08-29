@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { GoogleAuthProvider } from "@/components/providers/google-auth-provider";
+import { PageTransitionProvider } from "@/components/providers/page-transition-provider";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ThemeScript } from "@/components/providers/theme-script";
@@ -45,7 +46,9 @@ export default function RootLayout({
       <body className="min-h-full overflow-x-hidden bg-background text-foreground">
         <ThemeProvider>
           <GoogleAuthProvider>
-            <SmoothScrollProvider>{children}</SmoothScrollProvider>
+            <SmoothScrollProvider>
+              <PageTransitionProvider>{children}</PageTransitionProvider>
+            </SmoothScrollProvider>
           </GoogleAuthProvider>
         </ThemeProvider>
       </body>
