@@ -8,7 +8,6 @@ import {
   enriquecerInputModelTier,
   resolverModelTier,
 } from '../../../core/application/helpers/ia-model-tier.helper';
-import { GeminiIaAdapter } from './gemini/gemini-ia.adapter';
 import { GroqIaAdapter } from './groq/groq-ia.adapter';
 import { NvidiaIaAdapter } from './nvidia/nvidia-ia.adapter';
 
@@ -36,14 +35,9 @@ function isFallbackWorthy(error: unknown): boolean {
 export class IaEngineRouter implements IaEnginePort {
   constructor(
     @Inject(ConfigService) private readonly config: ConfigService,
-    @Inject(GeminiIaAdapter) private readonly gemini: GeminiIaAdapter,
     @Inject(NvidiaIaAdapter) private readonly nvidia: NvidiaIaAdapter,
     @Inject(GroqIaAdapter) private readonly groq: GroqIaAdapter,
   ) {}
-
-  private getProvider(): string {
-    return (this.config.get<string>('IA_PROVIDER') ?? 'nvidia').toLowerCase();
-  }
 
   private hasGroqExatas(): boolean {
     return Boolean(
@@ -56,11 +50,8 @@ export class IaEngineRouter implements IaEnginePort {
   private getVisionChain(): IaEnginePort[] {
     const chain: IaEnginePort[] = [this.nvidia];
 
-    if (this.getProvider() !== 'nvidia') {
-      if (this.config.get<string>('GROQ_API_KEY')) {
-        chain.push(this.groq);
-      }
-      chain.push(this.gemini);
+    if (this.config.get<string>('GROQ_API_KEY')) {
+      chain.push(this.groq);
     }
 
     return chain;
@@ -71,14 +62,10 @@ export class IaEngineRouter implements IaEnginePort {
     const exatas = resolverModelTier(input) === 'exatas';
 
     if (exatas && this.hasGroqExatas()) {
-      return [this.groq, this.nvidia, this.gemini];
+      return [this.groq, this.nvidia];
     }
 
-    if (this.getProvider() === 'nvidia') {
-      return [this.nvidia];
-    }
-
-    return [this.gemini, this.nvidia];
+    return [this.nvidia];
   }
 
   private async runWithFallback(
@@ -111,9 +98,6 @@ export class IaEngineRouter implements IaEnginePort {
     const enriched = enriquecerInputModelTier(input);
 
     if (enriched.imagem) {
-      if (this.getProvider() === 'nvidia') {
-        return this.nvidia.enviarMensagem(enriched);
-      }
       return this.runWithFallback(this.getVisionChain(), enriched);
     }
 

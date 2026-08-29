@@ -14,6 +14,7 @@ import {
 
 type TokensIaContextValue = {
   tokens: TokensIa;
+  loading: boolean;
   setTokens: (tokens: TokensIa) => void;
 };
 
@@ -27,9 +28,11 @@ const TokensIaContext = createContext<TokensIaContextValue | null>(null);
 
 export function TokensIaProvider({ children }: { children: ReactNode }) {
   const [tokens, setTokensState] = useState<TokensIa>(DEFAULT_TOKENS);
+  const [loading, setLoading] = useState(true);
 
   const setTokens = useCallback((next: TokensIa) => {
     setTokensState(next);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -37,10 +40,13 @@ export function TokensIaProvider({ children }: { children: ReactNode }) {
 
     obterSaldoTokens()
       .then((saldo) => {
-        if (!cancelled) setTokensState(saldo);
+        if (!cancelled) {
+          setTokensState(saldo);
+          setLoading(false);
+        }
       })
       .catch(() => {
-        /* mantém default até primeira mensagem */
+        if (!cancelled) setLoading(false);
       });
 
     return () => {
@@ -49,8 +55,8 @@ export function TokensIaProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ tokens, setTokens }),
-    [tokens, setTokens],
+    () => ({ tokens, loading, setTokens }),
+    [tokens, loading, setTokens],
   );
 
   return (

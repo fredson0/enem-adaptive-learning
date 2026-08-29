@@ -150,7 +150,7 @@ Reutiliza tokens da landing, adaptados ao workspace:
 - [x] `POST /ia-tutor/explicar-erro` no resultado do simulado
 - [x] `POST /ia-tutor/dica` durante simulado (sem revelar gabarito)
 - [x] `NvidiaIaAdapter` + `IaEngineRouter` (fallback Gemini ↔ NVIDIA)
-- [ ] Persistir conversas no Postgres (`GET /ia-tutor/conversas`)
+- [x] Persistir conversas no Postgres (`GET /ia-tutor/conversas`)
 - [x] Upload imagem → presign local (dev) / S3 Railway Bucket (prod) + vision NVIDIA → Groq → Gemini
 - [x] `PlanBadge` com tokens restantes (saldo inicial + após cada msg)
 - [x] `/planos` — cards Gratuito / Apoio
@@ -167,7 +167,7 @@ Reutiliza tokens da landing, adaptados ao workspace:
 ### Fase 5 — Piloto TCC
 
 - [ ] Testes e2e fluxo login → simulado → tutor
-- [ ] Ajustes de acessibilidade (foco, contraste)
+- [🟡] Ajustes de acessibilidade (foco, contraste) — skip link + `#workspace-main`
 - [ ] PWA básico (opcional)
 - [ ] Painel professor (se houver tempo)
 
@@ -187,8 +187,8 @@ Reutiliza tokens da landing, adaptados ao workspace:
 - [x] Contexto de questão quando veio do simulado
 - [x] **Botão anexar imagem** (UI + preview + remover)
 - [x] Upload via presign → `POST /ia-tutor/anexos/presign` (local dev / S3 prod)
-- [ ] Vision Gemini no envio com foto
-- [🟡] Indicador de tokens (`PlanBadge` após 1ª resposta)
+- [x] Vision no envio com foto (NVIDIA → fallback Groq; sem Gemini)
+- [x] Indicador de tokens (`PlanBadge` com saldo ao carregar o workspace)
 - [x] Enter envia · Shift+Enter nova linha · tela cheia · auto-resize
 
 > Escopo completo do tutor (texto + vision + rate limit): [ESCOPO-PRODUTO.md](./ESCOPO-PRODUTO.md)

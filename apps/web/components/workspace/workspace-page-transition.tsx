@@ -41,7 +41,11 @@ export function WorkspacePageTransition({
     >
       <WorkspaceChrome />
 
-      <div className="relative flex min-h-0 flex-1 flex-col">
+      <div
+        id="workspace-main"
+        tabIndex={-1}
+        className="relative flex min-h-0 flex-1 flex-col outline-none"
+      >
         <div
           className={cn(
             "absolute inset-0 flex min-h-0 flex-col",

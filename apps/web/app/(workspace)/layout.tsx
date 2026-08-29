@@ -9,6 +9,7 @@ import { WorkspaceScrollProvider } from "@/components/workspace/workspace-scroll
 import { WorkspaceSidebarProvider } from "@/components/workspace/workspace-sidebar-context";
 import { WorkspaceSidebar } from "@/components/workspace/workspace-sidebar";
 import { WorkspacePageTransition } from "@/components/workspace/workspace-page-transition";
+import { WorkspaceSkipLink } from "@/components/workspace/workspace-skip-link";
 import { WorkspaceToastProvider } from "@/components/workspace/workspace-toast";
 
 export default function WorkspaceLayout({
@@ -26,6 +27,7 @@ export default function WorkspaceLayout({
             <WorkspaceScrollProvider>
               <WorkspaceSidebarProvider>
                 <div className="osmo-workspace osmo-canvas-bg relative h-screen w-screen overflow-hidden">
+                  <WorkspaceSkipLink />
                   <WorkspaceLenisGuard />
                   <OnboardingGuard />
                   <WorkspacePageTransition>{children}</WorkspacePageTransition>
