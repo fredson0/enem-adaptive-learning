@@ -10,6 +10,12 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3333";
+const BFF_INTERNAL_SECRET = process.env.BFF_INTERNAL_SECRET;
+
+function bffSecretHeaders(): HeadersInit | undefined {
+  if (!BFF_INTERNAL_SECRET) return undefined;
+  return { "X-BFF-Secret": BFF_INTERNAL_SECRET };
+}
 
 const API_UNAVAILABLE_MESSAGE =
   "API indisponível. Aguarde o backend iniciar (npm run dev:api) em http://127.0.0.1:3333.";
@@ -80,6 +86,13 @@ export async function nestFetch<T>(
   }
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);
+  }
+
+  const secretHeaders = bffSecretHeaders();
+  if (secretHeaders) {
+    for (const [key, value] of Object.entries(secretHeaders)) {
+      headers.set(key, value);
+    }
   }
 
   let response: Response;

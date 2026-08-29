@@ -36,6 +36,12 @@ export type EnviarMensagemIaInput = {
   modelTier?: 'default' | 'exatas';
 };
 
+export type IaStreamDeltaHandler = (delta: string) => void | Promise<void>;
+
 export interface IaEnginePort {
   enviarMensagem(input: EnviarMensagemIaInput): Promise<string>;
+  enviarMensagemStream(
+    input: EnviarMensagemIaInput,
+    onDelta: IaStreamDeltaHandler,
+  ): Promise<string>;
 }

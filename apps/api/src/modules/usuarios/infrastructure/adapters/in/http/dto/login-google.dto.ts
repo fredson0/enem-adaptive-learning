@@ -12,6 +12,7 @@ import {
 export class LoginGoogleDto {
   @IsString()
   @MinLength(20)
+  @MaxLength(4096)
   idToken!: string;
 }
 

@@ -13,13 +13,13 @@ import { ApiError } from "@/lib/api";
 import { isLimiteTokensError } from "@/lib/api-errors";
 import { compressImageForUpload } from "@/lib/image-compress";
 import {
-  enviarMensagemTutor,
   gerarPdfQuestoesTutor,
   gerarPdfResumoTutor,
   presignAnexoTutor,
   uploadAnexoTutor,
   type MensagemHistorico,
 } from "@/lib/ia-tutor";
+import { enviarMensagemTutorStream } from "@/lib/ia-tutor-stream";
 import { consumePendingTutorPrompt } from "@/lib/pending-tutor-prompt";
 import {
   baixarQuestoesComoHtml,
@@ -52,6 +52,7 @@ export function TutorChatView({
 }: TutorChatViewProps) {
   const [messages, setMessages] = useState<MensagemHistorico[]>(initialMessages);
   const [loading, setLoading] = useState(false);
+  const [streamingText, setStreamingText] = useState<string | null>(null);
   const [pdfLoading, setPdfLoading] = useState<{
     index: number;
     tipo: "resumo" | "questoes";
@@ -99,7 +100,7 @@ export function TutorChatView({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  }, [messages, loading, streamingText]);
 
   const tratarErroIa = (err: unknown, fallback: string) => {
     if (isLimiteTokensError(err)) {
@@ -164,13 +165,22 @@ export function TutorChatView({
         anexoUrl,
       };
       setMessages([...historico, withUser]);
+      setStreamingText("");
 
-      const response = await enviarMensagemTutor({
-        mensagem,
-        conversaId: activeSessionId ?? undefined,
-        anexoUrl,
-      });
+      const response = await enviarMensagemTutorStream(
+        {
+          mensagem,
+          conversaId: activeSessionId ?? undefined,
+          anexoUrl,
+        },
+        {
+          onDelta: (chunk) => {
+            setStreamingText((prev) => (prev ?? "") + chunk);
+          },
+        },
+      );
       setTokens(response.tokens);
+      setStreamingText(null);
 
       if (response.trilhaAtualizada) {
         emitirTrilhaAtualizada();
@@ -190,6 +200,7 @@ export function TutorChatView({
       });
     } catch (err) {
       setMessages(historico);
+      setStreamingText(null);
       tratarErroIa(err, "Não foi possível enviar a mensagem. Tente novamente.");
     } finally {
       setLoading(false);
@@ -424,12 +435,18 @@ export function TutorChatView({
               </div>
             ))}
 
-            {loading && (
+            {streamingText !== null ? (
+              <div className="mr-auto max-w-3xl">
+                <div className="rounded-2xl border border-[var(--osmo-border)] bg-[var(--osmo-card)] px-4 py-3 text-sm leading-relaxed text-osmo backdrop-blur-md sm:text-[15px]">
+                  <p className="whitespace-pre-wrap">{streamingText}</p>
+                </div>
+              </div>
+            ) : loading ? (
               <div className="mr-auto inline-flex items-center gap-2 rounded-2xl border border-[var(--osmo-border)] bg-[var(--osmo-card)] px-4 py-3 text-sm text-osmo-muted">
                 <Loader2 className="size-4 animate-spin" />
                 O tutor está pensando…
               </div>
-            )}
+            ) : null}
 
             {error && (
               <div className="mr-auto max-w-3xl rounded-2xl border border-red-500/30 bg-red-950/40 px-4 py-3 text-sm text-red-200">

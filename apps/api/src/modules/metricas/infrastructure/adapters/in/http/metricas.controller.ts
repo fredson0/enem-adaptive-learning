@@ -7,9 +7,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../../../../../../infrastructure/auth/current-user.decorator';
 import { JwtAuthGuard } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import type { JwtPayload } from '../../../../../../infrastructure/auth/jwt-auth.guard';
+import { Idempotent } from '../../../../../../infrastructure/http/idempotent.decorator';
 import { CalcularProficienciaUseCase } from '../../../../core/application/use-cases/calcular-proficiencia.use-case';
 import { ObterCoberturaUseCase } from '../../../../core/application/use-cases/obter-cobertura.use-case';
 import { ObterFrequenciaTemasUseCase } from '../../../../core/application/use-cases/obter-frequencia-temas.use-case';
@@ -90,6 +92,8 @@ export class MetricasController {
   }
 
   @Post('trilha/diagnostico')
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Idempotent({ required: false })
   salvarDiagnosticoTrilha(
     @CurrentUser() user: JwtPayload,
     @Body() dto: SalvarDiagnosticoTrilhaDto,
@@ -103,6 +107,8 @@ export class MetricasController {
   }
 
   @Post('trilha/etapas')
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @Idempotent({ required: false })
   marcarEtapaTrilha(
     @CurrentUser() user: JwtPayload,
     @Body() dto: MarcarEtapaTrilhaDto,
@@ -115,6 +121,8 @@ export class MetricasController {
   }
 
   @Post('trilha/checklist')
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @Idempotent({ required: false })
   marcarChecklistIa(
     @CurrentUser() user: JwtPayload,
     @Body() dto: MarcarChecklistIaDto,
@@ -128,6 +136,7 @@ export class MetricasController {
 
   /** Recalcula proficiência a partir de todas as respostas (útil após migração). */
   @Post('recalcular')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   recalcular(@CurrentUser() user: JwtPayload) {
     return this.calcularProficienciaUseCase.execute(user.sub);
   }

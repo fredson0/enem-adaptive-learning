@@ -24,9 +24,11 @@ type RequestOptions = {
 
 /**
  * Cliente HTTP do browser.
- * - Rotas públicas Nest: auth=false → NEXT_PUBLIC_API_URL (só se necessário)
- * - Rotas autenticadas: auth=true (padrão) → /api/backend/* (cookies HttpOnly)
- * Tokens NUNCA ficam em localStorage / JS.
+ *
+ * Segurança:
+ * - Rotas autenticadas SEMPRE passam pelo BFF `/api/backend/*` (cookies HttpOnly).
+ * - O JS do browser NUNCA lê access/refresh JWT — só o servidor Next injeta Bearer.
+ * - Não use auth=false para dados privados; não chame a API Nest direto do browser.
  */
 export async function apiFetch<T>(
   path: string,

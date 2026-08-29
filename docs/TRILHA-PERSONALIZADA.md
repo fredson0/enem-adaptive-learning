@@ -112,7 +112,7 @@ Paleta: fundo `#111` / cards `#161616`, acento `#b0ff57`, tipografia bold no her
 ### Fase B — Dados reais + disciplinas
 
 - [ ] Agregar lacunas por `questoes.disciplina`
-- [ ] Marcar etapas concluídas automaticamente (simulado feito, tutor usado)
+- [x] Marcar etapas concluídas automaticamente ao finalizar simulado (treino/modalidade/cronometrado + revisão se houver erros)
 - [ ] `/trilha/[area]` — visão detalhada de uma área
 
 ### Fase C — Polish Osmo + IA

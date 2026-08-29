@@ -5,17 +5,20 @@ import {
   ForbiddenException,
   Get,
   Headers,
+  HttpException,
   Inject,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Put,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { CurrentUser } from '../../../../../../infrastructure/auth/current-user.decorator';
 import { JwtAuthGuard } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import type { JwtPayload } from '../../../../../../infrastructure/auth/jwt-auth.guard';
@@ -38,6 +41,7 @@ import { FinalizarPersonalizarTrilhaUseCase } from '../../../../core/application
 import { GerarPdfQuestoesUseCase } from '../../../../core/application/use-cases/gerar-pdf-questoes.use-case';
 import { GerarPdfResumoUseCase } from '../../../../core/application/use-cases/gerar-pdf-resumo.use-case';
 import { ObterSaldoTokensUseCase } from '../../../../core/application/use-cases/obter-saldo-tokens.use-case';
+import { Idempotent } from '../../../../../../infrastructure/http/idempotent.decorator';
 import {
   AtualizarConversaDto,
   ConversarPersonalizarTrilhaDto,
@@ -104,7 +108,7 @@ export class IaTutorController {
   @UseGuards(JwtAuthGuard)
   obterConversa(
     @CurrentUser() user: JwtPayload,
-    @Param('id') conversaId: string,
+    @Param('id', ParseUUIDPipe) conversaId: string,
   ) {
     return this.obterConversaUseCase.execute(user.sub, conversaId);
   }
@@ -125,7 +129,7 @@ export class IaTutorController {
   @UseGuards(JwtAuthGuard)
   atualizarConversa(
     @CurrentUser() user: JwtPayload,
-    @Param('id') conversaId: string,
+    @Param('id', ParseUUIDPipe) conversaId: string,
     @Body() dto: AtualizarConversaDto,
   ) {
     return this.atualizarConversaUseCase.execute({
@@ -139,7 +143,7 @@ export class IaTutorController {
   @UseGuards(JwtAuthGuard)
   excluirConversa(
     @CurrentUser() user: JwtPayload,
-    @Param('id') conversaId: string,
+    @Param('id', ParseUUIDPipe) conversaId: string,
   ) {
     return this.excluirConversaUseCase.execute(user.sub, conversaId);
   }
@@ -163,7 +167,7 @@ export class IaTutorController {
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   async uploadAnexo(
     @CurrentUser() user: JwtPayload,
-    @Param('userId') userId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
     @Param('file') file: string,
     @Headers('content-type') contentType: string,
     @Req() req: RawBodyRequest<Request>,
@@ -195,6 +199,7 @@ export class IaTutorController {
   @Post('mensagens')
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @Idempotent({ required: false })
   enviarMensagem(
     @CurrentUser() user: JwtPayload,
     @Body() dto: EnviarMensagemTutorDto,
@@ -207,9 +212,57 @@ export class IaTutorController {
     });
   }
 
+  @Post('mensagens/stream')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  async enviarMensagemStream(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: EnviarMensagemTutorDto,
+    @Res() res: Response,
+  ) {
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+
+    const writeEvent = (event: string, data: unknown) => {
+      res.write(`event: ${event}\n`);
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+    };
+
+    try {
+      const result = await this.enviarMensagemUseCase.executeStream(
+        {
+          userId: user.sub,
+          mensagem: dto.mensagem,
+          conversaId: dto.conversaId,
+          anexoUrl: dto.anexoUrl,
+        },
+        {
+          onDelta: (text) => {
+            writeEvent('delta', { text });
+          },
+        },
+      );
+      writeEvent('done', result);
+    } catch (error) {
+      const status =
+        error instanceof HttpException ? error.getStatus() : 500;
+      const message =
+        error instanceof HttpException
+          ? error.message
+          : 'Não foi possível enviar a mensagem. Tente novamente.';
+      res.status(status);
+      writeEvent('error', { message });
+    } finally {
+      res.end();
+    }
+  }
+
   @Post('explicar-erro')
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 15, ttl: 60_000 } })
+  @Idempotent({ required: false })
   explicarErro(
     @CurrentUser() user: JwtPayload,
     @Body() dto: ExplicarErroDto,

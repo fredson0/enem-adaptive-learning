@@ -39,8 +39,9 @@
 - [x] **D1** Intenção `minhas_lacunas` → resposta com `GET /metricas/lacunas` (0 tokens IA)
 - [x] **D2** Intenção `meu_progresso` → resumo com proficiência real (0 tokens IA)
 - [x] **D3** Chips de sugestão personalizados no `/tutor` (lacunas + treino focado)
-- [ ] **D4** Streaming de respostas no chat (opcional)
-- [ ] **D5** Injetar cobertura por assunto no prompt do tutor
+- [x] **D4** Streaming de respostas no chat (SSE `/ia-tutor/mensagens/stream`)
+- [x] **D5** Injetar cobertura por assunto no prompt do tutor
+- [x] **D6** Intenção `minha_cobertura` → resposta com dados reais (0 tokens IA)
 
 ---
 

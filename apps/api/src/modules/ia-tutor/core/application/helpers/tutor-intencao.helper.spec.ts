@@ -31,6 +31,12 @@ describe('classificarIntencaoTutor', () => {
     );
   });
 
+  it('detecta cobertura do aluno', () => {
+    expect(classificarIntencaoTutor('Qual é minha cobertura?')).toBe(
+      'minha_cobertura',
+    );
+  });
+
   it('detecta dúvidas sobre a plataforma', () => {
     expect(classificarIntencaoTutor('Como funciona a trilha?')).toBe(
       'produto_plataforma',

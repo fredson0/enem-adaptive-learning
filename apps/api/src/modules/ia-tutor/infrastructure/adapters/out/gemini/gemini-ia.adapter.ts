@@ -8,6 +8,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import type {
   EnviarMensagemIaInput,
   IaEnginePort,
+  IaStreamDeltaHandler,
 } from '../../../../core/application/ports/ia-engine.port';
 import { buildTutorSystemPrompt } from '../../../../core/application/helpers/tutor-prompts';
 import {
@@ -187,5 +188,14 @@ export class GeminiIaAdapter implements IaEnginePort {
     throw new ServiceUnavailableException(
       'Não foi possível conectar ao tutor IA. Verifique GEMINI_API_KEY e GEMINI_MODEL em apps/api/.env (use gemini-2.5-flash) e tente novamente.',
     );
+  }
+
+  async enviarMensagemStream(
+    input: EnviarMensagemIaInput,
+    onDelta: IaStreamDeltaHandler,
+  ): Promise<string> {
+    const text = await this.enviarMensagem(input);
+    await onDelta(text);
+    return text;
   }
 }

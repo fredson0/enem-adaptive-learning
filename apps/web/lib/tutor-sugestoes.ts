@@ -68,6 +68,11 @@ export function montarChipsSugestoesTutor(
       mensagem: "Como está meu desempenho?",
     },
     {
+      id: "cobertura",
+      label: "Minha cobertura",
+      mensagem: "Qual é minha cobertura de questões?",
+    },
+    {
       id: "frequencia",
       label: `O que cai em ${principal.label}`,
       mensagem: `O que mais cai em ${principal.label.toLowerCase()} no banco?`,

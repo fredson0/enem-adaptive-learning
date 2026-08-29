@@ -1,4 +1,4 @@
-import { IsArray, IsBoolean, IsOptional, IsString, IsUUID, MaxLength, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsIn, IsOptional, IsString, IsUUID, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class MensagemHistoricoDto {
@@ -27,7 +27,7 @@ export class EnviarMensagemTutorDto {
 
 export class PresignAnexoDto {
   @IsString()
-  @MaxLength(80)
+  @IsIn(['image/jpeg', 'image/png', 'image/webp'])
   contentType!: string;
 
   @IsOptional()

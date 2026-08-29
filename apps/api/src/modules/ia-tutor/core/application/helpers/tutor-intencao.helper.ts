@@ -4,6 +4,7 @@ export type IntencaoTutor =
   | 'frequencia_temas'
   | 'minhas_lacunas'
   | 'meu_progresso'
+  | 'minha_cobertura'
   | 'produto_plataforma';
 
 function normalizar(texto: string) {
@@ -48,6 +49,14 @@ export function classificarIntencaoTutor(mensagem: string): IntencaoTutor {
     )
   ) {
     return 'meu_progresso';
+  }
+
+  if (
+    /\b(minha cobertura|cobertura de questoes|quantas questoes dominei|questoes dominadas|mapa de cobertura|o que ja dominei)\b/.test(
+      t,
+    )
+  ) {
+    return 'minha_cobertura';
   }
 
   if (

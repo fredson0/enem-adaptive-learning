@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../../../../../../infrastructure/auth/current-user.decorator';
+import { BffSecretGuard } from '../../../../../../infrastructure/auth/bff-secret.guard';
 import { JwtAuthGuard } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import type { JwtPayload } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import { AtualizarPerfilUseCase } from '../../../../core/application/use-cases/atualizar-perfil.use-case';
@@ -30,7 +31,7 @@ import {
  * - Plano/role NUNCA aceitos no body (whitelist DTO + forbidNonWhitelisted).
  * - Upgrade de plano só via webhook Mercado Pago (futuro) — nunca pelo cliente.
  * - Login/refresh com rate limit agressivo.
- * - Tokens retornados no body para o BFF (Next) setar cookies HttpOnly.
+ * - Tokens retornados no body somente para o BFF (header X-BFF-Secret + cookies HttpOnly no Next).
  */
 @Controller('usuarios')
 export class UsuariosController {
@@ -50,6 +51,7 @@ export class UsuariosController {
   ) {}
 
   @Post('login-google')
+  @UseGuards(BffSecretGuard)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async loginGoogle(@Body() dto: LoginGoogleDto) {
     const { accessToken, refreshToken, userId } =
@@ -60,6 +62,7 @@ export class UsuariosController {
   }
 
   @Post('auth/refresh')
+  @UseGuards(BffSecretGuard)
   @HttpCode(200)
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   async refresh(@Body() dto: RefreshTokenDto) {
@@ -71,6 +74,7 @@ export class UsuariosController {
   }
 
   @Post('auth/logout')
+  @UseGuards(BffSecretGuard)
   @HttpCode(204)
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
   async logout(@Body() dto: LogoutDto) {

@@ -25,7 +25,14 @@ async function bootstrap() {
     }),
   );
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      // API JSON/SSE — sem HTML embutido
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
 
   app.enableCors({
     origin: process.env.CORS_ORIGIN?.split(',') ?? [
@@ -41,6 +48,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
+      forbidUnknownValues: true,
       transform: true,
     }),
   );

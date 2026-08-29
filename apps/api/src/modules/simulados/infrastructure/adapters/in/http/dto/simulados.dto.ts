@@ -7,6 +7,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   MaxLength,
   Min,
@@ -138,8 +139,7 @@ export class ListarSimuladosQueryDto {
 }
 
 export class EnviarRespostaDto {
-  @IsString()
-  @MinLength(1)
+  @IsUUID()
   questaoId!: string;
 
   @IsString()

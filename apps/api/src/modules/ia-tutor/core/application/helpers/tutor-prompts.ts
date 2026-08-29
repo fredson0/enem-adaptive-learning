@@ -8,6 +8,17 @@ import {
   REGRAS_FORMATO_RESPOSTA,
 } from './tutor-formato.helper';
 
+import {
+  buildCoberturaAssuntosBlock,
+  formatarRespostaCobertura,
+  type CoberturaAssuntoResumo,
+} from './tutor-cobertura.helper';
+
+export {
+  formatarRespostaCobertura,
+  type CoberturaAssuntoResumo,
+} from './tutor-cobertura.helper';
+
 export type ContextoAlunoMetricas = {
   simuladosConcluidos: number;
   questoesRespondidas: number;
@@ -166,6 +177,7 @@ export function buildTutorSystemPrompt(
   options?: {
     areaEnem?: AreaEnem | null;
     frequencias?: FrequenciaDisciplina[];
+    coberturaAssuntos?: CoberturaAssuntoResumo[];
     incluirProduto?: boolean;
     pedidoExplicacao?: boolean;
   },
@@ -181,6 +193,10 @@ export function buildTutorSystemPrompt(
 
   const frequenciaBlock = options?.frequencias?.length
     ? buildFrequenciaTemasBlock(options.frequencias, options.areaEnem)
+    : '';
+
+  const coberturaBlock = options?.coberturaAssuntos?.length
+    ? buildCoberturaAssuntosBlock(options.coberturaAssuntos)
     : '';
 
   const explicacaoBlock = options?.pedidoExplicacao
@@ -206,7 +222,7 @@ Regras pedagógicas:
 - Se o aluno pedir um PDF explicativo, oriente-o ao botão "PDF explicativo" abaixo da resposta (custa 2 tokens IA).
 - Se pedir questões ou prova em PDF, oriente-o ao botão "PDF de questões" (questões reais do banco, sem custo de tokens).
 - Se não souber responder com segurança, diga honestamente em vez de inventar.
-${explicacaoBlock}${areaBlock}${produtoBlock}${buildTutorContextBlock(contextoMetricas)}${buildTrilhaContextBlock(contextoTrilha)}${frequenciaBlock}`;
+${explicacaoBlock}${areaBlock}${produtoBlock}${buildTutorContextBlock(contextoMetricas)}${buildTrilhaContextBlock(contextoTrilha)}${frequenciaBlock}${coberturaBlock}`;
 }
 
 export function buildVisionSystemPrompt(nivelAluno?: string) {

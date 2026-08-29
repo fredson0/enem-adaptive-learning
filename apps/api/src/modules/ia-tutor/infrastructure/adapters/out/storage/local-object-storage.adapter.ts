@@ -29,7 +29,7 @@ export class LocalObjectStorageAdapter implements ObjectStoragePort {
     );
     this.publicBaseUrl =
       this.config.get<string>('LOCAL_UPLOAD_BASE_URL') ??
-      'http://localhost:3333/dev-uploads';
+      'http://localhost:3001/api/backend/dev-uploads';
     this.apiBaseUrl =
       this.config.get<string>('API_PUBLIC_URL') ?? 'http://localhost:3333';
   }

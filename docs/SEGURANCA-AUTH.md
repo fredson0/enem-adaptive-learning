@@ -53,11 +53,21 @@ Browser                    Next.js (BFF)                      NestJS API
 
 | Método | Rota | Função |
 |--------|------|--------|
-| `POST` | `/api/auth/login` | Login Google → seta cookies; JSON só `{ user }` |
+| `POST` | `/api/auth/login` | Login Google → seta cookies **HttpOnly**; JSON só `{ user }` |
 | `DELETE` | `/api/auth/login` | Logout + limpa cookies |
-| `POST` | `/api/auth/refresh` | Rotaciona tokens via cookie |
-| `GET` | `/api/auth/me` | Perfil autenticado |
-| `*` | `/api/backend/*` | Proxy: cookie → `Authorization: Bearer` |
+| `POST` | `/api/auth/refresh` | Rotaciona tokens via cookie refresh (JS não lê o token) |
+| `GET` | `/api/auth/me` | Perfil autenticado (sem JWT no JSON) |
+| `*` | `/api/backend/*` | Proxy: cookie HttpOnly → `Authorization: Bearer` no servidor |
+
+### Emissão de tokens na API (somente BFF)
+
+| Rota Nest | Guard | Resposta ao browser |
+|-----------|-------|---------------------|
+| `POST /usuarios/login-google` | `BffSecretGuard` | **403** se chamado direto; BFF recebe tokens e grava cookies |
+| `POST /usuarios/auth/refresh` | `BffSecretGuard` | idem |
+| `POST /usuarios/auth/logout` | `BffSecretGuard` | idem |
+
+Variável compartilhada: `BFF_INTERNAL_SECRET` (mesmo valor em `apps/api/.env` e `apps/web/.env.local`).
 
 ### Protegidas (JwtAuthGuard)
 
@@ -119,13 +129,18 @@ THROTTLE_LIMIT=100
 # Web
 NEXT_PUBLIC_API_URL=http://localhost:3333
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=
+BFF_INTERNAL_SECRET=dev-bff-secret-trocar-em-producao
+
+# API (mesmo BFF_INTERNAL_SECRET)
+BFF_INTERNAL_SECRET=dev-bff-secret-trocar-em-producao
 ```
 
 ---
 
 ## O que o front NÃO faz
 
-- Não guarda JWT em `localStorage`
-- Não decide se o usuário é APOIO/ADMIN
+- Não guarda JWT em `localStorage`, `sessionStorage` nem variáveis JS
+- Não recebe `accessToken` / `refreshToken` no JSON (só cookies HttpOnly)
+- Não decide se o usuário é APOIO/ADMIN para autorizar ações
 - Não “libera” tokens de IA no cliente — só exibe o que a API devolve
-- `proxy.ts` só redireciona UX se cookie **existe**; a **autorização real** é sempre o Nest
+- `middleware.ts` redireciona UX sem cookie; **autorização real** é sempre no Nest via JWT do BFF

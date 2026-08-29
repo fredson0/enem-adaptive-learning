@@ -10,6 +10,8 @@ import { ObterContextoTutorUseCase } from '../../../../metricas/core/application
 import { ObterTrilhaUseCase } from '../../../../metricas/core/application/use-cases/obter-trilha.use-case';
 import { ObterFrequenciaTemasUseCase } from '../../../../metricas/core/application/use-cases/obter-frequencia-temas.use-case';
 import { ObterLacunasUseCase } from '../../../../metricas/core/application/use-cases/obter-metricas.use-case';
+import { ObterCoberturaUseCase } from '../../../../metricas/core/application/use-cases/obter-cobertura.use-case';
+import { inferirAssuntoId } from '../../../../metricas/core/application/helpers/cobertura-questoes.helper';
 import { slugAreaEnem } from '../../../../metricas/core/application/helpers/area-enem-labels';
 import {
   METRICAS_REPOSITORY,
@@ -28,6 +30,10 @@ import {
   respostaForaEscopo,
 } from '../helpers/tutor-escopo.helper';
 import { classificarIntencaoTutor } from '../helpers/tutor-intencao.helper';
+import {
+  formatarRespostaCobertura,
+  selecionarAssuntosCoberturaParaPrompt,
+} from '../helpers/tutor-cobertura.helper';
 import {
   buildTutorSystemPrompt,
   detectarAreaEnem,
@@ -58,6 +64,26 @@ export type EnviarMensagemTutorInput = {
   anexoUrl?: string;
 };
 
+export type TutorStreamCallbacks = {
+  onDelta: (text: string) => void | Promise<void>;
+};
+
+export type EnviarMensagemTutorResult = {
+  resposta: string;
+  conversaId: string;
+  tokens: Awaited<ReturnType<UsoTokensIaService['obterSaldo']>>;
+  trilhaAtualizada?: {
+    etapasConcluidas: string[];
+    checklistIa: import('../../../../metricas/core/application/helpers/trilha.config').ChecklistItemIa[];
+  };
+  simuladoGerado?: {
+    id: string;
+    href: string;
+    totalQuestoes: number;
+  };
+  foraEscopo?: boolean;
+};
+
 @Injectable()
 export class EnviarMensagemTutorUseCase {
   constructor(
@@ -74,6 +100,8 @@ export class EnviarMensagemTutorUseCase {
     private readonly obterFrequenciaTemasUseCase: ObterFrequenciaTemasUseCase,
     @Inject(ObterLacunasUseCase)
     private readonly obterLacunasUseCase: ObterLacunasUseCase,
+    @Inject(ObterCoberturaUseCase)
+    private readonly obterCoberturaUseCase: ObterCoberturaUseCase,
     @Inject(METRICAS_REPOSITORY)
     private readonly metricasRepository: MetricasRepositoryPort,
     @Inject(CONVERSAS_TUTOR_REPOSITORY)
@@ -127,6 +155,29 @@ export class EnviarMensagemTutorUseCase {
   }
 
   async execute(input: EnviarMensagemTutorInput) {
+    return this.run(input);
+  }
+
+  async executeStream(
+    input: EnviarMensagemTutorInput,
+    callbacks: TutorStreamCallbacks,
+  ) {
+    return this.run(input, callbacks);
+  }
+
+  private async emitResposta(
+    callbacks: TutorStreamCallbacks | undefined,
+    resposta: string,
+  ) {
+    if (callbacks) {
+      await callbacks.onDelta(resposta);
+    }
+  }
+
+  private async run(
+    input: EnviarMensagemTutorInput,
+    callbacks?: TutorStreamCallbacks,
+  ): Promise<EnviarMensagemTutorResult> {
     let conversaId = input.conversaId;
 
     if (conversaId) {
@@ -159,6 +210,8 @@ export class EnviarMensagemTutorUseCase {
         resposta,
         conversa?.mensagens,
       );
+
+      await this.emitResposta(callbacks, resposta);
 
       return {
         resposta,
@@ -220,6 +273,8 @@ export class EnviarMensagemTutorUseCase {
           conversa?.mensagens,
         );
 
+        await this.emitResposta(callbacks, resposta);
+
         return {
           resposta,
           conversaId,
@@ -243,6 +298,8 @@ export class EnviarMensagemTutorUseCase {
           conversa?.mensagens,
         );
 
+        await this.emitResposta(callbacks, resposta);
+
         return { resposta, conversaId, tokens };
       }
     }
@@ -265,6 +322,8 @@ export class EnviarMensagemTutorUseCase {
         conversa?.mensagens,
       );
 
+      await this.emitResposta(callbacks, resposta);
+
       return { resposta, conversaId, tokens };
     }
 
@@ -280,6 +339,8 @@ export class EnviarMensagemTutorUseCase {
         resposta,
         conversa?.mensagens,
       );
+
+      await this.emitResposta(callbacks, resposta);
 
       return { resposta, conversaId, tokens };
     }
@@ -298,6 +359,30 @@ export class EnviarMensagemTutorUseCase {
         resposta,
         conversa?.mensagens,
       );
+
+      await this.emitResposta(callbacks, resposta);
+
+      return { resposta, conversaId, tokens };
+    }
+
+    if (intencao === 'minha_cobertura') {
+      const tokens = await this.usoTokens.obterSaldo(input.userId);
+      const cobertura = await this.obterCoberturaUseCase.execute(input.userId);
+      const resposta = formatarRespostaCobertura({
+        areas: cobertura.areas,
+        assuntos: cobertura.assuntos,
+        areaSlug: areaDetectada ? slugAreaEnem(areaDetectada) : null,
+      });
+
+      await this.persistirResposta(
+        conversaId,
+        input.mensagem,
+        input.anexoUrl,
+        resposta,
+        conversa?.mensagens,
+      );
+
+      await this.emitResposta(callbacks, resposta);
 
       return { resposta, conversaId, tokens };
     }
@@ -321,6 +406,28 @@ export class EnviarMensagemTutorUseCase {
       frequencias = freq.disciplinas;
     }
 
+    let coberturaAssuntos: ReturnType<
+      typeof selecionarAssuntosCoberturaParaPrompt
+    > = [];
+
+    if (
+      contextoMetricas.questoesRespondidas > 0 &&
+      (intencao === 'chat_livre' || intencao === 'produto_plataforma')
+    ) {
+      const cobertura = await this.obterCoberturaUseCase.execute(input.userId);
+      const areaSlug = areaDetectada ? slugAreaEnem(areaDetectada) : null;
+      const assuntoId = inferirAssuntoId(input.mensagem, areaSlug ?? undefined);
+
+      coberturaAssuntos = selecionarAssuntosCoberturaParaPrompt(
+        cobertura.assuntos,
+        {
+          areaSlug,
+          assuntoId: assuntoId ?? null,
+          limit: 6,
+        },
+      );
+    }
+
     const pedidoExplicacao = isPedidoExplicacao(input.mensagem);
 
     const systemPromptOverride = buildTutorSystemPrompt(
@@ -330,21 +437,36 @@ export class EnviarMensagemTutorUseCase {
       {
         areaEnem: areaDetectada,
         frequencias,
+        coberturaAssuntos,
         incluirProduto: intencao === 'produto_plataforma',
         pedidoExplicacao,
       },
     );
 
-    const respostaBruta = await this.iaEngine.enviarMensagem({
-      texto: input.mensagem,
-      historico: conversa?.mensagens,
-      nivelAluno: perfil?.nivelAtual ?? 'INICIANTE',
-      contextoMetricas,
-      contextoTrilha,
-      imagem,
-      systemPromptOverride,
-      areaEnem: areaDetectada ?? undefined,
-    });
+    const respostaBruta = callbacks
+      ? await this.iaEngine.enviarMensagemStream(
+          {
+            texto: input.mensagem,
+            historico: conversa?.mensagens,
+            nivelAluno: perfil?.nivelAtual ?? 'INICIANTE',
+            contextoMetricas,
+            contextoTrilha,
+            imagem,
+            systemPromptOverride,
+            areaEnem: areaDetectada ?? undefined,
+          },
+          callbacks.onDelta,
+        )
+      : await this.iaEngine.enviarMensagem({
+          texto: input.mensagem,
+          historico: conversa?.mensagens,
+          nivelAluno: perfil?.nivelAtual ?? 'INICIANTE',
+          contextoMetricas,
+          contextoTrilha,
+          imagem,
+          systemPromptOverride,
+          areaEnem: areaDetectada ?? undefined,
+        });
 
     const acoes = parseTrilhaAcoes(respostaBruta);
     let trilhaAtualizada:

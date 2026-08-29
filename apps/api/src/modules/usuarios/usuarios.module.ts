@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthGuard } from '../../infrastructure/auth/jwt-auth.guard';
+import { BffSecretGuard } from '../../infrastructure/auth/bff-secret.guard';
 import { AUTH_TOKEN_SERVICE } from './core/application/ports/auth-token.service.port';
 import { OAUTH_SERVICE } from './core/application/ports/oauth.service.port';
 import { USUARIOS_REPOSITORY } from './core/application/ports/usuarios.repository.port';
@@ -36,6 +37,7 @@ import { PrismaUsuariosRepository } from './infrastructure/adapters/out/persiste
     ObterPlanoUseCase,
     AtualizarPerfilUseCase,
     JwtAuthGuard,
+    BffSecretGuard,
     {
       provide: USUARIOS_REPOSITORY,
       useClass: PrismaUsuariosRepository,

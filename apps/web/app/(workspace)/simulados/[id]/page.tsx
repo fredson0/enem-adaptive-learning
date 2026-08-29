@@ -177,10 +177,7 @@ export default function SimuladoQuestaoPage() {
     setSubmitting(true);
     setError(null);
 
-    const idempotencyKey =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `${simuladoId}-${simulado.questaoAtual.id}-${Date.now()}`;
+    const idempotencyKey = `resposta:${simuladoId}:${simulado.questaoAtual.id}`;
 
     try {
       const result = await apiFetch<{

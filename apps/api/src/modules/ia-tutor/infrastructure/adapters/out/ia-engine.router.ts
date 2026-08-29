@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import type {
   EnviarMensagemIaInput,
   IaEnginePort,
+  IaStreamDeltaHandler,
 } from '../../../core/application/ports/ia-engine.port';
 import {
   enriquecerInputModelTier,
@@ -94,6 +95,37 @@ export class IaEngineRouter implements IaEnginePort {
     );
   }
 
+  private async runStreamWithFallback(
+    providers: IaEnginePort[],
+    input: EnviarMensagemIaInput,
+    onDelta: IaStreamDeltaHandler,
+  ): Promise<string> {
+    let lastError: unknown = null;
+
+    for (const provider of providers) {
+      let sentAny = false;
+      try {
+        return await provider.enviarMensagemStream(input, async (delta) => {
+          sentAny = true;
+          await onDelta(delta);
+        });
+      } catch (error) {
+        lastError = error;
+        if (!isFallbackWorthy(error) || sentAny) {
+          throw error;
+        }
+      }
+    }
+
+    if (lastError instanceof ServiceUnavailableException) {
+      throw lastError;
+    }
+
+    throw new ServiceUnavailableException(
+      'Não foi possível processar a mensagem com os provedores de IA disponíveis.',
+    );
+  }
+
   async enviarMensagem(input: EnviarMensagemIaInput): Promise<string> {
     const enriched = enriquecerInputModelTier(input);
 
@@ -107,5 +139,23 @@ export class IaEngineRouter implements IaEnginePort {
     }
 
     return this.runWithFallback(chain, enriched);
+  }
+
+  async enviarMensagemStream(
+    input: EnviarMensagemIaInput,
+    onDelta: IaStreamDeltaHandler,
+  ): Promise<string> {
+    const enriched = enriquecerInputModelTier(input);
+
+    if (enriched.imagem) {
+      return this.runStreamWithFallback(this.getVisionChain(), enriched, onDelta);
+    }
+
+    const chain = this.getTextChain(enriched);
+    if (chain.length === 1) {
+      return chain[0]!.enviarMensagemStream(enriched, onDelta);
+    }
+
+    return this.runStreamWithFallback(chain, enriched, onDelta);
   }
 }

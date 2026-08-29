@@ -59,11 +59,14 @@ async function proxy(
 
   const url = new URL(request.url);
   const search = url.search;
+  const isBinaryDownload =
+    method === "GET" && nestPath.startsWith("/dev-uploads/");
   const isBinaryUpload =
     method === "PUT" && nestPath.includes("/ia-tutor/anexos/upload");
 
   let body: BodyInit | undefined;
   let forwardHeaders: HeadersInit | undefined;
+  const idempotencyKey = request.headers.get("idempotency-key");
 
   if (method !== "GET" && method !== "DELETE") {
     if (isBinaryUpload) {
@@ -78,27 +81,57 @@ async function proxy(
         : undefined;
     } else {
       body = await request.text();
+      if (idempotencyKey) {
+        forwardHeaders = { "Idempotency-Key": idempotencyKey };
+      }
     }
   }
 
-  const run = (token: string) =>
-    nestFetch<unknown>(`${nestPath}${search}`, {
+  const run = async (token: string) => {
+    if (isBinaryDownload) {
+      const headers = new Headers();
+      headers.set("Authorization", `Bearer ${token}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3333"}${nestPath}${search}`, {
+        method,
+        headers,
+        cache: "no-store",
+      });
+      return { response, status: response.status };
+    }
+
+    const { data, status } = await nestFetch<unknown>(`${nestPath}${search}`, {
       method,
       body,
       accessToken: token,
       headers: forwardHeaders,
     });
+    return { data, status, response: null as Response | null };
+  };
 
-  let { data, status } = await run(accessToken);
+  let result = await run(accessToken);
 
-  if (status === 401) {
+  if (result.status === 401) {
     rotated = await rotateRefreshTokens();
     if (!rotated) {
       return NextResponse.json({ message: "Não autenticado" }, { status: 401 });
     }
     accessToken = rotated.accessToken;
-    ({ data, status } = await run(accessToken));
+    result = await run(accessToken);
   }
+
+  if (isBinaryDownload && result.response) {
+    const headers = new Headers();
+    const contentType = result.response.headers.get("content-type");
+    if (contentType) headers.set("Content-Type", contentType);
+    headers.set("Cache-Control", "private, max-age=3600");
+    const binary = new NextResponse(result.response.body, {
+      status: result.status,
+      headers,
+    });
+    return rotated ? applyAuthCookies(binary, rotated) : binary;
+  }
+
+  const { data, status } = result;
 
   if (status === 204) {
     const empty = new NextResponse(null, { status: 204 });

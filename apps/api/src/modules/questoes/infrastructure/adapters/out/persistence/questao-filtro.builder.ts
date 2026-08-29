@@ -1,6 +1,7 @@
 import type { Prisma } from '@generated/prisma';
 import { getFaixaIndiceArea } from '../../../../core/application/helpers/faixa-indice-enem.helper';
 import { expandirTermosBusca } from '../../../../core/application/helpers/termos-busca.helper';
+import { sanitizarListaTermosBusca } from '../../../../../../infrastructure/security/sanitizar-input.helper';
 import type { FiltroQuestoes } from '../../../../core/application/types/filtro-questoes';
 
 function condicaoTermoBusca(termo: string): Prisma.QuestaoWhereInput[] {
@@ -31,7 +32,9 @@ export function buildQuestaoWhere(filtro?: FiltroQuestoes): Prisma.QuestaoWhereI
     where.ano = filtro.ano;
   }
 
-  const termos = expandirTermosBusca(filtro.termosBusca ?? []);
+  const termos = expandirTermosBusca(
+    sanitizarListaTermosBusca(filtro.termosBusca ?? []),
+  );
 
   if (termos.length > 0) {
     where.OR = termos.flatMap((termo) => condicaoTermoBusca(termo));

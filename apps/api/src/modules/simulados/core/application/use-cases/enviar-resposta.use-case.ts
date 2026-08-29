@@ -11,6 +11,11 @@ import {
   type SimuladosRepositoryPort,
 } from '../ports/simulados.repository.port';
 import { CalcularProficienciaUseCase } from '../../../../metricas/core/application/use-cases/calcular-proficiencia.use-case';
+import {
+  METRICAS_REPOSITORY,
+  type MetricasRepositoryPort,
+} from '../../../../metricas/core/application/ports/metricas.repository.port';
+import { estadoTrilhaComSimuladoFinalizado } from '../../../../metricas/core/application/helpers/trilha-simulado.helper';
 
 export type EnviarRespostaInput = {
   simuladoId: string;
@@ -108,6 +113,8 @@ export class FinalizarSimuladoUseCase {
     private readonly questoesRepository: QuestoesRepositoryPort,
     @Inject(CalcularProficienciaUseCase)
     private readonly calcularProficienciaUseCase: CalcularProficienciaUseCase,
+    @Inject(METRICAS_REPOSITORY)
+    private readonly metricasRepository: MetricasRepositoryPort,
   ) {}
 
   async execute(simuladoId: string, userId: string) {
@@ -124,6 +131,16 @@ export class FinalizarSimuladoUseCase {
 
     if (simulado.status !== 'CONCLUIDO') {
       await this.calcularProficienciaUseCase.execute(userId);
+
+      const teveErros = finalizado.respondidas > finalizado.acertos;
+      const estadoAtual = await this.metricasRepository.obterTrilhaEstado(userId);
+      const novoEstado = estadoTrilhaComSimuladoFinalizado({
+        estadoAtual,
+        modo: finalizado.modo,
+        area: finalizado.area,
+        teveErros,
+      });
+      await this.metricasRepository.salvarTrilhaEstado(userId, novoEstado);
     }
 
     const questoes = await this.questoesRepository.buscarPorIds(finalizado.questaoIds);

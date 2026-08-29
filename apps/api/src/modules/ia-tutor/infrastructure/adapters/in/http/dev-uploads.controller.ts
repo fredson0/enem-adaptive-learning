@@ -1,12 +1,18 @@
 import {
   Controller,
+  ForbiddenException,
   Get,
   Inject,
   NotFoundException,
   Param,
+  ParseUUIDPipe,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import { CurrentUser } from '../../../../../../infrastructure/auth/current-user.decorator';
+import { JwtAuthGuard } from '../../../../../../infrastructure/auth/jwt-auth.guard';
+import type { JwtPayload } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import {
   OBJECT_STORAGE,
   type ObjectStoragePort,
@@ -20,11 +26,17 @@ export class DevUploadsController {
   ) {}
 
   @Get(':userId/:file')
+  @UseGuards(JwtAuthGuard)
   async servir(
-    @Param('userId') userId: string,
+    @CurrentUser() user: JwtPayload,
+    @Param('userId', ParseUUIDPipe) userId: string,
     @Param('file') file: string,
     @Res() res: Response,
   ) {
+    if (user.sub !== userId) {
+      throw new ForbiddenException('Acesso negado ao anexo');
+    }
+
     const key = `${userId}/${file}`;
     const arquivo = await this.storage.obterArquivo(key);
 

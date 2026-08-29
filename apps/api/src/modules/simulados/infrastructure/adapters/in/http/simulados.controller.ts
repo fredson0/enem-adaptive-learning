@@ -6,13 +6,16 @@ import {
   HttpCode,
   Inject,
   Param,
+  ParseUUIDPipe,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../../../../../../infrastructure/auth/current-user.decorator';
 import { JwtAuthGuard } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import type { JwtPayload } from '../../../../../../infrastructure/auth/jwt-auth.guard';
+import { Idempotent } from '../../../../../../infrastructure/http/idempotent.decorator';
 import {
   EnviarRespostaUseCase,
   FinalizarSimuladoUseCase,
@@ -54,6 +57,7 @@ export class SimuladosController {
   ) {}
 
   @Post()
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   criar(@CurrentUser() user: JwtPayload, @Body() dto: CriarSimuladoDto) {
     return this.gerarSimuladoUseCase.execute({
       userId: user.sub,
@@ -68,6 +72,7 @@ export class SimuladosController {
   }
 
   @Post('gerar-com-ia')
+  @Throttle({ default: { limit: 8, ttl: 60_000 } })
   gerarComIa(
     @CurrentUser() user: JwtPayload,
     @Body() dto: GerarSimuladoComIaDto,
@@ -96,14 +101,17 @@ export class SimuladosController {
   }
 
   @Get(':id/resultado')
-  obterResultado(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  obterResultado(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.finalizarSimuladoUseCase.execute(id, user.sub);
   }
 
   @Get(':id')
   async obter(
     @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Query('ordem') ordem?: string,
   ) {
     const ordemNum =
@@ -140,9 +148,11 @@ export class SimuladosController {
 
   @Post(':id/respostas')
   @HttpCode(200)
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
+  @Idempotent({ required: false })
   responder(
     @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: EnviarRespostaDto,
   ) {
     return this.enviarRespostaUseCase.execute({
@@ -155,18 +165,30 @@ export class SimuladosController {
 
   @Post(':id/finalizar')
   @HttpCode(200)
-  finalizar(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  @Throttle({ default: { limit: 15, ttl: 60_000 } })
+  @Idempotent({ required: false })
+  finalizar(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.finalizarSimuladoUseCase.execute(id, user.sub);
   }
 
   @Post(':id/refazer-erros')
-  refazerErros(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  refazerErros(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.refazerErrosSimuladoUseCase.execute(id, user.sub);
   }
 
   @Delete(':id')
   @HttpCode(200)
-  excluir(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  excluir(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.excluirSimuladoUseCase.execute(id, user.sub);
   }
 }

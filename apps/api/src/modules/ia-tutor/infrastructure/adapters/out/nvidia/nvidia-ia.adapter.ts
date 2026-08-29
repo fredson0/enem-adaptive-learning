@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import type {
   EnviarMensagemIaInput,
   IaEnginePort,
+  IaStreamDeltaHandler,
 } from '../../../../core/application/ports/ia-engine.port';
 import {
   buildOpenAiChatMessages,
@@ -16,6 +17,7 @@ import {
   montarCandidatosModelo,
   resolverModelTier,
 } from '../../../../core/application/helpers/ia-model-tier.helper';
+import { streamOpenAiChatCompletion } from '../openai-stream.helper';
 
 const NVIDIA_BASE_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
@@ -93,6 +95,45 @@ export class NvidiaIaAdapter implements IaEnginePort {
     );
   }
 
+  private buildRequestBody(
+    modelName: string,
+    messages: OpenAiChatMessage[],
+    jsonMode: boolean,
+    stream: boolean,
+  ) {
+    return {
+      model: modelName,
+      messages,
+      temperature: jsonMode ? 0.2 : 0.7,
+      top_p: 0.9,
+      max_tokens: 2048,
+      stream,
+      ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
+    };
+  }
+
+  private async callModelStream(
+    modelName: string,
+    messages: OpenAiChatMessage[],
+    timeoutMs: number,
+    jsonMode: boolean,
+    onDelta: IaStreamDeltaHandler,
+  ): Promise<string> {
+    if (jsonMode) {
+      const text = await this.callModel(modelName, messages, timeoutMs, jsonMode);
+      await onDelta(text);
+      return text;
+    }
+
+    return streamOpenAiChatCompletion({
+      url: NVIDIA_BASE_URL,
+      apiKey: this.getApiKey(),
+      body: this.buildRequestBody(modelName, messages, jsonMode, true),
+      timeoutMs,
+      onDelta,
+    });
+  }
+
   private async callModel(
     modelName: string,
     messages: OpenAiChatMessage[],
@@ -109,15 +150,9 @@ export class NvidiaIaAdapter implements IaEnginePort {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.getApiKey()}`,
         },
-        body: JSON.stringify({
-          model: modelName,
-          messages,
-          temperature: jsonMode ? 0.2 : 0.7,
-          top_p: 0.9,
-          max_tokens: 2048,
-          stream: false,
-          ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
-        }),
+        body: JSON.stringify(
+          this.buildRequestBody(modelName, messages, jsonMode, false),
+        ),
         signal: controller.signal,
       });
 
@@ -171,6 +206,59 @@ export class NvidiaIaAdapter implements IaEnginePort {
     for (const modelName of candidates) {
       try {
         return await this.callModel(modelName, messages, timeoutMs, jsonMode);
+      } catch (error) {
+        if (error instanceof ServiceUnavailableException) {
+          throw error;
+        }
+
+        const message =
+          error instanceof Error ? error.message : 'Erro desconhecido';
+
+        if (this.isRetryableError(message)) {
+          lastError = error instanceof Error ? error : new Error(message);
+          continue;
+        }
+
+        if (message.includes('429') || message.toLowerCase().includes('rate')) {
+          throw new ServiceUnavailableException(
+            'Limite da API NVIDIA atingido. Tente novamente em alguns minutos.',
+          );
+        }
+
+        throw new ServiceUnavailableException(
+          `Falha ao consultar o tutor IA (NVIDIA): ${message}`,
+        );
+      }
+    }
+
+    throw new ServiceUnavailableException(
+      `Não foi possível conectar à API NVIDIA: ${
+        lastError?.message ??
+        'Verifique NVIDIA_API_KEY e modelos em apps/api/.env'
+      }`,
+    );
+  }
+
+  async enviarMensagemStream(
+    input: EnviarMensagemIaInput,
+    onDelta: IaStreamDeltaHandler,
+  ): Promise<string> {
+    const messages = buildOpenAiChatMessages(input);
+    const candidates = this.getModelCandidates(input);
+    const timeoutMs = input.imagem ? VISION_TIMEOUT_MS : TEXT_TIMEOUT_MS;
+    let lastError: Error | null = null;
+
+    const jsonMode = input.responseFormat === 'json_object' && !input.imagem;
+
+    for (const modelName of candidates) {
+      try {
+        return await this.callModelStream(
+          modelName,
+          messages,
+          timeoutMs,
+          jsonMode,
+          onDelta,
+        );
       } catch (error) {
         if (error instanceof ServiceUnavailableException) {
           throw error;

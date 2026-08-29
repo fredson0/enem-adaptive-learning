@@ -1,29 +1,34 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import { createE2eApp } from './helpers/e2e-app.helper';
+describe('App (e2e)', () => {
+  let app: Awaited<ReturnType<typeof createE2eApp>>;
 
-describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
-
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+  beforeAll(async () => {
+    app = await createE2eApp();
   });
 
-  it('/ (GET)', () => {
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('GET / responde health básico', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
       .expect('Hello World!');
   });
 
-  afterEach(async () => {
-    await app.close();
+  it('POST /ia-tutor/mensagens exige autenticação', () => {
+    return request(app.getHttpServer())
+      .post('/ia-tutor/mensagens')
+      .send({ mensagem: 'teste' })
+      .expect(401);
+  });
+
+  it('POST /ia-tutor/mensagens/stream exige autenticação', () => {
+    return request(app.getHttpServer())
+      .post('/ia-tutor/mensagens/stream')
+      .send({ mensagem: 'teste' })
+      .expect(401);
   });
 });
