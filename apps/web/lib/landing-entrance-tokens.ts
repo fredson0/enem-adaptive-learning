@@ -10,6 +10,12 @@ export const LANDING_ENTRANCE_LEGACY_STORAGE_KEY = LANDING_ENTRANCE_STORAGE_KEY;
 
 export const LANDING_ENTRANCE_EASE = [0.22, 1, 0.36, 1] as const;
 
+/**
+ * Expansão do vídeo — ease-in-out suave (sem pico no início).
+ * O easeOut agressivo da intro fazia o retângulo “pular” e tremer nas bordas.
+ */
+export const LANDING_ENTRANCE_EXPAND_EASE = [0.4, 0.0, 0.18, 1] as const;
+
 /** Durações em milissegundos */
 export const LANDING_ENTRANCE_TIMINGS = {
   /** Fase 1 — "ENEM+" aparece centralizado */
@@ -18,8 +24,8 @@ export const LANDING_ENTRANCE_TIMINGS = {
   split: 950,
   /** Fase 3 — pausa com imagem visível */
   hold: 2000,
-  /** Fase 4 — vídeo expande e empurra o título para os lados */
-  expand: 2200,
+  /** Fase 4 — retângulo cresce até a viewport via scale (GPU) */
+  expand: 2400,
   /** Fase 5 — overlay some e revela a hero montada por baixo */
   exit: 450,
   /** Atraso após o expand antes de revelar header e textos da hero */
@@ -38,6 +44,9 @@ export const LANDING_ENTRANCE_IMAGE = {
   /** Valores animáveis (Framer não interpola clamp) — colados ao título */
   animWidth: "14vw",
   animHeight: "10.5vw",
+  animWidthVw: 14,
+  animHeightVw: 10.5,
+  radius: 12,
 } as const;
 
 export const LANDING_ENTRANCE_TITLE_CLASS =
