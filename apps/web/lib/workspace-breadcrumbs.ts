@@ -161,7 +161,28 @@ export function getWorkspaceCrumbs(
   if (pathname.startsWith("/progresso/detalhes")) {
     return [
       { label: PROGRESSO_NAV.label, href: PROGRESSO_NAV.href },
-      { label: "Análise completa" },
+      { label: "Desempenho" },
+    ];
+  }
+
+  if (pathname.startsWith("/progresso/desempenho")) {
+    return [
+      { label: PROGRESSO_NAV.label, href: PROGRESSO_NAV.href },
+      { label: "Desempenho" },
+    ];
+  }
+
+  if (pathname.startsWith("/progresso/rotina")) {
+    return [
+      { label: PROGRESSO_NAV.label, href: PROGRESSO_NAV.href },
+      { label: "Rotina" },
+    ];
+  }
+
+  if (pathname.startsWith("/progresso/foco")) {
+    return [
+      { label: PROGRESSO_NAV.label, href: PROGRESSO_NAV.href },
+      { label: "Foco agora" },
     ];
   }
 

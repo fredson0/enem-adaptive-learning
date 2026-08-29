@@ -3,6 +3,7 @@ import {
   CallHandler,
   ConflictException,
   ExecutionContext,
+  Inject,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
@@ -28,8 +29,8 @@ function hashRequest(body: unknown): string {
 @Injectable()
 export class IdempotencyInterceptor implements NestInterceptor {
   constructor(
-    private readonly reflector: Reflector,
-    private readonly idempotency: IdempotencyService,
+    @Inject(Reflector) private readonly reflector: Reflector,
+    @Inject(IdempotencyService) private readonly idempotency: IdempotencyService,
   ) {}
 
   async intercept(

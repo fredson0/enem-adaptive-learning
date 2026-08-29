@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR, Reflector } from '@nestjs/core';
 import { RolesGuard } from '../auth/roles.guard';
 import { IdempotencyInterceptor } from '../http/idempotency.interceptor';
 import { IdempotencyService } from '../http/idempotency.service';
@@ -10,11 +10,14 @@ import { IdempotencyService } from '../http/idempotency.service';
     IdempotencyService,
     {
       provide: APP_GUARD,
-      useClass: RolesGuard,
+      inject: [Reflector],
+      useFactory: (reflector: Reflector) => new RolesGuard(reflector),
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: IdempotencyInterceptor,
+      inject: [Reflector, IdempotencyService],
+      useFactory: (reflector: Reflector, idempotency: IdempotencyService) =>
+        new IdempotencyInterceptor(reflector, idempotency),
     },
   ],
   exports: [IdempotencyService],

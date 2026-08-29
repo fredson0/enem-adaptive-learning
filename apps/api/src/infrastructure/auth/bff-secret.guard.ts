@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  Inject,
   Injectable,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -13,7 +14,7 @@ import type { Request } from 'express';
  */
 @Injectable()
 export class BffSecretGuard implements CanActivate {
-  constructor(private readonly config: ConfigService) {}
+  constructor(@Inject(ConfigService) private readonly config: ConfigService) {}
 
   canActivate(context: ExecutionContext): boolean {
     const secret = this.config.get<string>('BFF_INTERNAL_SECRET');
