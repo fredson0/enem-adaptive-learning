@@ -34,6 +34,16 @@
 
 ---
 
+## D. Onda 2 — Tutor contextual (sem gastar tokens)
+
+- [x] **D1** Intenção `minhas_lacunas` → resposta com `GET /metricas/lacunas` (0 tokens IA)
+- [x] **D2** Intenção `meu_progresso` → resumo com proficiência real (0 tokens IA)
+- [x] **D3** Chips de sugestão personalizados no `/tutor` (lacunas + treino focado)
+- [ ] **D4** Streaming de respostas no chat (opcional)
+- [ ] **D5** Injetar cobertura por assunto no prompt do tutor
+
+---
+
 ## C. Qualidade e dados
 
 - [x] **C1** Campo `assuntoId` nas questões (opcional, melhora matching)

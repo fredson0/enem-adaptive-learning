@@ -3,6 +3,7 @@
 import { HeroWave } from "@/components/ui/ai-input-hero";
 import { TutorQuestaoContextBanner } from "@/components/workspace/tutor-questao-context-banner";
 import { useAuth } from "@/components/auth/auth-provider";
+import { TutorSugestoesChips } from "@/components/workspace/tutor-sugestoes-chips";
 import { useTokensIa } from "@/components/workspace/tokens-ia-provider";
 import { useWorkspaceToast } from "@/components/workspace/workspace-toast";
 import { useWorkspaceScrollReporter } from "@/components/workspace/workspace-scroll-context";
@@ -33,9 +34,14 @@ import {
   usuarioPediuPdf,
 } from "@/lib/pdf-resumo";
 import { emitirTrilhaAtualizada } from "@/lib/trilha-events";
+import {
+  montarChipsSugestoesTutor,
+  montarSugestoesAnimadasTutor,
+} from "@/lib/tutor-sugestoes";
+import { fetchLacunas, type LacunasResponse } from "@/lib/metricas";
 import { cn } from "@/lib/utils";
 import { FileDown, FileText, Loader2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type TutorChatViewProps = {
   initialMessages?: MensagemHistorico[];
@@ -52,6 +58,7 @@ export function TutorChatView({
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [contextDismissed, setContextDismissed] = useState(false);
+  const [lacunas, setLacunas] = useState<LacunasResponse | null>(null);
   const { isAuthenticated, isLoading, requireAuth } = useAuth();
   const { setTokens } = useTokensIa();
   const { showToast } = useWorkspaceToast();
@@ -64,6 +71,22 @@ export function TutorChatView({
   >(async () => {});
   const hasMessages = messages.length > 0;
   const reportScroll = useWorkspaceScrollReporter();
+  const sugestoesAnimadas = useMemo(
+    () => montarSugestoesAnimadasTutor(lacunas),
+    [lacunas],
+  );
+  const chipsSugestoes = useMemo(
+    () => montarChipsSugestoesTutor(lacunas),
+    [lacunas],
+  );
+
+  useEffect(() => {
+    if (!isAuthenticated || isLoading) return;
+
+    fetchLacunas()
+      .then(setLacunas)
+      .catch(() => setLacunas(null));
+  }, [isAuthenticated, isLoading]);
 
   useEffect(() => {
     setMessages(activeSession?.messages ?? initialMessages);
@@ -435,7 +458,17 @@ export function TutorChatView({
         extendLeftPx={0}
         title="Pergunte ao tutor ENEM+"
         subtitle="Dúvidas sobre o ENEM, simulados e trilha. Peça explicações ou treinos — não responde programação ou assuntos fora do ENEM."
-        basePlaceholder="Me explica funções do 2º grau"
+        basePlaceholder="Me explica"
+        suggestions={sugestoesAnimadas}
+        belowHeader={
+          !hasMessages ? (
+            <TutorSugestoesChips
+              sugestoes={chipsSugestoes}
+              disabled={loading}
+              onSelect={(mensagem) => void handleSubmitRef.current(mensagem)}
+            />
+          ) : null
+        }
         buttonText="Enviar"
         loading={loading}
         onPromptSubmit={handleSubmit}

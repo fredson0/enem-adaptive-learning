@@ -9,6 +9,7 @@ import type { UsuariosRepositoryPort } from '../../../../usuarios/core/applicati
 import { ObterContextoTutorUseCase } from '../../../../metricas/core/application/use-cases/obter-metricas.use-case';
 import { ObterTrilhaUseCase } from '../../../../metricas/core/application/use-cases/obter-trilha.use-case';
 import { ObterFrequenciaTemasUseCase } from '../../../../metricas/core/application/use-cases/obter-frequencia-temas.use-case';
+import { ObterLacunasUseCase } from '../../../../metricas/core/application/use-cases/obter-metricas.use-case';
 import { slugAreaEnem } from '../../../../metricas/core/application/helpers/area-enem-labels';
 import {
   METRICAS_REPOSITORY,
@@ -31,6 +32,8 @@ import {
   buildTutorSystemPrompt,
   detectarAreaEnem,
   formatarRespostaFrequenciaTemas,
+  formatarRespostaLacunas,
+  formatarRespostaProgresso,
 } from '../helpers/tutor-prompts';
 import {
   isPedidoExplicacao,
@@ -69,6 +72,8 @@ export class EnviarMensagemTutorUseCase {
     private readonly obterTrilhaUseCase: ObterTrilhaUseCase,
     @Inject(ObterFrequenciaTemasUseCase)
     private readonly obterFrequenciaTemasUseCase: ObterFrequenciaTemasUseCase,
+    @Inject(ObterLacunasUseCase)
+    private readonly obterLacunasUseCase: ObterLacunasUseCase,
     @Inject(METRICAS_REPOSITORY)
     private readonly metricasRepository: MetricasRepositoryPort,
     @Inject(CONVERSAS_TUTOR_REPOSITORY)
@@ -251,6 +256,40 @@ export class EnviarMensagemTutorUseCase {
         disciplinas,
         areaDetectada,
       );
+
+      await this.persistirResposta(
+        conversaId,
+        input.mensagem,
+        input.anexoUrl,
+        resposta,
+        conversa?.mensagens,
+      );
+
+      return { resposta, conversaId, tokens };
+    }
+
+    if (intencao === 'minhas_lacunas') {
+      const tokens = await this.usoTokens.obterSaldo(input.userId);
+      const lacunas = await this.obterLacunasUseCase.execute(input.userId);
+      const resposta = formatarRespostaLacunas(lacunas);
+
+      await this.persistirResposta(
+        conversaId,
+        input.mensagem,
+        input.anexoUrl,
+        resposta,
+        conversa?.mensagens,
+      );
+
+      return { resposta, conversaId, tokens };
+    }
+
+    if (intencao === 'meu_progresso') {
+      const tokens = await this.usoTokens.obterSaldo(input.userId);
+      const contextoMetricas = await this.obterContextoTutorUseCase.execute(
+        input.userId,
+      );
+      const resposta = formatarRespostaProgresso(contextoMetricas);
 
       await this.persistirResposta(
         conversaId,

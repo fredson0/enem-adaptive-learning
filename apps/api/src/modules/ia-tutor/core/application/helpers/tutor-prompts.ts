@@ -316,3 +316,66 @@ export function formatarRespostaFrequenciaTemas(
 
   return `${titulo}\n\n${lista}\n\nIsso reflete o banco de questões da plataforma, não uma previsão oficial do INEP. Use a Trilha para focar nos assuntos onde você ainda tem lacunas.`;
 }
+
+export type LacunaResumoTutor = {
+  label: string;
+  score: number;
+  prioridade: string;
+  mensagem: string;
+  simuladoSugerido: { area: string; quantidade: number };
+};
+
+export function formatarRespostaLacunas(input: {
+  metaSemanal: string;
+  lacunas: LacunaResumoTutor[];
+}): string {
+  if (input.lacunas.length === 0) {
+    return 'Faça seu primeiro simulado de treino (5 questões) para eu mapear suas lacunas por área.';
+  }
+
+  const lista = input.lacunas
+    .map(
+      (lacuna, index) =>
+        `${index + 1}. ${lacuna.label} — ${lacuna.score}% do banco dominado (${lacuna.prioridade})\n   ${lacuna.mensagem}\n   Sugestão: simulado focado com ${lacuna.simuladoSugerido.quantidade} questões em /simulados/treino/novo?area=${lacuna.simuladoSugerido.area}&quantidade=${lacuna.simuladoSugerido.quantidade}`,
+    )
+    .join('\n\n');
+
+  return `Suas maiores lacunas (dados reais da plataforma):\n\n${lista}\n\nMeta desta semana: ${input.metaSemanal}\n\nVeja detalhes em /trilha ou /progresso.`;
+}
+
+export function formatarRespostaProgresso(
+  contexto: ContextoAlunoMetricas,
+): string {
+  if (contexto.questoesRespondidas === 0) {
+    return 'Você ainda não concluiu simulados. Comece com um treino de 5 questões em /simulados/treino/novo?quantidade=5 para ver seu progresso por área.';
+  }
+
+  const linhas = contexto.proficiencias
+    .map(
+      (item) =>
+        `• ${item.area}: ${item.score}% de cobertura (${item.acertos}/${item.totalQuestoes} acertos em simulados)`,
+    )
+    .join('\n');
+
+  const ultimo = contexto.ultimoSimulado
+    ? `\nÚltimo simulado: ${contexto.ultimoSimulado.area} — ${contexto.ultimoSimulado.acertos}/${contexto.ultimoSimulado.totalQuestoes} (${contexto.ultimoSimulado.percentual}%).`
+    : '';
+
+  const lacunas = contexto.lacunas
+    .map((item) => `• ${item.area}: ${item.score}%`)
+    .join('\n');
+
+  return `Seu progresso no ENEM+ (dados reais):
+
+Simulados concluídos: ${contexto.simuladosConcluidos}
+Questões respondidas: ${contexto.questoesRespondidas}
+Média geral: ${contexto.mediaGeralPercentual ?? 0}%
+
+Cobertura por área:
+${linhas}
+
+Maiores lacunas:
+${lacunas}${ultimo}
+
+Acompanhe gráficos em /progresso e seu plano em /trilha.`;
+}

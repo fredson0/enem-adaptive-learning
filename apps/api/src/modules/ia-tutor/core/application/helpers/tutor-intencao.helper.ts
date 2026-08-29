@@ -2,6 +2,8 @@ export type IntencaoTutor =
   | 'chat_livre'
   | 'gerar_simulado'
   | 'frequencia_temas'
+  | 'minhas_lacunas'
+  | 'meu_progresso'
   | 'produto_plataforma';
 
 function normalizar(texto: string) {
@@ -30,6 +32,22 @@ export function classificarIntencaoTutor(mensagem: string): IntencaoTutor {
     )
   ) {
     return 'frequencia_temas';
+  }
+
+  if (
+    /\b(minhas lacunas|maiores lacunas|onde (mais )?erro|onde estou (mais )?fraco|minhas fraquezas|pior area|area mais fraca|o que devo estudar|onde estou fraco)\b/.test(
+      t,
+    )
+  ) {
+    return 'minhas_lacunas';
+  }
+
+  if (
+    /\b(como estou|meu desempenho|minha evolucao|minha proficiencia|como foi meu ultimo simulado|minhas notas|resumo do meu progresso)\b/.test(
+      t,
+    )
+  ) {
+    return 'meu_progresso';
   }
 
   if (

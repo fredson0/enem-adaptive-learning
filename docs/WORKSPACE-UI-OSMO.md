@@ -183,6 +183,7 @@ Reutiliza tokens da landing, adaptados ao workspace:
 - [x] Chat real com API (`lib/ia-tutor.ts` + `TutorChatView`)
 - [x] Nova conversa (sem `?r=` na URL; `TutorSessionProvider`)
 - [x] Sessões na sidebar via API (`GET /ia-tutor/conversas`)
+- [x] Sugestões personalizadas no chat vazio (lacunas + chips de atalho)
 - [ ] Mensagens com streaming (opcional)
 - [x] Contexto de questão quando veio do simulado
 - [x] **Botão anexar imagem** (UI + preview + remover)

@@ -37,6 +37,7 @@ export type HeroWaveProps = {
   loading?: boolean;
   /** Fixa o input na parte inferior (modo chat) com animação suave. */
   docked?: boolean;
+  belowHeader?: React.ReactNode;
   onPromptSubmit?: (value: string, attachment?: File) => void;
 };
 
@@ -54,6 +55,7 @@ export function HeroWave({
   buttonText = "Generate",
   loading = false,
   docked = false,
+  belowHeader,
   onPromptSubmit,
 }: HeroWaveProps) {
   const [prompt, setPrompt] = useState("");
@@ -1056,6 +1058,7 @@ export function HeroWave({
               <p className="mt-2 text-xs text-osmo-muted sm:mt-3 sm:text-sm md:mt-4 md:text-base">
                 {subtitle}
               </p>
+              {belowHeader}
             </div>
           ) : (
             showHeader && (
