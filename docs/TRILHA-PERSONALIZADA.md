@@ -117,10 +117,10 @@ Paleta: fundo `#111` / cards `#161616`, acento `#b0ff57`, tipografia bold no her
 
 ### Fase C — Polish Osmo + IA
 
-- [ ] Animações (hover 3D leve, scroll horizontal de áreas)
+- [x] Animações (hover 3D leve, scroll horizontal de áreas)
 - [ ] Plano semanal gerado por IA (opcional, 1 token)
-- [ ] Radar chart em `/progresso`
-- [ ] Seção `#trilha` na landing
+- [x] Radar chart em `/progresso`
+- [x] Seção `#trilha` na landing
 
 ---
 

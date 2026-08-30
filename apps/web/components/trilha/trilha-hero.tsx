@@ -2,6 +2,7 @@
 
 import { ProgressArcGauge } from "@/components/progresso/progress-arc-gauge";
 import { TrilhaModalidadesCarousel } from "@/components/trilha/trilha-modalidades-carousel";
+import { GlareCard } from "@/components/ui/glare-cards";
 import type { TrilhaResponse } from "@/lib/trilha";
 import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
@@ -47,10 +48,12 @@ export function TrilhaHero({ trilha }: TrilhaHeroProps) {
       </header>
 
       <div className="grid items-stretch gap-4 sm:gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-        <Link
-          href={hrefPrioridade}
-          className="group relative flex min-h-[340px] flex-col overflow-hidden rounded-[24px] bg-[#5b4dff] px-5 py-6 text-white shadow-[0_24px_70px_rgba(91,77,255,0.28)] transition duration-300 hover:-translate-y-1 hover:bg-[#6559ff] sm:min-h-[420px] sm:rounded-[32px] sm:px-8 sm:py-8 lg:min-h-[500px] osmo-surface-dark"
-        >
+        <Link href={hrefPrioridade} className="group block">
+          <GlareCard
+            tiltIntensity={8}
+            glareColor="rgba(255,255,255,0.22)"
+            className="relative flex min-h-[340px] flex-col overflow-hidden rounded-[24px] border-transparent bg-[#5b4dff] px-5 py-6 text-white shadow-[0_24px_70px_rgba(91,77,255,0.28)] transition duration-300 hover:bg-[#6559ff] sm:min-h-[420px] sm:rounded-[32px] sm:px-8 sm:py-8 lg:min-h-[500px] osmo-surface-dark"
+          >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_65%_18%,rgba(255,255,255,0.22),transparent_42%)]" />
 
           <div className="relative z-10 text-center">
@@ -89,6 +92,7 @@ export function TrilhaHero({ trilha }: TrilhaHeroProps) {
               Abrir trilha personalizada
             </span>
           </div>
+          </GlareCard>
         </Link>
 
         <div className="relative mx-auto flex h-[min(360px,78vw)] w-full max-w-[min(100%,340px)] flex-col justify-between overflow-hidden rounded-full border border-white/[0.07] bg-[#161616] px-5 py-6 osmo-surface-dark sm:h-[420px] sm:max-w-[500px] sm:px-10 sm:py-8 lg:mx-0 lg:ml-auto lg:h-[500px] lg:max-w-none">

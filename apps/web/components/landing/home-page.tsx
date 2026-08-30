@@ -9,6 +9,7 @@ import { LandingPlans } from "@/components/landing/landing-plans";
 import { LandingPlatformShowcase } from "@/components/landing/landing-platform-showcase";
 import { LandingProductShowcase } from "@/components/landing/landing-product-showcase";
 import { LandingTestimonials } from "@/components/landing/landing-testimonials";
+import { LandingTrilhaShowcase } from "@/components/landing/landing-trilha-showcase";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteHeader } from "@/components/landing/site-header";
 import { MarketingOsmoFaq } from "@/components/marketing/marketing-osmo-faq";
@@ -73,6 +74,7 @@ export function HomePage() {
           <SiteHeader revealed={heroRevealed} />
           <HeroSection revealed={heroRevealed} />
           <LandingProductShowcase />
+          <LandingTrilhaShowcase />
           <LandingPlatformShowcase />
           <LandingTestimonials />
           <LandingPlans />

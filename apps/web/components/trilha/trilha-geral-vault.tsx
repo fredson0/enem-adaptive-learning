@@ -5,6 +5,7 @@ import {
   TrilhaDisciplinaCard,
 } from "@/components/trilha/trilha-disciplina-card";
 import { TrilhaModalidadeCard } from "@/components/trilha/trilha-modalidade-card";
+import { TrilhaAreasScroll } from "@/components/trilha/trilha-areas-scroll";
 import type { TrilhaResponse } from "@/lib/trilha";
 import {
   agruparModalidadesPorArea,
@@ -362,6 +363,20 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
           }
         />
       </header>
+
+      {trilha.areas.length > 0 ? (
+        <section className="space-y-4">
+          <div className="px-1">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-osmo-subtle">
+              Suas áreas
+            </p>
+            <h2 className="mt-1 text-lg font-medium text-osmo sm:text-xl">
+              Prioridade e progresso por modalidade
+            </h2>
+          </div>
+          <TrilhaAreasScroll areas={trilha.areas} />
+        </section>
+      ) : null}
 
       <div className="space-y-8 sm:space-y-14">
         {gruposModalidades.map((grupo) => {
