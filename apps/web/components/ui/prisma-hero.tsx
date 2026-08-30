@@ -182,8 +182,6 @@ export const WordsPullUpMultiStyle = ({
 };
 
 /* ---------------- Hero ENEM+ ---------------- */
-const HERO_BLEED = "clamp(4.5rem, 12vh, 9rem)";
-
 function EnemHero({ revealed = true }: { revealed?: boolean }) {
   const heroVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -209,11 +207,8 @@ function EnemHero({ revealed = true }: { revealed?: boolean }) {
   }, []);
 
   return (
-    <section
-      className="relative w-full"
-      style={{ height: `calc(100svh + ${HERO_BLEED})` }}
-    >
-      <div className="absolute inset-x-0 top-0 h-svh overflow-hidden">
+    <section className="relative min-h-svh w-full">
+      <div className="absolute inset-0 overflow-hidden">
         <video
           ref={heroVideoRef}
           autoPlay
@@ -228,20 +223,18 @@ function EnemHero({ revealed = true }: { revealed?: boolean }) {
         <div className="noise-overlay pointer-events-none absolute inset-0 opacity-[0.7] mix-blend-overlay" />
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/85" />
-      </div>
 
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-b from-[#151314] to-[#151314]"
-        style={{ height: HERO_BLEED }}
-        aria-hidden
-      />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white sm:h-32"
+          aria-hidden
+        />
+      </div>
 
       <motion.div
         className={cn(
-          "absolute right-0 left-0 px-4 pb-8 sm:px-6 md:px-10 md:pb-10",
+          "relative z-10 flex min-h-svh flex-col justify-end px-4 pb-8 sm:px-6 md:px-10 md:pb-10",
           !revealed && "pointer-events-none",
         )}
-        style={{ bottom: HERO_BLEED }}
         initial={false}
         animate={{ opacity: revealed ? 1 : 0 }}
         transition={{ duration: revealed ? 0.2 : 0 }}

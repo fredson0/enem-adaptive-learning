@@ -24,6 +24,11 @@ import {
   enriquecerChecklistComAssunto,
 } from '../helpers/trilha-progresso.helper';
 import {
+  agregarLacunasPorDisciplina,
+  mesclarDisciplinasSugeridas,
+  selecionarDisciplinasPorArea,
+} from '../helpers/lacunas-disciplina.helper';
+import {
   METRICAS_REPOSITORY,
   type MetricasRepositoryPort,
 } from '../ports/metricas.repository.port';
@@ -98,6 +103,12 @@ export class ObterTrilhaUseCase {
       await this.metricasRepository.obterTempoDiarioMinutos(userId);
     const etapasConcluidas = new Set(estado.etapasConcluidas);
     const checklistIa = enriquecerChecklistComAssunto(estado.checklistIa ?? []);
+    const respostasDisciplina =
+      await this.metricasRepository.listarRespostasPorDisciplina(userId);
+    const lacunasPorDisciplina = agregarLacunasPorDisciplina(
+      respostasDisciplina,
+      { limite: 12 },
+    );
 
     const areas = AREAS_ENEM.map((area) => {
       const slug = slugAreaEnem(area);
@@ -121,10 +132,11 @@ export class ObterTrilhaUseCase {
         ),
       );
 
-      const disciplinasSugeridas =
-        disciplinasFoco.length > 0
-          ? disciplinasFoco
-          : disciplinasArea.slice(0, 2);
+      const disciplinasSugeridas = mesclarDisciplinasSugeridas(
+        selecionarDisciplinasPorArea(lacunasPorDisciplina, slug),
+        disciplinasFoco,
+        disciplinasArea.slice(0, 2),
+      );
 
       const etapas = montarEtapasArea({
         slug,
@@ -186,6 +198,7 @@ export class ObterTrilhaUseCase {
       checklistIa,
       progressoPorAssunto,
       coberturaPorAssunto,
+      lacunasPorDisciplina,
       tempoDiarioMinutos: tempoDiario,
       areas,
       areaPrioritaria: foco?.slug ?? null,

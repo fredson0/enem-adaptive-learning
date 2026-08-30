@@ -341,9 +341,20 @@ export type LacunaResumoTutor = {
   simuladoSugerido: { area: string; quantidade: number };
 };
 
+export type LacunaDisciplinaResumoTutor = {
+  disciplina: string;
+  label: string;
+  slug: string;
+  erros: number;
+  taxaErro: number;
+  prioridade: string;
+  mensagem: string;
+};
+
 export function formatarRespostaLacunas(input: {
   metaSemanal: string;
   lacunas: LacunaResumoTutor[];
+  disciplinas?: LacunaDisciplinaResumoTutor[];
 }): string {
   if (input.lacunas.length === 0) {
     return 'Faça seu primeiro simulado de treino (5 questões) para eu mapear suas lacunas por área.';
@@ -356,7 +367,18 @@ export function formatarRespostaLacunas(input: {
     )
     .join('\n\n');
 
-  return `Suas maiores lacunas (dados reais da plataforma):\n\n${lista}\n\nMeta desta semana: ${input.metaSemanal}\n\nVeja detalhes em /trilha ou /progresso.`;
+  const disciplinas =
+    input.disciplinas && input.disciplinas.length > 0
+      ? `\n\nLacunas por disciplina (erros reais nos simulados):\n${input.disciplinas
+          .slice(0, 5)
+          .map(
+            (item, index) =>
+              `${index + 1}. ${item.disciplina} (${item.label}) — ${item.erros} erro${item.erros === 1 ? '' : 's'}, ${item.taxaErro}% de erro`,
+          )
+          .join('\n')}`
+      : '';
+
+  return `Suas maiores lacunas (dados reais da plataforma):\n\n${lista}${disciplinas}\n\nMeta desta semana: ${input.metaSemanal}\n\nVeja detalhes em /trilha ou /progresso.`;
 }
 
 export function formatarRespostaProgresso(

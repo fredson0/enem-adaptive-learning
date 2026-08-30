@@ -66,7 +66,7 @@ export function HomePage() {
       {showMain ? (
         <main
           className={cn(
-            "relative min-h-screen bg-[#151314]",
+            "relative min-h-screen bg-white",
             showIntro && "pointer-events-none",
           )}
         >

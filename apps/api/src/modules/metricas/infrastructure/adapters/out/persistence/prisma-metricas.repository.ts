@@ -6,6 +6,7 @@ import type {
   EstatisticaAreaBruta,
   MetricasRepositoryPort,
   PontoEvolucaoBruto,
+  RespostaDisciplinaBruta,
   ResumoSimuladosBruto,
   UltimoSimuladoBruto,
 } from '../../../../core/application/ports/metricas.repository.port';
@@ -253,5 +254,28 @@ export class PrismaMetricasRepository implements MetricasRepositoryPort {
     });
 
     return perfil?.tempoDiarioMinutos ?? 120;
+  }
+
+  async listarRespostasPorDisciplina(
+    userId: string,
+  ): Promise<RespostaDisciplinaBruta[]> {
+    const rows = await this.prisma.respostaSimulado.findMany({
+      where: { simulado: { userId } },
+      select: {
+        correto: true,
+        questao: {
+          select: {
+            disciplina: true,
+            area: true,
+          },
+        },
+      },
+    });
+
+    return rows.map((row) => ({
+      correto: row.correto,
+      disciplina: row.questao.disciplina,
+      area: row.questao.area as AreaEnem,
+    }));
   }
 }

@@ -8,6 +8,7 @@ import {
   METRICAS_REPOSITORY,
   type MetricasRepositoryPort,
 } from '../ports/metricas.repository.port';
+import { agregarLacunasPorDisciplina } from '../helpers/lacunas-disciplina.helper';
 
 function prioridade(score: number): 'Alta' | 'Média' | 'Baixa' {
   if (score < 50) return 'Alta';
@@ -108,6 +109,11 @@ export class ObterLacunasUseCase {
   async execute(userId: string) {
     const rows = await this.metricasRepository.listarProficiencias(userId);
     const mapa = new Map(rows.map((row) => [row.area, row]));
+    const respostasDisciplina =
+      await this.metricasRepository.listarRespostasPorDisciplina(userId);
+    const disciplinas = agregarLacunasPorDisciplina(respostasDisciplina, {
+      limite: 8,
+    });
 
     const lacunas = AREAS_ENEM.map((area) => {
       const row = mapa.get(area);
@@ -151,6 +157,7 @@ export class ObterLacunasUseCase {
     return {
       metaSemanal,
       lacunas,
+      disciplinas,
       checklist: [
         {
           id: 'simulado-focado',

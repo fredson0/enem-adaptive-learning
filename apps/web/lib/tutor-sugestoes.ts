@@ -55,6 +55,7 @@ export function montarChipsSugestoesTutor(
   }
 
   const principal = lacunas.lacunas[0];
+  const disciplinaPrincipal = lacunas.disciplinas?.[0];
 
   return [
     {
@@ -72,6 +73,15 @@ export function montarChipsSugestoesTutor(
       label: "Minha cobertura",
       mensagem: "Qual é minha cobertura de questões?",
     },
+    ...(disciplinaPrincipal
+      ? [
+          {
+            id: "disciplina-foco",
+            label: disciplinaPrincipal.disciplina,
+            mensagem: `Por que estou errando em ${disciplinaPrincipal.disciplina.toLowerCase()}?`,
+          },
+        ]
+      : []),
     {
       id: "frequencia",
       label: `O que cai em ${principal.label}`,

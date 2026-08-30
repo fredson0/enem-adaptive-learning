@@ -224,6 +224,9 @@ export function TrilhaAreaDetalheView({
     ? getCoberturaAssunto(trilha, assuntoFoco.id)
     : undefined;
   const assuntos = formatarAssuntos(areaContextual.disciplinasSugeridas);
+  const lacunasArea = (trilha.lacunasPorDisciplina ?? []).filter(
+    (item) => item.slug === area.slug,
+  );
   const metaArea = getMetaAreaContextual(
     trilha,
     areaContextual,
@@ -308,6 +311,35 @@ export function TrilhaAreaDetalheView({
             </motion.article>
           )}
         </AnimatePresence>
+
+        {lacunasArea.length > 0 ? (
+          <div className="rounded-2xl border border-white/[0.08] bg-[#161616] p-4 sm:p-5">
+            <p className="text-[10px] uppercase tracking-[0.14em] text-white/40">
+              Lacunas por disciplina
+            </p>
+            <p className="mt-1 text-xs text-white/45">
+              Com base nos erros dos seus simulados nesta área.
+            </p>
+            <ul className="mt-4 space-y-2">
+              {lacunasArea.slice(0, 4).map((item) => (
+                <li
+                  key={`${item.slug}-${item.disciplina}`}
+                  className="flex items-start justify-between gap-3 rounded-xl border border-white/[0.06] bg-black/20 px-3 py-2.5"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-white/85">
+                      {item.disciplina}
+                    </p>
+                    <p className="mt-0.5 text-xs text-white/45">{item.mensagem}</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-[#b0ff57]/15 px-2 py-0.5 text-[10px] font-medium text-[#b0ff57]">
+                    {item.erros} erro{item.erros === 1 ? "" : "s"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         <motion.div
           layout

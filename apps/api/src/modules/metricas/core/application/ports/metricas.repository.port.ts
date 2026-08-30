@@ -48,6 +48,12 @@ export type CoberturaBruta = {
   disponiveisPorAno: { ano: number; total: number }[];
 };
 
+export type RespostaDisciplinaBruta = {
+  correto: boolean;
+  disciplina: string;
+  area: AreaEnem;
+};
+
 export interface MetricasRepositoryPort {
   agregarPorArea(userId: string): Promise<EstatisticaAreaBruta[]>;
   upsertProficiencia(
@@ -74,4 +80,5 @@ export interface MetricasRepositoryPort {
   obterTempoDiarioMinutos(userId: string): Promise<number>;
   obterCoberturaBruta(userId: string): Promise<CoberturaBruta>;
   obterIdsQuestoesDominadas(userId: string): Promise<string[]>;
+  listarRespostasPorDisciplina(userId: string): Promise<RespostaDisciplinaBruta[]>;
 }

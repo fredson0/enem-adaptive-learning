@@ -45,6 +45,16 @@
 
 ---
 
+## E. Onda 3 — Trilha Fase B (lacunas por disciplina)
+
+- [x] **E1** Agregar lacunas por `questoes.disciplina` a partir das respostas dos simulados
+- [x] **E2** `GET /metricas/lacunas` expõe `disciplinas[]` com erros e taxa de erro
+- [x] **E3** `GET /metricas/trilha` cruza lacunas reais com `disciplinasSugeridas` por área
+- [x] **E4** UI `/trilha/[area]` lista lacunas por disciplina detectadas
+- [x] **E5** Tutor: resposta `minhas_lacunas` inclui disciplinas; chip focado no tutor
+
+---
+
 ## C. Qualidade e dados
 
 - [x] **C1** Campo `assuntoId` nas questões (opcional, melhora matching)

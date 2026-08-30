@@ -53,6 +53,19 @@ export type TrilhaArea = {
   perguntaTutor: string;
 };
 
+export type LacunaDisciplinaTrilha = {
+  disciplina: string;
+  area: string;
+  slug: AreaEnemSlug;
+  label: string;
+  erros: number;
+  acertos: number;
+  total: number;
+  taxaErro: number;
+  prioridade: "Alta" | "Média" | "Baixa";
+  mensagem: string;
+};
+
 export type TrilhaResponse = {
   diagnosticoCompleto: boolean;
   metaEnem: string | null;
@@ -64,6 +77,7 @@ export type TrilhaResponse = {
     string,
     { dominadas: number; disponiveis: number; tentadas: number; percentual: number }
   >;
+  lacunasPorDisciplina?: LacunaDisciplinaTrilha[];
   tempoDiarioMinutos: number;
   areas: TrilhaArea[];
   areaPrioritaria: AreaEnemSlug | null;

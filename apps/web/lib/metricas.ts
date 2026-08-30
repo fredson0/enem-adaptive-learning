@@ -57,9 +57,23 @@ export type LacunaTrilha = {
   perguntaTutor: string;
 };
 
+export type LacunaDisciplina = {
+  disciplina: string;
+  area: string;
+  slug: string;
+  label: string;
+  erros: number;
+  acertos: number;
+  total: number;
+  taxaErro: number;
+  prioridade: "Alta" | "Média" | "Baixa";
+  mensagem: string;
+};
+
 export type LacunasResponse = {
   metaSemanal: string;
   lacunas: LacunaTrilha[];
+  disciplinas: LacunaDisciplina[];
   checklist: {
     id: string;
     texto: string;
