@@ -223,11 +223,6 @@ function EnemHero({ revealed = true }: { revealed?: boolean }) {
         <div className="noise-overlay pointer-events-none absolute inset-0 opacity-[0.7] mix-blend-overlay" />
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/85" />
-
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white sm:h-32"
-          aria-hidden
-        />
       </div>
 
       <motion.div
