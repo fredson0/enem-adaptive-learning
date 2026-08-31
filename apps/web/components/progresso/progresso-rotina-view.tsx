@@ -82,6 +82,16 @@ export function ProgressoRotinaView({
             icon={<CalendarCheck className="size-4" />}
             title="Meta da semana"
           >
+            {trilha?.planoIa?.proximoPasso ? (
+              <div className="mb-3 rounded-xl border border-[color-mix(in_srgb,var(--osmo-accent)_25%,transparent)] bg-[color-mix(in_srgb,var(--osmo-accent)_8%,transparent)] px-3 py-2.5">
+                <p className="text-[10px] uppercase tracking-wide text-osmo-accent">
+                  Hoje
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-osmo">
+                  {trilha.planoIa.proximoPasso}
+                </p>
+              </div>
+            ) : null}
             <p className="text-[13px] leading-relaxed text-osmo-muted sm:text-sm">
               {lacunas.metaSemanal}
             </p>
@@ -97,10 +107,10 @@ export function ProgressoRotinaView({
               </p>
             ) : null}
             <Link
-              href="/simulados/treino/novo?quantidade=5"
+              href="/trilha"
               className="mt-4 inline-flex rounded-full bg-osmo-accent px-4 py-2 text-xs font-medium transition hover:opacity-90"
             >
-              Fazer treino rápido
+              {trilha?.planoIa ? "Ver plano completo" : "Gerar plano na trilha"}
             </Link>
           </ProgressoCard>
 

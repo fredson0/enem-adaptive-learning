@@ -1,15 +1,19 @@
 "use client";
 
+import { TrilhaPlanoSemanalCard } from "@/components/trilha/trilha-plano-semanal-card";
 import type { TrilhaResponse } from "@/lib/trilha";
-import { cn } from "@/lib/utils";
-import { Check, ChevronRight, Route } from "lucide-react";
+import { ChevronRight, Route } from "lucide-react";
 import Link from "next/link";
 
 type ProgressoTrilhaResumoProps = {
   trilha: TrilhaResponse | null;
+  onTrilhaAtualizada?: (trilha: TrilhaResponse) => void;
 };
 
-export function ProgressoTrilhaResumo({ trilha }: ProgressoTrilhaResumoProps) {
+export function ProgressoTrilhaResumo({
+  trilha,
+  onTrilhaAtualizada,
+}: ProgressoTrilhaResumoProps) {
   if (!trilha?.areas?.length) {
     return (
       <p className="text-sm text-osmo-muted">
@@ -26,12 +30,12 @@ export function ProgressoTrilhaResumo({ trilha }: ProgressoTrilhaResumoProps) {
 
   return (
     <div className="space-y-4">
-      {trilha.planoIa?.proximoPasso ? (
-        <p className="rounded-xl border border-[var(--osmo-border)] bg-[var(--osmo-hover)] px-3 py-2.5 text-sm leading-relaxed text-osmo-muted">
-          <span className="font-medium text-osmo">Plano da IA:</span>{" "}
-          {trilha.planoIa.proximoPasso}
-        </p>
-      ) : null}
+      <TrilhaPlanoSemanalCard
+        trilha={trilha}
+        onTrilhaAtualizada={onTrilhaAtualizada}
+        compact
+        embedded
+      />
 
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium text-osmo">
@@ -49,65 +53,43 @@ export function ProgressoTrilhaResumo({ trilha }: ProgressoTrilhaResumoProps) {
         />
       </div>
 
-      <ul className="space-y-2">
-        {etapasPendentes.slice(0, 4).map((etapa) => (
-          <li key={etapa.id}>
-            {etapa.href ? (
-              <Link
-                href={etapa.href}
-                className="flex items-start gap-2.5 rounded-lg border border-[var(--osmo-border)] bg-[var(--osmo-surface)] px-3 py-2.5 transition hover:bg-[var(--osmo-hover)]"
-              >
-                <Route className="mt-0.5 size-4 shrink-0 text-osmo-accent" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm text-osmo">{etapa.titulo}</p>
-                  <p className="mt-0.5 text-[11px] text-osmo-subtle">
-                    {etapa.descricao}
-                  </p>
-                </div>
-                <ChevronRight className="size-4 shrink-0 text-osmo-subtle" />
-              </Link>
-            ) : (
-              <div className="flex items-start gap-2.5 rounded-lg border border-dashed border-[var(--osmo-border)] px-3 py-2.5">
-                <Route className="mt-0.5 size-4 shrink-0 text-osmo-subtle" />
-                <div>
-                  <p className="text-sm text-osmo-muted">{etapa.titulo}</p>
-                  <p className="mt-0.5 text-[11px] text-osmo-subtle">
-                    {etapa.descricao}
-                  </p>
-                </div>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
-
-      {trilha.checklistIa.length > 0 ? (
-        <div className="border-t border-[var(--osmo-border)] pt-3">
-          <p className="mb-2 text-[10px] uppercase tracking-wide text-osmo-subtle">
-            Checklist da trilha
+      {trilha.checklistIa.length === 0 && etapasPendentes.length > 0 ? (
+        <>
+          <p className="text-[10px] uppercase tracking-wide text-osmo-subtle">
+            Etapas pendentes
           </p>
-          <ul className="space-y-1.5">
-            {trilha.checklistIa.slice(0, 3).map((item) => (
-              <li
-                key={item.id}
-                className={cn(
-                  "flex items-center gap-2 text-xs",
-                  item.concluida
-                    ? "text-osmo-subtle line-through"
-                    : "text-osmo-muted",
+          <ul className="space-y-2">
+            {etapasPendentes.slice(0, 4).map((etapa) => (
+              <li key={etapa.id}>
+                {etapa.href ? (
+                  <Link
+                    href={etapa.href}
+                    className="flex items-start gap-2.5 rounded-lg border border-[var(--osmo-border)] bg-[var(--osmo-surface)] px-3 py-2.5 transition hover:bg-[var(--osmo-hover)]"
+                  >
+                    <Route className="mt-0.5 size-4 shrink-0 text-osmo-accent" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-osmo">{etapa.titulo}</p>
+                      <p className="mt-0.5 text-[11px] text-osmo-subtle">
+                        {etapa.descricao}
+                      </p>
+                    </div>
+                    <ChevronRight className="size-4 shrink-0 text-osmo-subtle" />
+                  </Link>
+                ) : (
+                  <div className="flex items-start gap-2.5 rounded-lg border border-dashed border-[var(--osmo-border)] px-3 py-2.5">
+                    <Route className="mt-0.5 size-4 shrink-0 text-osmo-subtle" />
+                    <div>
+                      <p className="text-sm text-osmo-muted">{etapa.titulo}</p>
+                      <p className="mt-0.5 text-[11px] text-osmo-subtle">
+                        {etapa.descricao}
+                      </p>
+                    </div>
+                  </div>
                 )}
-              >
-                <Check
-                  className={cn(
-                    "size-3 shrink-0",
-                    item.concluida ? "text-osmo-accent" : "text-osmo-subtle",
-                  )}
-                />
-                {item.texto}
               </li>
             ))}
           </ul>
-        </div>
+        </>
       ) : null}
 
       <Link

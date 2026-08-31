@@ -33,7 +33,10 @@ export function ProgressoFocoView({
   lacunas,
   trilha,
   cobertura,
-}: ProgressoDataProps) {
+  onTrilhaAtualizada,
+}: ProgressoDataProps & {
+  onTrilhaAtualizada?: (trilha: import("@/lib/trilha").TrilhaResponse) => void;
+}) {
   const { startChatWithSeed } = useTutorSession();
   const [abrindoTutor, setAbrindoTutor] = useState(false);
 
@@ -203,7 +206,10 @@ export function ProgressoFocoView({
             title="Trilha personalizada"
             className="md:col-span-2"
           >
-            <ProgressoTrilhaResumo trilha={trilha} />
+            <ProgressoTrilhaResumo
+              trilha={trilha}
+              onTrilhaAtualizada={onTrilhaAtualizada}
+            />
           </ProgressoCard>
 
           {cobertura?.assuntos?.length ? (

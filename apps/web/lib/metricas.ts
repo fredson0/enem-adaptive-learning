@@ -79,6 +79,7 @@ export type LacunasResponse = {
     texto: string;
     concluido: boolean;
   }[];
+  planoIa?: import("@/lib/trilha").PlanoIa | null;
 };
 
 export type CoberturaResumo = {

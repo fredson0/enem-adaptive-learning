@@ -67,7 +67,10 @@ export default function TrilhaPage() {
   return (
     <WorkspaceSection contentClassName={trilhaContentClass}>
       <div className="mx-auto w-full max-w-5xl">
-        <TrilhaHero trilha={data} />
+        <TrilhaHero
+          trilha={data}
+          onTrilhaAtualizada={(trilha) => setData(trilha)}
+        />
       </div>
     </WorkspaceSection>
   );

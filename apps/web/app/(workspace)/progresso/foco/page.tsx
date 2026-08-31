@@ -6,7 +6,7 @@ import { useProgressoData } from "@/components/progresso/use-progresso-data";
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
 
 export default function ProgressoFocoPage() {
-  const { proficiencia, evolucao, lacunas, trilha, cobertura, loading, error, ready } =
+  const { proficiencia, evolucao, lacunas, trilha, cobertura, loading, error, ready, setTrilha } =
     useProgressoData();
 
   return (
@@ -20,6 +20,7 @@ export default function ProgressoFocoPage() {
           lacunas={lacunas}
           trilha={trilha}
           cobertura={cobertura}
+          onTrilhaAtualizada={setTrilha}
         />
       ) : null}
     </WorkspaceSection>

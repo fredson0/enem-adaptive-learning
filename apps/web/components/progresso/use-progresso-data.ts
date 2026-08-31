@@ -11,7 +11,8 @@ import {
   type ProficienciaResponse,
 } from "@/lib/metricas";
 import { fetchTrilha, type TrilhaResponse } from "@/lib/trilha";
-import { useEffect, useState } from "react";
+import { usarTrilhaAtualizada } from "@/lib/trilha-events";
+import { useCallback, useEffect, useState } from "react";
 
 export function useProgressoData() {
   const [proficiencia, setProficiencia] = useState<ProficienciaResponse | null>(
@@ -23,6 +24,15 @@ export function useProgressoData() {
   const [cobertura, setCobertura] = useState<CoberturaResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const recarregarTrilha = useCallback(() => {
+    Promise.all([fetchTrilha().catch(() => null), fetchLacunas().catch(() => null)])
+      .then(([trilhaData, lacunasData]) => {
+        if (trilhaData) setTrilha(trilhaData);
+        if (lacunasData) setLacunas(lacunasData);
+      })
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -49,6 +59,8 @@ export function useProgressoData() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => usarTrilhaAtualizada(recarregarTrilha), [recarregarTrilha]);
+
   return {
     proficiencia,
     evolucao,
@@ -58,5 +70,6 @@ export function useProgressoData() {
     loading,
     error,
     ready: Boolean(proficiencia && lacunas),
+    setTrilha,
   };
 }

@@ -9,6 +9,7 @@ import {
   type MetricasRepositoryPort,
 } from '../ports/metricas.repository.port';
 import { agregarLacunasPorDisciplina } from '../helpers/lacunas-disciplina.helper';
+import { estadoTrilhaVazio } from '../helpers/trilha.config';
 
 function prioridade(score: number): 'Alta' | 'Média' | 'Baixa' {
   if (score < 50) return 'Alta';
@@ -149,32 +150,52 @@ export class ObterLacunasUseCase {
       .slice(0, 3);
 
     const pior = lacunas[0];
-    const metaSemanal =
+    const estadoTrilha =
+      (await this.metricasRepository.obterTrilhaEstado(userId)) ??
+      estadoTrilhaVazio();
+    const planoIa = estadoTrilha.planoIa;
+    const checklistIa = estadoTrilha.checklistIa ?? [];
+
+    const metaSemanalFallback =
       pior && pior.score < 70
         ? `Foque em ${pior.label} — faça ${pior.simuladoSugerido.quantidade} questões em simulado focado esta semana.`
         : 'Mantenha o ritmo com simulados variados e revise erros com o tutor IA.';
+
+    const metaSemanal = planoIa?.metaSemanal?.trim() || metaSemanalFallback;
+
+    const checklistPadrao = [
+      {
+        id: 'simulado-focado',
+        texto: `Fazer simulado focado${pior ? ` em ${pior.label}` : ''}`,
+        concluido: false,
+      },
+      {
+        id: 'revisar-erros',
+        texto: 'Revisar questões erradas com "Explicar com IA"',
+        concluido: false,
+      },
+      {
+        id: 'pergunta-tutor',
+        texto: 'Fazer 1 pergunta ao tutor sobre sua lacuna',
+        concluido: false,
+      },
+    ];
+
+    const checklist =
+      checklistIa.length > 0
+        ? checklistIa.map((item) => ({
+            id: item.id,
+            texto: item.texto,
+            concluido: item.concluida,
+          }))
+        : checklistPadrao;
 
     return {
       metaSemanal,
       lacunas,
       disciplinas,
-      checklist: [
-        {
-          id: 'simulado-focado',
-          texto: `Fazer simulado focado${pior ? ` em ${pior.label}` : ''}`,
-          concluido: false,
-        },
-        {
-          id: 'revisar-erros',
-          texto: 'Revisar questões erradas com "Explicar com IA"',
-          concluido: false,
-        },
-        {
-          id: 'pergunta-tutor',
-          texto: 'Fazer 1 pergunta ao tutor sobre sua lacuna',
-          concluido: false,
-        },
-      ],
+      checklist,
+      planoIa: planoIa ?? null,
     };
   }
 }

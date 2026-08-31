@@ -51,29 +51,54 @@ export class PersonalizarTrilhaUseCase {
     }
 
     const perfil = await this.usuariosRepository.obterPerfilAluno(userId);
-    await this.usoTokens.consumir(userId, 2);
+    await this.usoTokens.consumir(userId, 1);
 
-    const prompt = `Você é o tutor IA do ENEM+. Crie um plano de estudo personalizado para a trilha do aluno.
+    const lacunasDisciplina =
+      trilha.lacunasPorDisciplina
+        ?.slice(0, 5)
+        .map(
+          (item) =>
+            `${item.disciplina} (${item.erros} erros, ${item.taxaErro}% taxa de erro)`,
+        )
+        .join('; ') || 'ainda sem dados de simulados';
+
+    const resumoAreas = trilha.areas
+      .map(
+        (area) =>
+          `${area.label}: proficiência ${area.proficienciaReal}%, prioridade ${area.prioridade}`,
+      )
+      .join(' | ');
+
+    const minutosPorDia = Math.max(
+      30,
+      Math.round(trilha.tempoDiarioMinutos / 4),
+    );
+
+    const prompt = `Você é o tutor IA do ENEM+. Crie um plano de estudo semanal personalizado para a trilha do aluno.
 
 Dados:
 - Objetivo ENEM: ${trilha.metaEnem ?? 'não informado'}
-- Área prioritária: ${foco.label} (${foco.progresso}% concluído)
-- Assuntos fracos: ${foco.disciplinasSugeridas.join(', ') || 'não especificados'}
-- Próxima etapa sugerida: ${foco.proximaEtapa?.titulo ?? 'revisão geral'}
-- Proficiência real: ${foco.proficienciaReal}%
-- Autoavaliação: ${foco.autoAvaliacao}/5
+- Área prioritária: ${foco.label} (${foco.progresso}% da trilha concluída)
+- Assuntos fracos na área: ${foco.disciplinasSugeridas.join(', ') || 'não especificados'}
+- Lacunas por disciplina (simulados): ${lacunasDisciplina}
+- Próxima etapa sugerida: ${foco.proximaEtapa?.titulo ?? 'revisão geral'} — ${foco.proximaEtapa?.descricao ?? ''}
+- Proficiência real na área: ${foco.proficienciaReal}%
+- Autoavaliação na área: ${foco.autoAvaliacao}/5
+- Tempo disponível: ~${minutosPorDia} min/dia
+- Panorama das áreas: ${resumoAreas}
 
 Responda APENAS com JSON válido (sem markdown), neste formato:
 {
-  "metaSemanal": "frase curta com meta da semana em português",
+  "metaSemanal": "meta clara da semana (inclua tempo e foco principal)",
   "proximoPasso": "ação concreta para hoje",
   "resumo": "2 frases motivadoras e específicas",
   "checklist": ["micro-objetivo 1", "micro-objetivo 2", "micro-objetivo 3"]
 }
 
 Regras:
-- Português brasileiro, tom encorajador
-- checklist: 3 a 5 itens curtos, acionáveis, adaptados ao nível ${perfil?.nivelAtual ?? 'INICIANTE'}
+- Português brasileiro, tom encorajador e direto
+- checklist: 4 a 5 itens curtos, acionáveis na plataforma (simulado, tutor, revisão)
+- Adapte ao nível ${perfil?.nivelAtual ?? 'INICIANTE'} e ao tempo diário informado
 - Não use "é em" antes de disciplinas — use "são X e Y" ou "é X"`;
 
     const respostaBruta = await this.iaEngine.enviarMensagem({
