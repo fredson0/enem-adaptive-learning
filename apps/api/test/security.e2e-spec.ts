@@ -17,6 +17,26 @@ describe('Segurança (e2e)', () => {
     }
   });
 
+  describe('Autenticação global — JWT obrigatório', () => {
+    it('GET /simulados exige JWT', async () => {
+      await request(app.getHttpServer()).get('/simulados').expect(401);
+    });
+
+    it('GET /metricas/proficiencia exige JWT', async () => {
+      await request(app.getHttpServer())
+        .get('/metricas/proficiencia')
+        .expect(401);
+    });
+
+    it('GET /depoimentos/publico é público', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/depoimentos/publico')
+        .expect(200);
+
+      expect(Array.isArray(response.body.depoimentos)).toBe(true);
+    });
+  });
+
   describe('ParseUUIDPipe — IDs malformados', () => {
     const auth = () => authHeaderForE2e();
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { EnunciadoRichText } from "@/components/simulados/enunciado-rich-text";
 import { SimuladoDicaPanel } from "@/components/simulados/simulado-dica-panel";
 import { SimuladoFinalizarDialog } from "@/components/simulados/simulado-finalizar-dialog";
 import { SimuladoNavegacaoStrip } from "@/components/simulados/simulado-navegacao-strip";
@@ -17,13 +18,6 @@ import { Lightbulb, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-function renderMarkdownLite(text: string) {
-  return text
-    .replace(/!\[[^\]]*]\([^)]+\)/g, "")
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .trim();
-}
 
 const ATALHOS_ALTERNATIVA: Record<string, string> = {
   a: "A",
@@ -388,9 +382,10 @@ export default function SimuladoQuestaoPage() {
                 />
               ) : null}
 
-              <div className="whitespace-pre-wrap text-base leading-relaxed text-white/85">
-                {renderMarkdownLite(questao.contexto)}
-              </div>
+              <EnunciadoRichText
+                text={questao.contexto}
+                className="text-base text-white/85"
+              />
 
               {questao.introducaoAlternativas ? (
                 <p className="mt-6 text-sm text-white/60">

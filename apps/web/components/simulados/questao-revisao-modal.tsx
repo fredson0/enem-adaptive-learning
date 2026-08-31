@@ -1,5 +1,6 @@
 "use client";
 
+import { EnunciadoRichText } from "@/components/simulados/enunciado-rich-text";
 import type { SimuladoResultado } from "@/lib/simulados";
 import { X } from "lucide-react";
 import { useEffect } from "react";
@@ -11,13 +12,6 @@ type QuestaoRevisaoModalProps = {
   questao: QuestaoErro | null;
   onClose: () => void;
 };
-
-function renderMarkdownLite(text: string) {
-  return text
-    .replace(/!\[[^\]]*]\([^)]+\)/g, "")
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .trim();
-}
 
 export function QuestaoRevisaoModal({
   questao,
@@ -74,9 +68,10 @@ export function QuestaoRevisaoModal({
             />
           ) : null}
 
-          <div className="whitespace-pre-wrap text-sm leading-relaxed text-white/85">
-            {renderMarkdownLite(questao.contexto)}
-          </div>
+          <EnunciadoRichText
+            text={questao.contexto}
+            className="text-sm text-white/85"
+          />
 
           {questao.introducaoAlternativas ? (
             <p className="mt-6 text-sm text-white/60">

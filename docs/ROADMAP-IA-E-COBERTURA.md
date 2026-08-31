@@ -60,3 +60,32 @@
 - [x] **C1** Campo `assuntoId` nas questões (opcional, melhora matching)
 - [x] **C2** Atualizar docs `TUTOR-IA-PERGUNTAS-E-ENDPOINTS.md`
 - [x] **C3** Testes unitários cobertura + agregarPorArea
+
+---
+
+## F. Onda 4 — LaTeX, segurança e polish
+
+### 4a — LaTeX nos simulados
+
+- [x] **F1** Componente `EnunciadoRichText` com KaTeX (`$...$`, `$$...$$`, `\(...\)`, `\[...\]`)
+- [x] **F2** Enunciado em `/simulados/[id]` e modal de revisão de erros
+
+### 4b — Segurança (API + web)
+
+- [x] **F3** `JwtAuthGuard` global (`APP_GUARD`) + decorator `@Public()` em health/auth/depoimentos públicos
+- [x] **F4** Escopo tutor endurecido — deny-by-default + bloqueio exfiltração/jailbreak (0 tokens)
+- [x] **F5** Prompt anti-leak no system prompt do tutor
+- [x] **F6** Cron diário limpeza `idempotency_keys` e `refresh_tokens` expirados
+- [x] **F7** CSP + headers de segurança no `next.config.ts`
+- [x] **F8** Proxy Next deny-by-default (todas rotas exceto marketing/login exigem cookie)
+- [x] **F9** Testes E2E segurança ampliados (401 global, depoimentos públicos)
+
+### 4c — Polish mobile (pendente)
+
+- [ ] **F10** Ajustes finos de layout mobile em trilha/simulados/tutor
+
+### Produção (por último)
+
+- [ ] **F11** S3 anexos tutor
+- [ ] **F12** Mercado Pago + webhooks
+- [ ] **F13** Deploy Railway/Vercel produção

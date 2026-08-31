@@ -3,7 +3,7 @@
 > Fonte de verdade para endurecimento da API (NestJS) e do BFF (Next.js).  
 > Complementa: [SEGURANCA-AUTH.md](./SEGURANCA-AUTH.md) · [CONCEITOS-SEGURANCA-E-PERFORMANCE.md](./CONCEITOS-SEGURANCA-E-PERFORMANCE.md)
 
-**Última revisão:** 2026-08-29
+**Última revisão:** 2026-08-31
 
 ---
 
@@ -29,7 +29,7 @@
 | 1.5 | Secure + SameSite=Lax em produção | ✅ | `authCookieOptions` |
 | 1.6 | BFF converte cookie para Bearer | ✅ | `/api/backend/*` |
 | 1.7 | Rotas Nest de auth bloqueadas no BFF genérico | ✅ | login/refresh via `/api/auth/*` |
-| 1.8 | Middleware Next protege rotas do workspace | ✅ | `apps/web/middleware.ts` |
+| 1.8 | Middleware Next protege rotas do workspace | ✅ | `apps/web/proxy.ts` (deny-by-default) |
 | 1.9 | Tokens só emitidos para o BFF (X-BFF-Secret) | ✅ | `bff-secret.guard.ts` |
 | 1.10 | Rotação de JWT_SECRET sem derrubar sessões | 🔮 | kid/versionamento |
 
@@ -39,7 +39,7 @@
 
 | # | Item | Status | Onde / notas |
 |---|------|--------|--------------|
-| 2.1 | JwtAuthGuard em rotas de dados do aluno | ✅ | Simulados, métricas, questões, ia-tutor |
+| 2.1 | JwtAuthGuard global em rotas de dados do aluno | ✅ | `APP_GUARD` em `security.module.ts` + `@Public()` nas rotas de auth/health |
 | 2.2 | RolesGuard global + decorator `@Roles()` | ✅ | `roles.guard.ts`, `roles.decorator.ts` |
 | 2.3 | Endpoints só ADMIN | ⬜ | Painel admin ainda não existe |
 | 2.4 | Endpoints só PROFESSOR | ⬜ | — |
@@ -106,7 +106,7 @@ listarUsuarios() { … }
 | 4.9 | POST ia-tutor/explicar-erro | ✅ |
 | 4.10 | POST metricas/trilha/* | ✅ |
 | 4.11 | Webhook Mercado Pago | 🔮 |
-| 4.12 | Job limpeza expires_at | ⬜ |
+| 4.12 | Job limpeza expires_at | ✅ | `database-cleanup.service.ts` (cron 3h) |
 | 4.13 | SSE stream | ⬜ | Não aplicável (resposta manual) |
 
 Chave estável por ação: `resposta:{simuladoId}:{questaoId}` no front.
@@ -132,8 +132,8 @@ Chave estável por ação: `resposta:{simuladoId}:{questaoId}` no front.
 | 5.13 | **NoSQL injection** | N/A | Postgres relacional |
 | 5.14 | **Command injection** | ✅ | Sem `exec`/`spawn` com input do usuário |
 | 5.15 | **SSRF** — fetch servidor controlado | 🟡 | Nest só chama APIs IA configuradas |
-| 5.16 | CSP no Next (marketing) | ⬜ | Adicionar no `next.config` |
-| 5.17 | Prompt injection / jailbreak IA | 🟡 | Escopo + intenções; sem sandbox forte |
+| 5.16 | CSP no Next (marketing + workspace) | ✅ | `next.config.ts` headers |
+| 5.17 | Prompt injection / jailbreak IA | ✅ | Escopo deny-by-default + padrões exfiltração + prompt anti-leak |
 
 ### SQL injection — por que já estamos protegidos
 
@@ -154,7 +154,7 @@ Mesmo `'; DROP TABLE questoes; --` vira apenas um literal de busca inofensivo (e
 |---|------|--------|
 | 6.1 | Helmet | ✅ |
 | 6.2 | CORS restrito | ✅ |
-| 6.3 | CSP customizada | ⬜ |
+| 6.3 | CSP customizada | ✅ | Next.js `Content-Security-Policy` |
 | 6.4 | HTTPS produção | 🔮 |
 | 6.5 | HSTS | 🔮 |
 
@@ -166,9 +166,7 @@ Mesmo `'; DROP TABLE questoes; --` vira apenas um literal de busca inofensivo (e
 
 1. `IA_TOKENS_UNLIMITED=false` em produção
 2. Redis no Throttler (multi-instância)
-3. Cron limpeza idempotency_keys e refresh expirados
-4. Nest não exposto publicamente (só BFF + health)
-5. CSP no Next.js
+3. Nest não exposto publicamente (só BFF + health)
 
 ### Média
 
@@ -207,7 +205,11 @@ Mesmo `'; DROP TABLE questoes; --` vira apenas um literal de busca inofensivo (e
 | Idempotência | `apps/api/src/infrastructure/http/idempotency.*` |
 | RBAC | `apps/api/src/infrastructure/auth/roles.*` |
 | BFF | `apps/web/app/api/backend/[...path]/route.ts` |
-| Middleware | `apps/web/middleware.ts` |
+| Middleware | `apps/web/proxy.ts` |
+| Guard global JWT | `apps/api/src/infrastructure/security/security.module.ts` |
+| Decorator público | `apps/api/src/infrastructure/auth/public.decorator.ts` |
+| Escopo tutor | `apps/api/src/modules/ia-tutor/.../tutor-escopo.helper.ts` |
+| Limpeza DB | `apps/api/src/infrastructure/maintenance/database-cleanup.service.ts` |
 
 ---
 
@@ -215,7 +217,7 @@ Mesmo `'; DROP TABLE questoes; --` vira apenas um literal de busca inofensivo (e
 
 | # | Item | Status | Arquivo |
 |---|------|--------|---------|
-| 10.1 | Rotas protegidas → 401 sem JWT | ✅ | `test/app.e2e-spec.ts` |
+| 10.1 | Rotas protegidas → 401 sem JWT | ✅ | `test/app.e2e-spec.ts`, `test/security.e2e-spec.ts` |
 | 10.2 | SQL injection em `GET /questoes/contagem` → 200 + `total` numérico | ✅ | `test/security.e2e-spec.ts` |
 | 10.3 | UUID inválido em simulados/tutor → 400 | ✅ | `test/security.e2e-spec.ts` |
 | 10.4 | E2E idempotência (replay) | ⬜ | — |
@@ -227,8 +229,7 @@ Executar: `npm run test:e2e -w apps/api` (requer Postgres + `JWT_SECRET` no `.en
 
 ## Próximos passos
 
-1. Cron limpeza idempotency_keys
-2. E2E idempotência (replay)
-3. Redis throttler em staging
-4. Webhook Mercado Pago (HMAC + idempotência)
-5. Primeira rota `@Roles('ADMIN')`
+1. E2E idempotência (replay)
+2. Redis throttler em staging
+3. Webhook Mercado Pago (HMAC + idempotência)
+4. Primeira rota `@Roles('ADMIN')`

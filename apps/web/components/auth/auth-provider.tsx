@@ -2,7 +2,7 @@
 
 import { fetchMe } from "@/lib/api";
 import type { User } from "@/lib/auth";
-import { getLoginPath, isGuestAllowedPath } from "@/lib/login-redirect";
+import { getLoginPath } from "@/lib/login-redirect";
 import { savePendingTutorPrompt } from "@/lib/pending-tutor-prompt";
 import { useRouter } from "next/navigation";
 import {

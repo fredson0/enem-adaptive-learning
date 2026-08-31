@@ -127,7 +127,7 @@ Colunas em `simulados`:
 ## Pendências (próximas iterações)
 
 - [x] Navegação entre questões já respondidas (revisão)
-- [ ] Render LaTeX no enunciado
+- [x] Render LaTeX no enunciado (`EnunciadoRichText` + KaTeX)
 - [x] Atalhos de teclado A–E
 - [x] `DELETE /simulados/:id` (cancelar abandonado)
 - [x] Simulado “refazer só erros”

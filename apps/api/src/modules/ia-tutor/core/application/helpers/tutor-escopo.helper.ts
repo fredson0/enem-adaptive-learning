@@ -1,8 +1,13 @@
 export type EscopoMensagem = 'permitido' | 'fora_escopo';
 
+export type MotivoForaEscopo =
+  | 'programacao'
+  | 'geral'
+  | 'exfiltracao';
+
 export type AvaliacaoEscopo = {
   escopo: EscopoMensagem;
-  motivo?: 'programacao' | 'geral';
+  motivo?: MotivoForaEscopo;
 };
 
 function normalizar(texto: string) {
@@ -13,7 +18,13 @@ function normalizar(texto: string) {
 }
 
 const ENEM_KEYWORDS =
-  /\b(enem|vestibular|simulado|quest[aã]o|reda[cç][aã]o|matem[aá]tica|linguagens|humanas|natureza|f[ií]sica|qu[ií]mica|biologia|hist[oó]ria|geografia|filosofia|sociologia|literatura|interpreta[cç][aã]o|trilha|prova|gabarito|nota enem|enem\+|treino guiado|lacuna|profici[eê]ncia|cobertura|assunto enem|compet[eê]ncia)\b/;
+  /\b(enem|vestibular|simulado|quest[aã]o|reda[cç][aã]o|matem[aá]tica|linguagens|humanas|natureza|f[ií]sica|qu[ií]mica|biologia|hist[oó]ria|geografia|filosofia|sociologia|literatura|interpreta[cç][aã]o|trilha|prova|gabarito|nota enem|enem\+|treino guiado|lacuna|profici[eê]ncia|cobertura|assunto enem|compet[eê]ncia|disserta[cç][aã]o|cronograma|revis[aã]o|func[aã]o|equa[cç][aã]o|algebra|geometria|trigonometria|estat[ií]stica|probabilidade|logaritmo|polin[oô]mio|matriz|vetor|angulo|tri[aâ]ngulo|resolver|calcular|exerc[ií]cio)\b/;
+
+const PLATAFORMA_KEYWORDS =
+  /\b(como funciona|plano gratuito|tokens?|tutor ia|progresso|diagn[oó]stico|modalidade|cronometrado|pdf de quest|pdf explicativo)\b/;
+
+const SAUDACAO_CURTA =
+  /^(oi|ola|olá|hey|e aí|eai|bom dia|boa tarde|boa noite|ajuda|obrigad|valeu|tudo bem|td bem)[!.?\s]*$/i;
 
 const OFF_TOPIC_PROGRAMACAO = [
   /\b(javascript|typescript|python|java\b|c\+\+|c#|react|node\.?js|next\.?js|nestjs|docker|kubernetes|git\b|github|mongodb|postgres|programa[cç][aã]o|programar|c[oó]digo|codar|api rest|backend|frontend|full[\s-]?stack|html|css|vari[aá]vel|debug|compilador|vscode|leetcode|hackerrank)\b/,
@@ -24,14 +35,34 @@ const OFF_TOPIC_PROGRAMACAO = [
 ];
 
 const OFF_TOPIC_GERAL = [
-  /\b(receita de|como cozinhar|futebol|novela|big brother|hor[oó]scopo)\b/,
+  /\b(receita de|como cozinhar|futebol|novela|big brother|hor[oó]scopo|piada|meme)\b/,
 ];
 
+const EXFILTRACAO_OU_JAILBREAK = [
+  /\b(ignore|esque[cç]a|desconsidere) (as )?(instru[cç][oõ]es|regras) (anteriores|do sistema)\b/,
+  /\b(system prompt|prompt do sistema|prompt interno|instru[cç][oõ]es do sistema)\b/,
+  /\b(revele?|mostre?|liste?|dump|exporte?) (o |os |as )?(usu[aá]rios|alunos|emails?|senhas?|tokens? jwt|credenciais|dados (de|dos) (outros|alunos)|banco de dados|tabela|schema|sql)\b/,
+  /\b(dados de outro|email de outro|senha de outro|lista de usu[aá]rios|todos os usu[aá]rios)\b/,
+  /\b(jailbreak|dan mode|modo desenvolvedor|bypass|ignore previous)\b/,
+  /\b(select \* from|drop table|union select)\b/,
+];
+
+function temRelacaoComEstudo(texto: string): boolean {
+  return ENEM_KEYWORDS.test(texto) || PLATAFORMA_KEYWORDS.test(texto);
+}
+
 export function avaliarEscopoMensagem(mensagem: string): AvaliacaoEscopo {
-  const texto = normalizar(mensagem.trim());
+  const bruto = mensagem.trim();
+  const texto = normalizar(bruto);
   if (!texto) return { escopo: 'permitido' };
 
-  if (ENEM_KEYWORDS.test(texto)) {
+  for (const pattern of EXFILTRACAO_OU_JAILBREAK) {
+    if (pattern.test(texto)) {
+      return { escopo: 'fora_escopo', motivo: 'exfiltracao' };
+    }
+  }
+
+  if (SAUDACAO_CURTA.test(bruto)) {
     return { escopo: 'permitido' };
   }
 
@@ -47,10 +78,20 @@ export function avaliarEscopoMensagem(mensagem: string): AvaliacaoEscopo {
     }
   }
 
-  return { escopo: 'permitido' };
+  if (temRelacaoComEstudo(texto)) {
+    return { escopo: 'permitido' };
+  }
+
+  return { escopo: 'fora_escopo', motivo: 'geral' };
 }
 
-export function respostaForaEscopo(motivo?: AvaliacaoEscopo['motivo']): string {
+export function respostaForaEscopo(motivo?: MotivoForaEscopo): string {
+  if (motivo === 'exfiltracao') {
+    return `Sou o tutor IA do ENEM+ e só posso ajudar com estudos para o ENEM — conteúdos das provas, simulados, trilha e seu progresso na plataforma.
+
+Não posso compartilhar dados internos, informações de outros usuários nem detalhes técnicos do sistema. Se quiser, pergunte sobre alguma área do ENEM ou peça um treino de questões.`;
+  }
+
   if (motivo === 'programacao') {
     return `Sou o tutor IA do ENEM+ e só posso ajudar com estudos para o ENEM — conteúdos das provas, simulados, trilha e dúvidas de Matemática, Linguagens, Humanas e Natureza.
 

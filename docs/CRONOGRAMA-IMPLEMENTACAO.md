@@ -104,7 +104,23 @@ gantt
 
 - [x] Três modos: treino / modalidade / cronometrado (sidebar + rotas)
 - [x] Polish histórico, criar, questão, resultado — ver [SIMULADOS-POLISH.md](./SIMULADOS-POLISH.md)
+- [x] LaTeX no enunciado (KaTeX)
 - [ ] Mobile sidebar drawer + polish responsivo geral
+
+### ✅ Onda 4 — LaTeX + segurança — atualizado 31/08/2026
+
+**Backend**
+- [x] `JwtAuthGuard` global + `@Public()` (health, login BFF, depoimentos públicos)
+- [x] Escopo tutor endurecido (`tutor-escopo.helper.ts`) + prompt anti-leak
+- [x] Cron limpeza `idempotency_keys` / `refresh_tokens` (`MaintenanceModule`)
+- [x] Testes unitários escopo + E2E 401 ampliado
+
+**Frontend**
+- [x] `EnunciadoRichText` com KaTeX nos simulados
+- [x] CSP + headers no `next.config.ts`
+- [x] Proxy deny-by-default (todas rotas exceto marketing/login exigem auth)
+
+Ver [ROADMAP-IA-E-COBERTURA.md](./ROADMAP-IA-E-COBERTURA.md) seção **F. Onda 4** e [SEGURANCA-CHECKLIST.md](./SEGURANCA-CHECKLIST.md).
 
 ### ⬜ Depois (produção / monetização — por último)
 

@@ -11,6 +11,7 @@ import { SimuladosModule } from './modules/simulados/simulados.module';
 import { DepoimentosModule } from './modules/depoimentos/depoimentos.module';
 import { IaTutorModule } from './modules/ia-tutor/ia-tutor.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
+import { MaintenanceModule } from './infrastructure/maintenance/maintenance.module';
 import { SecurityModule } from './infrastructure/security/security.module';
 
 @Module({
@@ -31,6 +32,7 @@ import { SecurityModule } from './infrastructure/security/security.module';
     }),
     PrismaModule,
     SecurityModule,
+    MaintenanceModule,
     UsuariosModule,
     QuestoesModule,
     SimuladosModule,

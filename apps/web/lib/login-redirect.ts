@@ -1,7 +1,7 @@
 const DEFAULT_APP_PATH = "/tutor";
 
-export function isGuestAllowedPath(pathname: string) {
-  return pathname.startsWith("/tutor");
+export function isGuestAllowedPath(_pathname: string) {
+  return false;
 }
 
 export function getLoginPath(next?: string | null): string {

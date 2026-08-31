@@ -10,6 +10,7 @@ import { Throttle } from '@nestjs/throttler';
 import {
   CurrentUser,
 } from '../../../../../../infrastructure/auth/current-user.decorator';
+import { Public } from '../../../../../../infrastructure/auth/public.decorator';
 import { JwtAuthGuard } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import type { JwtPayload } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import { CriarDepoimentoUseCase } from '../../../../core/application/use-cases/criar-depoimento.use-case';
@@ -28,6 +29,7 @@ export class DepoimentosController {
     private readonly obterMeuDepoimentoUseCase: ObterMeuDepoimentoUseCase,
   ) {}
 
+  @Public()
   @Get('publico')
   listarPublicos() {
     return this.listarDepoimentosPublicosUseCase.execute();

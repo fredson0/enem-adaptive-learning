@@ -1,18 +1,18 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { isGuestAllowedPath } from "./lib/login-redirect";
 
-const PUBLIC_PATHS = [
+const PUBLIC_PATHS = new Set([
   "/",
   "/login",
   "/como-funciona",
   "/precos",
   "/tutor-ia",
   "/trilha-personalizada",
-];
+]);
 
-const PROTECTED_APP_PREFIX =
-  /^\/(simulados|trilha|progresso|perfil|planos)(\/|$)/;
+function isPublicRoute(pathname: string) {
+  return PUBLIC_PATHS.has(pathname);
+}
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -25,21 +25,18 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (PUBLIC_PATHS.includes(pathname) || isGuestAllowedPath(pathname)) {
+  if (isPublicRoute(pathname)) {
     return NextResponse.next();
   }
 
   const token = request.cookies.get("enem_access_token")?.value;
 
-  if (!token && pathname.startsWith("/onboarding")) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  if (
-    !token &&
-    PROTECTED_APP_PREFIX.test(pathname)
-  ) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  if (!token) {
+    const loginUrl = new URL("/login", request.url);
+    if (pathname !== "/login") {
+      loginUrl.searchParams.set("next", pathname);
+    }
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();

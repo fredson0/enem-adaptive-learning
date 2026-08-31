@@ -10,8 +10,8 @@ import {
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../../../../../../infrastructure/auth/current-user.decorator';
+import { Public } from '../../../../../../infrastructure/auth/public.decorator';
 import { BffSecretGuard } from '../../../../../../infrastructure/auth/bff-secret.guard';
-import { JwtAuthGuard } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import type { JwtPayload } from '../../../../../../infrastructure/auth/jwt-auth.guard';
 import { AtualizarPerfilUseCase } from '../../../../core/application/use-cases/atualizar-perfil.use-case';
 import { LoginGoogleUseCase } from '../../../../core/application/use-cases/login-google.use-case';
@@ -50,6 +50,7 @@ export class UsuariosController {
     private readonly atualizarPerfilUseCase: AtualizarPerfilUseCase,
   ) {}
 
+  @Public()
   @Post('login-google')
   @UseGuards(BffSecretGuard)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
@@ -61,6 +62,7 @@ export class UsuariosController {
     return { accessToken, refreshToken, user };
   }
 
+  @Public()
   @Post('auth/refresh')
   @UseGuards(BffSecretGuard)
   @HttpCode(200)
@@ -73,6 +75,7 @@ export class UsuariosController {
     };
   }
 
+  @Public()
   @Post('auth/logout')
   @UseGuards(BffSecretGuard)
   @HttpCode(204)
@@ -83,25 +86,21 @@ export class UsuariosController {
 
   @Post('auth/logout-all')
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard)
   async logoutAll(@CurrentUser() user: JwtPayload) {
     await this.logoutUseCase.execute(undefined, user.sub);
   }
 
   @Get('perfil')
-  @UseGuards(JwtAuthGuard)
   obterPerfil(@CurrentUser() user: JwtPayload) {
     return this.obterPerfilUseCase.execute(user.sub);
   }
 
   @Get('plano')
-  @UseGuards(JwtAuthGuard)
   obterPlano(@CurrentUser() user: JwtPayload) {
     return this.obterPlanoUseCase.execute(user.sub);
   }
 
   @Patch('perfil')
-  @UseGuards(JwtAuthGuard)
   async atualizarPerfil(
     @CurrentUser() user: JwtPayload,
     @Body() dto: AtualizarPerfilDto,
