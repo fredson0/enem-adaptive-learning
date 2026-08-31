@@ -17,7 +17,11 @@ export function SimuladoNavegacaoStrip({
   onSelecionar,
 }: SimuladoNavegacaoStripProps) {
   return (
-    <div className="flex flex-wrap gap-1.5" role="navigation" aria-label="Questões do simulado">
+    <div
+      className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 snap-x snap-mandatory scrollbar-none"
+      role="navigation"
+      aria-label="Questões do simulado"
+    >
       {navegacao.map((item) => {
         const numero = item.ordem + 1;
         const podeAcessar = item.ordem <= indiceProgresso;
@@ -35,7 +39,7 @@ export function SimuladoNavegacaoStrip({
                 : `Questão ${numero}`
             }
             className={cn(
-              "flex size-8 items-center justify-center rounded-lg border text-xs font-medium transition",
+              "flex size-8 shrink-0 snap-start items-center justify-center rounded-lg border text-xs font-medium transition",
               !podeAcessar && "cursor-not-allowed border-white/5 text-white/20",
               podeAcessar &&
                 !ativa &&

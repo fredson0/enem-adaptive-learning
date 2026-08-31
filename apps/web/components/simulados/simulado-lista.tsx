@@ -72,7 +72,7 @@ export function SimuladoLista({ modoSlug }: SimuladoListaProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="space-y-3">
         <Link
           href={modo.novoHref}
           className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-medium text-black transition hover:bg-white/90"
@@ -81,7 +81,8 @@ export function SimuladoLista({ modoSlug }: SimuladoListaProps) {
           Novo {modo.shortLabel.toLowerCase()}
         </Link>
 
-        <div className="flex gap-1 rounded-full border border-white/10 bg-[#111] p-1">
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+          <div className="flex shrink-0 gap-1 rounded-full border border-white/10 bg-[#111] p-1">
           {(
             [
               ["todos", "Todos"],
@@ -102,9 +103,9 @@ export function SimuladoLista({ modoSlug }: SimuladoListaProps) {
               {label}
             </button>
           ))}
-        </div>
+          </div>
 
-        <div className="flex flex-wrap gap-1 rounded-full border border-white/10 bg-[#111] p-1">
+          <div className="flex shrink-0 gap-1 rounded-full border border-white/10 bg-[#111] p-1">
           <button
             type="button"
             onClick={() => setFiltroArea("todas")}
@@ -130,6 +131,7 @@ export function SimuladoLista({ modoSlug }: SimuladoListaProps) {
               {area.label}
             </button>
           ))}
+          </div>
         </div>
       </div>
 

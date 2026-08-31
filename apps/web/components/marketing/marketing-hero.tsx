@@ -30,7 +30,7 @@ export function MarketingHero({
     <section
       className={
         dark
-          ? "relative overflow-hidden bg-[#231E1B] px-4 pt-32 pb-16 md:px-8 md:pt-40 md:pb-24"
+          ? "relative overflow-hidden bg-[#1f1e1c] px-4 pt-32 pb-16 md:px-8 md:pt-40 md:pb-24"
           : "relative overflow-hidden bg-[#f3f3f1] px-4 pt-32 pb-16 md:px-8 md:pt-40 md:pb-24"
       }
     >

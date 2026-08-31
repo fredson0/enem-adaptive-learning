@@ -105,7 +105,7 @@ gantt
 - [x] Três modos: treino / modalidade / cronometrado (sidebar + rotas)
 - [x] Polish histórico, criar, questão, resultado — ver [SIMULADOS-POLISH.md](./SIMULADOS-POLISH.md)
 - [x] LaTeX no enunciado (KaTeX)
-- [ ] Mobile sidebar drawer + polish responsivo geral
+- [x] Mobile sidebar drawer + polish responsivo geral — ver Onda 5 abaixo
 
 ### ✅ Onda 4 — LaTeX + segurança — atualizado 31/08/2026
 
@@ -121,6 +121,25 @@ gantt
 - [x] Proxy deny-by-default (todas rotas exceto marketing/login exigem auth)
 
 Ver [ROADMAP-IA-E-COBERTURA.md](./ROADMAP-IA-E-COBERTURA.md) seção **F. Onda 4** e [SEGURANCA-CHECKLIST.md](./SEGURANCA-CHECKLIST.md).
+
+### 🔄 Onda 5 — Mobile polish — em andamento 31/08/2026
+
+**Trilha**
+- [x] `TrilhaCardsGrid` — carrossel horizontal no mobile
+- [x] Ícones animados por área/matéria/assunto (`trilha-icones.ts`)
+- [x] Simulado cards com identidade visual por área (`area-visual.ts`)
+
+**Simulados**
+- [x] Strip de questões com scroll horizontal
+- [x] Barra fixa Confirmar + Dica no mobile (`/simulados/[id]`)
+- [x] Filtros do histórico com scroll horizontal
+
+**Workspace**
+- [x] Títulos e chrome offset responsivos
+- [x] Tutor com safe-area no input
+- [ ] Polish `/progresso` em viewport estreita
+
+Ver [ROADMAP-IA-E-COBERTURA.md](./ROADMAP-IA-E-COBERTURA.md) seção **G. Onda 5**.
 
 ### ⬜ Depois (produção / monetização — por último)
 

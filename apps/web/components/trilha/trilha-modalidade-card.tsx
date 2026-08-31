@@ -1,5 +1,6 @@
 "use client";
 
+import { TrilhaIcone } from "@/components/trilha/trilha-icone";
 import type { TrilhaModalidadeItem } from "@/lib/trilha-catalogo";
 import { contarAssuntosModalidade, modalidadeTemDisciplinas } from "@/lib/trilha-catalogo";
 import { cn } from "@/lib/utils";
@@ -22,7 +23,6 @@ export function TrilhaModalidadeCard({
 }: TrilhaModalidadeCardProps) {
   const destino =
     href ?? `/trilha/geral?modalidade=${encodeURIComponent(modalidade.id)}`;
-  const inicial = modalidade.nome.charAt(0).toUpperCase();
 
   return (
     <Link href={destino} className="group block">
@@ -60,10 +60,17 @@ export function TrilhaModalidadeCard({
             ) : null}
           </div>
 
-          <div className="flex items-end justify-between gap-2">
-            <span className="text-2xl font-medium text-white/90" aria-hidden>
-              {inicial}
-            </span>
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <TrilhaIcone
+              id={modalidade.id}
+              cor={modalidade.areaCor}
+              areaSlug={modalidade.areaSlug}
+              size="xl"
+              pulsando={emFoco || isPrioridadeArea}
+            />
+          </div>
+
+          <div className="flex items-end justify-end">
             <span className="flex size-6 items-center justify-center rounded-full bg-white/10 text-white opacity-0 transition group-hover:opacity-100">
               <ArrowUpRight className="size-3" />
             </span>

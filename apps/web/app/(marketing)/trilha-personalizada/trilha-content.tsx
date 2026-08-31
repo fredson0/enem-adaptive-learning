@@ -93,7 +93,7 @@ export function TrilhaPersonalizadaContent() {
         inactivePanelBlur={false}
       />
 
-      <section className="bg-[#231E1B] px-4 py-20 md:px-8 md:py-28">
+      <section className="bg-[#1f1e1c] px-4 py-20 md:px-8 md:py-28">
         <div className="mx-auto max-w-[1200px]">
           <MarketingBlurReveal className="mx-auto max-w-3xl text-center">
             <p className="font-mono text-xs tracking-[0.2em] text-[#b0ff57] uppercase">

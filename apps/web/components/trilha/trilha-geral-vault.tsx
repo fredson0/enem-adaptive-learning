@@ -1,5 +1,6 @@
 "use client";
 
+import { TrilhaCardsGrid } from "@/components/trilha/trilha-cards-grid";
 import {
   TrilhaAssuntoCard,
   TrilhaDisciplinaCard,
@@ -250,14 +251,14 @@ export function TrilhaGeralVault({
           />
         </header>
 
-        <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 sm:gap-x-4 sm:gap-y-8 md:grid-cols-4 lg:grid-cols-5">
+        <TrilhaCardsGrid>
           {assuntosFiltrados.map((assunto) =>
             renderAssuntoCard(
               assunto,
               assuntosEmFoco.has(assunto.nome.toLowerCase()),
             ),
           )}
-        </div>
+        </TrilhaCardsGrid>
       </div>
     );
   }
@@ -314,7 +315,7 @@ export function TrilhaGeralVault({
           />
         </header>
 
-        <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 sm:gap-x-4 sm:gap-y-8 md:grid-cols-4 lg:grid-cols-5">
+        <TrilhaCardsGrid>
           {temDisciplinas
             ? disciplinasFiltradas.map((disciplina) => (
                 <TrilhaDisciplinaCard
@@ -333,7 +334,7 @@ export function TrilhaGeralVault({
                   assuntosEmFoco.has(assunto.nome.toLowerCase()),
                 ),
               )}
-        </div>
+        </TrilhaCardsGrid>
       </div>
     );
   }
@@ -413,7 +414,7 @@ export function TrilhaGeralVault({
                 ) : null}
               </div>
 
-              <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 sm:gap-x-4 sm:gap-y-8 md:grid-cols-4 lg:grid-cols-5">
+              <TrilhaCardsGrid>
                 {grupo.itens.map((modalidade) => (
                   <TrilhaModalidadeCard
                     key={modalidade.id}
@@ -425,7 +426,7 @@ export function TrilhaGeralVault({
                     }
                   />
                 ))}
-              </div>
+              </TrilhaCardsGrid>
             </section>
           );
         })}

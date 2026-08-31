@@ -34,7 +34,7 @@ export function ComoFuncionaOsmoHero({
   const reduceMotion = useReducedMotion() ?? false;
 
   return (
-    <section className="relative overflow-hidden bg-[#231E1B] text-white">
+    <section className="relative overflow-hidden bg-[#1f1e1c] text-white">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.35]"
         aria-hidden

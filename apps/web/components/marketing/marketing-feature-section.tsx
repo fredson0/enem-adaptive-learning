@@ -30,7 +30,7 @@ export function MarketingFeatureSection({
 }: MarketingFeatureSectionProps) {
   const bg =
     variant === "dark"
-      ? "bg-[#231E1B]"
+      ? "bg-[#1f1e1c]"
       : variant === "light"
         ? "bg-[#f3f3f1]"
         : "bg-white";

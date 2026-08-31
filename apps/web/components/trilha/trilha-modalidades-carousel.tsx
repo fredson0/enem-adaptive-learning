@@ -48,7 +48,7 @@ type TrilhaModalidadesCarouselProps = {
 /** Carrossel horizontal de modalidades — card único, sem informação extra. */
 export function TrilhaModalidadesCarousel({
   modalidades = TRILHA_MODALIDADES,
-  fadeColor = "#231E1B",
+  fadeColor = "#151314",
 }: TrilhaModalidadesCarouselProps) {
   const prefersReducedMotion = useReducedMotion();
   const loop = [...modalidades, ...modalidades];

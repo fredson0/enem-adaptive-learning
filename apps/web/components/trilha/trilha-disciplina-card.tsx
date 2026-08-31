@@ -1,5 +1,6 @@
 "use client";
 
+import { TrilhaIcone } from "@/components/trilha/trilha-icone";
 import type {
   TrilhaAssuntoCatalogo,
   TrilhaDisciplinaCatalogo,
@@ -36,7 +37,6 @@ export function TrilhaAssuntoCard({
   disponiveis,
 }: TrilhaAssuntoCardProps) {
   const href = montarHrefAssunto(assunto);
-  const inicial = assunto.nome.charAt(0).toUpperCase();
   const tag =
     assunto.disciplinaNome?.split(" ")[0] ??
     assunto.modalidadeNome.split(" ")[0];
@@ -79,10 +79,17 @@ export function TrilhaAssuntoCard({
             </span>
           </div>
 
-          <div className="flex items-end justify-between gap-2">
-            <span className="text-2xl font-medium text-white/90" aria-hidden>
-              {inicial}
-            </span>
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <TrilhaIcone
+              id={assunto.id}
+              cor={assunto.areaCor}
+              areaSlug={assunto.areaSlug}
+              size="md"
+              pulsando={emFoco}
+            />
+          </div>
+
+          <div className="flex items-end justify-end">
             <span className="flex size-6 items-center justify-center rounded-full bg-white/10 text-white opacity-0 transition group-hover:opacity-100">
               <ArrowUpRight className="size-3" />
             </span>
@@ -115,7 +122,6 @@ export function TrilhaDisciplinaCard({
   progresso = 0,
 }: TrilhaDisciplinaCardProps) {
   const href = `/trilha/geral?modalidade=${encodeURIComponent(disciplina.modalidadeId)}&disciplina=${encodeURIComponent(disciplina.id)}`;
-  const inicial = disciplina.nome.charAt(0).toUpperCase();
 
   return (
     <Link href={href} className="group block">
@@ -155,10 +161,17 @@ export function TrilhaDisciplinaCard({
             </span>
           </div>
 
-          <div className="flex items-end justify-between gap-2">
-            <span className="text-2xl font-medium text-white/90" aria-hidden>
-              {inicial}
-            </span>
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <TrilhaIcone
+              id={disciplina.id}
+              cor={disciplina.areaCor}
+              areaSlug={disciplina.areaSlug}
+              size="lg"
+              pulsando={emFoco}
+            />
+          </div>
+
+          <div className="flex items-end justify-end">
             <span className="flex size-6 items-center justify-center rounded-full bg-white/10 text-white opacity-0 transition group-hover:opacity-100">
               <ArrowUpRight className="size-3" />
             </span>

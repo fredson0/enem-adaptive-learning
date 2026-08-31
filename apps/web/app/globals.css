@@ -106,16 +106,20 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/*
+ * Paleta amostrada pixel a pixel do Osmo Vault:
+ * canvas #151314 · sidebar #211d1c · ativo #2b2726 · chip #292728 · divisor #3c3837
+ */
 .dark {
-  --osmo-canvas: #231e1b;
-  --osmo-sidebar: #1b1714;
-  --osmo-surface: #231e1b;
-  --osmo-header: #282320;
-  --osmo-active: #332e29;
-  --osmo-hover: #2d2824;
-  --osmo-card: #2f2a26;
-  --osmo-border: #3f3934;
-  --osmo-grid-line: rgba(255, 255, 255, 0.028);
+  --osmo-canvas: #151314;
+  --osmo-sidebar: #211d1c;
+  --osmo-surface: #151314;
+  --osmo-header: #211d1c;
+  --osmo-active: #2b2726;
+  --osmo-hover: #262322;
+  --osmo-card: #211d1c;
+  --osmo-border: #3c3837;
+  --osmo-grid-line: rgba(255, 255, 255, 0.025);
   --osmo-text: #ffffff;
   --osmo-text-muted: rgba(255, 255, 255, 0.62);
   --osmo-text-subtle: rgba(255, 255, 255, 0.38);
@@ -124,13 +128,13 @@
   --osmo-accent-hover: #c4ff7a;
   --osmo-accent-fg: #0b1220;
   --osmo-accent-secondary: #7c6cff;
-  --osmo-chip: #2d2824;
-  --osmo-chip-active: #38322c;
-  --background: #231e1b;
+  --osmo-chip: #292728;
+  --osmo-chip-active: #2b2726;
+  --background: #151314;
   --foreground: oklch(0.985 0 0);
-  --card: #2f2a26;
+  --card: #211d1c;
   --card-foreground: oklch(0.985 0 0);
-  --popover: #2f2a26;
+  --popover: #211d1c;
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
@@ -235,7 +239,7 @@
   background: rgba(255, 255, 255, 0.36);
 }
 
-/* Fundo Osmo — marrom escuro texturizado (não preto nem cinza neutro) */
+/* Fundo Osmo — charcoal escuro texturizado (padrão Vault) */
 .osmo-canvas-bg {
   background-color: var(--osmo-canvas);
   background-image:
@@ -409,6 +413,109 @@ html.light .osmo-workspace .tutor-prompt-scroll::-webkit-scrollbar-thumb:hover {
   height: calc(100% + 2px);
   background: var(--osmo-border);
   pointer-events: none;
+}
+
+/*
+ * Ícones da trilha — tingidos pela cor da área (`--trilha-icone-cor`).
+ * Entrada suave, reação ao hover do card pai e pulso no item em foco.
+ */
+.trilha-icone {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--trilha-icone-cor, var(--osmo-text));
+  background-color: color-mix(
+    in srgb,
+    var(--trilha-icone-cor, #ffffff) 16%,
+    transparent
+  );
+  border: 1px solid
+    color-mix(in srgb, var(--trilha-icone-cor, #ffffff) 32%, transparent);
+  backdrop-filter: blur(2px);
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.trilha-icone__glifo {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.group:hover .trilha-icone {
+  transform: translateY(-2px) scale(1.08);
+  background-color: color-mix(
+    in srgb,
+    var(--trilha-icone-cor, #ffffff) 26%,
+    transparent
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--trilha-icone-cor, #ffffff) 55%,
+    transparent
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in srgb, var(--trilha-icone-cor, #ffffff) 12%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .trilha-icone {
+    animation: trilha-icone-entrada 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .group:hover .trilha-icone__glifo {
+    animation: trilha-icone-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .trilha-icone--pulsando::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid var(--trilha-icone-cor, #ffffff);
+    animation: trilha-icone-pulso 2.4s ease-out infinite;
+    pointer-events: none;
+  }
+}
+
+@keyframes trilha-icone-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes trilha-icone-pop {
+  40% {
+    transform: scale(1.18) rotate(-6deg);
+  }
+  70% {
+    transform: scale(0.97) rotate(3deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes trilha-icone-pulso {
+  0% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
 }
 
 .noise-overlay {

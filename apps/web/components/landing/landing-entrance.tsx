@@ -279,7 +279,7 @@ export function LandingEntrance({
 
           <motion.div
             className={cn(
-              "relative overflow-hidden bg-[#231E1B]",
+              "relative overflow-hidden bg-[#1f1e1c]",
               isExpand ? "z-30" : "z-10",
             )}
             style={{ transformOrigin: "center center" }}

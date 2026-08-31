@@ -4,7 +4,8 @@ import { useWorkspaceScroll } from "@/components/workspace/workspace-scroll-cont
 import { cn } from "@/lib/utils";
 
 /** Espaço para as tags flutuantes (seção + plano) no topo. */
-export const WORKSPACE_CHROME_OFFSET = "pt-[5.25rem] sm:pt-[5.5rem] md:pt-[5.75rem]";
+export const WORKSPACE_CHROME_OFFSET =
+  "pt-[4.75rem] sm:pt-[5.25rem] md:pt-[5.75rem]";
 
 type WorkspaceSectionProps = {
   title?: string;
@@ -44,7 +45,7 @@ export function WorkspaceSection({
         )}
       >
         {title ? (
-          <h1 className="text-[2.5rem] leading-none font-medium tracking-tight text-osmo md:text-5xl">
+          <h1 className="text-3xl leading-none font-medium tracking-tight text-osmo sm:text-[2.5rem] md:text-5xl">
             {title}
             {typeof count === "number" ? (
               <sup className="ml-1.5 align-super text-base font-normal tracking-normal text-osmo-subtle md:text-lg">

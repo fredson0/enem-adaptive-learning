@@ -3,17 +3,26 @@
  * Documentação: docs/MARKETING-UI-OSMO.md
  */
 
-/** Canvas escuro do projeto — marrom quase preto (#231E1B), não cinza neutro. */
-export const OSMO_DARK_CANVAS = "#231E1B";
-export const OSMO_DARK_CARD = "#2F2A26";
-export const OSMO_DARK_SIDEBAR = "#1B1714";
+/*
+ * Cores amostradas pixel a pixel dos prints do Osmo.
+ * App (Vault): canvas #151314 · sidebar/header #211d1c · divisor #3c3837
+ * Marketing (site): fundo e header #1f1e1c
+ */
+
+/** Canvas do app Osmo Vault. */
+export const OSMO_DARK_CANVAS = "#151314";
+/** Sidebar / header / cards do Osmo Vault. */
+export const OSMO_DARK_SIDEBAR = "#211d1c";
+export const OSMO_DARK_CARD = OSMO_DARK_SIDEBAR;
+/** Fundo das páginas de marketing do Osmo. */
+export const OSMO_MARKETING_BG = "#1f1e1c";
 
 export const MARKETING_OSMO_COLORS = {
-  /** Canvas escuro — marrom quente (#231E1B). */
-  heroBg: OSMO_DARK_CANVAS,
+  /** Hero das páginas de marketing. */
+  heroBg: OSMO_MARKETING_BG,
   osmoCanvas: OSMO_DARK_CANVAS,
-  /** Barra do header Osmo — amostrada do print (RGB 49,46,46). */
-  osmoHeader: "#312e2e",
+  /** Barra do header Osmo. */
+  osmoHeader: OSMO_DARK_SIDEBAR,
   /** Card do formulário Osmo. */
   osmoCard: OSMO_DARK_CARD,
   sectionBg: "#f3f3f1",

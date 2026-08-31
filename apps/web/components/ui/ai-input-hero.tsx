@@ -1023,7 +1023,7 @@ export function HeroWave({
           variant === "workspace" && (docked ? "justify-end" : "justify-center"),
           variant === "hero" && "flex items-center justify-center",
           variant === "workspace" &&
-            "pt-[3.75rem] pr-4 pb-4 sm:pt-20 sm:pr-5 sm:pb-5 lg:p-6",
+            "pt-[3.75rem] pr-4 pb-[max(1rem,env(safe-area-inset-bottom))] pl-4 sm:pt-20 sm:pr-5 sm:pb-5 lg:p-6",
         )}
         style={{
           position: "absolute",

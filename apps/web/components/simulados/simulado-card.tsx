@@ -1,5 +1,7 @@
 "use client";
 
+import { TrilhaIcone } from "@/components/trilha/trilha-icone";
+import { obterVisualArea } from "@/lib/area-visual";
 import {
   formatArea,
   formatSimuladoStatus,
@@ -45,12 +47,19 @@ export function SimuladoCard({
       : `${simulado.respondidas}/${simulado.totalQuestoes}`;
 
   const podeExcluir = simulado.status === "EM_ANDAMENTO" && onExcluir;
+  const visual = obterVisualArea(simulado.area);
 
   return (
     <div className="group overflow-hidden rounded-[14px] border border-white/[0.06] bg-[#161616] transition-colors hover:border-white/10 hover:bg-[#1a1a1a]">
       <Link href={href} className="block">
-        <div className="relative flex aspect-[16/10] flex-col justify-between bg-gradient-to-br from-[#222] via-[#171717] to-[#111] p-5">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(176,255,87,0.08),transparent_55%)]" />
+        <div
+          className="relative flex aspect-[16/10] flex-col justify-between p-5"
+          style={{ backgroundImage: visual.gradiente }}
+        >
+          <div
+            className="absolute inset-0"
+            style={{ backgroundImage: visual.glow }}
+          />
           <div className="relative flex items-start justify-between gap-2">
             <span className="rounded-full border border-white/10 bg-black/20 px-2 py-0.5 text-[10px] uppercase tracking-wide text-white/55">
               {formatModoSimulado(simulado.modo)}
@@ -66,20 +75,30 @@ export function SimuladoCard({
               {formatSimuladoStatus(simulado.status)}
             </span>
           </div>
-          <div className="relative">
-            <p className="text-3xl font-medium tracking-tight text-white">
-              {scoreLabel}
-            </p>
-            <p className="mt-1 text-sm text-white/40">
-              {formatArea(simulado.area)} · {progresso}%
-            </p>
+
+          <div className="relative flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-3xl font-medium tracking-tight text-white">
+                {scoreLabel}
+              </p>
+              <p className="mt-1 truncate text-sm text-white/40">
+                {formatArea(simulado.area)} · {progresso}%
+              </p>
+            </div>
+            <TrilhaIcone
+              id={visual.slug ?? "geral"}
+              cor={visual.cor}
+              icone={visual.icone}
+              size="lg"
+              pulsando={simulado.status === "EM_ANDAMENTO"}
+            />
           </div>
         </div>
         <div className="space-y-3 px-5 py-4">
           <div className="h-1 overflow-hidden rounded-full bg-white/10">
             <div
-              className="h-full rounded-full bg-white/70 transition-all group-hover:bg-white"
-              style={{ width: `${progresso}%` }}
+              className="h-full rounded-full transition-all"
+              style={{ width: `${progresso}%`, backgroundColor: visual.cor }}
             />
           </div>
           <div className="flex items-center justify-between gap-3">

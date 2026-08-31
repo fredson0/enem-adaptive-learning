@@ -280,7 +280,7 @@ export default function SimuladoQuestaoPage() {
     painelDicaVisivel && Boolean(dicaAtual || carregandoDica || erroDica);
 
   return (
-    <WorkspaceSection contentClassName="pb-6">
+    <WorkspaceSection contentClassName="pb-24 md:pb-6">
       <div
         className={cn(
           "mx-auto flex w-full flex-col gap-5 transition-[max-width] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
@@ -338,7 +338,7 @@ export default function SimuladoQuestaoPage() {
               </button>
             </div>
           ) : (
-            <p className="text-xs text-white/30">
+            <p className="hidden text-xs text-white/30 md:block">
               Atalhos: teclas A–E para marcar · Enter para confirmar
             </p>
           )}
@@ -457,60 +457,101 @@ export default function SimuladoQuestaoPage() {
         </div>
 
         {!emRevisao ? (
-          <div className="space-y-3 border-t border-white/[0.06] pt-5">
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={handlePedirDica}
-                disabled={
-                  !questao ||
-                  carregandoDica ||
-                  submitting ||
-                  (painelDicaVisivel && jaTemDica)
-                }
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-sm text-white/75 transition hover:border-white/25 hover:text-white disabled:opacity-50"
-              >
-                {carregandoDica ? (
-                  <Loader2 className="size-4 animate-spin" />
+          <>
+            <div className="hidden space-y-3 border-t border-white/[0.06] pt-5 md:block">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handlePedirDica}
+                  disabled={
+                    !questao ||
+                    carregandoDica ||
+                    submitting ||
+                    (painelDicaVisivel && jaTemDica)
+                  }
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-sm text-white/75 transition hover:border-white/25 hover:text-white disabled:opacity-50"
+                >
+                  {carregandoDica ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Lightbulb className="size-4" strokeWidth={1.75} />
+                  )}
+                  {carregandoDica
+                    ? "Buscando dica…"
+                    : jaTemDica
+                      ? painelDicaVisivel
+                        ? "Dica aberta"
+                        : "Ver dica"
+                      : "Pedir dica (1 token IA)"}
+                </button>
+                {!simulado?.revelarGabaritoImediato ? (
+                  <p className="self-center text-xs text-white/35">
+                    Gabarito só no resultado final
+                  </p>
                 ) : (
-                  <Lightbulb className="size-4" strokeWidth={1.75} />
+                  <p className="self-center text-xs text-white/35">
+                    Sem revelar gabarito na dica
+                  </p>
                 )}
-                {carregandoDica
-                  ? "Buscando dica…"
-                  : jaTemDica
-                    ? painelDicaVisivel
-                      ? "Dica aberta"
-                      : "Ver dica"
-                    : "Pedir dica (1 token IA)"}
-              </button>
-              {!simulado?.revelarGabaritoImediato ? (
-                <p className="self-center text-xs text-white/35">
-                  Gabarito só no resultado final
-                </p>
-              ) : (
-                <p className="self-center text-xs text-white/35">
-                  Sem revelar gabarito na dica
-                </p>
-              )}
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleResponder}
+                  disabled={!selecionada || submitting}
+                  className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90 disabled:opacity-50"
+                >
+                  {submitting ? "Enviando…" : "Confirmar resposta"}
+                </button>
+                <Link
+                  href="/simulados"
+                  className="rounded-full border border-white/15 px-6 py-3 text-sm text-white/70 transition hover:border-white/25"
+                >
+                  Voltar
+                </Link>
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={handleResponder}
-                disabled={!selecionada || submitting}
-                className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90 disabled:opacity-50"
-              >
-                {submitting ? "Enviando…" : "Confirmar resposta"}
-              </button>
-              <Link
-                href="/simulados"
-                className="rounded-full border border-white/15 px-6 py-3 text-sm text-white/70 transition hover:border-white/25"
-              >
-                Voltar
-              </Link>
+            <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[var(--osmo-canvas)]/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handlePedirDica}
+                  disabled={
+                    !questao ||
+                    carregandoDica ||
+                    submitting ||
+                    (painelDicaVisivel && jaTemDica)
+                  }
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/15 px-3 py-3 text-xs text-white/75 transition hover:border-white/25 disabled:opacity-50"
+                >
+                  {carregandoDica ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Lightbulb className="size-4 shrink-0" strokeWidth={1.75} />
+                  )}
+                  <span className="truncate">
+                    {carregandoDica
+                      ? "Dica…"
+                      : jaTemDica
+                        ? painelDicaVisivel
+                          ? "Dica"
+                          : "Ver dica"
+                        : "Dica IA"}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResponder}
+                  disabled={!selecionada || submitting}
+                  className="flex-[1.4] rounded-full bg-white px-4 py-3 text-sm font-medium text-black transition hover:bg-white/90 disabled:opacity-50"
+                >
+                  {submitting ? "Enviando…" : "Confirmar"}
+                </button>
+              </div>
             </div>
-          </div>
+          </>
         ) : null}
       </div>
 

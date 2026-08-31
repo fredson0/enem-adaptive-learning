@@ -80,9 +80,30 @@
 - [x] **F8** Proxy Next deny-by-default (todas rotas exceto marketing/login exigem cookie)
 - [x] **F9** Testes E2E segurança ampliados (401 global, depoimentos públicos)
 
-### 4c — Polish mobile (pendente)
+### 4c — Polish mobile
 
-- [ ] **F10** Ajustes finos de layout mobile em trilha/simulados/tutor
+- [x] **F10** Sidebar drawer mobile (`workspace-chrome.tsx` + `workspace-sidebar.tsx`)
+
+## G. Onda 5 — Mobile polish (em andamento)
+
+### 5a — Trilha
+
+- [x] **G1** `TrilhaCardsGrid` — carrossel horizontal no mobile, grade no desktop
+- [x] **G2** Ícones por área/matéria/assunto com cor e animação (`trilha-icones.ts`, `trilha-icone.tsx`)
+- [x] **G3** Cards de simulado com capa tingida pela área (`area-visual.ts`)
+
+### 5b — Simulados
+
+- [x] **G4** Navegação entre questões com scroll horizontal no mobile
+- [x] **G5** Barra fixa inferior (Confirmar + Dica IA) na tela de questão
+- [x] **G6** Filtros do histórico com scroll horizontal no mobile
+
+### 5c — Workspace geral
+
+- [x] **G7** Títulos e chrome offset ajustados para telas pequenas
+- [x] **G8** Tutor com `safe-area-inset-bottom` no input
+- [ ] **G9** Polish progresso (gráficos e KPIs em telas estreitas)
+- [ ] **G10** Testes manuais em viewport 375px
 
 ### Produção (por último)
 
