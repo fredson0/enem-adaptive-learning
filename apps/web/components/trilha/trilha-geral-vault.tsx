@@ -6,6 +6,7 @@ import {
 } from "@/components/trilha/trilha-disciplina-card";
 import { TrilhaModalidadeCard } from "@/components/trilha/trilha-modalidade-card";
 import { TrilhaAreasScroll } from "@/components/trilha/trilha-areas-scroll";
+import { TrilhaPlanoSemanalCard } from "@/components/trilha/trilha-plano-semanal-card";
 import type { TrilhaResponse } from "@/lib/trilha";
 import {
   agruparModalidadesPorArea,
@@ -29,6 +30,7 @@ import { useMemo, useState, useEffect } from "react";
 
 type TrilhaGeralVaultProps = {
   trilha: TrilhaResponse;
+  onTrilhaAtualizada?: (trilha: TrilhaResponse) => void;
 };
 
 function BuscaAssuntos({
@@ -73,7 +75,10 @@ function BuscaAssuntos({
   );
 }
 
-export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
+export function TrilhaGeralVault({
+  trilha,
+  onTrilhaAtualizada,
+}: TrilhaGeralVaultProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const modalidadeId = searchParams.get("modalidade");
@@ -363,6 +368,11 @@ export function TrilhaGeralVault({ trilha }: TrilhaGeralVaultProps) {
           }
         />
       </header>
+
+      <TrilhaPlanoSemanalCard
+        trilha={trilha}
+        onTrilhaAtualizada={onTrilhaAtualizada}
+      />
 
       {trilha.areas.length > 0 ? (
         <section className="space-y-4">

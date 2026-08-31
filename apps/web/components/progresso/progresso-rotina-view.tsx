@@ -107,10 +107,10 @@ export function ProgressoRotinaView({
               </p>
             ) : null}
             <Link
-              href="/trilha"
+              href="/trilha/geral"
               className="mt-4 inline-flex rounded-full bg-osmo-accent px-4 py-2 text-xs font-medium transition hover:opacity-90"
             >
-              {trilha?.planoIa ? "Ver plano completo" : "Gerar plano na trilha"}
+              {trilha?.planoIa ? "Ver plano completo" : "Gerar plano na trilha geral"}
             </Link>
           </ProgressoCard>
 

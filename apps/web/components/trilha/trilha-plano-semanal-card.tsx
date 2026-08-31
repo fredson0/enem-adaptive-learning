@@ -3,8 +3,10 @@
 import { ProgressoCard } from "@/components/progresso/progresso-card";
 import { usePlanoSemanalIa } from "@/components/trilha/use-plano-semanal-ia";
 import type { TrilhaResponse } from "@/lib/trilha";
+import { obterPlanoIaDesatualizado } from "@/lib/trilha-progresso";
 import { cn } from "@/lib/utils";
 import {
+  AlertTriangle,
   CalendarCheck,
   Check,
   Loader2,
@@ -57,6 +59,7 @@ export function TrilhaPlanoSemanalCard({
     : null;
 
   const metaExibida = plano?.metaSemanal ?? trilha.metaSemanal;
+  const planoDesatualizado = obterPlanoIaDesatualizado(trilha);
 
   const footerContent = (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -82,9 +85,11 @@ export function TrilhaPlanoSemanalCard({
         )}
         {gerando
           ? "Gerando…"
-          : plano
+          : planoDesatualizado.desatualizado
             ? "Atualizar plano"
-            : "Gerar com IA (1 token)"}
+            : plano
+              ? "Atualizar plano"
+              : "Gerar com IA (1 token)"}
       </button>
     </div>
   );
@@ -95,6 +100,39 @@ export function TrilhaPlanoSemanalCard({
         <p className="mb-3 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-300">
           {error}
         </p>
+      ) : null}
+
+      {planoDesatualizado.desatualizado ? (
+        <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-3 sm:px-4">
+          <div className="flex gap-2.5">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-400" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <p className="text-sm leading-relaxed text-amber-100/95">
+                Sua prioridade mudou
+                {planoDesatualizado.areaAtualLabel
+                  ? ` para ${planoDesatualizado.areaAtualLabel}`
+                  : ""}
+                {planoDesatualizado.areaPlanoLabel
+                  ? ` — o plano ainda está focado em ${planoDesatualizado.areaPlanoLabel}`
+                  : ""}
+                . Atualize para alinhar com suas lacunas atuais.
+              </p>
+              <button
+                type="button"
+                onClick={() => gerarPlano()}
+                disabled={gerando}
+                className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 px-3 py-1.5 text-xs font-medium text-amber-100 transition hover:bg-amber-500/30 disabled:opacity-60"
+              >
+                {gerando ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <RefreshCw className="size-3.5" />
+                )}
+                Atualizar plano (1 token)
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
 
       {plano?.proximoPasso ? (

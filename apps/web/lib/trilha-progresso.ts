@@ -324,3 +324,34 @@ export function getMetaAreaContextual(
 
   return null;
 }
+
+export type PlanoIaDesatualizadoInfo = {
+  desatualizado: boolean;
+  areaAtualLabel: string | null;
+  areaPlanoLabel: string | null;
+};
+
+/** Plano IA foi gerado para outra área que não é mais a prioritária. */
+export function obterPlanoIaDesatualizado(
+  trilha: TrilhaResponse,
+): PlanoIaDesatualizadoInfo {
+  const plano = trilha.planoIa;
+  const areaAtualSlug = trilha.areaPrioritaria;
+
+  if (!plano || !areaAtualSlug) {
+    return {
+      desatualizado: false,
+      areaAtualLabel: null,
+      areaPlanoLabel: null,
+    };
+  }
+
+  const areaAtual = trilha.areas.find((area) => area.slug === areaAtualSlug);
+  const areaPlano = trilha.areas.find((area) => area.slug === plano.areaSlug);
+
+  return {
+    desatualizado: plano.areaSlug !== areaAtualSlug,
+    areaAtualLabel: areaAtual?.label ?? null,
+    areaPlanoLabel: areaPlano?.label ?? null,
+  };
+}

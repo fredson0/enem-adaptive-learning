@@ -3,8 +3,9 @@
 import { TrilhaGeralVault } from "@/components/trilha/trilha-geral-vault";
 import { WorkspaceSection } from "@/components/workspace/workspace-section";
 import { fetchTrilha, type TrilhaResponse } from "@/lib/trilha";
+import { usarTrilhaAtualizada } from "@/lib/trilha-events";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function TrilhaGeralPage() {
   const router = useRouter();
@@ -12,22 +13,33 @@ export default function TrilhaGeralPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchTrilha()
+  const carregarTrilha = useCallback(() => {
+    return fetchTrilha()
       .then((response) => {
         if (!response.diagnosticoCompleto) {
           router.replace("/trilha/diagnostico");
-          return;
+          return null;
         }
         setData(response);
-      })
+        return response;
+      });
+  }, [router]);
+
+  useEffect(() => {
+    carregarTrilha()
       .catch((err) =>
         setError(
           err instanceof Error ? err.message : "Não foi possível carregar a trilha.",
         ),
       )
       .finally(() => setLoading(false));
-  }, [router]);
+  }, [carregarTrilha]);
+
+  useEffect(() => {
+    return usarTrilhaAtualizada(() => {
+      carregarTrilha().catch(() => undefined);
+    });
+  }, [carregarTrilha]);
 
   if (loading) {
     return (
@@ -47,7 +59,10 @@ export default function TrilhaGeralPage() {
 
   return (
     <WorkspaceSection>
-      <TrilhaGeralVault trilha={data} />
+      <TrilhaGeralVault
+        trilha={data}
+        onTrilhaAtualizada={(trilha) => setData(trilha)}
+      />
     </WorkspaceSection>
   );
 }

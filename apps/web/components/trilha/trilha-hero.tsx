@@ -2,7 +2,6 @@
 
 import { ProgressArcGauge } from "@/components/progresso/progress-arc-gauge";
 import { TrilhaModalidadesCarousel } from "@/components/trilha/trilha-modalidades-carousel";
-import { TrilhaPlanoSemanalCard } from "@/components/trilha/trilha-plano-semanal-card";
 import { GlareCard } from "@/components/ui/glare-cards";
 import type { TrilhaResponse } from "@/lib/trilha";
 import { cn } from "@/lib/utils";
@@ -17,10 +16,9 @@ const caveat = Caveat({
 
 type TrilhaHeroProps = {
   trilha: TrilhaResponse;
-  onTrilhaAtualizada?: (trilha: TrilhaResponse) => void;
 };
 
-export function TrilhaHero({ trilha, onTrilhaAtualizada }: TrilhaHeroProps) {
+export function TrilhaHero({ trilha }: TrilhaHeroProps) {
   const areas = trilha.areas;
   const areaPrioritaria = areas[0] ?? null;
 
@@ -122,11 +120,6 @@ export function TrilhaHero({ trilha, onTrilhaAtualizada }: TrilhaHeroProps) {
           </div>
         </div>
       </div>
-
-      <TrilhaPlanoSemanalCard
-        trilha={trilha}
-        onTrilhaAtualizada={onTrilhaAtualizada}
-      />
     </section>
   );
 }
