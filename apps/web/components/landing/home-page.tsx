@@ -74,8 +74,8 @@ export function HomePage() {
           <SiteHeader revealed={heroRevealed} />
           <HeroSection revealed={heroRevealed} />
           <LandingProductShowcase />
-          <LandingTrilhaShowcase />
           <LandingPlatformShowcase />
+          <LandingTrilhaShowcase />
           <LandingTestimonials />
           <LandingPlans />
           <MarketingOsmoFaq className="bg-[#f3f3f1]" />

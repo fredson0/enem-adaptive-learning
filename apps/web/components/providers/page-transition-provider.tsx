@@ -9,7 +9,7 @@ import {
 import gsap from "gsap";
 import { useLenis } from "lenis/react";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -33,6 +33,23 @@ export function PageTransitionProvider({
 
   const slats = () => slatsRef.current.filter(Boolean);
 
+  const resetOverlay = useCallback(() => {
+    const overlay = overlayRef.current;
+    const bars = slats();
+    if (!overlay || bars.length === 0) {
+      busyRef.current = false;
+      pendingRef.current = null;
+      return;
+    }
+
+    gsap.killTweensOf(bars);
+    gsap.killTweensOf(overlay);
+    gsap.set(overlay, { autoAlpha: 0, pointerEvents: "none" });
+    gsap.set(bars, { scaleY: 0 });
+    busyRef.current = false;
+    pendingRef.current = null;
+  }, []);
+
   useEffect(() => {
     const overlay = overlayRef.current;
     if (!overlay) return;
@@ -42,42 +59,51 @@ export function PageTransitionProvider({
   }, []);
 
   useEffect(() => {
-    const pending = pendingRef.current;
-    if (!pending) return;
+    const onForceReset = () => resetOverlay();
+    window.addEventListener("page-transition:reset", onForceReset);
+    return () =>
+      window.removeEventListener("page-transition:reset", onForceReset);
+  }, [resetOverlay]);
 
-    const pendingPath = pending.split("#")[0];
-    const current = `${pathname}${window.location.search}`;
-    if (pendingPath !== current && pendingPath !== pathname) return;
+  useEffect(() => {
+    const pendingPath = pendingRef.current?.split("#")[0] ?? null;
+    const current = pathname;
 
-    pendingRef.current = null;
-    const overlay = overlayRef.current;
-    const bars = slats();
-    if (!overlay || bars.length === 0) {
-      busyRef.current = false;
+    if (pendingPath && pendingPath === current) {
+      pendingRef.current = null;
+      const overlay = overlayRef.current;
+      const bars = slats();
+      if (!overlay || bars.length === 0) {
+        busyRef.current = false;
+        return;
+      }
+
+      lenis?.scrollTo(0, { immediate: true });
+      window.scrollTo(0, 0);
+      gsap.killTweensOf(bars);
+
+      const tl = gsap.timeline({
+        onComplete: () => {
+          gsap.set(overlay, { autoAlpha: 0, pointerEvents: "none" });
+          gsap.set(bars, { scaleY: 0 });
+          busyRef.current = false;
+          tl.kill();
+        },
+      });
+
+      tl.to(bars, {
+        scaleY: 0,
+        duration: 0.72,
+        ease: "power3.inOut",
+        stagger: { each: 0.045, from: "end" },
+      });
       return;
     }
 
-    lenis?.scrollTo(0, { immediate: true });
-    window.scrollTo(0, 0);
-
-    gsap.killTweensOf(bars);
-
-    const tl = gsap.timeline({
-      onComplete: () => {
-        gsap.set(overlay, { autoAlpha: 0, pointerEvents: "none" });
-        gsap.set(bars, { scaleY: 0 });
-        busyRef.current = false;
-        tl.kill();
-      },
-    });
-
-    tl.to(bars, {
-      scaleY: 0,
-      duration: 0.72,
-      ease: "power3.inOut",
-      stagger: { each: 0.045, from: "end" },
-    });
-  }, [pathname, lenis]);
+    if (busyRef.current) {
+      resetOverlay();
+    }
+  }, [pathname, lenis, resetOverlay]);
 
   useEffect(() => {
     const coverThenNavigate = (href: string) => {

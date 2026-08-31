@@ -10,6 +10,7 @@ interface SlideHoverButtonProps {
   label: string;
   className?: string;
   onClick?: () => void;
+  "data-no-transition"?: string;
 }
 
 export function SlideHoverButton({
@@ -17,6 +18,7 @@ export function SlideHoverButton({
   label,
   className,
   onClick,
+  "data-no-transition": noTransition,
 }: SlideHoverButtonProps) {
   const trackRef = useRef<HTMLSpanElement>(null);
   const viewportRef = useRef<HTMLSpanElement>(null);
@@ -69,6 +71,7 @@ export function SlideHoverButton({
     <Link
       href={href}
       onClick={onClick}
+      data-no-transition={noTransition}
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
       className={cn(

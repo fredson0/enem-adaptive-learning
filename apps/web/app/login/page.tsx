@@ -8,6 +8,7 @@ import { MarketingOsmoFaq } from "@/components/marketing/marketing-osmo-faq";
 import { loginWithGoogleIdToken, fetchMe } from "@/lib/api";
 import { isOnboardingComplete } from "@/lib/auth";
 import { getSafeRedirectPath } from "@/lib/login-redirect";
+import { resetPageTransitionOverlay } from "@/lib/page-transition";
 import { MARKETING_FAQ_CATEGORIES } from "@/lib/marketing-faq";
 import { MARKETING_OSMO_COLORS } from "@/lib/marketing-osmo-tokens";
 import { Caveat } from "next/font/google";
@@ -41,10 +42,12 @@ function LoginContent() {
         if (cancelled || !user) return;
 
         if (!isOnboardingComplete(user)) {
+          resetPageTransitionOverlay();
           router.replace("/onboarding");
           return;
         }
 
+        resetPageTransitionOverlay();
         router.replace(nextPath);
       } finally {
         if (!cancelled) setCheckingSession(false);

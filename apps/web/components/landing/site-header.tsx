@@ -599,6 +599,7 @@ export function SiteHeader({
                   useCompactShell &&
                     "rounded-lg border border-white/15 bg-white/[0.08] px-4 hover:bg-white/[0.12]",
                 )}
+                data-no-transition="true"
               />
               <Link
                 href="/tutor"
