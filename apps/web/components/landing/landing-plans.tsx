@@ -107,7 +107,7 @@ export function LandingPlans() {
 
             <Link
               href={PLANS.free.href}
-              className="mt-10 inline-flex w-full items-center justify-center rounded-xl bg-[#1f1e1c] px-5 py-4 text-base font-medium text-white transition hover:bg-[#151314]"
+              className="mt-10 inline-flex w-full items-center justify-center rounded-xl bg-[#1f1e1c] px-5 py-4 text-base font-medium text-white transition hover:bg-[#231E1B]"
             >
               {PLANS.free.cta}
             </Link>

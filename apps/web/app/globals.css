@@ -107,14 +107,14 @@
 }
 
 .dark {
-  --osmo-canvas: #111111;
-  --osmo-sidebar: #141414;
-  --osmo-surface: #111111;
-  --osmo-header: #161616;
-  --osmo-active: #1e1e1e;
-  --osmo-hover: #1a1a1a;
-  --osmo-card: #161616;
-  --osmo-border: #262626;
+  --osmo-canvas: #231e1b;
+  --osmo-sidebar: #1b1714;
+  --osmo-surface: #231e1b;
+  --osmo-header: #282320;
+  --osmo-active: #332e29;
+  --osmo-hover: #2d2824;
+  --osmo-card: #2f2a26;
+  --osmo-border: #3f3934;
   --osmo-grid-line: rgba(255, 255, 255, 0.028);
   --osmo-text: #ffffff;
   --osmo-text-muted: rgba(255, 255, 255, 0.62);
@@ -124,13 +124,13 @@
   --osmo-accent-hover: #c4ff7a;
   --osmo-accent-fg: #0b1220;
   --osmo-accent-secondary: #7c6cff;
-  --osmo-chip: #1c1c1c;
-  --osmo-chip-active: #2a2a2a;
-  --background: oklch(0.145 0 0);
+  --osmo-chip: #2d2824;
+  --osmo-chip-active: #38322c;
+  --background: #231e1b;
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: #2f2a26;
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: #2f2a26;
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
@@ -235,7 +235,7 @@
   background: rgba(255, 255, 255, 0.36);
 }
 
-/* Fundo Osmo — cinza escuro texturizado (não preto puro) */
+/* Fundo Osmo — marrom escuro texturizado (não preto nem cinza neutro) */
 .osmo-canvas-bg {
   background-color: var(--osmo-canvas);
   background-image:
@@ -314,9 +314,21 @@ html.light .osmo-workspace [class*="hover:bg-[#c4ff7a]"]:hover {
   background-color: var(--osmo-accent-hover) !important;
 }
 
-html.light
-  .osmo-workspace
-  [class*="bg-[#161616]"]:not(.osmo-surface-dark),
+html.dark .osmo-workspace [class*="bg-[#161616]"]:not(.osmo-surface-dark) {
+  background-color: var(--osmo-card) !important;
+}
+
+html.dark .osmo-workspace [class*="bg-[#1a1a1a]"]:not(.osmo-surface-dark),
+html.dark .osmo-workspace [class*="bg-[#1c1c1c]"]:not(.osmo-surface-dark),
+html.dark .osmo-workspace [class*="bg-[#1e1e1e]"]:not(.osmo-surface-dark) {
+  background-color: var(--osmo-hover) !important;
+}
+
+html.dark .osmo-workspace [class*="bg-[#141414]"]:not(.osmo-surface-dark) {
+  background-color: var(--osmo-card) !important;
+}
+
+html.light .osmo-workspace [class*="bg-[#161616]"]:not(.osmo-surface-dark),
 html.light
   .osmo-workspace
   [class*="bg-[#1a1a1a]"]:not(.osmo-surface-dark),

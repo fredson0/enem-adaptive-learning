@@ -62,7 +62,7 @@ export function MarketingOsmoHeroShell({
     <section
       className={cn(
         "relative overflow-hidden",
-        isLight ? "bg-white text-[#0b1220]" : "bg-[#151314] text-white",
+        isLight ? "bg-white text-[#0b1220]" : "bg-[#231E1B] text-white",
         className,
       )}
       style={style}

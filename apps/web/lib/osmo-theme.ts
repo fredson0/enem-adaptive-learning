@@ -1,6 +1,6 @@
 /**
  * Paleta Osmo — workspace do aluno
- * Sidebar (#181818) flutua sobre o canvas (#111111 + textura sutil).
+ * Sidebar flutua sobre o canvas marrom escuro (#231E1B + textura sutil).
  * Área de conteúdo usa o canvas; cards usam tons neutros sem tint azulado.
  */
 export const OSMO = {

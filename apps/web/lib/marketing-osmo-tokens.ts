@@ -3,19 +3,24 @@
  * Documentação: docs/MARKETING-UI-OSMO.md
  */
 
+/** Canvas escuro do projeto — marrom quase preto (#231E1B), não cinza neutro. */
+export const OSMO_DARK_CANVAS = "#231E1B";
+export const OSMO_DARK_CARD = "#2F2A26";
+export const OSMO_DARK_SIDEBAR = "#1B1714";
+
 export const MARKETING_OSMO_COLORS = {
-  /** Canvas Osmo amostrado do print "Unlock the Demo". */
-  heroBg: "#151314",
-  osmoCanvas: "#151314",
+  /** Canvas escuro — marrom quente (#231E1B). */
+  heroBg: OSMO_DARK_CANVAS,
+  osmoCanvas: OSMO_DARK_CANVAS,
   /** Barra do header Osmo — amostrada do print (RGB 49,46,46). */
   osmoHeader: "#312e2e",
   /** Card do formulário Osmo. */
-  osmoCard: "#1e1d1b",
+  osmoCard: OSMO_DARK_CARD,
   sectionBg: "#f3f3f1",
   titleDark: "#0b1220",
   accentLime: "#b0ff57",
   accentPurple: "#7c6cff",
-  ctaCardBg: "#1e1d1b",
+  ctaCardBg: OSMO_DARK_CARD,
   ctaButton: "#6840ff",
   ctaButtonHover: "#5a36e0",
   textMuted: "rgba(255,255,255,0.55)",

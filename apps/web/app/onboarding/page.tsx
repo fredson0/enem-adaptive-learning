@@ -97,14 +97,14 @@ export default function OnboardingPage() {
 
   if (bootstrapping) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#151314] px-6">
+      <main className="flex min-h-screen items-center justify-center bg-[#231E1B] px-6">
         <p className="text-sm text-white/45">Carregando…</p>
       </main>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#151314] px-6">
+    <main className="flex min-h-screen items-center justify-center bg-[#231E1B] px-6">
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-lg rounded-[14px] border border-white/[0.06] bg-[#1e1d1b] p-8"

@@ -32,7 +32,7 @@ export default function PlanosPage() {
               className={`rounded-[14px] border p-6 md:p-7 ${
                 catalogo.highlighted
                   ? "border-white/10 bg-[#161616] ring-1 ring-white/10"
-                  : "border-white/[0.06] bg-[#141414]"
+                  : "border-white/[0.06] bg-[var(--osmo-card)]"
               } ${isAtual ? "ring-1 ring-[#b0ff57]/40" : ""}`}
             >
               <div className="flex items-center justify-between gap-3">

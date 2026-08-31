@@ -22,7 +22,7 @@ export const PRODUCT_FEATURES: ProductFeature[] = [
     id: "metricas",
     title: "Métricas por área",
     preview: "metricas",
-    accent: "#151314",
+    accent: "#231E1B",
   },
   {
     id: "tutor",
@@ -198,7 +198,7 @@ function FeaturePreview({
 
   if (type === "metricas") {
     return (
-      <div className="flex h-full flex-col justify-center gap-3 bg-[#151314] p-5 md:gap-4 md:p-6">
+      <div className="flex h-full flex-col justify-center gap-3 bg-[#231E1B] p-5 md:gap-4 md:p-6">
         {[
           { label: "MAT", value: 72 },
           { label: "LIN", value: 58 },

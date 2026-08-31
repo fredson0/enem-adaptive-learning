@@ -35,7 +35,7 @@ export function LandingPlatformShowcase() {
 
       <div className="mx-auto mt-10 w-[min(94vw,1320px)] md:mt-14">
         {hasVideo ? (
-          <div className="overflow-hidden rounded-[20px] border border-black/10 bg-[#0d0d0d] shadow-[0_32px_80px_rgba(0,0,0,0.14)] md:rounded-[28px]">
+          <div className="overflow-hidden rounded-[20px] border border-black/10 bg-[#231E1B] shadow-[0_32px_80px_rgba(0,0,0,0.14)] md:rounded-[28px]">
             <video
               className="block h-auto w-full"
               autoPlay

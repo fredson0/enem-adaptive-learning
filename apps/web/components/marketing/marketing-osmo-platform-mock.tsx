@@ -38,7 +38,7 @@ export function MarketingOsmoPlatformMock({
   return (
     <div
       className={cn(
-        "flex h-full min-h-[280px] flex-col overflow-hidden border border-white/10 bg-[#0d0d0d]",
+        "flex h-full min-h-[280px] flex-col overflow-hidden border border-white/10 bg-[#231E1B]",
         isClipped
           ? "rounded-tl-2xl rounded-tr-xl border-r-0 border-b-0 shadow-none"
           : "rounded-2xl shadow-[0_32px_80px_rgba(0,0,0,0.45)]",
@@ -60,7 +60,7 @@ export function MarketingOsmoPlatformMock({
       </div>
 
       <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-[28%] shrink-0 border-r border-white/10 bg-[#0a0a0a] p-3 sm:block">
+        <aside className="hidden w-[28%] shrink-0 border-r border-white/10 bg-[#1B1714] p-3 sm:block">
           <div className="flex items-center gap-1.5 px-1">
             <Sparkles className="size-3.5 text-[#b0ff57]" />
             <span className="text-[11px] font-semibold tracking-wide text-white">
@@ -85,7 +85,7 @@ export function MarketingOsmoPlatformMock({
           </nav>
         </aside>
 
-        <div className="flex flex-1 flex-col bg-[#151314]">
+        <div className="flex flex-1 flex-col bg-[#231E1B]">
           <div className="border-b border-white/10 px-4 py-3">
             <p className="text-[10px] text-white/35">Recursos gratuitos</p>
             <p className="mt-0.5 text-sm font-medium text-white/90">
