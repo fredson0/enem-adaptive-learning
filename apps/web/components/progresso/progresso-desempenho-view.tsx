@@ -156,20 +156,6 @@ export function ProgressoDesempenhoView({
                 total={totalQuestoes}
               />
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {segmentos.map((seg) => (
-                <span
-                  key={seg.slug}
-                  className="inline-flex items-center gap-1.5 text-[10px] text-osmo-subtle"
-                >
-                  <span
-                    className="size-2 rounded-full"
-                    style={{ backgroundColor: seg.cor }}
-                  />
-                  {seg.sigla} · {seg.valor}
-                </span>
-              ))}
-            </div>
           </ProgressoCard>
 
           <ProgressoCard

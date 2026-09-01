@@ -1,4 +1,4 @@
-import { Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type {
   EnviarMensagemIaInput,
@@ -10,7 +10,14 @@ import {
   resolverModelTier,
 } from '../../../core/application/helpers/ia-model-tier.helper';
 import { GroqIaAdapter } from './groq/groq-ia.adapter';
+import { GeminiIaAdapter } from './gemini/gemini-ia.adapter';
 import { NvidiaIaAdapter } from './nvidia/nvidia-ia.adapter';
+
+function chaveUtilizavel(value?: string): boolean {
+  const key = value?.trim() ?? '';
+  if (key.length < 16) return false;
+  return !/sua_chave|cole_sua|changeme|placeholder/i.test(key);
+}
 
 function isFallbackWorthy(error: unknown): boolean {
   if (!(error instanceof ServiceUnavailableException)) {
@@ -34,60 +41,89 @@ function isFallbackWorthy(error: unknown): boolean {
 
 @Injectable()
 export class IaEngineRouter implements IaEnginePort {
+  private readonly logger = new Logger(IaEngineRouter.name);
+
   constructor(
     @Inject(ConfigService) private readonly config: ConfigService,
     @Inject(NvidiaIaAdapter) private readonly nvidia: NvidiaIaAdapter,
     @Inject(GroqIaAdapter) private readonly groq: GroqIaAdapter,
+    @Inject(GeminiIaAdapter) private readonly gemini: GeminiIaAdapter,
   ) {}
+
+  private hasGemini(): boolean {
+    return chaveUtilizavel(this.config.get<string>('GEMINI_API_KEY'));
+  }
+
+  private hasGroq(): boolean {
+    return chaveUtilizavel(this.config.get<string>('GROQ_API_KEY'));
+  }
 
   private hasGroqExatas(): boolean {
     return Boolean(
-      this.config.get<string>('GROQ_API_KEY') &&
+      this.hasGroq() &&
         (this.config.get<string>('GROQ_MODEL_EXATAS') ||
           this.config.get<string>('GROQ_MODEL')),
     );
   }
 
-  private getVisionChain(): IaEnginePort[] {
-    const chain: IaEnginePort[] = [this.nvidia];
-
-    if (this.config.get<string>('GROQ_API_KEY')) {
-      chain.push(this.groq);
+  /** Gemini só entra no fim — não faz parte da cadeia principal. */
+  private withGeminiLast(chain: IaEnginePort[]): IaEnginePort[] {
+    if (this.hasGemini()) {
+      chain.push(this.gemini);
     }
-
     return chain;
   }
 
-  /** Texto em Matemática/Natureza: prioriza Groq 70B quando configurado. */
-  private getTextChain(input: EnviarMensagemIaInput): IaEnginePort[] {
-    const exatas = resolverModelTier(input) === 'exatas';
+  private getVisionChain(): IaEnginePort[] {
+    const chain: IaEnginePort[] = [this.nvidia];
 
-    if (exatas && this.hasGroqExatas()) {
-      return [this.groq, this.nvidia];
+    if (this.hasGroq()) {
+      chain.push(this.groq);
     }
 
-    return [this.nvidia];
+    return this.withGeminiLast(chain);
+  }
+
+  /**
+   * Texto: NVIDIA (e Groq em exatas) primeiro.
+   * Gemini só se todos os outros falharem.
+   */
+  private getTextChain(input: EnviarMensagemIaInput): IaEnginePort[] {
+    const exatas = resolverModelTier(input) === 'exatas';
+    const chain: IaEnginePort[] =
+      exatas && this.hasGroqExatas()
+        ? [this.groq, this.nvidia]
+        : this.hasGroq()
+          ? [this.nvidia, this.groq]
+          : [this.nvidia];
+
+    return this.withGeminiLast(chain);
   }
 
   private async runWithFallback(
     providers: IaEnginePort[],
     input: EnviarMensagemIaInput,
   ): Promise<string> {
-    let lastError: unknown = null;
+    let firstError: unknown = null;
 
     for (const provider of providers) {
       try {
         return await provider.enviarMensagem(input);
       } catch (error) {
-        lastError = error;
+        this.logger.warn(
+          `${provider.constructor.name} falhou: ${
+            error instanceof Error ? error.message : 'erro desconhecido'
+          }`,
+        );
+        if (!firstError) firstError = error;
         if (!isFallbackWorthy(error)) {
           throw error;
         }
       }
     }
 
-    if (lastError instanceof ServiceUnavailableException) {
-      throw lastError;
+    if (firstError instanceof ServiceUnavailableException) {
+      throw firstError;
     }
 
     throw new ServiceUnavailableException(
@@ -100,7 +136,7 @@ export class IaEngineRouter implements IaEnginePort {
     input: EnviarMensagemIaInput,
     onDelta: IaStreamDeltaHandler,
   ): Promise<string> {
-    let lastError: unknown = null;
+    let firstError: unknown = null;
 
     for (const provider of providers) {
       let sentAny = false;
@@ -110,15 +146,20 @@ export class IaEngineRouter implements IaEnginePort {
           await onDelta(delta);
         });
       } catch (error) {
-        lastError = error;
+        this.logger.warn(
+          `${provider.constructor.name} stream falhou: ${
+            error instanceof Error ? error.message : 'erro desconhecido'
+          }`,
+        );
+        if (!firstError) firstError = error;
         if (!isFallbackWorthy(error) || sentAny) {
           throw error;
         }
       }
     }
 
-    if (lastError instanceof ServiceUnavailableException) {
-      throw lastError;
+    if (firstError instanceof ServiceUnavailableException) {
+      throw firstError;
     }
 
     throw new ServiceUnavailableException(
@@ -134,10 +175,6 @@ export class IaEngineRouter implements IaEnginePort {
     }
 
     const chain = this.getTextChain(enriched);
-    if (chain.length === 1) {
-      return chain[0]!.enviarMensagem(enriched);
-    }
-
     return this.runWithFallback(chain, enriched);
   }
 
@@ -152,10 +189,6 @@ export class IaEngineRouter implements IaEnginePort {
     }
 
     const chain = this.getTextChain(enriched);
-    if (chain.length === 1) {
-      return chain[0]!.enviarMensagemStream(enriched, onDelta);
-    }
-
     return this.runStreamWithFallback(chain, enriched, onDelta);
   }
 }

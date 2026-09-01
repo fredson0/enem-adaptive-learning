@@ -102,7 +102,7 @@
 
 - [x] **G7** Títulos e chrome offset ajustados para telas pequenas
 - [x] **G8** Tutor com `safe-area-inset-bottom` no input
-- [ ] **G9** Polish progresso (gráficos e KPIs em telas estreitas)
+- [x] **G9** Polish progresso (gráficos e KPIs em telas estreitas)
 - [ ] **G10** Testes manuais em viewport 375px
 
 ### Produção (por último)

@@ -9,7 +9,7 @@ import { ProgressoLacunasLista } from "@/components/progresso/progresso-lacunas-
 import { ProgressoSectionShell } from "@/components/progresso/progresso-section-shell";
 import { ProgressoTrilhaResumo } from "@/components/progresso/progresso-trilha-resumo";
 import type { ProgressoDataProps } from "@/components/progresso/progresso-view";
-import { obterProximaAcaoTrilha } from "@/lib/progresso-helpers";
+import { AREA_SIGLAS, obterProximaAcaoTrilha } from "@/lib/progresso-helpers";
 import { cn } from "@/lib/utils";
 import {
   ArrowRight,
@@ -78,9 +78,11 @@ export function ProgressoFocoView({
           items={[
             {
               label: "Lacuna #1",
-              value: lacunaPrincipal?.label ?? "—",
+              value: lacunaPrincipal
+                ? (AREA_SIGLAS[lacunaPrincipal.slug] ?? lacunaPrincipal.label)
+                : "—",
               hint: lacunaPrincipal
-                ? `${lacunaPrincipal.score}% de acerto`
+                ? `${lacunaPrincipal.label} · ${lacunaPrincipal.score}% de acerto`
                 : "Sem prioridade",
               accent: "warning",
             },

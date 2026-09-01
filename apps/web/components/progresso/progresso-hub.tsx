@@ -13,6 +13,7 @@ import type {
   PontoEvolucao,
 } from "@/lib/metricas";
 import {
+  AREA_SIGLAS,
   calcularRitmoSemanal,
   calcularTendenciaGeral,
   formatarLinhaTendencia,
@@ -138,7 +139,9 @@ export function ProgressoHub({
           : "Dias com prática esta semana",
     },
     foco: {
-      metric: lacunaPrincipal?.label ?? "—",
+      metric: lacunaPrincipal
+        ? (AREA_SIGLAS[lacunaPrincipal.slug] ?? lacunaPrincipal.label)
+        : "—",
       detail:
         totalAnos > 0
           ? `${anosCompletos}/${totalAnos} provas ENEM cobertas`
@@ -160,7 +163,7 @@ export function ProgressoHub({
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+      <div className="-mx-4 flex gap-3 overflow-x-auto overflow-y-hidden px-4 pb-1 snap-x snap-mandatory scrollbar-none md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 md:snap-none lg:grid-cols-3 lg:gap-6">
         {HUB_CARDS.map((card) => {
           const Icon = card.icon;
           const stats = cardStats[card.id];
@@ -173,12 +176,12 @@ export function ProgressoHub({
             <Link
               key={card.id}
               href={card.href}
-              className="group block rounded-[2rem] focus:outline-none focus-visible:ring-2 focus-visible:ring-osmo-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--osmo-bg)]"
+              className="group block w-[min(82vw,22rem)] shrink-0 snap-start rounded-[2rem] focus:outline-none focus-visible:ring-2 focus-visible:ring-osmo-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--osmo-bg)] md:w-auto md:min-w-0"
             >
               <GlareCard
                 tiltIntensity={10}
                 glareColor={`${visual.accent}33`}
-                className="flex h-[400px] cursor-pointer flex-col overflow-hidden border-transparent p-1.5 pb-0 shadow-sm transition-shadow hover:shadow-md sm:h-[420px]"
+                className="flex h-[360px] cursor-pointer flex-col overflow-hidden border-transparent p-1.5 pb-0 shadow-sm transition-shadow hover:shadow-md sm:h-[400px] md:h-[420px]"
                 style={{ backgroundColor: visual.frame }}
               >
                 <div className="relative h-[46%] shrink-0 overflow-hidden rounded-[1.35rem]">
@@ -195,11 +198,11 @@ export function ProgressoHub({
                   <Illustration className="relative z-10 px-4 pt-3" />
                 </div>
 
-                <div className="flex min-h-0 flex-1 flex-col justify-between bg-[var(--osmo-card)] p-5 sm:p-6">
+                <div className="flex min-h-0 flex-1 flex-col justify-between overflow-hidden bg-[var(--osmo-card)] p-4 sm:p-6">
                   <div className="flex items-start justify-between gap-3">
                     <div
                       className={cn(
-                        "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider sm:text-[11px]",
+                        "inline-flex min-w-0 max-w-[85%] items-center gap-2 overflow-hidden rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider sm:text-[11px]",
                         card.badgeClass,
                       )}
                     >
@@ -241,9 +244,9 @@ export function ProgressoHub({
                         {proficiencia.areas.slice(0, 4).map((area) => (
                           <span
                             key={area.slug}
-                            className="rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-hover)] px-2 py-0.5 text-[10px] text-osmo-muted"
+                            className="max-w-full truncate rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-hover)] px-2 py-0.5 text-[10px] text-osmo-muted"
                           >
-                            {area.label.split(" ")[0]} · {area.score}%
+                            {AREA_SIGLAS[area.slug] ?? area.label.split(" ")[0]} · {area.score}%
                           </span>
                         ))}
                       </div>
@@ -253,14 +256,17 @@ export function ProgressoHub({
                       </p>
                     )}
 
-                    <div>
+                    <div className="min-w-0">
                       <h3 className="text-lg font-semibold text-osmo sm:text-xl">
                         {card.title}
                       </h3>
-                      <p className="mt-0.5 text-2xl font-medium tabular-nums tracking-tight text-osmo sm:text-3xl">
+                      <p
+                        className="mt-0.5 truncate text-xl font-medium tabular-nums tracking-tight text-osmo sm:text-3xl"
+                        title={stats.metric}
+                      >
                         {stats.metric}
                       </p>
-                      <p className="mt-1 text-xs leading-relaxed text-osmo-muted sm:text-sm">
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-osmo-muted sm:text-sm">
                         {stats.detail}
                       </p>
                     </div>

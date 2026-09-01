@@ -1,6 +1,7 @@
 import {
   Inject,
   Injectable,
+  Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -21,15 +22,37 @@ import { streamOpenAiChatCompletion } from '../openai-stream.helper';
 
 const NVIDIA_BASE_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
+/**
+ * Primário: Nemotron 3 Nano Omni 30B — único Nemotron hosted que ainda
+ * responde após o EOL de 26/08/2026 (Nano 9B/8B, Llama 3.1/3.3 e Super 49B).
+ */
+const NVIDIA_TEXT_DEFAULT = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
+const NVIDIA_TEXT_FAST_FALLBACK = 'openai/gpt-oss-20b';
+const NVIDIA_TEXT_EXATAS = 'openai/gpt-oss-120b';
+
+/** IDs mortos (410/timeout) → sucessor vivo, para NVIDIA_MODEL antigo no .env. */
+const MODELOS_RETIRADOS: Record<string, string> = {
+  'nvidia/nemotron-3-nano-30b-a3b': NVIDIA_TEXT_DEFAULT,
+  'nvidia/nemotron-3.5-lightning-30b-a3b': NVIDIA_TEXT_DEFAULT,
+  'nvidia/nvidia-nemotron-nano-9b-v2': NVIDIA_TEXT_DEFAULT,
+  'nvidia/llama-3.1-nemotron-nano-8b-v1': NVIDIA_TEXT_DEFAULT,
+  'nvidia/nemotron-mini-4b-instruct': NVIDIA_TEXT_DEFAULT,
+  'meta/llama-3.1-8b-instruct': NVIDIA_TEXT_FAST_FALLBACK,
+  'meta/llama-3.3-70b-instruct': NVIDIA_TEXT_EXATAS,
+  'nvidia/llama-3.3-nemotron-super-49b-v1': NVIDIA_TEXT_EXATAS,
+  'nvidia/llama-3.3-nemotron-super-49b-v1.5': NVIDIA_TEXT_EXATAS,
+};
+
 const TEXT_MODEL_FALLBACKS = [
-  'nvidia/nemotron-3.5-lightning-30b-a3b',
-  'nvidia/nemotron-3-nano-30b-a3b',
+  NVIDIA_TEXT_DEFAULT,
+  NVIDIA_TEXT_FAST_FALLBACK,
+  NVIDIA_TEXT_EXATAS,
 ] as const;
 
 const TEXT_MODEL_EXATAS_FALLBACKS = [
-  'meta/llama-3.3-70b-instruct',
-  'nvidia/nemotron-3.5-lightning-30b-a3b',
-  'nvidia/nemotron-3-nano-30b-a3b',
+  NVIDIA_TEXT_EXATAS,
+  NVIDIA_TEXT_DEFAULT,
+  NVIDIA_TEXT_FAST_FALLBACK,
 ] as const;
 
 const VISION_MODEL_FALLBACKS = [
@@ -40,8 +63,26 @@ const VISION_MODEL_FALLBACKS = [
 const TEXT_TIMEOUT_MS = 30_000;
 const VISION_TIMEOUT_MS = 90_000;
 
+function extrairTextoNvidia(data: {
+  choices?: {
+    message?: { content?: string; reasoning_content?: string };
+  }[];
+}): string {
+  const message = data.choices?.[0]?.message;
+  const bruto =
+    message?.content?.trim() ||
+    message?.reasoning_content?.trim() ||
+    '';
+
+  if (!bruto) return '';
+  if (!bruto.includes('</think>')) return bruto;
+  return bruto.split('</think>').pop()?.trim() ?? bruto;
+}
+
 @Injectable()
 export class NvidiaIaAdapter implements IaEnginePort {
+  private readonly logger = new Logger(NvidiaIaAdapter.name);
+
   constructor(@Inject(ConfigService) private readonly config: ConfigService) {}
 
   private getApiKey(): string {
@@ -55,24 +96,28 @@ export class NvidiaIaAdapter implements IaEnginePort {
   }
 
   private getModelCandidates(input: EnviarMensagemIaInput): string[] {
+    let raw: string[];
+
     if (input.imagem) {
       const configured = this.config.get<string>('NVIDIA_VISION_MODEL');
-      if (!configured) return [...VISION_MODEL_FALLBACKS];
-      return [
-        configured,
-        ...VISION_MODEL_FALLBACKS.filter((model) => model !== configured),
-      ];
+      raw = configured
+        ? [
+            configured,
+            ...VISION_MODEL_FALLBACKS.filter((model) => model !== configured),
+          ]
+        : [...VISION_MODEL_FALLBACKS];
+    } else {
+      const tier = resolverModelTier(input);
+      raw = montarCandidatosModelo({
+        tier,
+        configuredDefault: this.config.get<string>('NVIDIA_MODEL'),
+        configuredExatas: this.config.get<string>('NVIDIA_MODEL_EXATAS'),
+        fallbacks:
+          tier === 'exatas' ? TEXT_MODEL_EXATAS_FALLBACKS : TEXT_MODEL_FALLBACKS,
+      });
     }
 
-    const tier = resolverModelTier(input);
-
-    return montarCandidatosModelo({
-      tier,
-      configuredDefault: this.config.get<string>('NVIDIA_MODEL'),
-      configuredExatas: this.config.get<string>('NVIDIA_MODEL_EXATAS'),
-      fallbacks:
-        tier === 'exatas' ? TEXT_MODEL_EXATAS_FALLBACKS : TEXT_MODEL_FALLBACKS,
-    });
+    return [...new Set(raw.map((model) => MODELOS_RETIRADOS[model] ?? model))];
   }
 
   private isRetryableError(message: string): boolean {
@@ -83,6 +128,7 @@ export class NvidiaIaAdapter implements IaEnginePort {
       lower.includes('gone') ||
       lower.includes('end of life') ||
       lower.includes('not found') ||
+      lower.includes('vazia') ||
       lower.includes('fetch failed') ||
       lower.includes('econnreset') ||
       lower.includes('etimedout') ||
@@ -157,7 +203,9 @@ export class NvidiaIaAdapter implements IaEnginePort {
       });
 
       const data = (await response.json().catch(() => null)) as {
-        choices?: { message?: { content?: string } }[];
+        choices?: {
+          message?: { content?: string; reasoning_content?: string };
+        }[];
         error?: { message?: string };
         detail?: string;
       } | null;
@@ -170,11 +218,9 @@ export class NvidiaIaAdapter implements IaEnginePort {
         throw new Error(detail);
       }
 
-      const text = data?.choices?.[0]?.message?.content?.trim();
+      const text = extrairTextoNvidia(data ?? {});
       if (!text) {
-        throw new ServiceUnavailableException(
-          'O tutor não retornou uma resposta. Tente novamente.',
-        );
+        throw new Error(`Resposta vazia de ${modelName}`);
       }
 
       return text;
@@ -205,7 +251,12 @@ export class NvidiaIaAdapter implements IaEnginePort {
 
     for (const modelName of candidates) {
       try {
-        return await this.callModel(modelName, messages, timeoutMs, jsonMode);
+        return await this.callModel(
+          modelName,
+          messages,
+          timeoutMs,
+          jsonMode,
+        );
       } catch (error) {
         if (error instanceof ServiceUnavailableException) {
           throw error;
@@ -213,6 +264,8 @@ export class NvidiaIaAdapter implements IaEnginePort {
 
         const message =
           error instanceof Error ? error.message : 'Erro desconhecido';
+
+        this.logger.warn(`NVIDIA ${modelName} falhou: ${message}`);
 
         if (this.isRetryableError(message)) {
           lastError = error instanceof Error ? error : new Error(message);
@@ -266,6 +319,8 @@ export class NvidiaIaAdapter implements IaEnginePort {
 
         const message =
           error instanceof Error ? error.message : 'Erro desconhecido';
+
+        this.logger.warn(`NVIDIA stream ${modelName} falhou: ${message}`);
 
         if (this.isRetryableError(message)) {
           lastError = error instanceof Error ? error : new Error(message);

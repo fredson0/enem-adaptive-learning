@@ -38,10 +38,10 @@ export function ProgressoTrilhaResumo({
       />
 
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-osmo">
+        <p className="min-w-0 truncate text-sm font-medium text-osmo">
           {areaPrioritaria.label}
         </p>
-        <span className="text-xs tabular-nums text-osmo-subtle">
+        <span className="shrink-0 text-xs tabular-nums text-osmo-subtle">
           {areaPrioritaria.progresso}% da trilha
         </span>
       </div>

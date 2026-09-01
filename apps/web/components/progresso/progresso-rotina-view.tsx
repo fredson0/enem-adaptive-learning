@@ -186,15 +186,15 @@ export function ProgressoRotinaView({
           >
             {proficiencia.ultimoSimulado ? (
               <div className="rounded-xl border border-[var(--osmo-border)] bg-[var(--osmo-hover)] p-4">
-                <p className="text-sm text-osmo">
+                <p className="truncate text-sm text-osmo">
                   {proficiencia.ultimoSimulado.label ?? "Último simulado"}
                 </p>
                 <p className="mt-2 text-2xl font-medium tabular-nums text-osmo">
                   {proficiencia.ultimoSimulado.percentual}%
-                  <span className="ml-2 text-sm font-normal text-osmo-subtle">
-                    {proficiencia.ultimoSimulado.acertos}/
-                    {proficiencia.ultimoSimulado.totalQuestoes} acertos
-                  </span>
+                </p>
+                <p className="mt-1 text-sm font-normal text-osmo-subtle">
+                  {proficiencia.ultimoSimulado.acertos}/
+                  {proficiencia.ultimoSimulado.totalQuestoes} acertos
                 </p>
               </div>
             ) : (

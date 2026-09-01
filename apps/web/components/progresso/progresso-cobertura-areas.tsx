@@ -32,8 +32,8 @@ export function ProgressoCoberturaAreas({ areas }: ProgressoCoberturaAreasProps)
               className="block rounded-xl border border-transparent p-2 transition hover:border-[var(--osmo-border)] hover:bg-[var(--osmo-hover)]"
             >
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm text-osmo">{area.label}</p>
-                <span className="text-xs tabular-nums text-osmo-muted">
+                <p className="min-w-0 truncate text-sm text-osmo">{area.label}</p>
+                <span className="shrink-0 text-xs tabular-nums text-osmo-muted">
                   {area.dominadas}/{area.disponiveis}
                 </span>
               </div>

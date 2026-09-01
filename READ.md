@@ -8,7 +8,7 @@ O grande diferencial do projeto é o seu foco em acessibilidade social. Através
 
 🚀 Principais Funcionalidades
 
-🧠 Tutor Virtual IA: Integração com **NVIDIA NIM** (`meta/llama-3.1-8b-instruct`) para texto e **NVIDIA Llama 3.2 Vision** para fotos, com fallback **Groq** → **Gemini 2.5 Flash** via `IaEngineRouter`. Chat persistido no Postgres, contexto de métricas reais, explicação de erros pós-simulado e dicas durante o simulado. **Upload de foto** (questão ou resolução no caderno) com compressão no frontend e storage local (dev) / S3 Railway Bucket (prod).
+🧠 Tutor Virtual IA: Integração com **NVIDIA NIM** (`nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`) para texto e **NVIDIA Llama 3.2 Vision** para fotos, com fallback **GPT-OSS 20B/120B** → **Groq** → **Gemini 2.5 Flash** via `IaEngineRouter`. Chat persistido no Postgres, contexto de métricas reais, explicação de erros pós-simulado e dicas durante o simulado. **Upload de foto** (questão ou resolução no caderno) com compressão no frontend e storage local (dev) / S3 Railway Bucket (prod).
 
 🔐 Autenticação Segura (Google Login): Acesso facilitado via OAuth2 com o Google. Sessão com **cookies HttpOnly** no frontend (BFF Next.js) e **refresh tokens** rotativos na API.
 
@@ -109,7 +109,7 @@ GEMINI_API_KEY="sua_chave_do_google_ai_studio"
 GEMINI_MODEL="gemini-2.5-flash"
 IA_PROVIDER="nvidia"
 NVIDIA_API_KEY="sua_chave_build.nvidia.com"
-NVIDIA_MODEL="meta/llama-3.1-8b-instruct"
+NVIDIA_MODEL="nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
 NVIDIA_VISION_MODEL="meta/llama-3.2-11b-vision-instruct"
 # GROQ_API_KEY="opcional_fallback_vision"
 STORAGE_PROVIDER="local"

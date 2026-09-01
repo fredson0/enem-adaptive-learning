@@ -17,17 +17,17 @@ export function ProgressoEnemAnos({ anos }: ProgressoEnemAnosProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-[11px] text-osmo-subtle sm:text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="min-w-0 text-[11px] text-osmo-subtle sm:text-xs">
           {completos}/{anosOrdenados.length} provas com 100% de cobertura
         </p>
-        <span className="inline-flex items-center gap-1 text-[10px] text-osmo-accent">
+        <span className="inline-flex shrink-0 items-center gap-1 text-[10px] text-osmo-accent">
           <Sparkles className="size-3" />
           Complete todos os anos
         </span>
       </div>
 
-      <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-5 sm:gap-2">
+      <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5 sm:gap-2">
         {anosOrdenados.map((item) => {
           const href = `/simulados/treino/novo?ano=${item.ano}&quantidade=10&priorizar=1`;
           const temProgresso = item.dominadas > 0;

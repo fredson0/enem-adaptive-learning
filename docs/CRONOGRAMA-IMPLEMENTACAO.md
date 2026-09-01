@@ -137,7 +137,8 @@ Ver [ROADMAP-IA-E-COBERTURA.md](./ROADMAP-IA-E-COBERTURA.md) seção **F. Onda 4
 **Workspace**
 - [x] Títulos e chrome offset responsivos
 - [x] Tutor com safe-area no input
-- [ ] Polish `/progresso` em viewport estreita
+- [x] Polish `/progresso` em viewport estreita
+- [ ] Testes manuais em viewport 375px (G10)
 
 Ver [ROADMAP-IA-E-COBERTURA.md](./ROADMAP-IA-E-COBERTURA.md) seção **G. Onda 5**.
 

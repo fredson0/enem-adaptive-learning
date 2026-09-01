@@ -17,7 +17,7 @@ const ROUTER_LANES: RouterLane[] = [
   {
     step: "01",
     role: "Entrada de texto",
-    model: "nvidia/nemotron-3.5-lightning-30b-a3b",
+    model: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
     provider: "NVIDIA NIM",
     detail:
       "Tutor, trilha e criação de simulados por linguagem natural — com contexto real do aluno.",
@@ -33,7 +33,7 @@ const ROUTER_LANES: RouterLane[] = [
   {
     step: "03",
     role: "Fallback automático",
-    model: "groq → gemini-2.5-flash",
+    model: "groq → gemini-2.5-flash (último caso)",
     provider: "IaEngineRouter",
     detail:
       "Se o provedor principal falhar, a requisição segue sem derrubar a sessão do estudante.",

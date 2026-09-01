@@ -8,7 +8,7 @@ import {
 import { cn } from "@/lib/utils";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type ProgressoEvolucaoChartProps = {
   pontos: PontoEvolucao[];
@@ -22,13 +22,24 @@ export function ProgressoEvolucaoChart({
   variant = "bar",
 }: ProgressoEvolucaoChartProps) {
   const [ativo, setAtivo] = useState<number | null>(null);
+  const [estreito, setEstreito] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 639px)");
+    const sync = () => setEstreito(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  const limite = compact || estreito ? 5 : 8;
 
   const recentes = [...pontos]
     .sort(
       (a, b) =>
         new Date(a.finalizadoEm).getTime() - new Date(b.finalizadoEm).getTime(),
     )
-    .slice(compact ? -6 : -8);
+    .slice(-limite);
 
   if (recentes.length < 3) {
     return (
@@ -71,8 +82,8 @@ export function ProgressoEvolucaoChart({
 
     return (
       <div className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
+        <div className="flex items-start justify-between gap-2 sm:gap-3">
+          <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-wide text-osmo-subtle">
               Último resultado
             </p>
@@ -83,7 +94,7 @@ export function ProgressoEvolucaoChart({
           {tendencia !== null && tendencia !== 0 ? (
             <span
               className={cn(
-                "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium",
+                "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium sm:px-2.5 sm:text-xs",
                 tendencia > 0
                   ? "bg-[color-mix(in_srgb,var(--osmo-accent)_15%,transparent)] text-osmo-accent"
                   : "bg-red-500/15 text-red-400",
@@ -95,16 +106,18 @@ export function ProgressoEvolucaoChart({
                 <TrendingDown className="size-3" />
               )}
               {tendencia > 0 ? "+" : ""}
-              {tendencia}% vs anterior
+              {tendencia}%
+              <span className="hidden sm:inline"> vs anterior</span>
             </span>
           ) : null}
         </div>
 
-        <div className="relative">
+        <div className="relative overflow-hidden">
           <svg
             viewBox={`0 0 ${width} ${height}`}
-            className="h-auto w-full"
+            className="h-auto w-full touch-pan-y"
             onMouseLeave={() => setAtivo(null)}
+            onPointerLeave={() => setAtivo(null)}
           >
             {[0, 25, 50, 75, 100].map((nivel) => {
               const y = padY + chartH - (nivel / 100) * chartH;
@@ -141,6 +154,7 @@ export function ProgressoEvolucaoChart({
                   strokeWidth={2}
                   className="cursor-pointer"
                   onMouseEnter={() => setAtivo(index)}
+                  onPointerDown={() => setAtivo(index)}
                 />
               </g>
             ))}
@@ -159,9 +173,9 @@ export function ProgressoEvolucaoChart({
 
           {pontoAtivo ? (
             <div
-              className="pointer-events-none absolute rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-card)] px-2.5 py-1 text-[10px] text-osmo shadow-lg"
+              className="pointer-events-none absolute max-w-[70%] truncate rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-card)] px-2.5 py-1 text-[10px] text-osmo shadow-lg"
               style={{
-                left: `${(pontoAtivo.x / width) * 100}%`,
+                left: `${Math.min(88, Math.max(12, (pontoAtivo.x / width) * 100))}%`,
                 top: `${(pontoAtivo.y / height) * 100}%`,
                 transform: "translate(-50%, -130%)",
               }}
@@ -173,14 +187,25 @@ export function ProgressoEvolucaoChart({
         </div>
 
         <div className="flex justify-between gap-1 px-1">
-          {recentes.map((ponto) => (
-            <span
-              key={ponto.simuladoId}
-              className="flex-1 truncate text-center text-[9px] text-osmo-subtle"
-            >
-              {formatDateCurta(ponto.finalizadoEm)}
-            </span>
-          ))}
+          {recentes.map((ponto, index) => {
+            const mostrar =
+              !estreito ||
+              index === 0 ||
+              index === recentes.length - 1 ||
+              index === Math.floor((recentes.length - 1) / 2);
+
+            return (
+              <span
+                key={ponto.simuladoId}
+                className={cn(
+                  "flex-1 truncate text-center text-[9px] text-osmo-subtle",
+                  !mostrar && "invisible",
+                )}
+              >
+                {formatDateCurta(ponto.finalizadoEm)}
+              </span>
+            );
+          })}
         </div>
       </div>
     );
@@ -227,7 +252,8 @@ export function ProgressoEvolucaoChart({
       </div>
       {!compact ? (
         <p className="text-[11px] text-osmo-subtle">
-          Últimos {recentes.length} simulados · passe o mouse para ver detalhes
+          Últimos {recentes.length} simulados
+          <span className="hidden sm:inline"> · passe o mouse para ver detalhes</span>
         </p>
       ) : null}
     </div>

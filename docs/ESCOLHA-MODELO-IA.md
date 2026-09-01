@@ -8,13 +8,13 @@
 
 | Pergunta | Resposta |
 |----------|----------|
-| **Texto (chat livre)?** | **NVIDIA NIM** `meta/llama-3.1-8b-instruct` → fallback Gemini |
-| **Foto (vision)?** | **NVIDIA** `llama-3.2-11b-vision` → Groq → Gemini (último recurso) |
+| **Texto (chat livre)?** | **NVIDIA NIM** `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` → GPT-OSS 20B → Groq* → Gemini (último caso) |
+| **Foto (vision)?** | **NVIDIA** `llama-3.2-11b-vision` → Groq* → Gemini (último caso) |
 | **Existe API gratuita?** | **Sim** — NVIDIA NIM + Groq + Google AI Studio |
-| **Gemini ainda é usado?** | **Sim** — fallback de texto e vision (não primário) |
+| **Gemini ainda é usado?** | **Só último recurso** — se NVIDIA e Groq falharem; não conta na cadeia principal |
 | **Modelo antigo 1.5 / 2.0?** | **Não usar** — 2.0 Flash está em depreciação |
 
-> **Estratégia atualizada (08/08/2026):** texto via NVIDIA; **fotos via NVIDIA Vision** para não esgotar cota Gemini. Gemini só entra se NVIDIA/Groq falharem.
+> **Estratégia atualizada (01/09/2026):** Llama 3.1/3.3, Nano 9B/8B e Super 49B saíram de linha (EOL 26/08/2026). Texto via **Nemotron 3 Nano Omni 30B**. Exatas: GPT-OSS 120B no NIM (Groq 70B na frente, se configurado). **Gemini não entra no caminho feliz** — só depois de NVIDIA e Groq.
 
 ---
 
@@ -22,9 +22,9 @@
 
 | Tipo | Cadeia de fallback (`IaEngineRouter`) |
 |------|----------------------------------------|
-| **Só texto** | `IA_PROVIDER` (NVIDIA) → Gemini |
-| **Texto exatas** (Matemática/Natureza) | Groq 70B* → NVIDIA exatas → Gemini exatas |
-| **Com foto** | NVIDIA Vision → Groq Vision* → Gemini Vision |
+| **Só texto** | NVIDIA → Groq* → Gemini (último caso) |
+| **Texto exatas** (Matemática/Natureza) | Groq 70B* → NVIDIA exatas → Gemini (último caso) |
+| **Com foto** | NVIDIA Vision → Groq Vision* → Gemini (último caso) |
 
 \*Groq entra na cadeia se `GROQ_API_KEY` estiver configurada.
 
@@ -32,8 +32,8 @@
 
 ```env
 IA_PROVIDER=nvidia
-NVIDIA_MODEL=meta/llama-3.1-8b-instruct
-NVIDIA_MODEL_EXATAS=meta/llama-3.3-70b-instruct
+NVIDIA_MODEL=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
+NVIDIA_MODEL_EXATAS=openai/gpt-oss-120b
 NVIDIA_VISION_MODEL=meta/llama-3.2-11b-vision-instruct
 
 # Opcional — exatas via Groq (prioridade no router para Matemática/Natureza)
@@ -70,7 +70,7 @@ GEMINI_MODEL_EXATAS=gemini-2.5-flash
 
 | Provedor | Modelo free | Cartão? | Limite típico free | Português | Melhor para |
 |----------|-------------|---------|-------------------|-----------|-------------|
-| **NVIDIA NIM** ⭐ | `llama-3.1-8b-instruct` (texto) | Não | ~40 RPM | Bom | **Chat texto (primário)** |
+| **NVIDIA NIM** ⭐ | `nemotron-3-nano-omni-30b-a3b-reasoning` (texto) | Não | ~40 RPM | Bom (PT listado) | **Chat texto (primário)** |
 | **NVIDIA NIM** ⭐ | `llama-3.2-11b-vision-instruct` | Não | ~40 RPM | Bom | **Foto no tutor (primário)** |
 | **Groq** | `llama-3.2-11b-vision-preview` | Não | ~30 RPM | Bom | Fallback vision |
 | **Google AI Studio** | `gemini-2.5-flash` | Não | ~250–1.500 req/dia* | Excelente | Fallback texto + vision |
@@ -171,7 +171,7 @@ GEMINI_MODEL=gemini-2.5-flash
 
 # NVIDIA NIM (build.nvidia.com) — free tier ~40 req/min
 NVIDIA_API_KEY=sua-chave
-NVIDIA_MODEL=meta/llama-3.1-8b-instruct
+NVIDIA_MODEL=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
 
 # Fallback opcional
 GROQ_API_KEY=sua-chave

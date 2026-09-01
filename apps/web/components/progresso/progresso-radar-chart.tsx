@@ -58,7 +58,7 @@ export function ProgressoRadarChart({ areas }: ProgressoRadarChartProps) {
           Faça treinos em diferentes áreas para ver seu mapa.
         </p>
       ) : (
-        <div className="relative mx-auto w-full max-w-[200px] sm:max-w-[260px]">
+        <div className="relative mx-auto w-full max-w-[min(100%,200px)] overflow-hidden sm:max-w-[260px]">
           <svg viewBox="0 0 240 240" className="h-auto w-full" aria-hidden>
             {niveis.map((nivel) => {
               const pontos = Array.from({ length: total }, (_, indice) =>
