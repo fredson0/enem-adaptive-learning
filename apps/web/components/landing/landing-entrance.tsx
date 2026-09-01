@@ -248,6 +248,7 @@ export function LandingEntrance({
     <motion.div
       className="fixed inset-0 z-[250] overflow-hidden"
       style={{ backgroundColor: LANDING_ENTRANCE_COLORS.background }}
+      initial={{ opacity: 1 }}
       animate={{ opacity: isExit ? 0 : 1 }}
       transition={{
         type: "tween",
@@ -271,6 +272,7 @@ export function LandingEntrance({
               LANDING_ENTRANCE_TITLE_CLASS,
               "absolute top-1/2 right-full z-20 -translate-y-1/2 pr-[0.05em] whitespace-nowrap text-[#0b0b0b]",
             )}
+            initial={{ opacity: 1 }}
             animate={letterFade}
             transition={letterFadeTransition}
           >
@@ -327,6 +329,7 @@ export function LandingEntrance({
               LANDING_ENTRANCE_TITLE_CLASS,
               "absolute top-1/2 left-full z-20 -translate-y-1/2 whitespace-nowrap text-[#0b0b0b]",
             )}
+            initial={{ opacity: 1 }}
             animate={letterFade}
             transition={letterFadeTransition}
           >

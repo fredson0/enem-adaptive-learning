@@ -103,7 +103,7 @@ export const WordsPullUp = ({
               shouldAnimate && !reduceMotion
                 ? { y: 0, opacity: 1, filter: "blur(0px)" }
                 : reduceMotion
-                  ? undefined
+                  ? { y: 0, opacity: 1, filter: "blur(0px)" }
                   : { y: 72, opacity: 0, filter: "blur(16px)" }
             }
             transition={heroRevealTransition(baseDelay + i * 0.06)}
@@ -167,8 +167,8 @@ export const WordsPullUpMultiStyle = ({
             isInView && !reduceMotion
               ? { y: 0, opacity: 1, filter: "blur(0px)" }
               : reduceMotion
-                ? undefined
-                : {}
+                ? { y: 0, opacity: 1, filter: "blur(0px)" }
+                : { y: 72, opacity: 0, filter: "blur(16px)" }
           }
           transition={heroRevealTransition(i * 0.06)}
           className={`inline-block ${w.className ?? ""}`}
