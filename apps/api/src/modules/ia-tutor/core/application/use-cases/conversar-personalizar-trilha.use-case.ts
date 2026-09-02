@@ -64,7 +64,9 @@ export class ConversarPersonalizarTrilhaUseCase {
     }
 
     if (input.mensagem?.trim()) {
-      const escopo = avaliarEscopoMensagem(input.mensagem);
+      const escopo = avaliarEscopoMensagem(input.mensagem, historico, {
+        entrevista: true,
+      });
       if (escopo.escopo === 'fora_escopo') {
         const tokens = await this.usoTokens.obterSaldo(input.userId);
         return {

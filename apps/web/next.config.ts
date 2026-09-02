@@ -3,16 +3,19 @@ import path from "path";
 
 const isDev = process.env.NODE_ENV !== "production";
 
+const googleGsi = "https://accounts.google.com https://www.gstatic.com";
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   isDev
-    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-    : "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
+    ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${googleGsi}`
+    : `script-src 'self' 'unsafe-inline' ${googleGsi}`,
+  "style-src 'self' 'unsafe-inline' https://accounts.google.com https://www.gstatic.com",
   "img-src 'self' data: blob: https:",
   "media-src 'self' blob: https:",
   "font-src 'self' data:",
   "connect-src 'self' https: wss:",
+  `frame-src 'self' ${googleGsi}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

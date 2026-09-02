@@ -17,7 +17,6 @@ import {
 import {
   LANDING_ENTRANCE_IMAGE_SRC,
   LANDING_HERO_VIDEO_URL,
-  publishLandingHeroVideoHandoff,
 } from "@/lib/landing-hero-media";
 import { cn } from "@/lib/utils";
 import { motion, useReducedMotion } from "framer-motion";
@@ -207,14 +206,6 @@ export function LandingEntrance({
     };
   }, [reduceMotion, metricsReady]);
 
-  useEffect(() => {
-    if (phase !== "exit") return;
-    const time = entranceVideoRef.current?.currentTime;
-    if (typeof time === "number" && Number.isFinite(time)) {
-      publishLandingHeroVideoHandoff(time);
-    }
-  }, [phase]);
-
   const isTitle = phase === "title";
   const isExpand = phase === "expand" || phase === "exit";
   const isExit = phase === "exit";
@@ -278,8 +269,8 @@ export function LandingEntrance({
       <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
         <motion.div
           className="relative"
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ y: 16 }}
+          animate={{ y: 0 }}
           transition={{
             type: "tween",
             duration: LANDING_ENTRANCE_TIMINGS.titleIn / 1000,
@@ -289,9 +280,10 @@ export function LandingEntrance({
           <motion.span
             className={cn(
               LANDING_ENTRANCE_TITLE_CLASS,
-              "absolute top-1/2 right-full z-20 -translate-y-1/2 pr-[0.05em] whitespace-nowrap text-[#0b0b0b]",
+              "absolute top-1/2 right-full z-20 -translate-y-1/2 pr-[0.05em] whitespace-nowrap",
             )}
-            initial={{ opacity: 1 }}
+            style={{ color: LANDING_ENTRANCE_COLORS.title }}
+            initial={false}
             animate={letterFade}
             transition={letterFadeTransition}
           >
@@ -346,9 +338,10 @@ export function LandingEntrance({
           <motion.span
             className={cn(
               LANDING_ENTRANCE_TITLE_CLASS,
-              "absolute top-1/2 left-full z-20 -translate-y-1/2 whitespace-nowrap text-[#0b0b0b]",
+              "absolute top-1/2 left-full z-20 -translate-y-1/2 whitespace-nowrap",
             )}
-            initial={{ opacity: 1 }}
+            style={{ color: LANDING_ENTRANCE_COLORS.title }}
+            initial={false}
             animate={letterFade}
             transition={letterFadeTransition}
           >

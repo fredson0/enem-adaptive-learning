@@ -1,8 +1,9 @@
 "use client";
 
+import { ProgressoStreakFlame } from "@/components/progresso/progresso-streak-flame";
 import type { RitmoSemanal } from "@/lib/progresso-helpers";
 import { cn } from "@/lib/utils";
-import { Check, Flame } from "lucide-react";
+import { Check } from "lucide-react";
 
 type ProgressoStreakCardProps = {
   ritmo: RitmoSemanal;
@@ -59,7 +60,7 @@ export function ProgressoStreakCard({ ritmo }: ProgressoStreakCardProps) {
 
       <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-osmo-muted">
         <span className="inline-flex items-center gap-1.5">
-          <Flame className="size-3.5 text-osmo-accent" />
+          <ProgressoStreakFlame lit={ritmo.sequenciaAtual > 0} />
           {ritmo.sequenciaAtual > 0
             ? `${ritmo.sequenciaAtual} dia${ritmo.sequenciaAtual === 1 ? "" : "s"} seguidos`
             : "Sem sequência ativa"}

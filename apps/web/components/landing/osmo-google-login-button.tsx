@@ -78,11 +78,21 @@ export function OsmoGoogleLoginButton({
     <button
       type="button"
       onClick={() => {
-        if (!clientRef.current) {
-          onError();
-          return;
-        }
-        clientRef.current.requestAccessToken();
+        const requestToken = () => {
+          if (!clientRef.current) return false;
+          clientRef.current.requestAccessToken();
+          return true;
+        };
+
+        if (requestToken()) return;
+
+        const started = Date.now();
+        const retryId = window.setInterval(() => {
+          if (requestToken() || Date.now() - started > 2500) {
+            window.clearInterval(retryId);
+            if (!clientRef.current) onError();
+          }
+        }, 150);
       }}
       className="flex h-12 w-full items-center justify-center rounded-xl text-sm font-medium text-white transition hover:brightness-110"
       style={{ backgroundColor: MARKETING_OSMO_COLORS.ctaButton }}

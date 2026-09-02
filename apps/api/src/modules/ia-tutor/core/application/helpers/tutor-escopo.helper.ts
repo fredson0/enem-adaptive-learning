@@ -1,13 +1,18 @@
+import { TRILHA_ASSUNTOS } from '../../../../metricas/core/application/helpers/trilha-assuntos.catalog';
+import type { MensagemHistorico } from '../ports/ia-engine.port';
+
 export type EscopoMensagem = 'permitido' | 'fora_escopo';
 
-export type MotivoForaEscopo =
-  | 'programacao'
-  | 'geral'
-  | 'exfiltracao';
+export type MotivoForaEscopo = 'programacao' | 'geral' | 'exfiltracao';
 
 export type AvaliacaoEscopo = {
   escopo: EscopoMensagem;
   motivo?: MotivoForaEscopo;
+};
+
+export type OpcoesEscopo = {
+  /** Conversa de checklist: respostas do aluno às perguntas do tutor. */
+  entrevista?: boolean;
 };
 
 function normalizar(texto: string) {
@@ -17,11 +22,37 @@ function normalizar(texto: string) {
     .replace(/\p{M}/gu, '');
 }
 
+function casa(pattern: RegExp, texto: string): boolean {
+  pattern.lastIndex = 0;
+  return pattern.test(texto);
+}
+
 const ENEM_KEYWORDS =
-  /\b(enem|vestibular|simulado|quest[aã]o|reda[cç][aã]o|matem[aá]tica|linguagens|humanas|natureza|f[ií]sica|qu[ií]mica|biologia|hist[oó]ria|geografia|filosofia|sociologia|literatura|interpreta[cç][aã]o|trilha|prova|gabarito|nota enem|enem\+|treino guiado|lacuna|profici[eê]ncia|cobertura|assunto enem|compet[eê]ncia|disserta[cç][aã]o|cronograma|revis[aã]o|func[aã]o|equa[cç][aã]o|algebra|geometria|trigonometria|estat[ií]stica|probabilidade|logaritmo|polin[oô]mio|matriz|vetor|angulo|tri[aâ]ngulo|resolver|calcular|exerc[ií]cio)\b/;
+  /\b(enem|vestibular|simulado|quest[aã]o|questoes|reda[cç][aã]o|matem[aá]tica|linguagens|humanas|natureza|f[ií]sica|qu[ií]mica|biologia|hist[oó]ria|geografia|filosofia|sociologia|literatura|interpreta[cç][aã]o|trilha|prova|gabarito|nota enem|enem\+|treino guiado|lacuna|profici[eê]ncia|cobertura|assunto enem|compet[eê]ncia|disserta[cç][aã]o|cronograma|revis[aã]o|func(ao|oes)|equac(ao|oes)|algebra|geometria|trigonometria|estat[ií]stica|probabilidade|logaritmo|polin[oô]mio|matriz|vetor|angulo|tri[aâ]ngulo|resolver|calcular|exerc[ií]cio|estudar|estudos|rotina|checklist|frac(ao|oes)|porcentagem|razao|proporcao)\b/;
 
 const PLATAFORMA_KEYWORDS =
   /\b(como funciona|plano gratuito|tokens?|tutor ia|progresso|diagn[oó]stico|modalidade|cronometrado|pdf de quest|pdf explicativo)\b/;
+
+const TEMPO_ESTUDO =
+  /\b(\d+([.,]\d+)?|uma|duas|tres|quatro|cinco|seis|sete|oito|nove|dez|umas)\s*(h|hrs?|horas?|min(utos?)?)\b/;
+
+const DISPONIBILIDADE_ESTUDO =
+  /\b(por\s*(dia|semana)|todos os dias|todo dia|diariamente|semanalmente|fim de semana|finais de semana|\d+\s*(x|vezes)|manha|tarde|noite|disponh|consigo (estudar|dedicar)|tempo (livre|disponivel)|dedic(o|ar)|depois do (trabalho|expediente|almoco))\b/;
+
+const PREFERENCIA_ESTUDO =
+  /\b(teoria|teorico|questoes|exercicios|pratica|equilibrio|equilibrad|os dois|as duas|misturad|mais conteudo|mais pratica|videoaula|leitura|tanto faz)\b/;
+
+const META_E_CONTEXTO =
+  /\b(essa semana|nesta semana|meta|quero (fazer|passar|acertar|melhorar|revisar)|nenhum(a|o)?|nao tenho|so o enem|prova|vestibular|sisu|fuvest|evento|prazo)\b/;
+
+const NIVEL_OU_DIFICULDADE =
+  /\b(iniciante|intermediario|avancado|basico|dificil|facil|nao sei|tenho dificuldade|nao entendo|fraco|perdido|comecar do zero)\b/;
+
+const RESPOSTA_CURTA_CONVERSA =
+  /^(sim|nao|n[aã]o|ok|claro|pode ser|isso|exato|certo|iniciante|intermediario|avancado|basico|nenhuma|nenhum|os dois|as duas|tanto faz|mais teoria|mais questoes|equilibrio)[!.?\s]*$/i;
+
+const RESPOSTA_NUMERICA_CURTA =
+  /^\d+([.,]\d+)?\s*(h|hrs?|horas?|min(utos?)?|x|vezes?)?$/;
 
 const SAUDACAO_CURTA =
   /^(oi|ola|olá|hey|e aí|eai|bom dia|boa tarde|boa noite|ajuda|obrigad|valeu|tudo bem|td bem)[!.?\s]*$/i;
@@ -47,38 +78,83 @@ const EXFILTRACAO_OU_JAILBREAK = [
   /\b(select \* from|drop table|union select)\b/,
 ];
 
-function temRelacaoComEstudo(texto: string): boolean {
-  return ENEM_KEYWORDS.test(texto) || PLATAFORMA_KEYWORDS.test(texto);
+function mencionaAssuntoDoEnem(texto: string): boolean {
+  const t = texto.trim();
+  if (t.length < 4) return false;
+  return TRILHA_ASSUNTOS.some((assunto) => {
+    const nome = normalizar(assunto.nome);
+    if (nome.length < 4) return false;
+    return t === nome || t.includes(nome) || nome.includes(t);
+  });
 }
 
-export function avaliarEscopoMensagem(mensagem: string): AvaliacaoEscopo {
-  const bruto = mensagem.trim();
-  const texto = normalizar(bruto);
-  if (!texto) return { escopo: 'permitido' };
+function temRelacaoComEstudo(texto: string): boolean {
+  return (
+    casa(ENEM_KEYWORDS, texto) ||
+    casa(PLATAFORMA_KEYWORDS, texto) ||
+    casa(TEMPO_ESTUDO, texto) ||
+    casa(DISPONIBILIDADE_ESTUDO, texto) ||
+    casa(PREFERENCIA_ESTUDO, texto) ||
+    casa(META_E_CONTEXTO, texto) ||
+    casa(NIVEL_OU_DIFICULDADE, texto) ||
+    casa(RESPOSTA_NUMERICA_CURTA, texto) ||
+    mencionaAssuntoDoEnem(texto)
+  );
+}
 
+function conversaEmAndamento(
+  historico?: Pick<MensagemHistorico, 'role' | 'texto'>[],
+): boolean {
+  return Boolean(historico?.some((item) => item.role === 'assistant'));
+}
+
+function bloqueioRigido(texto: string): AvaliacaoEscopo | null {
   for (const pattern of EXFILTRACAO_OU_JAILBREAK) {
-    if (pattern.test(texto)) {
+    if (casa(pattern, texto)) {
       return { escopo: 'fora_escopo', motivo: 'exfiltracao' };
     }
   }
 
-  if (SAUDACAO_CURTA.test(bruto)) {
-    return { escopo: 'permitido' };
-  }
-
   for (const pattern of OFF_TOPIC_PROGRAMACAO) {
-    if (pattern.test(texto)) {
+    if (casa(pattern, texto)) {
       return { escopo: 'fora_escopo', motivo: 'programacao' };
     }
   }
 
+  return null;
+}
+
+export function avaliarEscopoMensagem(
+  mensagem: string,
+  historico?: Pick<MensagemHistorico, 'role' | 'texto'>[],
+  opcoes?: OpcoesEscopo,
+): AvaliacaoEscopo {
+  const bruto = mensagem.trim();
+  const texto = normalizar(bruto);
+  if (!texto) return { escopo: 'permitido' };
+
+  const rigido = bloqueioRigido(texto);
+  if (rigido) return rigido;
+
+  if (SAUDACAO_CURTA.test(bruto) || RESPOSTA_CURTA_CONVERSA.test(bruto)) {
+    return { escopo: 'permitido' };
+  }
+
+  if (opcoes?.entrevista) {
+    return { escopo: 'permitido' };
+  }
+
   for (const pattern of OFF_TOPIC_GERAL) {
-    if (pattern.test(texto)) {
+    if (casa(pattern, texto)) {
       return { escopo: 'fora_escopo', motivo: 'geral' };
     }
   }
 
   if (temRelacaoComEstudo(texto)) {
+    return { escopo: 'permitido' };
+  }
+
+  if (conversaEmAndamento(historico) && bruto.length <= 500) {
     return { escopo: 'permitido' };
   }
 

@@ -12,7 +12,6 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
 import {
   LANDING_HERO_VIDEO_URL,
-  subscribeLandingHeroVideoHandoff,
 } from "@/lib/landing-hero-media";
 import { cn } from "@/lib/utils";
 import { BRAND_NAME } from "@/lib/brand";
@@ -189,44 +188,18 @@ function EnemHero({ revealed = true }: { revealed?: boolean }) {
   const heroVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    return subscribeLandingHeroVideoHandoff((time) => {
-      const video = heroVideoRef.current;
-      if (!video) return;
-
-      const applyTime = () => {
-        try {
-          video.currentTime = time;
-        } catch {
-          /* ignore seek errors during load */
-        }
-      };
-
-      if (video.readyState >= 1) {
-        applyTime();
-      } else {
-        video.addEventListener("loadedmetadata", applyTime, { once: true });
-      }
-    });
-  }, []);
-
-  useEffect(() => {
     const video = heroVideoRef.current;
     if (!video) return;
-
-    if (revealed) {
-      void video.play().catch(() => undefined);
-      return;
-    }
-
-    video.pause();
-  }, [revealed]);
+    video.muted = true;
+    void video.play().catch(() => undefined);
+  }, []);
 
   return (
     <section className="relative min-h-svh w-full">
       <div className="absolute inset-0 overflow-hidden">
         <video
           ref={heroVideoRef}
-          autoPlay={false}
+          autoPlay
           loop
           muted
           playsInline

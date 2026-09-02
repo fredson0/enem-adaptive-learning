@@ -518,6 +518,78 @@ html.light .osmo-workspace .tutor-prompt-scroll::-webkit-scrollbar-thumb:hover {
   }
 }
 
+@keyframes streak-flame-flicker {
+  0%,
+  100% {
+    transform: scaleY(1) scaleX(1) rotate(-1.5deg);
+  }
+  20% {
+    transform: scaleY(1.1) scaleX(0.92) rotate(2deg);
+  }
+  45% {
+    transform: scaleY(0.9) scaleX(1.08) rotate(-2.5deg);
+  }
+  70% {
+    transform: scaleY(1.08) scaleX(0.94) rotate(1.5deg);
+  }
+}
+
+@keyframes streak-flame-core {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.95;
+  }
+  40% {
+    transform: translateY(-0.6px) scale(1.08, 0.9);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(0.4px) scale(0.92, 1.06);
+    opacity: 0.85;
+  }
+}
+
+@keyframes streak-flame-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.15);
+  }
+}
+
+.streak-flame-outer {
+  animation: streak-flame-flicker 0.85s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.55));
+}
+
+.streak-flame-inner {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: streak-flame-core 0.7s ease-in-out infinite;
+}
+
+.streak-flame-glow {
+  background: radial-gradient(
+    circle,
+    rgba(249, 115, 22, 0.55) 0%,
+    transparent 72%
+  );
+  animation: streak-flame-glow 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .streak-flame-outer,
+  .streak-flame-inner,
+  .streak-flame-glow {
+    animation: none;
+  }
+}
+
 .noise-overlay {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat: repeat;

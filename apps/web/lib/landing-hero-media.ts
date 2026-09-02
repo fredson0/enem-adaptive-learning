@@ -38,21 +38,3 @@ export const LANDING_ENTRANCE_IMAGE_SRC = hasLocalMarketingFile(
   ? MARKETING_IMAGE_PATHS.landing.entrancePoster
   : "";
 
-/** Sincroniza o frame do vídeo entre a intro e a hero (evita “pulo” na transição). */
-let landingHeroVideoHandoffTime: number | null = null;
-const landingHeroVideoHandoffListeners = new Set<(time: number) => void>();
-
-export function publishLandingHeroVideoHandoff(time: number) {
-  landingHeroVideoHandoffTime = time;
-  landingHeroVideoHandoffListeners.forEach((listener) => listener(time));
-}
-
-export function subscribeLandingHeroVideoHandoff(listener: (time: number) => void) {
-  landingHeroVideoHandoffListeners.add(listener);
-  if (landingHeroVideoHandoffTime !== null) {
-    listener(landingHeroVideoHandoffTime);
-  }
-  return () => {
-    landingHeroVideoHandoffListeners.delete(listener);
-  };
-}

@@ -198,7 +198,10 @@ export class EnviarMensagemTutorUseCase {
       conversaId,
     );
 
-    const escopo = avaliarEscopoMensagem(input.mensagem);
+    const escopo = avaliarEscopoMensagem(
+      input.mensagem,
+      conversa?.mensagens,
+    );
     if (escopo.escopo === 'fora_escopo') {
       const resposta = respostaForaEscopo(escopo.motivo);
       const tokens = await this.usoTokens.obterSaldo(input.userId);
