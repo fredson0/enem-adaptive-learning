@@ -47,9 +47,9 @@ function BuscaAssuntos({
 }) {
   return (
     <>
-      <div className="relative mx-auto max-w-xl">
+      <div className="relative min-w-0 w-full">
         <Search
-          className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-osmo-subtle sm:left-5"
+          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-osmo-subtle sm:left-4"
           strokeWidth={1.75}
         />
         <input
@@ -58,7 +58,7 @@ function BuscaAssuntos({
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           className={cn(
-            "w-full rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-card)] py-3 pr-4 pl-11 text-sm text-osmo sm:py-3.5 sm:pr-5 sm:pl-12",
+            "w-full min-w-0 rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-card)] py-2.5 pr-3 pl-10 text-sm text-osmo sm:py-3 sm:pr-4 sm:pl-11",
             "placeholder:text-osmo-subtle outline-none transition",
             "focus:border-[color-mix(in_srgb,var(--osmo-text)_20%,transparent)] focus:bg-[var(--osmo-hover)]",
           )}
@@ -73,6 +73,40 @@ function BuscaAssuntos({
         </p>
       ) : null}
     </>
+  );
+}
+
+function VaultBack({
+  onClick,
+  href,
+  label,
+}: {
+  onClick?: () => void;
+  href?: string;
+  label: string;
+}) {
+  const className =
+    "inline-flex min-w-0 max-w-[42%] shrink-0 items-center gap-1.5 text-sm text-osmo-muted transition hover:text-osmo sm:max-w-none";
+
+  const content = (
+    <>
+      <ArrowLeft className="size-4 shrink-0" />
+      <span className="truncate">{label}</span>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {content}
+    </button>
   );
 }
 
@@ -179,14 +213,8 @@ export function TrilhaGeralVault({
 
   if (modalidadeId && !modalidadeAtiva) {
     return (
-      <div className="mx-auto max-w-6xl space-y-6 pb-6 sm:space-y-8">
-        <Link
-          href="/trilha/geral"
-          className="inline-flex items-center gap-2 text-sm text-osmo-muted transition hover:text-osmo-muted"
-        >
-          <ArrowLeft className="size-4" />
-          Todas as modalidades
-        </Link>
+      <div className="mx-auto w-full min-w-0 max-w-6xl space-y-6 pb-6 sm:space-y-8">
+        <VaultBack href="/trilha/geral" label="Todas as modalidades" />
         <p className="text-sm text-osmo-muted">Modalidade não encontrada.</p>
       </div>
     );
@@ -194,14 +222,11 @@ export function TrilhaGeralVault({
 
   if (modalidadeId && disciplinaId && modalidadeAtiva && !disciplinaAtiva) {
     return (
-      <div className="mx-auto max-w-6xl space-y-6 pb-6 sm:space-y-8">
-        <Link
+      <div className="mx-auto w-full min-w-0 max-w-6xl space-y-6 pb-6 sm:space-y-8">
+        <VaultBack
           href={`/trilha/geral?modalidade=${encodeURIComponent(modalidadeAtiva.id)}`}
-          className="inline-flex items-center gap-2 text-sm text-osmo-muted transition hover:text-osmo-muted"
-        >
-          <ArrowLeft className="size-4" />
-          {modalidadeAtiva.nome}
-        </Link>
+          label={modalidadeAtiva.nome}
+        />
         <p className="text-sm text-osmo-muted">Matéria não encontrada.</p>
       </div>
     );
@@ -211,44 +236,44 @@ export function TrilhaGeralVault({
     const area = mapaArea.get(modalidadeAtiva.areaSlug);
 
     return (
-      <div className="mx-auto max-w-6xl space-y-8 pb-6 sm:space-y-12 sm:pb-8">
-        <button
-          type="button"
-          onClick={voltar}
-          className="inline-flex items-center gap-2 text-sm text-osmo-muted transition hover:text-osmo-muted"
-        >
-          <ArrowLeft className="size-4" />
-          {modalidadeAtiva.nome}
-        </button>
-
-        <header className="mx-auto max-w-2xl space-y-5 text-center sm:space-y-8">
-          <div className="space-y-2 sm:space-y-3">
-            <p
-              className="text-[10px] uppercase tracking-[0.18em] sm:text-[11px]"
-              style={{ color: modalidadeAtiva.areaCor }}
-            >
-              {modalidadeAtiva.nome}
-            </p>
-            <h1 className="text-2xl font-medium tracking-tight text-osmo sm:text-3xl md:text-5xl">
-              {disciplinaAtiva.nome}
-            </h1>
-            <p className="text-xs text-osmo-muted sm:text-sm md:text-base">
-              {disciplinaAtiva.assuntos.length} assuntos — escolha por onde
-              começar.
-            </p>
-            {area ? (
-              <p className="text-xs text-osmo-subtle">
-                {area.progresso}% da trilha · {area.prioridade}
-              </p>
-            ) : null}
+      <div className="mx-auto w-full min-w-0 max-w-6xl space-y-6 pb-6 sm:space-y-10 sm:pb-8">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <VaultBack onClick={voltar} label={modalidadeAtiva.nome} />
+          <div className="min-w-0 flex-1">
+            <BuscaAssuntos
+              busca={busca}
+              onChange={setBusca}
+              placeholder="Buscar assunto…"
+            />
           </div>
+        </div>
+        {busca.trim() ? (
+          <p className="-mt-3 text-xs text-osmo-subtle">
+            {assuntosFiltrados.length === 0
+              ? "Nenhum resultado encontrado."
+              : `${assuntosFiltrados.length} resultado${assuntosFiltrados.length === 1 ? "" : "s"}`}
+          </p>
+        ) : null}
 
-          <BuscaAssuntos
-            busca={busca}
-            onChange={setBusca}
-            placeholder="Buscar assunto…"
-            resultadoCount={busca.trim() ? assuntosFiltrados.length : undefined}
-          />
+        <header className="space-y-2 sm:mx-auto sm:max-w-2xl sm:space-y-3 sm:text-center">
+          <p
+            className="text-[10px] uppercase tracking-[0.18em] sm:text-[11px]"
+            style={{ color: modalidadeAtiva.areaCor }}
+          >
+            {modalidadeAtiva.nome}
+          </p>
+          <h1 className="text-2xl font-medium tracking-tight wrap-break-word text-osmo sm:text-3xl md:text-5xl">
+            {disciplinaAtiva.nome}
+          </h1>
+          <p className="text-xs text-osmo-muted sm:text-sm md:text-base">
+            {disciplinaAtiva.assuntos.length} assuntos — escolha por onde
+            começar.
+          </p>
+          {area ? (
+            <p className="text-xs text-osmo-subtle">
+              {area.progresso}% da trilha · {area.prioridade}
+            </p>
+          ) : null}
         </header>
 
         <TrilhaCardsGrid>
@@ -268,51 +293,45 @@ export function TrilhaGeralVault({
     const temDisciplinas = modalidadeTemDisciplinas(modalidadeAtiva);
 
     return (
-      <div className="mx-auto max-w-6xl space-y-8 pb-6 sm:space-y-12 sm:pb-8">
-        <button
-          type="button"
-          onClick={voltar}
-          className="inline-flex items-center gap-2 text-sm text-osmo-muted transition hover:text-osmo-muted"
-        >
-          <ArrowLeft className="size-4" />
-          Todas as modalidades
-        </button>
-
-        <header className="mx-auto max-w-2xl space-y-5 text-center sm:space-y-8">
-          <div className="space-y-2 sm:space-y-3">
-            <p
-              className="text-[10px] uppercase tracking-[0.18em] sm:text-[11px]"
-              style={{ color: modalidadeAtiva.areaCor }}
-            >
-              {modalidadeAtiva.areaTag}
-            </p>
-            <h1 className="text-2xl font-medium tracking-tight text-osmo sm:text-3xl md:text-5xl">
-              {modalidadeAtiva.nome}
-            </h1>
-            <p className="text-xs text-osmo-muted sm:text-sm md:text-base">
-              {temDisciplinas
-                ? `${modalidadeAtiva.disciplinas?.length ?? 0} matérias — escolha por onde começar.`
-                : `${contarAssuntosModalidade(modalidadeAtiva)} assuntos — escolha por onde começar.`}
-            </p>
-            {area ? (
-              <p className="text-xs text-osmo-subtle">
-                {area.progresso}% da trilha · {area.prioridade}
-              </p>
-            ) : null}
+      <div className="mx-auto w-full min-w-0 max-w-6xl space-y-6 pb-6 sm:space-y-10 sm:pb-8">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <VaultBack onClick={voltar} label="Todas as modalidades" />
+          <div className="min-w-0 flex-1">
+            <BuscaAssuntos
+              busca={busca}
+              onChange={setBusca}
+              placeholder={temDisciplinas ? "Buscar matéria…" : "Buscar assunto…"}
+            />
           </div>
+        </div>
+        {busca.trim() ? (
+          <p className="-mt-3 text-xs text-osmo-subtle">
+            {(temDisciplinas ? disciplinasFiltradas.length : assuntosFiltrados.length) === 0
+              ? "Nenhum resultado encontrado."
+              : `${temDisciplinas ? disciplinasFiltradas.length : assuntosFiltrados.length} resultado${(temDisciplinas ? disciplinasFiltradas.length : assuntosFiltrados.length) === 1 ? "" : "s"}`}
+          </p>
+        ) : null}
 
-          <BuscaAssuntos
-            busca={busca}
-            onChange={setBusca}
-            placeholder={temDisciplinas ? "Buscar matéria…" : "Buscar assunto…"}
-            resultadoCount={
-              busca.trim()
-                ? temDisciplinas
-                  ? disciplinasFiltradas.length
-                  : assuntosFiltrados.length
-                : undefined
-            }
-          />
+        <header className="space-y-2 sm:mx-auto sm:max-w-2xl sm:space-y-3 sm:text-center">
+          <p
+            className="text-[10px] uppercase tracking-[0.18em] sm:text-[11px]"
+            style={{ color: modalidadeAtiva.areaCor }}
+          >
+            {modalidadeAtiva.areaTag}
+          </p>
+          <h1 className="text-2xl font-medium tracking-tight wrap-break-word text-osmo sm:text-3xl md:text-5xl">
+            {modalidadeAtiva.nome}
+          </h1>
+          <p className="text-xs text-osmo-muted sm:text-sm md:text-base">
+            {temDisciplinas
+              ? `${modalidadeAtiva.disciplinas?.length ?? 0} matérias — escolha por onde começar.`
+              : `${contarAssuntosModalidade(modalidadeAtiva)} assuntos — escolha por onde começar.`}
+          </p>
+          {area ? (
+            <p className="text-xs text-osmo-subtle">
+              {area.progresso}% da trilha · {area.prioridade}
+            </p>
+          ) : null}
         </header>
 
         <TrilhaCardsGrid>
@@ -340,34 +359,33 @@ export function TrilhaGeralVault({
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-12 pb-8">
-      <Link
-        href="/trilha"
-        className="inline-flex items-center gap-2 text-sm text-osmo-muted transition hover:text-osmo-muted"
-      >
-        <ArrowLeft className="size-4" />
-        Voltar
-      </Link>
-
-      <header className="mx-auto max-w-2xl space-y-5 text-center sm:space-y-8">
-        <div className="space-y-2 sm:space-y-3">
-          <h1 className="text-2xl font-medium tracking-tight text-osmo sm:text-3xl md:text-5xl">
-            Todas as modalidades
-          </h1>
-          <p className="text-xs text-osmo-muted sm:text-sm md:text-base">
-            {TRILHA_MODALIDADES.length} modalidades do ENEM — escolha uma para
-            ver os assuntos.
-          </p>
+    <div className="mx-auto w-full min-w-0 max-w-6xl space-y-6 pb-8 sm:space-y-12">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+        <VaultBack href="/trilha" label="Voltar" />
+        <div className="min-w-0 flex-1">
+          <BuscaAssuntos
+            busca={busca}
+            onChange={setBusca}
+            placeholder="Buscar modalidade…"
+          />
         </div>
+      </div>
+      {busca.trim() ? (
+        <p className="-mt-3 text-xs text-osmo-subtle">
+          {modalidadesFiltradas.length === 0
+            ? "Nenhum resultado encontrado."
+            : `${modalidadesFiltradas.length} resultado${modalidadesFiltradas.length === 1 ? "" : "s"}`}
+        </p>
+      ) : null}
 
-        <BuscaAssuntos
-          busca={busca}
-          onChange={setBusca}
-          placeholder="Buscar modalidade…"
-          resultadoCount={
-            busca.trim() ? modalidadesFiltradas.length : undefined
-          }
-        />
+      <header className="space-y-2 sm:mx-auto sm:max-w-2xl sm:space-y-3 sm:text-center">
+        <h1 className="text-2xl font-medium tracking-tight text-osmo sm:text-3xl md:text-5xl">
+          Todas as modalidades
+        </h1>
+        <p className="text-xs text-osmo-muted sm:text-sm md:text-base">
+          {TRILHA_MODALIDADES.length} modalidades do ENEM — escolha uma para
+          ver os assuntos.
+        </p>
       </header>
 
       <TrilhaPlanoSemanalCard
@@ -395,8 +413,8 @@ export function TrilhaGeralVault({
 
           return (
             <section key={grupo.areaSlug} className="space-y-4 sm:space-y-5">
-              <div className="flex flex-wrap items-end justify-between gap-2 border-b border-[var(--osmo-border)] pb-3 sm:gap-3 sm:pb-4">
-                <div>
+              <div className="flex min-w-0 flex-wrap items-end justify-between gap-2 border-b border-[var(--osmo-border)] pb-3 sm:gap-3 sm:pb-4">
+                <div className="min-w-0">
                   <p
                     className="text-[10px] uppercase tracking-[0.18em] sm:text-[11px]"
                     style={{ color: grupo.cor }}

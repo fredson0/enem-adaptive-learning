@@ -1,8 +1,7 @@
 "use client";
 
-import { ProgressArcGauge } from "@/components/progresso/progress-arc-gauge";
 import { ProgressoAreasList } from "@/components/progresso/progresso-areas-list";
-import { ProgressoCard } from "@/components/progresso/progresso-card";
+import { ProgressoBlock } from "@/components/progresso/progresso-block";
 import { ProgressoComparativoSemana } from "@/components/progresso/progresso-comparativo-semana";
 import { ProgressoCoberturaAreas } from "@/components/progresso/progresso-cobertura-areas";
 import { ProgressoEvolucaoChart } from "@/components/progresso/progresso-evolucao-chart";
@@ -21,7 +20,7 @@ import {
   ordenarAreasPorPrioridade,
 } from "@/lib/progresso-helpers";
 import { cn } from "@/lib/utils";
-import { BarChart3, History, Target, TrendingUp } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 function LinhaTendencia({ texto }: { texto: string }) {
@@ -76,154 +75,142 @@ export function ProgressoDesempenhoView({
 
   return (
     <ProgressoSectionShell
+      tone="desempenho"
       title="Desempenho"
       description="Veja sua média geral, como cada área do ENEM está evoluindo e onde concentrar revisão."
     >
-      <div className="space-y-3 md:space-y-4">
-        <ProgressoKpiStrip
-          items={[
-            {
-              label: "Simulados",
-              value: String(proficiencia.resumo.simuladosConcluidos),
-              hint: "concluídos no total",
-            },
-            {
-              label: "Questões",
-              value: String(totalQuestoes),
-              hint: "respondidas",
-            },
-            {
-              label: "Melhor área",
-              value: melhorArea ? `${melhorArea.score}%` : "—",
-              hint: melhorArea?.label ?? "Sem dados",
-              accent: "positive",
-            },
-            {
-              label: "Precisa atenção",
-              value: piorArea ? `${piorArea.score}%` : "—",
-              hint: piorArea?.label ?? "Sem lacunas",
-              accent: "warning",
-            },
-          ]}
-        />
+      <ProgressoKpiStrip
+        items={[
+          {
+            label: "Simulados",
+            value: String(proficiencia.resumo.simuladosConcluidos),
+            hint: "concluídos no total",
+          },
+          {
+            label: "Questões",
+            value: String(totalQuestoes),
+            hint: "respondidas",
+          },
+          {
+            label: "Melhor área",
+            value: melhorArea ? `${melhorArea.score}%` : "—",
+            hint: melhorArea?.label ?? "Sem dados",
+            accent: "positive",
+          },
+          {
+            label: "Precisa atenção",
+            value: piorArea ? `${piorArea.score}%` : "—",
+            hint: piorArea?.label ?? "Sem lacunas",
+            accent: "warning",
+          },
+        ]}
+      />
 
-        <div className="grid gap-3 md:grid-cols-2 md:gap-4">
-          <ProgressoCard
-            icon={<TrendingUp className="size-4" />}
-            title="Média geral"
-            footer={
-              linhaTendencia ? (
-                <LinhaTendencia texto={linhaTendencia} />
-              ) : undefined
-            }
-          >
-            <div className="flex justify-center py-1">
-              <ProgressArcGauge
-                percent={mediaExibida}
-                labelLeft={`${mediaExibida}%`}
-                labelRight="média geral"
-                className="max-w-[200px] sm:max-w-[220px]"
-              />
+      <div className="grid gap-10 border-t border-[var(--osmo-border)] pt-10 lg:grid-cols-12 lg:gap-16 lg:pt-12">
+        <ProgressoBlock eyebrow="Média geral" className="lg:col-span-5">
+          <p className="text-6xl font-medium tabular-nums tracking-tight text-osmo sm:text-7xl">
+            {mediaExibida}%
+          </p>
+          {linhaTendencia ? (
+            <div className="mt-3">
+              <LinhaTendencia texto={linhaTendencia} />
             </div>
-            {proficiencia.ultimoSimulado ? (
-              <p className="mt-3 text-center text-[11px] text-osmo-subtle">
-                Último:{" "}
-                <Link
-                  href={`/simulados/${proficiencia.ultimoSimulado.id}/resultado`}
-                  className="text-osmo-muted underline-offset-2 hover:underline"
-                >
-                  {proficiencia.ultimoSimulado.percentual}% ·{" "}
-                  {proficiencia.ultimoSimulado.acertos}/
-                  {proficiencia.ultimoSimulado.totalQuestoes}
-                </Link>
-              </p>
-            ) : null}
-          </ProgressoCard>
-
-          <ProgressoCard
-            icon={<BarChart3 className="size-4" />}
-            title="Distribuição por área"
-          >
-            <p className="text-[10px] uppercase tracking-wide text-osmo-subtle">
-              Volume de questões
-            </p>
-            <p className="mt-0.5 text-2xl font-medium tabular-nums text-osmo sm:text-3xl">
-              {totalQuestoes}
-            </p>
-            <div className="mt-4 sm:mt-5">
-              <ProgressoSegmentedBar
-                segmentos={segmentos}
-                total={totalQuestoes}
-              />
-            </div>
-          </ProgressoCard>
-
-          <ProgressoCard
-            icon={<TrendingUp className="size-4" />}
-            title="Esta semana vs anterior"
-            className="md:col-span-2"
-          >
-            <ProgressoComparativoSemana comparativo={comparativoSemanal} />
-          </ProgressoCard>
-
-          <ProgressoCard
-            icon={<BarChart3 className="size-4" />}
-            title="Por área"
-            footer={
-              lacunaPrincipal ? (
-                <Link
-                  href="/progresso/foco"
-                  className="text-xs text-osmo-subtle transition hover:text-osmo-muted"
-                >
-                  Ver plano de foco →
-                </Link>
-              ) : undefined
-            }
-          >
-            <ProgressoAreasList
-              areas={areasOrdenadas}
-              lacunaSlug={lacunaPrincipal?.slug ?? null}
-              tendencias={tendenciasArea}
-            />
-          </ProgressoCard>
-
-          <ProgressoRadarChart areas={proficiencia.areas} />
-
-          <ProgressoCard
-            icon={<TrendingUp className="size-4" />}
-            title="Evolução nos simulados"
-            className="md:col-span-2"
-          >
-            <ProgressoEvolucaoChart pontos={evolucao} variant="line" />
-          </ProgressoCard>
-
-          {cobertura?.areas?.length ? (
-            <ProgressoCard
-              icon={<Target className="size-4" />}
-              title="Cobertura do banco por área"
-              className="md:col-span-2"
-              footer={
-                <Link
-                  href="/progresso/foco"
-                  className="text-xs text-osmo-subtle transition hover:text-osmo-muted"
-                >
-                  Ver assuntos e provas ENEM →
-                </Link>
-              }
-            >
-              <ProgressoCoberturaAreas areas={cobertura.areas} />
-            </ProgressoCard>
           ) : null}
+          {proficiencia.ultimoSimulado ? (
+            <p className="mt-4 text-sm text-osmo-subtle">
+              Último simulado{" "}
+              <Link
+                href={`/simulados/${proficiencia.ultimoSimulado.id}/resultado`}
+                className="text-osmo-muted underline-offset-2 hover:underline"
+              >
+                {proficiencia.ultimoSimulado.percentual}% ·{" "}
+                {proficiencia.ultimoSimulado.acertos}/
+                {proficiencia.ultimoSimulado.totalQuestoes}
+              </Link>
+            </p>
+          ) : null}
+        </ProgressoBlock>
 
-          <ProgressoCard
-            icon={<History className="size-4" />}
-            title="Histórico recente"
-            className="md:col-span-2"
-          >
-            <ProgressoHistoricoRecente pontos={evolucao} limit={6} />
-          </ProgressoCard>
-        </div>
+        <ProgressoBlock eyebrow="Volume por área" className="lg:col-span-7">
+          <p className="text-sm text-osmo-muted">Questões respondidas</p>
+          <p className="mt-1 text-3xl font-medium tabular-nums tracking-tight text-osmo sm:text-4xl">
+            {totalQuestoes}
+          </p>
+          <div className="mt-6">
+            <ProgressoSegmentedBar
+              segmentos={segmentos}
+              total={totalQuestoes}
+            />
+          </div>
+        </ProgressoBlock>
       </div>
+
+      <ProgressoBlock
+        eyebrow="Esta semana vs anterior"
+        className="border-t border-[var(--osmo-border)] pt-10 lg:pt-12"
+      >
+        <ProgressoComparativoSemana comparativo={comparativoSemanal} />
+      </ProgressoBlock>
+
+      <div className="grid gap-10 border-t border-[var(--osmo-border)] pt-10 lg:grid-cols-12 lg:gap-16 lg:pt-12">
+        <ProgressoBlock
+          eyebrow="Por área"
+          className="lg:col-span-7"
+          action={
+            lacunaPrincipal ? (
+              <Link
+                href="/progresso/foco"
+                className="inline-flex items-center gap-1 text-xs text-osmo-subtle transition hover:text-osmo"
+              >
+                Plano de foco
+                <ArrowRight className="size-3.5" />
+              </Link>
+            ) : undefined
+          }
+        >
+          <ProgressoAreasList
+            areas={areasOrdenadas}
+            lacunaSlug={lacunaPrincipal?.slug ?? null}
+            tendencias={tendenciasArea}
+          />
+        </ProgressoBlock>
+
+        <ProgressoBlock eyebrow="Mapa ENEM" className="lg:col-span-5">
+          <ProgressoRadarChart areas={proficiencia.areas} />
+        </ProgressoBlock>
+      </div>
+
+      <ProgressoBlock
+        eyebrow="Evolução nos simulados"
+        className="border-t border-[var(--osmo-border)] pt-10 lg:pt-12"
+      >
+        <ProgressoEvolucaoChart pontos={evolucao} variant="line" />
+      </ProgressoBlock>
+
+      {cobertura?.areas?.length ? (
+        <ProgressoBlock
+          eyebrow="Cobertura do banco"
+          className="border-t border-[var(--osmo-border)] pt-10 lg:pt-12"
+          action={
+            <Link
+              href="/progresso/foco"
+              className="inline-flex items-center gap-1 text-xs text-osmo-subtle transition hover:text-osmo"
+            >
+              Assuntos e provas
+              <ArrowRight className="size-3.5" />
+            </Link>
+          }
+        >
+          <ProgressoCoberturaAreas areas={cobertura.areas} />
+        </ProgressoBlock>
+      ) : null}
+
+      <ProgressoBlock
+        eyebrow="Histórico recente"
+        className="border-t border-[var(--osmo-border)] pt-10 lg:pt-12"
+      >
+        <ProgressoHistoricoRecente pontos={evolucao} limit={6} />
+      </ProgressoBlock>
     </ProgressoSectionShell>
   );
 }

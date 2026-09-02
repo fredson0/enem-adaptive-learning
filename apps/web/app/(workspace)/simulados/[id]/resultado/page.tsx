@@ -139,7 +139,7 @@ export default function SimuladoResultadoPage() {
   return (
     <WorkspaceSection title="Resultado">
       <div className="mx-auto max-w-3xl space-y-8">
-        <div className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-8 text-center">
+        <div className="rounded-[14px] border border-white/[0.06] bg-[#161616] p-5 text-center sm:p-8">
           <p className="text-xs uppercase tracking-wide text-white/40">
             {formatModoSimulado(resultado.modo)}
           </p>
@@ -189,11 +189,13 @@ export default function SimuladoResultadoPage() {
                   <p className="mt-2 line-clamp-3 text-sm text-white/75">
                     {q.contexto.replace(/!\[[^\]]*]\([^)]+\)/g, "").slice(0, 200)}…
                   </p>
-                  <p className="mt-3 text-sm">
+                  <p className="mt-3 flex flex-col gap-1 text-sm sm:block">
                     <span className="text-red-400">
                       Sua resposta: {q.alternativaMarcada ?? "—"}
                     </span>
-                    <span className="mx-2 text-white/25">·</span>
+                    <span className="hidden text-white/25 sm:inline">
+                      <span className="mx-2">·</span>
+                    </span>
                     <span className="text-emerald-400">Gabarito: {q.gabarito}</span>
                   </p>
                   <p className="mt-3 text-xs text-white/35">
@@ -245,32 +247,32 @@ export default function SimuladoResultadoPage() {
           </section>
         ) : null}
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {erros.length > 0 ? (
             <button
               type="button"
               disabled={refazendoErros}
               onClick={handleRefazerErros}
-              className="rounded-full bg-[#b0ff57] px-6 py-3 text-sm font-medium text-black transition hover:bg-[#b0ff57]/90 disabled:opacity-50"
+              className="w-full rounded-full bg-[#b0ff57] px-6 py-3 text-center text-sm font-medium text-black transition hover:bg-[#b0ff57]/90 disabled:opacity-50 sm:w-auto"
             >
               {refazendoErros ? "Criando simulado…" : `Refazer ${erros.length} erro${erros.length === 1 ? "" : "s"}`}
             </button>
           ) : null}
           <Link
             href="/trilha"
-            className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90"
+            className="w-full rounded-full bg-white px-6 py-3 text-center text-sm font-medium text-black transition hover:bg-white/90 sm:w-auto"
           >
             Ver minha trilha
           </Link>
           <Link
             href="/progresso"
-            className="rounded-full border border-white/15 px-6 py-3 text-sm text-white/70 transition hover:border-white/25"
+            className="w-full rounded-full border border-white/15 px-6 py-3 text-center text-sm text-white/70 transition hover:border-white/25 sm:w-auto"
           >
             Ver progresso
           </Link>
           <Link
             href="/simulados"
-            className="rounded-full border border-white/15 px-6 py-3 text-sm text-white/70 transition hover:border-white/25"
+            className="w-full rounded-full border border-white/15 px-6 py-3 text-center text-sm text-white/70 transition hover:border-white/25 sm:w-auto"
           >
             Outros simulados
           </Link>

@@ -23,7 +23,7 @@ export function ProgressoCard({
   return (
     <article
       className={cn(
-        "flex flex-col rounded-2xl border border-[var(--osmo-border)] bg-[var(--osmo-card)] p-4 sm:rounded-[20px] sm:p-5",
+        "flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[var(--osmo-border)] bg-[var(--osmo-card)] p-4 sm:rounded-[20px] sm:p-5",
         className,
       )}
     >
@@ -34,7 +34,7 @@ export function ProgressoCard({
         <h3 className="text-[13px] font-medium text-osmo sm:text-sm">{title}</h3>
       </header>
 
-      <div className={cn("mt-3 flex flex-1 flex-col sm:mt-4", bodyClassName)}>
+      <div className={cn("mt-3 flex min-w-0 flex-1 flex-col sm:mt-4", bodyClassName)}>
         {children}
       </div>
 

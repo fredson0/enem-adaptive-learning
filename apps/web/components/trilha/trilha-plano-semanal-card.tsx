@@ -74,7 +74,7 @@ export function TrilhaPlanoSemanalCard({
         type="button"
         onClick={() => gerarPlano()}
         disabled={gerando}
-        className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-hover)] px-3 py-1.5 text-xs font-medium text-osmo transition hover:bg-[var(--osmo-active)] disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-[var(--osmo-border)] bg-[var(--osmo-hover)] px-3 py-2 text-xs font-medium text-osmo transition hover:bg-[var(--osmo-active)] disabled:opacity-60 sm:w-auto sm:py-1.5"
       >
         {gerando ? (
           <Loader2 className="size-3.5 animate-spin" />
@@ -136,11 +136,11 @@ export function TrilhaPlanoSemanalCard({
       ) : null}
 
       {plano?.proximoPasso ? (
-        <div className="mb-4 rounded-xl border border-[color-mix(in_srgb,var(--osmo-accent)_25%,transparent)] bg-[color-mix(in_srgb,var(--osmo-accent)_8%,transparent)] px-3 py-2.5">
+        <div className="mb-4 min-w-0 rounded-xl border border-[color-mix(in_srgb,var(--osmo-accent)_25%,transparent)] bg-[color-mix(in_srgb,var(--osmo-accent)_8%,transparent)] px-3 py-2.5">
           <p className="text-[10px] uppercase tracking-wide text-osmo-accent">
             Hoje
           </p>
-          <p className="mt-1 text-sm leading-relaxed text-osmo">
+          <p className="mt-1 text-sm leading-relaxed wrap-break-word text-osmo">
             {plano.proximoPasso}
           </p>
         </div>
@@ -148,7 +148,7 @@ export function TrilhaPlanoSemanalCard({
 
       <p
         className={cn(
-          "leading-relaxed text-osmo-muted",
+          "leading-relaxed wrap-break-word text-osmo-muted",
           compact ? "text-[13px]" : "text-sm",
         )}
       >
@@ -156,7 +156,7 @@ export function TrilhaPlanoSemanalCard({
       </p>
 
       {plano?.resumo ? (
-        <p className="mt-3 text-[13px] leading-relaxed text-osmo-subtle">
+        <p className="mt-3 text-[13px] leading-relaxed wrap-break-word text-osmo-subtle">
           {plano.resumo}
         </p>
       ) : null}
@@ -218,7 +218,7 @@ export function TrilhaPlanoSemanalCard({
                 </button>
                 <span
                   className={cn(
-                    "text-sm leading-snug",
+                    "min-w-0 flex-1 text-sm leading-snug wrap-break-word",
                     item.concluida
                       ? "text-osmo-subtle line-through"
                       : "text-osmo-muted",
@@ -240,7 +240,7 @@ export function TrilhaPlanoSemanalCard({
       {areaPrioritaria?.proximaEtapa?.href ? (
         <Link
           href={areaPrioritaria.proximaEtapa.href}
-          className="mt-4 inline-flex items-center gap-1 text-xs text-osmo-subtle transition hover:text-osmo"
+          className="mt-4 inline-flex min-w-0 max-w-full items-center gap-1 text-xs leading-snug wrap-break-word text-osmo-subtle transition hover:text-osmo"
         >
           Próxima etapa: {areaPrioritaria.proximaEtapa.titulo}
         </Link>

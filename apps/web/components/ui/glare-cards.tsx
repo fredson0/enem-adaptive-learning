@@ -128,7 +128,7 @@ const GlareCard = React.forwardRef<HTMLDivElement, GlareCardProps>(
         />
 
         <div
-          className="relative z-40 h-full w-full"
+          className="relative z-40 flex h-full min-h-0 w-full flex-col"
           style={{
             transform: prefersReducedMotion ? "none" : "translateZ(50px)",
             filter: isHovered

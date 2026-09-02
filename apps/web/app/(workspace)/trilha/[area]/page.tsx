@@ -227,51 +227,52 @@ export default function TrilhaAreaPage() {
 
   return (
     <WorkspaceSection>
-      <div className="mx-auto max-w-5xl space-y-4 sm:space-y-8">
-        <div className="scrollbar-none flex items-center gap-2 overflow-x-auto text-xs whitespace-nowrap trilha-breadcrumbs sm:flex-wrap sm:gap-3 sm:text-sm sm:whitespace-normal">
+      <div className="mx-auto w-full min-w-0 max-w-6xl">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-osmo-muted sm:text-sm">
           <Link
             href="/trilha"
-            className="inline-flex items-center gap-2 text-white/45 transition hover:text-white/75"
+            className="inline-flex items-center gap-1.5 transition hover:text-osmo"
           >
-            <ArrowLeft className="size-4" />
+            <ArrowLeft className="size-3.5 sm:size-4" />
             Trilha
           </Link>
-          <span className="text-white/20">/</span>
+          <span className="text-osmo-subtle">/</span>
           <Link
             href={breadcrumbModalidade}
-            className="text-white/45 transition hover:text-white/75"
+            className="transition hover:text-osmo"
           >
             {modalidadeParam ? "Modalidade" : "Todas as áreas"}
           </Link>
           {breadcrumbDisciplina && disciplinaCatalogo ? (
             <>
-              <span className="text-white/20">/</span>
+              <span className="text-osmo-subtle">/</span>
               <Link
                 href={breadcrumbDisciplina}
-                className="text-white/45 transition hover:text-white/75"
+                className="min-w-0 max-w-[40vw] truncate transition hover:text-osmo sm:max-w-none"
               >
                 {disciplinaCatalogo.nome}
               </Link>
             </>
           ) : null}
-          <span className="text-white/20">/</span>
+          <span className="text-osmo-subtle">/</span>
           {assuntoFoco ? (
             <>
               <Link
                 href={`/trilha/${area.slug}?modalidade=${encodeURIComponent(modalidadeParam ?? assuntoFoco.modalidadeId)}${assuntoFoco.disciplinaId ? `&disciplina=${encodeURIComponent(assuntoFoco.disciplinaId)}` : ""}`}
-                className="text-white/45 transition hover:text-white/75"
+                className="transition hover:text-osmo"
               >
                 {area.label}
               </Link>
-              <span className="text-white/20">/</span>
-              <span className="text-white/70">{assuntoFoco.nome}</span>
+              <span className="text-osmo-subtle">/</span>
+              <span className="min-w-0 truncate text-osmo">{assuntoFoco.nome}</span>
             </>
           ) : (
-            <span className="text-white/70">{area.label}</span>
+            <span className="text-osmo">{area.label}</span>
           )}
         </div>
 
-        <TrilhaAreaDetalheView
+        <div className="mt-6 sm:mt-8">
+          <TrilhaAreaDetalheView
           area={area}
           trilha={data}
           isPrioridade={isPrioridade}
@@ -284,6 +285,7 @@ export default function TrilhaAreaPage() {
           togglingEtapaId={togglingEtapaId}
           togglingChecklistId={togglingChecklistId}
         />
+        </div>
       </div>
     </WorkspaceSection>
   );

@@ -10,7 +10,7 @@ const LAYOUT_ID = "trilha-personalizar-cta";
 type TrilhaPersonalizarBotaoProps = {
   chat: TrilhaPersonalizarChat;
   label?: string;
-  variant?: "primary" | "ghost";
+  variant?: "primary" | "ghost" | "text";
   className?: string;
 };
 
@@ -23,17 +23,25 @@ export function TrilhaPersonalizarBotao({
   if (chat.aberto) return null;
 
   return (
-    <div className={cn("flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-center", className)}>
+    <div className={cn(
+      variant === "text"
+        ? "flex flex-col items-start gap-2"
+        : "flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-center",
+      className,
+    )}>
       <motion.button
         type="button"
         layoutId={LAYOUT_ID}
         disabled={chat.iniciando}
         onClick={() => void chat.abrir()}
         className={cn(
-          "inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition disabled:opacity-60 sm:w-auto sm:px-6 sm:py-2.5 sm:text-sm",
-          variant === "primary"
-            ? "bg-[#b0ff57] text-black hover:bg-[#c4ff7a]"
-            : "border border-[#b0ff57]/30 bg-[#b0ff57]/10 text-[#b0ff57] hover:bg-[#b0ff57]/15",
+          "inline-flex items-center justify-center gap-2 text-sm font-medium transition disabled:opacity-60",
+          variant === "primary" &&
+            "w-full rounded-full bg-[#b0ff57] px-4 py-2 text-xs text-black hover:bg-[#c4ff7a] sm:w-auto sm:px-6 sm:py-2.5 sm:text-sm",
+          variant === "ghost" &&
+            "w-full rounded-full border border-[#b0ff57]/30 bg-[#b0ff57]/10 px-4 py-2 text-xs text-[#b0ff57] hover:bg-[#b0ff57]/15 sm:w-auto sm:px-6 sm:py-2.5 sm:text-sm",
+          variant === "text" &&
+            "w-auto gap-1.5 p-0 text-osmo-accent hover:underline",
         )}
       >
         {chat.iniciando ? (

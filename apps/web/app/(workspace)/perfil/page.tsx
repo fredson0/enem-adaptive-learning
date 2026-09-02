@@ -66,17 +66,17 @@ export default function PerfilPage() {
 
   return (
     <WorkspaceSection title="Perfil">
-      <div className="max-w-xl rounded-[14px] border border-white/[0.06] bg-[#161616] p-6 md:p-8">
-        <div className="mb-8 flex items-center gap-4">
+      <div className="max-w-xl rounded-[14px] border border-white/[0.06] bg-[#161616] p-5 md:p-8">
+        <div className="mb-8 flex min-w-0 items-center gap-4">
           <UserAvatar
             name={user.nome}
             fotoUrl={user.fotoUrl}
-            className="size-14"
+            className="size-14 shrink-0"
             initialsClassName="text-lg"
           />
-          <div>
-            <p className="text-lg font-medium text-white">{user.nome}</p>
-            <p className="text-sm text-white/45">{user.email}</p>
+          <div className="min-w-0">
+            <p className="truncate text-lg font-medium text-white">{user.nome}</p>
+            <p className="truncate text-sm text-white/45">{user.email}</p>
           </div>
         </div>
 

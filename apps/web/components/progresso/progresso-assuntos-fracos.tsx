@@ -28,22 +28,22 @@ export function ProgressoAssuntosFracos({
   }
 
   return (
-    <ul className="space-y-2.5">
+    <ul className="divide-y divide-[var(--osmo-border)]">
       {fracos.map((assunto) => (
         <li key={assunto.assuntoId}>
           <Link
             href={`/simulados/treino/novo?assunto=${assunto.assuntoId}&quantidade=5&priorizar=1`}
-            className="flex items-center justify-between gap-3 rounded-xl border border-[var(--osmo-border)] bg-[var(--osmo-hover)] px-3 py-2.5 transition hover:border-[color-mix(in_srgb,var(--osmo-text)_15%,transparent)]"
+            className="flex items-center justify-between gap-3 py-3 transition first:pt-0 last:pb-0 hover:opacity-90"
           >
             <div className="min-w-0">
               <p className="truncate text-sm text-osmo">{assunto.nome}</p>
-              <p className="mt-0.5 text-[10px] text-osmo-subtle">
+              <p className="mt-0.5 text-[11px] text-osmo-subtle">
                 {assunto.dominadas}/{assunto.disponiveis} questões
               </p>
             </div>
             <span
               className={cn(
-                "shrink-0 text-xs font-medium tabular-nums",
+                "shrink-0 text-sm font-medium tabular-nums",
                 assunto.percentual < 30
                   ? "text-amber-400/90"
                   : "text-osmo-muted",

@@ -29,7 +29,10 @@ export function WorkspaceBreadcrumb() {
           return (
             <li
               key={`${crumb.label}-${index}`}
-              className="flex min-w-0 items-center gap-1.5"
+              className={cn(
+                "flex min-w-0 items-center gap-1.5",
+                index > 0 && !isLast && "hidden sm:flex",
+              )}
             >
               {index > 0 && (
                 <ChevronRight

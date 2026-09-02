@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  DesempenhoIllustration,
-  FocoIllustration,
-  RotinaIllustration,
-} from "@/components/progresso/progresso-hub-illustrations";
 import { GlareCard } from "@/components/ui/glare-cards";
 import type {
   CoberturaResponse,
@@ -28,8 +23,8 @@ import {
   Check,
   Target,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import type { ComponentType } from "react";
 
 const HUB_CARDS = [
   {
@@ -37,7 +32,8 @@ const HUB_CARDS = [
     href: "/progresso/desempenho",
     title: "Desempenho",
     subtitle: "Média, áreas e evolução",
-    Illustration: DesempenhoIllustration,
+    image: "/progresso/desempenho.png",
+    imageAlt: "Gráfico de evolução do desempenho no ENEM+",
     icon: BarChart3,
     badgeClass:
       "text-[#3d5a18] dark:text-[#b0ff57] border-[#b0ff57]/30 bg-[#b0ff57]/12 dark:border-[#b0ff57]/25 dark:bg-[#b0ff57]/10",
@@ -49,7 +45,8 @@ const HUB_CARDS = [
     href: "/progresso/rotina",
     title: "Rotina",
     subtitle: "Ritmo, metas e consistência",
-    Illustration: RotinaIllustration,
+    image: "/progresso/rotina.png",
+    imageAlt: "Painel da semana de estudo no ENEM+",
     icon: CalendarDays,
     badgeClass:
       "text-[#4a3db8] dark:text-[#7c6cff] border-[#7c6cff]/30 bg-[#7c6cff]/10 dark:border-[#7c6cff]/25 dark:bg-[#7c6cff]/10",
@@ -61,7 +58,8 @@ const HUB_CARDS = [
     href: "/progresso/foco",
     title: "Foco agora",
     subtitle: "Lacunas e próximo passo",
-    Illustration: FocoIllustration,
+    image: "/progresso/focoAgora.png",
+    imageAlt: "Alvo do próximo passo e da principal lacuna no ENEM+",
     icon: Target,
     badgeClass:
       "text-[#1e3a8a] dark:text-[#60a5fa] border-[#60a5fa]/30 bg-[#60a5fa]/10 dark:border-[#60a5fa]/25 dark:bg-[#60a5fa]/10",
@@ -150,12 +148,12 @@ export function ProgressoHub({
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 py-1 sm:space-y-8 sm:py-2">
-      <header className="space-y-2 px-0.5">
-        <p className="text-xs uppercase tracking-[0.18em] text-osmo-subtle">
+    <div className="mx-auto flex h-full min-h-0 w-full max-w-6xl flex-col gap-3 md:gap-8">
+      <header className="shrink-0 space-y-1.5 px-0.5">
+        <p className="hidden text-xs uppercase tracking-[0.18em] text-osmo-subtle sm:block">
           Progresso
         </p>
-        <h2 className="text-2xl font-medium tracking-tight text-osmo md:text-3xl">
+        <h2 className="text-2xl leading-tight font-medium tracking-tight text-osmo md:text-3xl">
           Seu painel
         </h2>
         <p className="max-w-xl text-sm leading-relaxed text-osmo-muted">
@@ -163,28 +161,25 @@ export function ProgressoHub({
         </p>
       </header>
 
-      <div className="-mx-4 flex gap-3 overflow-x-auto overflow-y-hidden px-4 pb-1 snap-x snap-mandatory scrollbar-none md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 md:snap-none lg:grid-cols-3 lg:gap-6">
+      <div className="-mx-4 flex min-h-0 flex-1 gap-3 overflow-x-auto overflow-y-hidden px-4 snap-x snap-mandatory scrollbar-none md:mx-0 md:grid md:h-auto md:flex-none md:grid-cols-2 md:overflow-visible md:px-0 md:snap-none lg:grid-cols-3 lg:gap-6">
         {HUB_CARDS.map((card) => {
           const Icon = card.icon;
           const stats = cardStats[card.id];
           const visual = PROGRESSO_HUB_VISUAL[card.id];
-          const Illustration = card.Illustration as ComponentType<{
-            className?: string;
-          }>;
 
           return (
             <Link
               key={card.id}
               href={card.href}
-              className="group block w-[min(82vw,22rem)] shrink-0 snap-start rounded-[2rem] focus:outline-none focus-visible:ring-2 focus-visible:ring-osmo-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--osmo-bg)] md:w-auto md:min-w-0"
+              className="group block w-[min(82vw,22rem)] shrink-0 snap-start rounded-[2rem] focus:outline-none focus-visible:ring-2 focus-visible:ring-osmo-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--osmo-bg)] max-md:h-full md:w-auto md:min-w-0"
             >
               <GlareCard
                 tiltIntensity={10}
                 glareColor={`${visual.accent}33`}
-                className="flex h-[360px] cursor-pointer flex-col overflow-hidden border-transparent p-1.5 pb-0 shadow-sm transition-shadow hover:shadow-md sm:h-[400px] md:h-[420px]"
+                className="flex h-full min-h-0 cursor-pointer flex-col overflow-hidden border-transparent p-1.5 pb-0 shadow-sm transition-shadow hover:shadow-md md:h-[420px]"
                 style={{ backgroundColor: visual.frame }}
               >
-                <div className="relative h-[46%] shrink-0 overflow-hidden rounded-[1.35rem]">
+                <div className="relative h-[38%] min-h-0 shrink-0 overflow-hidden rounded-[1.35rem] md:h-[46%]">
                   <div
                     className={cn(
                       "absolute inset-0 bg-gradient-to-br",
@@ -195,10 +190,17 @@ export function ProgressoHub({
                     className="absolute inset-0"
                     style={{ background: visual.glow }}
                   />
-                  <Illustration className="relative z-10 px-4 pt-3" />
+                  <Image
+                    src={card.image}
+                    alt={card.imageAlt}
+                    fill
+                    sizes="(max-width: 768px) 82vw, (max-width: 1024px) 50vw, 22rem"
+                    className="z-10 object-cover object-center"
+                    priority={card.id === "desempenho"}
+                  />
                 </div>
 
-                <div className="flex min-h-0 flex-1 flex-col justify-between overflow-hidden bg-[var(--osmo-card)] p-4 sm:p-6">
+                <div className="flex min-h-0 flex-1 flex-col justify-between overflow-hidden bg-[var(--osmo-card)] p-3 sm:p-6">
                   <div className="flex items-start justify-between gap-3">
                     <div
                       className={cn(
@@ -212,7 +214,7 @@ export function ProgressoHub({
                     <ArrowRight className="size-5 shrink-0 text-osmo-subtle transition group-hover:translate-x-0.5 group-hover:text-osmo-muted" />
                   </div>
 
-                  <div className="mt-4 space-y-3">
+                  <div className="mt-2 space-y-2 sm:mt-4 sm:space-y-3">
                     {card.id === "rotina" ? (
                       <div className="flex justify-between gap-0.5">
                         {ritmo.dias.map((dia) => (

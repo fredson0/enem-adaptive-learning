@@ -29,7 +29,7 @@ export function ProgressoCoberturaAreas({ areas }: ProgressoCoberturaAreasProps)
           <li key={area.slug}>
             <Link
               href={`/trilha/${area.slug}`}
-              className="block rounded-xl border border-transparent p-2 transition hover:border-[var(--osmo-border)] hover:bg-[var(--osmo-hover)]"
+              className="block py-1 transition hover:opacity-90"
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="min-w-0 truncate text-sm text-osmo">{area.label}</p>

@@ -1,6 +1,5 @@
 "use client";
 
-import { ProgressoCard } from "@/components/progresso/progresso-card";
 import type { RitmoSemanal } from "@/lib/progresso-helpers";
 import { cn } from "@/lib/utils";
 import { Check, Flame } from "lucide-react";
@@ -16,35 +15,39 @@ export function ProgressoStreakCard({ ritmo }: ProgressoStreakCardProps) {
       : `${ritmo.diasAtivosNaSemana} dias`;
 
   return (
-    <ProgressoCard icon={<Flame className="size-4" />} title="Ritmo da semana">
-      <p className="text-2xl font-medium tracking-tight text-osmo sm:text-3xl">
+    <section className="min-w-0">
+      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-osmo-subtle">
+        Ritmo da semana
+      </p>
+      <p className="mt-3 text-4xl font-medium tracking-tight text-osmo sm:text-5xl">
         {labelDias}
       </p>
-      <p className="mt-0.5 text-[11px] text-osmo-subtle sm:mt-1 sm:text-xs">
-        com prática esta semana
-      </p>
+      <p className="mt-1 text-sm text-osmo-muted">com prática esta semana</p>
 
-      <div className="mt-4 flex justify-between gap-0.5 sm:mt-5 sm:gap-1">
+      <div className="mt-8 grid grid-cols-7 gap-2 sm:gap-3">
         {ritmo.dias.map((dia) => (
-          <div key={dia.label} className="flex flex-col items-center gap-1 sm:gap-1.5">
+          <div
+            key={dia.label}
+            className="flex min-w-0 flex-col items-center gap-2"
+          >
             <div
               className={cn(
-                "flex size-6 items-center justify-center rounded-full border transition sm:size-7",
+                "flex size-9 items-center justify-center rounded-full border transition sm:size-11",
                 dia.ativo
                   ? "border-[color-mix(in_srgb,var(--osmo-accent)_40%,transparent)] bg-osmo-accent text-[var(--osmo-accent-fg)]"
-                  : "border-[var(--osmo-border)] bg-[var(--osmo-hover)] text-osmo-subtle",
+                  : "border-[var(--osmo-border)] text-osmo-subtle",
                 dia.hoje && !dia.ativo && "ring-1 ring-white/25",
               )}
             >
               {dia.ativo ? (
-                <Check className="size-3.5" strokeWidth={2.5} />
+                <Check className="size-4" strokeWidth={2.5} />
               ) : (
                 <span className="size-1.5 rounded-full bg-white/15" />
               )}
             </div>
             <span
               className={cn(
-                "text-[8px] uppercase tracking-wide sm:text-[9px]",
+                "text-[9px] uppercase tracking-[0.14em]",
                 dia.hoje ? "text-osmo-muted" : "text-osmo-subtle",
               )}
             >
@@ -54,7 +57,7 @@ export function ProgressoStreakCard({ ritmo }: ProgressoStreakCardProps) {
         ))}
       </div>
 
-      <div className="mt-4 flex flex-col gap-2 border-t border-[var(--osmo-border)] pt-3 text-[11px] text-osmo-muted sm:mt-5 sm:flex-row sm:items-center sm:gap-4 sm:pt-4 sm:text-xs">
+      <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-osmo-muted">
         <span className="inline-flex items-center gap-1.5">
           <Flame className="size-3.5 text-osmo-accent" />
           {ritmo.sequenciaAtual > 0
@@ -68,6 +71,6 @@ export function ProgressoStreakCard({ ritmo }: ProgressoStreakCardProps) {
           </span>
         ) : null}
       </div>
-    </ProgressoCard>
+    </section>
   );
 }

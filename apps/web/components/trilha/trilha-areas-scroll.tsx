@@ -98,7 +98,7 @@ export function TrilhaAreasScroll({ areas, className }: TrilhaAreasScrollProps) 
     return (
       <div
         className={cn(
-          "flex gap-4 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory [&::-webkit-scrollbar]:hidden",
+          "flex min-w-0 gap-4 overflow-x-auto overscroll-x-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory [&::-webkit-scrollbar]:hidden",
           className,
         )}
       >
@@ -110,7 +110,7 @@ export function TrilhaAreasScroll({ areas, className }: TrilhaAreasScrollProps) 
   }
 
   return (
-    <div className={cn("relative w-full overflow-hidden", className)}>
+    <div className={cn("relative min-w-0 w-full overflow-hidden", className)}>
       <motion.div
         className="flex w-max gap-4"
         animate={{ x: ["0%", "-50%"] }}

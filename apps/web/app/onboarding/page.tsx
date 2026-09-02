@@ -97,17 +97,17 @@ export default function OnboardingPage() {
 
   if (bootstrapping) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#151314] px-6">
+      <main className="flex min-h-dvh items-center justify-center bg-[#151314] px-4">
         <p className="text-sm text-white/45">Carregando…</p>
       </main>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#151314] px-6">
+    <main className="flex min-h-dvh items-start justify-center overflow-y-auto bg-[#151314] px-4 py-8 sm:items-center sm:px-6">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-lg rounded-[14px] border border-white/[0.06] bg-[#1e1d1b] p-8"
+        className="w-full max-w-lg rounded-[14px] border border-white/[0.06] bg-[#1e1d1b] p-5 sm:p-8"
       >
         <h1 className="text-2xl font-medium text-white">Bem-vindo ao ENEM+</h1>
         <p className="mt-2 text-sm text-white/50">

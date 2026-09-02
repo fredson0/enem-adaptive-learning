@@ -20,54 +20,42 @@ export function ProgressoComparativoSemana({
   } = comparativo;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <div className="rounded-xl border border-[var(--osmo-border)] bg-[var(--osmo-hover)] p-4">
-        <p className="text-[10px] uppercase tracking-wide text-osmo-subtle">
+    <div className="grid gap-8 sm:grid-cols-2 lg:gap-16">
+      <div>
+        <p className="text-[11px] uppercase tracking-[0.16em] text-osmo-subtle">
           Esta semana
         </p>
-        <p className="mt-2 text-2xl font-medium tabular-nums text-osmo">
+        <p className="mt-2 text-4xl font-medium tabular-nums tracking-tight text-osmo sm:text-5xl">
           {simuladosSemanaAtual}
-          <span className="ml-1 text-sm font-normal text-osmo-subtle">
-            simulado{simuladosSemanaAtual === 1 ? "" : "s"}
-          </span>
         </p>
-        {mediaSemanaAtual !== null ? (
-          <p className="mt-1 text-sm text-osmo-muted">
-            Média {mediaSemanaAtual}%
-          </p>
-        ) : (
-          <p className="mt-1 text-sm text-osmo-subtle">Sem simulados ainda</p>
-        )}
+        <p className="mt-1 text-sm text-osmo-muted">
+          simulado{simuladosSemanaAtual === 1 ? "" : "s"}
+          {mediaSemanaAtual !== null ? ` · média ${mediaSemanaAtual}%` : ""}
+        </p>
       </div>
 
-      <div className="rounded-xl border border-[var(--osmo-border)] bg-[var(--osmo-hover)] p-4">
-        <p className="text-[10px] uppercase tracking-wide text-osmo-subtle">
+      <div>
+        <p className="text-[11px] uppercase tracking-[0.16em] text-osmo-subtle">
           Semana passada
         </p>
-        <p className="mt-2 text-2xl font-medium tabular-nums text-osmo">
+        <p className="mt-2 text-4xl font-medium tabular-nums tracking-tight text-osmo sm:text-5xl">
           {simuladosSemanaAnterior}
-          <span className="ml-1 text-sm font-normal text-osmo-subtle">
-            simulado{simuladosSemanaAnterior === 1 ? "" : "s"}
-          </span>
         </p>
-        {mediaSemanaAnterior !== null ? (
-          <p className="mt-1 text-sm text-osmo-muted">
-            Média {mediaSemanaAnterior}%
-          </p>
-        ) : (
-          <p className="mt-1 text-sm text-osmo-subtle">Sem simulados</p>
-        )}
+        <p className="mt-1 text-sm text-osmo-muted">
+          simulado{simuladosSemanaAnterior === 1 ? "" : "s"}
+          {mediaSemanaAnterior !== null
+            ? ` · média ${mediaSemanaAnterior}%`
+            : ""}
+        </p>
       </div>
 
       {deltaMedia !== null ? (
-        <div
+        <p
           className={cn(
-            "flex items-center gap-2 rounded-xl border px-4 py-3 text-sm sm:col-span-2",
-            deltaMedia > 0
-              ? "border-[color-mix(in_srgb,var(--osmo-accent)_25%,transparent)] bg-[color-mix(in_srgb,var(--osmo-accent)_8%,transparent)] text-osmo-accent"
-              : deltaMedia < 0
-                ? "border-red-500/20 bg-red-500/10 text-red-400"
-                : "border-[var(--osmo-border)] bg-[var(--osmo-hover)] text-osmo-muted",
+            "flex items-center gap-2 text-sm sm:col-span-2",
+            deltaMedia > 0 && "text-osmo-accent",
+            deltaMedia < 0 && "text-red-400",
+            deltaMedia === 0 && "text-osmo-muted",
           )}
         >
           {deltaMedia > 0 ? (
@@ -82,7 +70,7 @@ export function ProgressoComparativoSemana({
                 ? `${deltaMedia}% na média vs semana passada`
                 : "Média estável em relação à semana passada"}
           </span>
-        </div>
+        </p>
       ) : null}
     </div>
   );

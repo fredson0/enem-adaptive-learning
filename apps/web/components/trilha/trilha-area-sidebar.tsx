@@ -1,17 +1,14 @@
 "use client";
 
-import { ProgressoCard } from "@/components/progresso/progresso-card";
-import { ProgressRing } from "@/components/progresso/progress-ring";
-import type { TrilhaArea, TrilhaResponse } from "@/lib/trilha";
 import { AREA_CORES } from "@/lib/progresso-helpers";
+import type { TrilhaArea, TrilhaResponse } from "@/lib/trilha";
 import { cn } from "@/lib/utils";
-import { Check, Sparkles, Target } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 
-const PRIORIDADE_STYLES = {
-  Alta: "bg-red-500/15 text-red-500 dark:text-red-300",
-  Média: "bg-amber-500/15 text-amber-600 dark:text-amber-300",
-  Baixa: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300",
+const PRIORIDADE_TEXT = {
+  Alta: "text-red-400",
+  Média: "text-amber-400",
+  Baixa: "text-osmo-accent",
 } as const;
 
 type TrilhaAreaSidebarProps = {
@@ -51,96 +48,77 @@ export function TrilhaAreaSidebar({
   const corArea = AREA_CORES[area.slug] ?? "var(--osmo-accent)";
 
   return (
-    <aside className="space-y-3 sm:space-y-4 lg:sticky lg:top-28 lg:self-start">
-      <ProgressoCard icon={<Target className="size-4" />} title="Seu progresso">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <ProgressRing
-            percent={progressoExibido}
-            color={corArea}
-            size={52}
-            strokeWidth={3.5}
-            className="sm:hidden"
-          />
-          <ProgressRing
-            percent={progressoExibido}
-            color={corArea}
-            size={64}
-            strokeWidth={4}
-            className="hidden sm:block"
-          />
-          <div className="min-w-0">
-            <p className="text-xl font-medium tabular-nums text-osmo sm:text-2xl">
-              {progressoExibido}%
-            </p>
-            <p className="mt-0.5 text-xs text-osmo-subtle">
-              {coberturaAssunto
-                ? `${coberturaAssunto.dominadas}/${coberturaAssunto.disponiveis} questões dominadas`
-                : `${etapasConcluidas}/${totalEtapas} etapas`}
-            </p>
-          </div>
-        </div>
+    <aside className="min-w-0 space-y-10 lg:sticky lg:top-28 lg:self-start lg:space-y-12">
+      <section>
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-osmo-subtle">
+          Seu progresso
+        </p>
+        <p
+          className="mt-3 text-5xl font-medium tabular-nums tracking-tight sm:text-6xl"
+          style={{ color: corArea }}
+        >
+          {progressoExibido}%
+        </p>
+        <p className="mt-2 text-sm text-osmo-muted">
+          {coberturaAssunto
+            ? `${coberturaAssunto.dominadas}/${coberturaAssunto.disponiveis} questões dominadas`
+            : `${etapasConcluidas}/${totalEtapas} etapas`}
+        </p>
 
-        <ul className="mt-4 space-y-2 border-t border-[var(--osmo-border)] pt-4 text-sm">
-          <li className="flex items-center justify-between gap-2">
-            <span className="text-osmo-muted">Prioridade</span>
-            <span
-              className={cn(
-                "rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide",
-                PRIORIDADE_STYLES[area.prioridade],
-              )}
-            >
+        <dl className="mt-6 space-y-3 text-sm">
+          <div className="flex items-baseline justify-between gap-3">
+            <dt className="text-osmo-subtle">Prioridade</dt>
+            <dd className={cn("uppercase tracking-[0.14em]", PRIORIDADE_TEXT[area.prioridade])}>
               {area.prioridade}
-            </span>
-          </li>
+            </dd>
+          </div>
           {area.proficienciaReal > 0 ? (
-            <li className="flex items-center justify-between gap-2">
-              <span className="text-osmo-muted">Simulados</span>
-              <span className="tabular-nums text-osmo">
-                {area.proficienciaReal}%
-              </span>
-            </li>
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-osmo-subtle">Simulados</dt>
+              <dd className="tabular-nums text-osmo">{area.proficienciaReal}%</dd>
+            </div>
           ) : null}
           {checklistArea.length > 0 ? (
-            <li className="flex items-center justify-between gap-2">
-              <span className="text-osmo-muted">Checklist IA</span>
-              <span className="tabular-nums text-osmo">
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-osmo-subtle">Checklist</dt>
+              <dd className="tabular-nums text-osmo">
                 {checklistConcluidos}/{checklistArea.length}
-              </span>
-            </li>
+              </dd>
+            </div>
           ) : null}
-        </ul>
+        </dl>
 
         {trilha.metaEnem || metaArea ? (
-          <div className="mt-4 space-y-1.5 border-t border-[var(--osmo-border)] pt-4">
+          <div className="mt-6 space-y-2 border-t border-[var(--osmo-border)] pt-5">
             {trilha.metaEnem ? (
-              <p className="text-xs leading-relaxed text-osmo-muted">
-                <span className="text-osmo-accent">Objetivo:</span>{" "}
+              <p className="text-sm leading-relaxed text-osmo-muted">
+                <span className="text-osmo-subtle">Objetivo · </span>
                 {trilha.metaEnem}
               </p>
             ) : null}
             {metaArea ? (
-              <p className="text-xs leading-relaxed text-osmo-subtle">{metaArea}</p>
+              <p className="text-sm leading-relaxed wrap-break-word text-osmo-subtle">
+                {metaArea}
+              </p>
             ) : null}
           </div>
         ) : null}
-      </ProgressoCard>
+      </section>
 
       {checklistArea.length > 0 ? (
-        <ProgressoCard
-          icon={<Sparkles className="size-4 text-osmo-accent" />}
-          title={assuntoFocoNome ? `Checklist · ${assuntoFocoNome}` : "Checklist IA"}
-        >
-          <ul className="space-y-2.5">
+        <section>
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-osmo-subtle">
+            {assuntoFocoNome ? `Checklist · ${assuntoFocoNome}` : "Checklist"}
+          </p>
+          <ul className="mt-5 space-y-3">
             {checklistArea.map((item) => {
               const toggling = togglingChecklistId === item.id;
               return (
-                <li key={item.id} className="flex items-start gap-2.5">
+                <li key={item.id} className="flex items-start gap-3">
                   <button
                     type="button"
                     disabled={toggling || !onToggleChecklist}
-                    onClick={() =>
-                      onToggleChecklist?.(item.id, !item.concluida)
-                    }
+                    onClick={() => onToggleChecklist?.(item.id, !item.concluida)}
                     className={cn(
                       "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full transition",
                       item.concluida
@@ -157,7 +135,7 @@ export function TrilhaAreaSidebar({
                   </button>
                   <span
                     className={cn(
-                      "text-sm leading-snug",
+                      "min-w-0 flex-1 text-sm leading-snug wrap-break-word",
                       item.concluida
                         ? "text-osmo-subtle line-through"
                         : "text-osmo-muted",
@@ -169,7 +147,7 @@ export function TrilhaAreaSidebar({
               );
             })}
           </ul>
-        </ProgressoCard>
+        </section>
       ) : null}
     </aside>
   );

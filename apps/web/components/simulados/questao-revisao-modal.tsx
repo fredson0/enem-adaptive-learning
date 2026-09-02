@@ -32,7 +32,7 @@ export function QuestaoRevisaoModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm md:p-8"
+      className="fixed inset-0 z-[200] flex items-end justify-center bg-black/75 p-3 backdrop-blur-sm sm:items-center sm:p-4 md:p-8"
       role="dialog"
       aria-modal="true"
       aria-label={`Questão ENEM ${questao.ano} ${questao.indice}`}
@@ -40,7 +40,7 @@ export function QuestaoRevisaoModal({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="flex h-full w-full max-w-3xl flex-col">
+      <div className="flex h-[min(92dvh,100%)] w-full max-w-3xl flex-col">
         <div className="mb-3 flex items-center justify-between px-1">
           <p className="text-sm font-medium text-white/70">
             ENEM {questao.ano} · Questão {questao.indice}
@@ -48,7 +48,7 @@ export function QuestaoRevisaoModal({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex size-8 items-center justify-center rounded-lg text-white/50 transition hover:bg-white/10 hover:text-white"
+            className="inline-flex size-10 items-center justify-center rounded-lg text-white/50 transition hover:bg-white/10 hover:text-white"
             aria-label="Fechar"
           >
             <X className="size-4" strokeWidth={1.75} />
@@ -57,7 +57,7 @@ export function QuestaoRevisaoModal({
 
         <article
           data-lenis-prevent
-          className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-[14px] border border-white/[0.06] bg-[#161616] p-6 md:p-8 tutor-prompt-scroll"
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-[14px] border border-white/[0.06] bg-[#161616] p-4 tutor-prompt-scroll sm:p-6 md:p-8"
         >
           {questao.imagemUrl ? (
             // eslint-disable-next-line @next/next/no-img-element

@@ -35,7 +35,7 @@ export default function PlanosPage() {
                   : "border-white/[0.06] bg-[var(--osmo-card)]"
               } ${isAtual ? "ring-1 ring-[#b0ff57]/40" : ""}`}
             >
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm text-white/45">{catalogo.name}</p>
                 {isAtual ? (
                   <span className="rounded-full bg-[#b0ff57]/15 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-[#b0ff57]">

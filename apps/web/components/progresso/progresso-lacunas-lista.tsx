@@ -25,7 +25,7 @@ export function ProgressoLacunasLista({
   }
 
   return (
-    <ul className="space-y-3">
+    <ul className="divide-y divide-[var(--osmo-border)]">
       {lacunas.map((lacuna, index) => {
         const cor = AREA_CORES[lacuna.slug] ?? "var(--osmo-accent)";
         const href = `/simulados/treino/novo?area=${lacuna.simuladoSugerido.area}&quantidade=${lacuna.simuladoSugerido.quantidade}`;
@@ -36,33 +36,31 @@ export function ProgressoLacunasLista({
             <Link
               href={href}
               className={cn(
-                "flex items-start gap-3 rounded-xl border p-3 transition sm:p-4",
-                ehPrincipal
-                  ? "border-[color-mix(in_srgb,var(--osmo-accent)_25%,transparent)] bg-[color-mix(in_srgb,var(--osmo-accent)_6%,transparent)]"
-                  : "border-[var(--osmo-border)] bg-[var(--osmo-hover)] hover:border-[color-mix(in_srgb,var(--osmo-text)_12%,transparent)]",
+                "group flex items-start gap-4 py-4 transition first:pt-0 last:pb-0 hover:opacity-90",
+                ehPrincipal && "pt-0",
               )}
             >
-              <div
-                className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-semibold"
-                style={{ backgroundColor: `${cor}22`, color: cor }}
+              <span
+                className="mt-0.5 w-10 shrink-0 text-lg font-medium tabular-nums tracking-tight"
+                style={{ color: cor }}
               >
                 {lacuna.score}%
-              </div>
+              </span>
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                   <p className="text-sm font-medium text-osmo">{lacuna.label}</p>
-                  <span className="rounded-full bg-white/5 px-2 py-0.5 text-[9px] uppercase tracking-wide text-osmo-subtle">
+                  <span className="text-[11px] uppercase tracking-[0.14em] text-osmo-subtle">
                     {lacuna.prioridade}
                   </span>
                 </div>
-                <p className="mt-1 text-xs leading-relaxed text-osmo-muted">
+                <p className="mt-1 text-sm leading-relaxed text-osmo-muted">
                   {lacuna.mensagem}
                 </p>
-                <p className="mt-2 text-[11px] text-osmo-subtle">
+                <p className="mt-1.5 text-[11px] text-osmo-subtle">
                   {lacuna.acertos}/{lacuna.totalQuestoes} acertos no banco
                 </p>
               </div>
-              <ArrowRight className="mt-1 size-4 shrink-0 text-osmo-subtle" />
+              <ArrowRight className="mt-1 size-4 shrink-0 text-osmo-subtle transition group-hover:translate-x-0.5" />
             </Link>
           </li>
         );

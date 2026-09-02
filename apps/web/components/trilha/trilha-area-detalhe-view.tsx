@@ -1,6 +1,7 @@
 "use client";
 
-import { ProgressoCard } from "@/components/progresso/progresso-card";
+import { ProgressoBlock } from "@/components/progresso/progresso-block";
+import { ProgressoKpiStrip } from "@/components/progresso/progresso-kpi-strip";
 import { TrilhaAreaSidebar } from "@/components/trilha/trilha-area-sidebar";
 import { TrilhaEtapasProgressBar } from "@/components/trilha/trilha-etapas-progress-bar";
 import type { TrilhaArea, TrilhaEtapa, TrilhaResponse } from "@/lib/trilha";
@@ -19,24 +20,24 @@ import {
   TrilhaPersonalizarPainel,
 } from "@/components/trilha/trilha-personalizar-ia-chat";
 import { useTrilhaPersonalizarChat } from "@/components/trilha/use-trilha-personalizar-chat";
+import { AREA_CORES } from "@/lib/progresso-helpers";
 import { cn } from "@/lib/utils";
 import {
+  ArrowRight,
   Check,
   ChevronDown,
   ChevronRight,
   Loader2,
-  Map,
-  Square,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 
-const AREA_GRADIENTS: Record<string, string> = {
-  matematica: "from-[#1a2a4a]/80 via-[#161616] to-[#111]",
-  linguagens: "from-[#3a1a2a]/80 via-[#161616] to-[#111]",
-  humanas: "from-[#3a2a10]/80 via-[#161616] to-[#111]",
-  natureza: "from-[#103a2a]/80 via-[#161616] to-[#111]",
+const AREA_TAGS: Record<string, string> = {
+  matematica: "Exatas",
+  linguagens: "Texto",
+  humanas: "Humanas",
+  natureza: "Natureza",
 };
 
 type TrilhaAreaDetalheViewProps = {
@@ -60,38 +61,34 @@ function OrientacaoPainel({ disciplinas }: { disciplinas: string[] }) {
       : ["os tópicos mais cobrados no ENEM"];
 
   return (
-    <div className="mt-3 space-y-2.5 rounded-[12px] border border-white/[0.08] bg-black/25 p-3 sm:mt-4 sm:space-y-4 sm:rounded-[14px] sm:p-4">
+    <div className="mt-4 space-y-5 border-l-2 border-osmo-accent/40 pl-4 sm:pl-5">
       <div>
-        <p className="text-[10px] uppercase tracking-[0.14em] text-white/35">
+        <p className="text-[11px] uppercase tracking-[0.16em] text-osmo-subtle">
           Assuntos prioritários
         </p>
         <ul className="mt-2 space-y-1.5">
           {assuntos.map((disciplina) => (
-            <li
-              key={disciplina}
-              className="flex items-start gap-2 text-sm text-white/70"
-            >
-              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#b0ff57]" />
+            <li key={disciplina} className="text-sm leading-relaxed text-osmo-muted">
               {disciplina}
             </li>
           ))}
         </ul>
       </div>
       <div>
-        <p className="text-[10px] uppercase tracking-[0.14em] text-white/35">
+        <p className="text-[11px] uppercase tracking-[0.16em] text-osmo-subtle">
           Ordem sugerida
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-white/55">
+        <p className="mt-2 text-sm leading-relaxed text-osmo-muted">
           Comece lendo esta orientação, depois faça o treino guiado (5 questões),
           o simulado da área (10 questões) e revise os erros com o tutor. Cada
           etapa prepara você para a próxima.
         </p>
       </div>
       <div>
-        <p className="text-[10px] uppercase tracking-[0.14em] text-white/35">
+        <p className="text-[11px] uppercase tracking-[0.16em] text-osmo-subtle">
           Dica
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-white/55">
+        <p className="mt-2 text-sm leading-relaxed text-osmo-muted">
           Marque cada etapa como concluída quando terminar — você pode voltar e
           repassar qualquer conteúdo a qualquer momento.
         </p>
@@ -109,6 +106,7 @@ function EtapaAcoes({
   orientacaoAberta,
   onToggleOrientacao,
   disciplinasOrientacao,
+  destaque = false,
 }: {
   etapa: TrilhaEtapa;
   area: TrilhaArea;
@@ -118,16 +116,20 @@ function EtapaAcoes({
   orientacaoAberta: boolean;
   onToggleOrientacao: () => void;
   disciplinasOrientacao: string[];
+  destaque?: boolean;
 }) {
   const repassando = etapa.concluida;
+  const ctaClass = destaque
+    ? "inline-flex items-center gap-1.5 rounded-full bg-osmo-accent px-4 py-2 text-sm font-medium text-[var(--osmo-accent-fg)] transition hover:opacity-90 disabled:opacity-50"
+    : "inline-flex items-center gap-1.5 text-sm text-osmo-accent transition hover:underline disabled:opacity-50";
 
   if (etapa.tipo === "orientacao") {
     return (
-      <div className="mt-3 space-y-3">
+      <div className="mt-4 space-y-3">
         <button
           type="button"
           onClick={onToggleOrientacao}
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs text-white/75 transition hover:border-white/25 hover:bg-white/[0.08] sm:w-auto"
+          className="inline-flex items-center gap-1.5 text-sm text-osmo-muted transition hover:text-osmo"
         >
           {orientacaoAberta
             ? "Ocultar orientação"
@@ -149,7 +151,7 @@ function EtapaAcoes({
             type="button"
             disabled={toggling}
             onClick={() => onToggleEtapa(etapa.id, true)}
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#b0ff57] px-4 py-2 text-xs font-medium text-black transition hover:bg-[#c4ff7a] disabled:opacity-50 sm:w-auto"
+            className={ctaClass}
           >
             {toggling ? (
               <Loader2 className="size-3.5 animate-spin" />
@@ -165,11 +167,7 @@ function EtapaAcoes({
 
   if (etapa.tipo === "tutor") {
     return (
-      <button
-        type="button"
-        onClick={() => onAbrirTutor(area.perguntaTutor)}
-        className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#b0ff57] px-4 py-2 text-xs font-medium text-black transition hover:bg-[#c4ff7a] sm:w-auto"
-      >
+      <button type="button" onClick={() => onAbrirTutor(area.perguntaTutor)} className={cn("mt-4", ctaClass)}>
         {repassando ? "Repasar com tutor" : "Abrir tutor IA"}
         <ChevronRight className="size-3.5" />
       </button>
@@ -178,10 +176,7 @@ function EtapaAcoes({
 
   if (etapa.href) {
     return (
-      <Link
-        href={etapa.href}
-        className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-medium text-white/85 transition hover:border-[#b0ff57]/30 hover:bg-[#b0ff57]/10 hover:text-white sm:w-auto"
-      >
+      <Link href={etapa.href} className={cn("mt-4", ctaClass)}>
         {repassando ? "Repasar etapa" : "Iniciar etapa"}
         <ChevronRight className="size-3.5" />
       </Link>
@@ -252,7 +247,7 @@ export function TrilhaAreaDetalheView({
 
   return (
     <LayoutGroup>
-      <div className="space-y-4">
+      <div className="flex min-w-0 flex-col gap-10 sm:gap-12 lg:gap-16">
         <AnimatePresence mode="wait">
           {chat.aberto ? (
             <TrilhaPersonalizarPainel
@@ -266,79 +261,119 @@ export function TrilhaAreaDetalheView({
               }
             />
           ) : (
-            <motion.article
+            <motion.header
               key="header"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className={cn(
-                "osmo-surface-dark overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br p-4 sm:rounded-[20px] sm:p-6",
-                AREA_GRADIENTS[area.slug] ?? "from-[#161616] to-[#111]",
-              )}
+              className="flex flex-col gap-4 border-b border-[var(--osmo-border)] pb-8 sm:pb-10 lg:flex-row lg:items-end lg:justify-between lg:gap-16"
             >
-              <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-white/40">
-                    {isPrioridade ? "Trilha prioritária" : "Plano da área"}
-                  </p>
-                  <h1 className="mt-1.5 text-xl font-medium tracking-tight text-white sm:mt-2 sm:text-2xl md:text-3xl">
-                    {assuntoFoco ? assuntoFoco.nome : area.label}
-                  </h1>
-                  <p className="mt-1.5 max-w-xl text-[13px] leading-relaxed text-white/45 sm:mt-2 sm:text-sm">
-                    {assuntoFoco
-                      ? `Plano de estudos em ${assuntoFoco.nome} · ${contextoEstudo}.`
-                      : area.disciplinasSugeridas.length > 0
-                        ? `Foco em ${assuntos}.`
-                        : "Siga as etapas para fortalecer esta área."}
-                  </p>
-                  {assuntoFoco && modalidadeId ? (
-                    <Link
-                      href={`/trilha/geral?modalidade=${encodeURIComponent(modalidadeId)}`}
-                      className="mt-3 inline-block text-xs text-osmo-accent transition hover:opacity-80"
-                    >
-                      Ver todos os assuntos desta modalidade
-                    </Link>
-                  ) : null}
-                </div>
-                <TrilhaPersonalizarBotao
-                  chat={chat}
-                  variant="ghost"
-                  label="Atualizar plano com IA"
-                  className="w-full sm:w-auto sm:items-end"
-                />
+              <div className="min-w-0">
+                <p
+                  className="text-[11px] uppercase tracking-[0.2em]"
+                  style={{
+                    color: AREA_CORES[area.slug] ?? "var(--osmo-accent)",
+                  }}
+                >
+                  {isPrioridade
+                    ? "Trilha prioritária"
+                    : (AREA_TAGS[area.slug] ?? "Plano da área")}
+                </p>
+                <h1 className="mt-2 text-[1.75rem] leading-[1.1] font-medium tracking-tight wrap-break-word text-osmo sm:text-4xl lg:text-[2.75rem]">
+                  {assuntoFoco ? assuntoFoco.nome : area.label}
+                </h1>
               </div>
-            </motion.article>
+              <div className="max-w-md lg:pb-1 lg:text-right">
+                <p className="text-[13px] leading-relaxed text-osmo-muted sm:text-sm">
+                  {assuntoFoco
+                    ? `Plano de estudos em ${assuntoFoco.nome} · ${contextoEstudo}.`
+                    : area.disciplinasSugeridas.length > 0
+                      ? `Foco em ${assuntos}.`
+                      : "Siga as etapas para fortalecer esta área."}
+                </p>
+                {assuntoFoco && modalidadeId ? (
+                  <Link
+                    href={`/trilha/geral?modalidade=${encodeURIComponent(modalidadeId)}`}
+                    className="mt-3 inline-flex items-center gap-1 text-sm text-osmo-accent transition hover:underline"
+                  >
+                    Ver todos os assuntos
+                    <ArrowRight className="size-3.5" />
+                  </Link>
+                ) : null}
+                <div className="mt-3 lg:flex lg:justify-end">
+                  <TrilhaPersonalizarBotao
+                    chat={chat}
+                    variant="text"
+                    label="Atualizar plano com IA"
+                  />
+                </div>
+              </div>
+            </motion.header>
           )}
         </AnimatePresence>
 
+        <ProgressoKpiStrip
+          items={[
+            {
+              label: "Progresso",
+              value: `${progressoExibido}%`,
+              hint: coberturaAssunto
+                ? `${coberturaAssunto.dominadas}/${coberturaAssunto.disponiveis} dominadas`
+                : `${etapasConcluidas}/${areaContextual.etapas.length} etapas`,
+              accent: "positive",
+            },
+            {
+              label: "Etapas",
+              value: `${etapasConcluidas}/${areaContextual.etapas.length}`,
+              hint: proximaEtapa ? `Agora: ${proximaEtapa.titulo}` : "Trilha completa",
+            },
+            {
+              label: "Prioridade",
+              value: area.prioridade,
+              hint: isPrioridade ? "Área em foco" : "Nesta modalidade",
+              accent: area.prioridade === "Alta" ? "warning" : "default",
+            },
+            {
+              label: "Checklist",
+              value:
+                checklistArea.length > 0
+                  ? `${checklistConcluidos}/${checklistArea.length}`
+                  : "—",
+              hint: "metas desta área",
+            },
+          ]}
+        />
+
         {lacunasArea.length > 0 ? (
-          <div className="rounded-2xl border border-white/[0.08] bg-[#161616] p-4 sm:p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] text-white/40">
-              Lacunas por disciplina
-            </p>
-            <p className="mt-1 text-xs text-white/45">
+          <ProgressoBlock
+            eyebrow="Lacunas por disciplina"
+            className="border-t border-[var(--osmo-border)] pt-10 lg:pt-12"
+          >
+            <p className="mb-5 text-sm text-osmo-muted">
               Com base nos erros dos seus simulados nesta área.
             </p>
-            <ul className="mt-4 space-y-2">
+            <ul className="divide-y divide-[var(--osmo-border)]">
               {lacunasArea.slice(0, 4).map((item) => (
                 <li
                   key={`${item.slug}-${item.disciplina}`}
-                  className="flex items-start justify-between gap-3 rounded-xl border border-white/[0.06] bg-black/20 px-3 py-2.5"
+                  className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0"
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-white/85">
+                    <p className="text-sm font-medium text-osmo">
                       {item.disciplina}
                     </p>
-                    <p className="mt-0.5 text-xs text-white/45">{item.mensagem}</p>
+                    <p className="mt-1 text-sm leading-relaxed wrap-break-word text-osmo-muted">
+                      {item.mensagem}
+                    </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-[#b0ff57]/15 px-2 py-0.5 text-[10px] font-medium text-[#b0ff57]">
+                  <span className="shrink-0 text-sm tabular-nums text-osmo-accent">
                     {item.erros} erro{item.erros === 1 ? "" : "s"}
                   </span>
                 </li>
               ))}
             </ul>
-          </div>
+          </ProgressoBlock>
         ) : null}
 
         <motion.div
@@ -348,126 +383,101 @@ export function TrilhaAreaDetalheView({
             y: chat.aberto ? 28 : 0,
           }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="grid gap-4 lg:grid-cols-[1fr_300px]"
+          className="grid gap-10 border-t border-[var(--osmo-border)] pt-10 lg:grid-cols-12 lg:gap-16 lg:pt-12"
         >
-          <div className="space-y-4">
-            <ProgressoCard
-              icon={<Map className="size-4" />}
-              title="Etapas da trilha"
-              bodyClassName="gap-5"
-            >
-              <TrilhaEtapasProgressBar
-                etapas={areaContextual.etapas}
-                proximaEtapaId={proximaEtapa?.id}
-              />
+          <ProgressoBlock eyebrow="Etapas da trilha" className="lg:col-span-7">
+            <TrilhaEtapasProgressBar
+              etapas={areaContextual.etapas}
+              proximaEtapaId={proximaEtapa?.id}
+            />
 
-              <div className="space-y-3">
-                {areaContextual.etapas.map((etapa, index) => {
-                  const isProxima =
-                    etapa.id === proximaEtapa?.id && !etapa.concluida;
-                  const toggling = togglingEtapaId === etapa.id;
+            <ol className="mt-8 divide-y divide-[var(--osmo-border)]">
+              {areaContextual.etapas.map((etapa, index) => {
+                const isProxima =
+                  etapa.id === proximaEtapa?.id && !etapa.concluida;
+                const toggling = togglingEtapaId === etapa.id;
 
-                  return (
-                    <section
-                      key={etapa.id}
-                      className={cn(
-                        "rounded-[14px] border p-3 transition sm:rounded-[16px] sm:p-4",
-                        etapa.concluida
-                          ? "border-[color-mix(in_srgb,var(--osmo-accent)_15%,transparent)] bg-[color-mix(in_srgb,var(--osmo-accent)_5%,transparent)]"
-                          : isProxima
-                            ? "border-[color-mix(in_srgb,var(--osmo-accent)_25%,transparent)] bg-[color-mix(in_srgb,var(--osmo-accent)_7%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--osmo-accent)_10%,transparent)]"
-                            : "border-[var(--osmo-border)] bg-[var(--osmo-hover)]",
-                      )}
-                    >
-                      <div className="flex items-start gap-3">
-                        <button
-                          type="button"
-                          disabled={toggling}
-                          onClick={() =>
-                            onToggleEtapa(etapa.id, !etapa.concluida)
+                return (
+                  <li key={etapa.id} className="py-6 first:pt-0 last:pb-0">
+                    <div className="flex items-start gap-4">
+                      <button
+                        type="button"
+                        disabled={toggling}
+                        onClick={() => onToggleEtapa(etapa.id, !etapa.concluida)}
+                        title={
+                          etapa.concluida
+                            ? "Desmarcar etapa"
+                            : "Marcar como concluída"
+                        }
+                        className={cn(
+                          "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums transition",
+                          etapa.concluida
+                            ? "bg-[color-mix(in_srgb,var(--osmo-accent)_20%,transparent)] text-osmo-accent"
+                            : isProxima
+                              ? "bg-osmo-accent text-[var(--osmo-accent-fg)]"
+                              : "border border-[var(--osmo-border)] text-osmo-subtle",
+                          toggling && "opacity-50",
+                        )}
+                      >
+                        {toggling ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : etapa.concluida ? (
+                          <Check className="size-4" strokeWidth={2} />
+                        ) : (
+                          index + 1
+                        )}
+                      </button>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-osmo-subtle">
+                          Etapa {index + 1}
+                          {etapa.concluida ? " · concluída" : ""}
+                          {isProxima ? " · agora" : ""}
+                        </p>
+                        <h2 className="mt-1 text-lg font-medium leading-snug wrap-break-word text-osmo sm:text-xl">
+                          {etapa.titulo}
+                        </h2>
+                        <p className="mt-1.5 text-sm leading-relaxed wrap-break-word text-osmo-muted">
+                          {etapa.descricao}
+                        </p>
+
+                        <EtapaAcoes
+                          etapa={etapa}
+                          area={areaContextual}
+                          onAbrirTutor={onAbrirTutor}
+                          onToggleEtapa={onToggleEtapa}
+                          toggling={toggling}
+                          orientacaoAberta={orientacaoAbertaId === etapa.id}
+                          onToggleOrientacao={() => toggleOrientacao(etapa.id)}
+                          disciplinasOrientacao={
+                            areaContextual.disciplinasSugeridas
                           }
-                          title={
-                            etapa.concluida
-                              ? "Desmarcar etapa"
-                              : "Marcar como concluída"
-                          }
-                          className={cn(
-                            "flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-medium transition",
-                            etapa.concluida
-                              ? "bg-[color-mix(in_srgb,var(--osmo-accent)_20%,transparent)] text-osmo-accent hover:bg-[color-mix(in_srgb,var(--osmo-accent)_30%,transparent)]"
-                              : isProxima
-                                ? "bg-osmo-accent text-[var(--osmo-accent-fg)] hover:opacity-90"
-                                : "border border-[var(--osmo-border)] bg-[var(--osmo-card)] text-osmo-subtle hover:border-[color-mix(in_srgb,var(--osmo-text)_15%,transparent)]",
-                            toggling && "opacity-50",
-                          )}
-                        >
-                          {toggling ? (
-                            <Loader2 className="size-4 animate-spin" />
-                          ) : etapa.concluida ? (
-                            <Check className="size-4" strokeWidth={2} />
-                          ) : (
-                            <Square className="size-3.5" strokeWidth={2} />
-                          )}
-                        </button>
-
-                        <div className="min-w-0 flex-1 space-y-1">
-                          <div className="flex flex-wrap items-start justify-between gap-2">
-                            <div>
-                              <p className="text-[10px] uppercase tracking-[0.12em] text-osmo-subtle">
-                                Etapa {index + 1}
-                                {etapa.concluida ? " · Concluída" : ""}
-                              </p>
-                              <h2 className="text-sm font-medium text-osmo">
-                                {etapa.titulo}
-                              </h2>
-                            </div>
-                            {isProxima ? (
-                              <span className="shrink-0 rounded-full bg-[color-mix(in_srgb,var(--osmo-accent)_15%,transparent)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-osmo-accent">
-                                Agora
-                              </span>
-                            ) : null}
-                          </div>
-                          <p className="text-sm text-osmo-muted">
-                            {etapa.descricao}
-                          </p>
-
-                          <EtapaAcoes
-                            etapa={etapa}
-                            area={areaContextual}
-                            onAbrirTutor={onAbrirTutor}
-                            onToggleEtapa={onToggleEtapa}
-                            toggling={toggling}
-                            orientacaoAberta={orientacaoAbertaId === etapa.id}
-                            onToggleOrientacao={() =>
-                              toggleOrientacao(etapa.id)
-                            }
-                            disciplinasOrientacao={
-                              areaContextual.disciplinasSugeridas
-                            }
-                          />
-                        </div>
+                          destaque={isProxima}
+                        />
                       </div>
-                    </section>
-                  );
-                })}
-              </div>
-            </ProgressoCard>
-          </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </ProgressoBlock>
 
-          <TrilhaAreaSidebar
-            area={area}
-            trilha={trilha}
-            progressoExibido={progressoExibido}
-            etapasConcluidas={etapasConcluidas}
-            totalEtapas={areaContextual.etapas.length}
-            checklistArea={checklistArea}
-            checklistConcluidos={checklistConcluidos}
-            metaArea={metaArea}
-            assuntoFocoNome={assuntoFoco?.nome}
-            coberturaAssunto={coberturaAssunto}
-            onToggleChecklist={onToggleChecklist}
-            togglingChecklistId={togglingChecklistId}
-          />
+          <div className="lg:col-span-5">
+            <TrilhaAreaSidebar
+              area={area}
+              trilha={trilha}
+              progressoExibido={progressoExibido}
+              etapasConcluidas={etapasConcluidas}
+              totalEtapas={areaContextual.etapas.length}
+              checklistArea={checklistArea}
+              checklistConcluidos={checklistConcluidos}
+              metaArea={metaArea}
+              assuntoFocoNome={assuntoFoco?.nome}
+              coberturaAssunto={coberturaAssunto}
+              onToggleChecklist={onToggleChecklist}
+              togglingChecklistId={togglingChecklistId}
+            />
+          </div>
         </motion.div>
       </div>
     </LayoutGroup>

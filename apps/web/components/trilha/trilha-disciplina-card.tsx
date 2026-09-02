@@ -42,7 +42,7 @@ export function TrilhaAssuntoCard({
     assunto.modalidadeNome.split(" ")[0];
 
   return (
-    <Link href={href} className="group block">
+    <Link href={href} className="group block min-w-0">
       <div
         className={cn(
           "osmo-surface-dark relative aspect-[5/4] overflow-hidden rounded-[12px] border border-white/[0.06] bg-[#161616] transition duration-300 group-hover:border-white/15 group-hover:-translate-y-0.5",
@@ -124,7 +124,7 @@ export function TrilhaDisciplinaCard({
   const href = `/trilha/geral?modalidade=${encodeURIComponent(disciplina.modalidadeId)}&disciplina=${encodeURIComponent(disciplina.id)}`;
 
   return (
-    <Link href={href} className="group block">
+    <Link href={href} className="group block min-w-0">
       <div
         className={cn(
           "osmo-surface-dark relative aspect-[5/4] overflow-hidden rounded-[12px] border border-white/[0.06] bg-[#161616] transition duration-300 group-hover:border-white/15 group-hover:-translate-y-0.5",

@@ -45,7 +45,7 @@ export function WorkspaceSection({
         )}
       >
         {title ? (
-          <h1 className="text-3xl leading-none font-medium tracking-tight text-osmo sm:text-[2.5rem] md:text-5xl">
+          <h1 className="text-[1.75rem] leading-none font-medium tracking-tight text-osmo sm:text-[2.5rem] md:text-5xl">
             {title}
             {typeof count === "number" ? (
               <sup className="ml-1.5 align-super text-base font-normal tracking-normal text-osmo-subtle md:text-lg">
@@ -58,9 +58,10 @@ export function WorkspaceSection({
 
       <div
         className={cn(
-          "flex-1 px-4 pb-8 md:px-10 md:pb-12 lg:px-12",
+          "flex min-w-0 flex-1 flex-col px-4 pb-8 md:px-10 md:pb-12 lg:px-12",
           title ? "pt-8 md:pt-10" : WORKSPACE_CHROME_OFFSET,
           contentClassName,
+          !title && WORKSPACE_CHROME_OFFSET,
         )}
       >
         {children}

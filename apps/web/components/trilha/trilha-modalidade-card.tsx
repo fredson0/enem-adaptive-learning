@@ -25,7 +25,7 @@ export function TrilhaModalidadeCard({
     href ?? `/trilha/geral?modalidade=${encodeURIComponent(modalidade.id)}`;
 
   return (
-    <Link href={destino} className="group block">
+    <Link href={destino} className="group block min-w-0">
       <div
         className={cn(
           "osmo-surface-dark relative aspect-[5/4] overflow-hidden rounded-[12px] border border-white/[0.06] bg-[#161616] transition duration-300 group-hover:border-white/15 group-hover:-translate-y-0.5",

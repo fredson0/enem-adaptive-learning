@@ -1,13 +1,11 @@
 "use client";
 
-import { ProgressoCard } from "@/components/progresso/progresso-card";
 import type { ProficienciaArea } from "@/lib/metricas";
 import {
   AREA_CORES,
   AREA_ORDEM_RADAR,
   AREA_SIGLAS,
 } from "@/lib/progresso-helpers";
-import { Radar } from "lucide-react";
 
 type ProgressoRadarChartProps = {
   areas: ProficienciaArea[];
@@ -52,13 +50,13 @@ export function ProgressoRadarChart({ areas }: ProgressoRadarChartProps) {
   const niveis = [25, 50, 75, 100];
 
   return (
-    <ProgressoCard icon={<Radar className="size-4" />} title="Mapa ENEM">
+    <>
       {!temDados ? (
-        <p className="py-8 text-center text-sm text-osmo-muted">
+        <p className="text-sm text-osmo-muted">
           Faça treinos em diferentes áreas para ver seu mapa.
         </p>
       ) : (
-        <div className="relative mx-auto w-full max-w-[min(100%,200px)] overflow-hidden sm:max-w-[260px]">
+        <div className="relative w-full max-w-[280px]">
           <svg viewBox="0 0 240 240" className="h-auto w-full" aria-hidden>
             {niveis.map((nivel) => {
               const pontos = Array.from({ length: total }, (_, indice) =>
@@ -145,6 +143,6 @@ export function ProgressoRadarChart({ areas }: ProgressoRadarChartProps) {
           </div>
         </div>
       )}
-    </ProgressoCard>
+    </>
   );
 }

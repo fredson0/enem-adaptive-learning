@@ -280,7 +280,7 @@ export default function SimuladoQuestaoPage() {
     painelDicaVisivel && Boolean(dicaAtual || carregandoDica || erroDica);
 
   return (
-    <WorkspaceSection contentClassName="pb-24 md:pb-6">
+    <WorkspaceSection contentClassName="pb-[calc(6.75rem+env(safe-area-inset-bottom))] md:pb-6">
       <div
         className={cn(
           "mx-auto flex w-full flex-col gap-5 transition-[max-width] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
