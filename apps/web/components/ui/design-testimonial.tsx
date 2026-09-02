@@ -1,5 +1,6 @@
 "use client";
 
+import { MarketingClipTitle } from "@/components/marketing/marketing-clip-title";
 import { MARKETING_OSMO_COLORS, MARKETING_OSMO_SECTION_TITLE } from "@/lib/marketing-osmo-tokens";
 import { motionRevealState } from "@/lib/motion-reveal";
 import { cn } from "@/lib/utils";
@@ -116,27 +117,26 @@ export function DesignTestimonial({
       )}
     >
       <div className="mx-auto max-w-[1200px]">
-        <motion.div
-          className="text-center"
-          initial={headingReveal.initial}
-          animate={headingReveal.animate}
-          transition={{ duration: 0.7, ease: REVEAL_EASE }}
-        >
-          <h2
+        <div className="text-center">
+          <MarketingClipTitle
+            as="h2"
             className={cn(
               "font-display text-[#0b1220]",
               MARKETING_OSMO_SECTION_TITLE,
             )}
           >
             {eyebrow}
-          </h2>
-          <p
+          </MarketingClipTitle>
+          <motion.p
             className="mx-auto mt-5 max-w-2xl text-base leading-relaxed md:text-lg"
             style={{ color: MARKETING_OSMO_COLORS.textMutedDark }}
+            initial={headingReveal.initial}
+            animate={headingReveal.animate}
+            transition={{ duration: 0.7, ease: REVEAL_EASE }}
           >
             {title}
-          </p>
-        </motion.div>
+          </motion.p>
+        </div>
 
         <div
           ref={containerRef}

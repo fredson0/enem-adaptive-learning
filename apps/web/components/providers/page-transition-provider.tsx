@@ -39,6 +39,8 @@ export function PageTransitionProvider({
     if (!overlay || bars.length === 0) {
       busyRef.current = false;
       pendingRef.current = null;
+      overlay?.setAttribute("data-busy", "false");
+      window.dispatchEvent(new Event("page-transition:uncover"));
       return;
     }
 
@@ -48,6 +50,8 @@ export function PageTransitionProvider({
     gsap.set(bars, { scaleY: 0 });
     busyRef.current = false;
     pendingRef.current = null;
+    overlay.setAttribute("data-busy", "false");
+    window.dispatchEvent(new Event("page-transition:uncover"));
   }, []);
 
   useEffect(() => {
@@ -75,11 +79,15 @@ export function PageTransitionProvider({
       const bars = slats();
       if (!overlay || bars.length === 0) {
         busyRef.current = false;
+        overlay?.setAttribute("data-busy", "false");
+        window.dispatchEvent(new Event("page-transition:uncover"));
         return;
       }
 
       lenis?.scrollTo(0, { immediate: true });
       window.scrollTo(0, 0);
+      overlay.setAttribute("data-busy", "false");
+      window.dispatchEvent(new Event("page-transition:uncover"));
       gsap.killTweensOf(bars);
 
       const tl = gsap.timeline({
@@ -125,6 +133,7 @@ export function PageTransitionProvider({
 
       busyRef.current = true;
       pendingRef.current = href.split("#")[0];
+      overlay.setAttribute("data-busy", "true");
 
       gsap.set(overlay, { autoAlpha: 1, pointerEvents: "auto" });
       gsap.set(bars, { scaleY: 0, transformOrigin: "50% 50%" });
@@ -193,6 +202,8 @@ export function PageTransitionProvider({
       {children}
       <div
         ref={overlayRef}
+        data-page-transition
+        data-busy="false"
         className="pointer-events-none fixed inset-0 z-[180] flex flex-col overflow-hidden"
         aria-hidden
       >

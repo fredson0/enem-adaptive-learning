@@ -1,6 +1,7 @@
 "use client";
 
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
+import { MarketingClipTitle } from "@/components/marketing/marketing-clip-title";
 import { MarketingLoopVideo } from "@/components/marketing/marketing-loop-video";
 import { MARKETING_VIDEOS } from "@/lib/landing-hero-media";
 import {
@@ -78,19 +79,17 @@ export function ComoFuncionaOsmoHero({
               MARKETING_OSMO_HERO_TITLE_OFFSET,
             )}
           >
-            <MarketingBlurReveal
+            <MarketingClipTitle
+              as="h1"
+              playOnMount
               delay={0.06}
-              className="flex w-full justify-center"
+              className={cn(
+                "font-display mx-auto max-w-[min(100%,22em)] text-white",
+                MARKETING_OSMO_HERO_TITLE,
+              )}
             >
-              <h1
-                className={cn(
-                  "font-display mx-auto max-w-[min(100%,22em)] text-center text-balance text-white",
-                  MARKETING_OSMO_HERO_TITLE,
-                )}
-              >
-                {title}
-              </h1>
-            </MarketingBlurReveal>
+              {title}
+            </MarketingClipTitle>
 
             <MarketingBlurReveal
               delay={0.12}

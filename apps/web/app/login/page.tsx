@@ -4,6 +4,7 @@ import { LandingArcCarousel } from "@/components/landing/landing-arc-carousel";
 import { OsmoGoogleLoginButton } from "@/components/landing/osmo-google-login-button";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteHeader } from "@/components/landing/site-header";
+import { MarketingClipTitle } from "@/components/marketing/marketing-clip-title";
 import { MarketingOsmoFaq } from "@/components/marketing/marketing-osmo-faq";
 import { loginWithGoogleIdToken, fetchMe } from "@/lib/api";
 import { isOnboardingComplete } from "@/lib/auth";
@@ -119,9 +120,13 @@ function LoginContent() {
         <SiteHeader variant="auth" />
 
         <div className="relative z-20 flex min-h-svh flex-col items-center justify-center px-5 pt-24 pb-16 sm:px-6 sm:pt-28">
-          <h1 className="font-display text-center text-[clamp(2.25rem,10vw,4.5rem)] leading-[1.02] font-semibold tracking-[-0.04em] text-white">
+          <MarketingClipTitle
+            as="h1"
+            playOnMount
+            className="font-display text-[clamp(2.25rem,10vw,4.5rem)] leading-[1.02] font-semibold tracking-[-0.04em] text-white"
+          >
             Entrar
-          </h1>
+          </MarketingClipTitle>
 
           <div className="relative mt-8 w-full max-w-md">
             <p

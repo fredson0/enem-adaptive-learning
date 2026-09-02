@@ -63,7 +63,13 @@ export function TutorIaContent() {
             Incluso no gratuito
           </span>
         }
-        title="Seu professor particular, disponível 24h"
+        title={
+          <>
+            Seu professor particular,
+            <br />
+            disponível 24h
+          </>
+        }
         titleOffset="pt-[clamp(3.5rem,10vw,6.5rem)] md:pt-[clamp(4rem,11vw,7.5rem)]"
         titleClassName="max-w-[min(100%,22em)] text-[clamp(3.25rem,11vw,7.25rem)] leading-[0.88] tracking-[-0.06em]"
         description="Tire dúvidas, envie fotos de questões, peça explicações de erros e receba orientação alinhada ao seu nível real — powered by NVIDIA NIM com fallback Gemini."

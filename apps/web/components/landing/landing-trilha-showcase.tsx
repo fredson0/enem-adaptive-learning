@@ -1,5 +1,6 @@
 "use client";
 
+import { MarketingClipTitle } from "@/components/marketing/marketing-clip-title";
 import { motionRevealState } from "@/lib/motion-reveal";
 import { REVEAL_MOTION } from "@/lib/scroll-lenis-config";
 import { MarketingLoopVideo } from "@/components/marketing/marketing-loop-video";
@@ -68,27 +69,36 @@ export function LandingTrilhaShowcase() {
       className="relative overflow-hidden bg-white px-4 py-20 md:px-8 md:py-28"
     >
       <div className="relative mx-auto max-w-[1200px]">
-        <BlurReveal className="mx-auto max-w-3xl text-center">
-          <p
-            className={cn(
-              caveat.className,
-              "text-xl text-[#7c6cff] sm:text-2xl",
-            )}
+        <div className="mx-auto max-w-3xl text-center">
+          <BlurReveal>
+            <p
+              className={cn(
+                caveat.className,
+                "text-xl text-[#7c6cff] sm:text-2xl",
+              )}
+            >
+              Sua trilha
+            </p>
+          </BlurReveal>
+          <MarketingClipTitle
+            as="h2"
+            className="font-display mt-4 text-[clamp(2rem,6vw,4.5rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-[#0b1220]"
           >
-            Sua trilha
-          </p>
-          <h2 className="font-display mt-4 text-[clamp(2rem,6vw,4.5rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-[#0b1220]">
-            Quatro áreas, um plano que evolui com você
-          </h2>
-          <p
-            className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed md:text-base"
-            style={{ color: MARKETING_OSMO_COLORS.textMutedDark }}
-          >
-            Após o diagnóstico, a plataforma ordena Linguagens, Matemática,
-            Humanas e Natureza por prioridade — com etapas sequenciais e foco nas
-            disciplinas onde você mais precisa evoluir.
-          </p>
-        </BlurReveal>
+            Quatro áreas, um plano
+            <br />
+            que evolui com você
+          </MarketingClipTitle>
+          <BlurReveal delay={0.08}>
+            <p
+              className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed md:text-base"
+              style={{ color: MARKETING_OSMO_COLORS.textMutedDark }}
+            >
+              Após o diagnóstico, a plataforma ordena Linguagens, Matemática,
+              Humanas e Natureza por prioridade — com etapas sequenciais e foco nas
+              disciplinas onde você mais precisa evoluir.
+            </p>
+          </BlurReveal>
+        </div>
 
         <div className="mt-12 grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] lg:gap-12">
           <BlurReveal delay={0.1}>

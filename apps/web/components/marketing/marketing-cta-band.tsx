@@ -1,4 +1,5 @@
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
+import { MarketingClipTitle } from "@/components/marketing/marketing-clip-title";
 import { MarketingOsmoPlatformMock } from "@/components/marketing/marketing-osmo-platform-mock";
 import { MARKETING_IMAGES } from "@/lib/marketing-images";
 import { MARKETING_OSMO_COLORS } from "@/lib/marketing-osmo-tokens";
@@ -66,9 +67,12 @@ export function MarketingCtaBand({
                   </p>
                 ) : null}
 
-                <h2 className="font-display mx-auto mt-4 max-w-xl text-center text-balance text-[clamp(2.25rem,5.5vw,4.5rem)] leading-[0.92] font-semibold tracking-[-0.04em] text-white lg:mt-5">
+                <MarketingClipTitle
+                  as="h2"
+                  className="font-display mx-auto mt-4 max-w-xl text-[clamp(2.25rem,5.5vw,4.5rem)] leading-[0.92] font-semibold tracking-[-0.04em] text-white lg:mt-5"
+                >
                   {title}
-                </h2>
+                </MarketingClipTitle>
 
                 <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-white/55 md:mt-6 md:text-lg">
                   {description}

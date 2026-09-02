@@ -5,6 +5,7 @@ import {
   type StickyFeatureStep,
 } from "@/components/marketing/como-funciona-sticky-features";
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
+import { MarketingClipTitle } from "@/components/marketing/marketing-clip-title";
 import { MarketingCtaBand } from "@/components/marketing/marketing-cta-band";
 import { MarketingOsmoHeroShell } from "@/components/marketing/marketing-osmo-hero-shell";
 import { MARKETING_VIDEOS } from "@/lib/landing-hero-media";
@@ -97,19 +98,26 @@ export function TrilhaPersonalizadaContent() {
 
       <section className="bg-[#1f1e1c] px-4 py-20 md:px-8 md:py-28">
         <div className="mx-auto max-w-[1200px]">
-          <MarketingBlurReveal className="mx-auto max-w-3xl text-center">
-            <p className="font-mono text-xs tracking-[0.2em] text-[#b0ff57] uppercase">
-              ( Áreas ENEM )
-            </p>
-            <h2 className="font-display mt-5 text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.04em] text-white">
+          <div className="mx-auto max-w-3xl text-center">
+            <MarketingBlurReveal>
+              <p className="font-mono text-xs tracking-[0.2em] text-[#b0ff57] uppercase">
+                ( Áreas ENEM )
+              </p>
+            </MarketingBlurReveal>
+            <MarketingClipTitle
+              as="h2"
+              className="font-display mt-5 text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-[-0.04em] text-white"
+            >
               Quatro áreas, uma jornada
-            </h2>
-            <p className="mt-5 text-base leading-relaxed text-white/60 md:text-lg">
-              A trilha organiza Linguagens, Matemática, Humanas e Natureza com
-              priorização automática — você estuda primeiro o que mais impacta
-              sua nota.
-            </p>
-          </MarketingBlurReveal>
+            </MarketingClipTitle>
+            <MarketingBlurReveal delay={0.08}>
+              <p className="mt-5 text-base leading-relaxed text-white/60 md:text-lg">
+                A trilha organiza Linguagens, Matemática, Humanas e Natureza com
+                priorização automática — você estuda primeiro o que mais impacta
+                sua nota.
+              </p>
+            </MarketingBlurReveal>
+          </div>
 
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {AREAS.map((area, index) => (

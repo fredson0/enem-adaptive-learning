@@ -59,6 +59,14 @@ export const MARKETING_OSMO_DIAL_SPIN = {
   ease: [0.22, 1, 0.36, 1] as const,
 } as const;
 
+/** Título — clip letra a letra, de baixo para cima (dominó Osmo) */
+export const MARKETING_OSMO_CLIP_TITLE = {
+  fromY: "110%",
+  duration: 0.52,
+  ease: [0.16, 1, 0.3, 1] as const,
+  stagger: 0.024,
+} as const;
+
 /** Seção clara — título de bloco (estilo "Features" Osmo) */
 export const MARKETING_OSMO_SECTION_TITLE =
   "text-[clamp(3rem,10vw,7.5rem)] leading-[0.92] font-semibold tracking-[-0.05em]";

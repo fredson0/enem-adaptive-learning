@@ -5,7 +5,7 @@ import {
   MARKETING_OSMO_DIAL_SPIN,
 } from "@/lib/marketing-osmo-tokens";
 import { cn } from "@/lib/utils";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 
 const DIAL_SPIN_EASE = MARKETING_OSMO_DIAL_SPIN.ease;
 
@@ -42,10 +42,11 @@ function OsmoDialGraphic({
         const isMajor = index % 6 === 0;
         const inner = radius - (isMajor ? 3.2 : 1.6);
         const outer = radius;
-        const x1 = 50 + Math.cos(angle) * inner;
-        const y1 = 50 + Math.sin(angle) * inner;
-        const x2 = 50 + Math.cos(angle) * outer;
-        const y2 = 50 + Math.sin(angle) * outer;
+        // toFixed evita mismatch SSR/cliente (Node vs V8 em Math.cos/sin).
+        const x1 = (50 + Math.cos(angle) * inner).toFixed(3);
+        const y1 = (50 + Math.sin(angle) * inner).toFixed(3);
+        const x2 = (50 + Math.cos(angle) * outer).toFixed(3);
+        const y2 = (50 + Math.sin(angle) * outer).toFixed(3);
 
         return (
           <line

@@ -1,6 +1,7 @@
 "use client";
 
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
+import { MarketingClipTitle } from "@/components/marketing/marketing-clip-title";
 import { OsmoDialSpin, MARKETING_OSMO_DIAL_SIZE } from "@/components/marketing/osmo-dial";
 import {
   MARKETING_OSMO_HERO_TITLE,
@@ -140,21 +141,19 @@ export function MarketingOsmoHeroShell({
 
           <div className="relative z-10 flex w-full flex-col items-center text-center">
             <div className={cn("w-full", resolvedTitleOffset)}>
-              <MarketingBlurReveal
+              <MarketingClipTitle
+                as="h1"
+                playOnMount
                 delay={0.06}
-                className="flex w-full justify-center"
+                className={cn(
+                  "font-display mx-auto max-w-[min(100%,22em)]",
+                  MARKETING_OSMO_HERO_TITLE,
+                  isLight ? "text-[#0b1220]" : "text-white",
+                  titleClassName,
+                )}
               >
-                <h1
-                  className={cn(
-                    "font-display mx-auto max-w-[min(100%,22em)] text-center text-balance",
-                    MARKETING_OSMO_HERO_TITLE,
-                    isLight ? "text-[#0b1220]" : "text-white",
-                    titleClassName,
-                  )}
-                >
-                  {title}
-                </h1>
-              </MarketingBlurReveal>
+                {title}
+              </MarketingClipTitle>
             </div>
 
             {description ? (

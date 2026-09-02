@@ -1,6 +1,7 @@
 "use client";
 
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
+import { MarketingClipTitle } from "@/components/marketing/marketing-clip-title";
 import {
   MARKETING_FAQ_CATEGORIES,
   type MarketingFaqCategory,
@@ -72,6 +73,7 @@ function FaqToggleIcon({
           strokeWidth="2"
           strokeLinecap="round"
           style={{ transformOrigin: "8px 8px" }}
+          initial={{ scaleY: 1, opacity: 1 }}
           animate={{ scaleY: isOpen ? 0 : 1, opacity: isOpen ? 0 : 1 }}
           transition={{ duration: 0.35, ease: FAQ_EASE }}
         />
@@ -173,8 +175,9 @@ export function MarketingOsmoFaq({
       className={cn("bg-white px-4 py-20 md:px-8 md:py-28", className)}
     >
       <div className="mx-auto max-w-[800px]">
-        <MarketingBlurReveal className="relative text-center">
-          <h2
+        <div className="relative text-center">
+          <MarketingClipTitle
+            as="h2"
             className={cn(
               "font-display text-[#0b1220]",
               MARKETING_OSMO_SECTION_TITLE,
@@ -183,7 +186,7 @@ export function MarketingOsmoFaq({
             {title}
             <br />
             {titleLine2}
-          </h2>
+          </MarketingClipTitle>
           {accentNote ? (
             <p
               className={cn(
@@ -195,7 +198,7 @@ export function MarketingOsmoFaq({
               <span className="ml-1 inline-block">↗</span>
             </p>
           ) : null}
-        </MarketingBlurReveal>
+        </div>
 
         <MarketingBlurReveal delay={0.08} className="mt-10 md:mt-12">
           <div className="mx-auto flex w-fit max-w-full flex-wrap justify-center rounded-full border border-[#0b1220]/10 bg-[#f3f3f1] p-1">

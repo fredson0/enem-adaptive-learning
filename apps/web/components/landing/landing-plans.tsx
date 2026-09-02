@@ -1,5 +1,6 @@
 "use client";
 
+import { MarketingClipTitle } from "@/components/marketing/marketing-clip-title";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -52,9 +53,14 @@ export function LandingPlans() {
       className="bg-white px-4 py-20 md:px-8 md:py-28"
     >
       <div className="mx-auto max-w-[1200px]">
-        <h2 className="font-display text-center text-[clamp(1.75rem,4.2vw,3.5rem)] leading-[1.05] font-semibold tracking-[-0.04em] text-[#0b1220]">
-          Tudo que você precisa em um só lugar
-        </h2>
+        <MarketingClipTitle
+          as="h2"
+          className="font-display text-[clamp(1.75rem,4.2vw,3.5rem)] leading-[1.05] font-semibold tracking-[-0.04em] text-[#0b1220]"
+        >
+          Tudo que você precisa
+          <br />
+          em um só lugar
+        </MarketingClipTitle>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
           <div className="inline-flex rounded-full border border-[#0b1220]/10 bg-[#f3f3f1] p-1">

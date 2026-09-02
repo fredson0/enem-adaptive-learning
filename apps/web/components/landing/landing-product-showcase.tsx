@@ -1,6 +1,7 @@
 "use client";
 
 import { LandingArcCarousel } from "@/components/landing/landing-arc-carousel";
+import { MarketingClipTitle } from "@/components/marketing/marketing-clip-title";
 import { motionRevealState } from "@/lib/motion-reveal";
 import { REVEAL_MOTION } from "@/lib/scroll-lenis-config";
 import { motion, useInView, useReducedMotion } from "framer-motion";
@@ -43,13 +44,9 @@ function BlurRevealInView({
 }
 
 function ProductShowcaseHeading() {
-  const ref = useRef<HTMLHeadingElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: IN_VIEW_MARGIN });
   const reduceMotion = useReducedMotion();
-  const reveal = motionRevealState(reduceMotion, isInView, {
-    y: REVEAL_MOTION.y + 16,
-    opacity: 0,
-  });
 
   const transition = {
     duration: REVEAL_DURATION,
@@ -57,13 +54,10 @@ function ProductShowcaseHeading() {
   };
 
   return (
-    <div className="flex w-full justify-center px-2">
-      <motion.h2
-        ref={ref}
-        initial={reveal.initial}
-        animate={reveal.animate}
-        transition={transition}
-        className="font-display text-center text-[clamp(1.65rem,4.2vw,5.25rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-balance text-[#0b1220] md:text-[clamp(1.85rem,4.4vw,5.25rem)] lg:whitespace-nowrap lg:text-[clamp(2rem,4.6vw,5.25rem)] lg:leading-[0.9] lg:tracking-[-0.055em]"
+    <div ref={ref} className="flex w-full justify-center px-2">
+      <MarketingClipTitle
+        as="h2"
+        className="font-display text-[clamp(1.65rem,4.2vw,5.25rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-[#0b1220] md:text-[clamp(1.85rem,4.4vw,5.25rem)] lg:whitespace-nowrap lg:text-[clamp(2rem,4.6vw,5.25rem)] lg:leading-[0.9] lg:tracking-[-0.055em]"
       >
         Preparação ENEM{" "}
         <motion.span
@@ -76,7 +70,7 @@ function ProductShowcaseHeading() {
           ✦
         </motion.span>{" "}
         que se adapta a você
-      </motion.h2>
+      </MarketingClipTitle>
     </div>
   );
 }

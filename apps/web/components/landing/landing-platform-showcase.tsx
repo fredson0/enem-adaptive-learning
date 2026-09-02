@@ -1,9 +1,8 @@
-"use client";
-
 import {
   LANDING_PLATFORM_VIDEO_SRC,
   LANDING_PLATFORM_VIDEO_TYPE,
 } from "@/lib/landing-hero-media";
+import { MarketingClipTitle } from "@/components/marketing/marketing-clip-title";
 import {
   MARKETING_OSMO_COLORS,
 } from "@/lib/marketing-osmo-tokens";
@@ -20,9 +19,12 @@ export function LandingPlatformShowcase() {
       className="relative bg-white px-4 py-24 md:px-8 md:py-32"
     >
       <div className="mx-auto max-w-5xl text-center">
-        <h2 className="font-display text-[clamp(3.5rem,13vw,8.75rem)] leading-[0.88] font-semibold tracking-[-0.06em] text-[#0b1220]">
+        <MarketingClipTitle
+          as="h2"
+          className="font-display text-[clamp(3.5rem,13vw,8.75rem)] leading-[0.88] font-semibold tracking-[-0.06em] text-[#0b1220]"
+        >
           A plataforma
-        </h2>
+        </MarketingClipTitle>
 
         <p
           className="mx-auto mt-5 max-w-lg text-base leading-relaxed md:mt-6 md:text-lg"

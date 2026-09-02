@@ -1,6 +1,7 @@
 "use client";
 
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
+import { MarketingClipTitle } from "@/components/marketing/marketing-clip-title";
 import { MarketingPlaceholderImage } from "@/components/marketing/marketing-placeholder-image";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
@@ -38,34 +39,39 @@ export function MarketingFeatureSection({
   return (
     <section className={cn("px-4 py-20 md:px-8 md:py-28", bg)}>
       <div className="mx-auto max-w-[1200px]">
-        <MarketingBlurReveal className="mx-auto max-w-3xl text-center">
-          <p
-            className={cn(
-              "font-mono text-xs tracking-[0.2em] uppercase",
-              variant === "dark" ? "text-[#b0ff57]" : "text-[#7c6cff]",
-            )}
-          >
-            {eyebrow}
-          </p>
-          <h2
+        <div className="mx-auto max-w-3xl text-center">
+          <MarketingBlurReveal>
+            <p
+              className={cn(
+                "font-mono text-xs tracking-[0.2em] uppercase",
+                variant === "dark" ? "text-[#b0ff57]" : "text-[#7c6cff]",
+              )}
+            >
+              {eyebrow}
+            </p>
+          </MarketingBlurReveal>
+          <MarketingClipTitle
+            as="h2"
             className={cn(
               "font-display mt-5 text-[clamp(1.75rem,4vw,3.25rem)] leading-[1.05] font-semibold tracking-[-0.04em]",
               variant === "dark" ? "text-white" : "text-[#0b1220]",
             )}
           >
             {title}
-          </h2>
+          </MarketingClipTitle>
           {description ? (
-            <p
-              className={cn(
-                "mt-5 text-base leading-relaxed md:text-lg",
-                variant === "dark" ? "text-white/60" : "text-[#0b1220]/65",
-              )}
-            >
-              {description}
-            </p>
+            <MarketingBlurReveal delay={0.08}>
+              <p
+                className={cn(
+                  "mt-5 text-base leading-relaxed md:text-lg",
+                  variant === "dark" ? "text-white/60" : "text-[#0b1220]/65",
+                )}
+              >
+                {description}
+              </p>
+            </MarketingBlurReveal>
           ) : null}
-        </MarketingBlurReveal>
+        </div>
 
         <div className="mt-14 grid gap-8 md:grid-cols-2 lg:gap-10">
           {items.map((item, index) => (
