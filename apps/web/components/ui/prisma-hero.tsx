@@ -96,7 +96,7 @@ export const WordsPullUp = ({
             key={i}
             initial={
               reduceMotion
-                ? false
+                ? { y: 0, opacity: 1, filter: "blur(0px)" }
                 : { y: 72, opacity: 0, filter: "blur(16px)" }
             }
             animate={
@@ -161,7 +161,9 @@ export const WordsPullUpMultiStyle = ({
         <motion.span
           key={i}
           initial={
-            reduceMotion ? false : { y: 72, opacity: 0, filter: "blur(16px)" }
+            reduceMotion
+              ? { y: 0, opacity: 1, filter: "blur(0px)" }
+              : { y: 72, opacity: 0, filter: "blur(16px)" }
           }
           animate={
             isInView && !reduceMotion
@@ -206,15 +208,28 @@ function EnemHero({ revealed = true }: { revealed?: boolean }) {
     });
   }, []);
 
+  useEffect(() => {
+    const video = heroVideoRef.current;
+    if (!video) return;
+
+    if (revealed) {
+      void video.play().catch(() => undefined);
+      return;
+    }
+
+    video.pause();
+  }, [revealed]);
+
   return (
     <section className="relative min-h-svh w-full">
       <div className="absolute inset-0 overflow-hidden">
         <video
           ref={heroVideoRef}
-          autoPlay
+          autoPlay={false}
           loop
           muted
           playsInline
+          preload="auto"
           className="h-full w-full object-cover"
           src={LANDING_HERO_VIDEO_URL}
           aria-hidden
@@ -230,7 +245,7 @@ function EnemHero({ revealed = true }: { revealed?: boolean }) {
           "relative z-10 flex min-h-svh flex-col justify-end px-4 pb-8 sm:px-6 md:px-10 md:pb-10",
           !revealed && "pointer-events-none",
         )}
-        initial={false}
+        initial={{ opacity: 0 }}
         animate={{ opacity: revealed ? 1 : 0 }}
         transition={{ duration: revealed ? 0.2 : 0 }}
       >

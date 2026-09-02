@@ -1,6 +1,7 @@
 "use client";
 
 import { MARKETING_OSMO_COLORS, MARKETING_OSMO_SECTION_TITLE } from "@/lib/marketing-osmo-tokens";
+import { motionRevealState } from "@/lib/motion-reveal";
 import { cn } from "@/lib/utils";
 import { MOCK_TESTIMONIALS } from "@/lib/testimonials";
 import {
@@ -95,7 +96,14 @@ export function DesignTestimonial({
   };
 
   const current = testimonials[activeIndex];
-  const animate = isInView && !reduceMotion;
+  const headingReveal = motionRevealState(reduceMotion, isInView, {
+    y: 24,
+    opacity: 0,
+  });
+  const labelReveal = motionRevealState(reduceMotion, isInView, {
+    y: 0,
+    opacity: 0,
+  });
 
   return (
     <section
@@ -110,8 +118,8 @@ export function DesignTestimonial({
       <div className="mx-auto max-w-[1200px]">
         <motion.div
           className="text-center"
-          initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-          animate={animate ? { opacity: 1, y: 0 } : reduceMotion ? undefined : {}}
+          initial={headingReveal.initial}
+          animate={headingReveal.animate}
           transition={{ duration: 0.7, ease: REVEAL_EASE }}
         >
           <h2
@@ -141,8 +149,8 @@ export function DesignTestimonial({
               <motion.span
                 className="font-mono text-xs tracking-[0.2em] text-[#0b1220]/40 uppercase"
                 style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
-                initial={reduceMotion ? false : { opacity: 0 }}
-                animate={animate ? { opacity: 1 } : reduceMotion ? undefined : {}}
+                initial={labelReveal.initial}
+                animate={labelReveal.animate}
                 transition={{ delay: 0.25, duration: 0.5 }}
               >
                 {eyebrow}

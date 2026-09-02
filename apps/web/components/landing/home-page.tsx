@@ -21,23 +21,17 @@ type IntroState = "checking" | "intro" | "ready";
 
 export function HomePage() {
   const [introState, setIntroState] = useState<IntroState>("checking");
-  const [revealMain, setRevealMain] = useState(false);
   const [heroRevealed, setHeroRevealed] = useState(false);
 
   useEffect(() => {
     const skipIntro = shouldSkipLandingEntrance();
     if (skipIntro) {
       setIntroState("ready");
-      setRevealMain(true);
       setHeroRevealed(true);
       return;
     }
 
     setIntroState("intro");
-  }, []);
-
-  const handleExpandStart = useCallback(() => {
-    setRevealMain(true);
   }, []);
 
   const handleExpandComplete = useCallback(() => {
@@ -46,11 +40,10 @@ export function HomePage() {
 
   const handleIntroComplete = useCallback(() => {
     setIntroState("ready");
-    setRevealMain(true);
     setHeroRevealed(true);
   }, []);
 
-  const showMain = introState === "ready" || revealMain;
+  const showMain = introState !== "checking";
   const showIntro = introState === "intro";
 
   if (introState === "checking") {
@@ -85,7 +78,6 @@ export function HomePage() {
 
       {showIntro ? (
         <LandingEntrance
-          onExpandStart={handleExpandStart}
           onExpandComplete={handleExpandComplete}
           onComplete={handleIntroComplete}
         />

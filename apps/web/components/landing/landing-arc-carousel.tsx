@@ -180,7 +180,7 @@ function CarouselVideoPreloader() {
   return (
     <div className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0" aria-hidden>
       {PRELOAD_VIDEO_SRCS.map((src) => (
-        <MarketingLoopVideo key={src} src={src} play={false} />
+        <MarketingLoopVideo key={src} src={src} play={false} preload="auto" />
       ))}
     </div>
   );
@@ -363,7 +363,10 @@ export function LandingArcCarousel({
               }}
             >
               <div style={{ height: previewHeight }}>
-                <FeaturePreview type={feature.preview} play />
+                <FeaturePreview
+                  type={feature.preview}
+                  play={cardOpacity > 0.02}
+                />
               </div>
               <div
                 className="flex items-center border-t-2 border-black bg-[#1a1a1a] px-4"

@@ -1,5 +1,6 @@
 "use client";
 
+import { motionRevealState } from "@/lib/motion-reveal";
 import { REVEAL_MOTION } from "@/lib/scroll-lenis-config";
 import { MarketingLoopVideo } from "@/components/marketing/marketing-loop-video";
 import { MARKETING_VIDEOS } from "@/lib/landing-hero-media";
@@ -37,18 +38,16 @@ function BlurReveal({
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
   const reduceMotion = useReducedMotion();
+  const reveal = motionRevealState(reduceMotion, isInView, {
+    y: REVEAL_MOTION.y,
+    opacity: 0,
+  });
 
   return (
     <motion.div
       ref={ref}
-      initial={reduceMotion ? false : { y: REVEAL_MOTION.y, opacity: 0 }}
-      animate={
-        isInView && !reduceMotion
-          ? { y: 0, opacity: 1 }
-          : reduceMotion
-            ? undefined
-            : {}
-      }
+      initial={reveal.initial}
+      animate={reveal.animate}
       transition={{
         duration: REVEAL_MOTION.duration,
         delay,

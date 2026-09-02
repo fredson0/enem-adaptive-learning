@@ -24,9 +24,9 @@ export function SidebarAccordion({
         {open ? (
           <motion.div
             key="sidebar-accordion-panel"
-            initial={reduceMotion ? false : { height: 0 }}
+            initial={{ height: reduceMotion ? "auto" : 0 }}
             animate={{ height: "auto" }}
-            exit={reduceMotion ? undefined : { height: 0 }}
+            exit={{ height: reduceMotion ? "auto" : 0 }}
             transition={{
               duration: reduceMotion ? 0 : 0.34,
               ease: SIDEBAR_ACCORDION_EASE,

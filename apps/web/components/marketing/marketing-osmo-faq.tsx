@@ -117,9 +117,15 @@ function FaqAccordionItem({
         {isOpen ? (
           <motion.div
             key="content"
-            initial={reduceMotion ? false : { height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={reduceMotion ? undefined : { height: 0, opacity: 0 }}
+          initial={{
+            height: reduceMotion ? "auto" : 0,
+            opacity: reduceMotion ? 1 : 0,
+          }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{
+            height: reduceMotion ? "auto" : 0,
+            opacity: reduceMotion ? 1 : 0,
+          }}
             transition={{
               height: { duration: 0.45, ease: FAQ_EASE },
               opacity: { duration: 0.3, ease: "easeOut" },
@@ -127,9 +133,9 @@ function FaqAccordionItem({
             className="overflow-hidden"
           >
             <motion.p
-              initial={reduceMotion ? false : { y: -10, opacity: 0 }}
+              initial={{ y: reduceMotion ? 0 : -10, opacity: reduceMotion ? 1 : 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={reduceMotion ? undefined : { y: -6, opacity: 0 }}
+              exit={{ y: reduceMotion ? 0 : -6, opacity: reduceMotion ? 1 : 0 }}
               transition={{ duration: 0.38, ease: FAQ_EASE, delay: 0.04 }}
               className="max-w-3xl pb-6 text-sm leading-relaxed md:pb-7 md:text-base"
               style={{ color: MARKETING_OSMO_COLORS.textMutedDark }}

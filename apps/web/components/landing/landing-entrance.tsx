@@ -158,6 +158,8 @@ export function LandingEntrance({
   onExpandStartRef.current = onExpandStart;
   onExpandCompleteRef.current = onExpandComplete;
 
+  const metricsReady = metrics.splitW > 0 && metrics.splitH > 0;
+
   useEffect(() => {
     if (reduceMotion === null) return;
 
@@ -168,6 +170,8 @@ export function LandingEntrance({
       onCompleteRef.current();
       return;
     }
+
+    if (!metricsReady) return;
 
     const { titleIn, split, hold, expand, exit } = LANDING_ENTRANCE_TIMINGS;
     const splitAt = titleIn;
@@ -196,7 +200,7 @@ export function LandingEntrance({
       window.clearTimeout(t4);
       window.clearTimeout(t5);
     };
-  }, [reduceMotion]);
+  }, [reduceMotion, metricsReady]);
 
   useEffect(() => {
     if (phase !== "exit") return;
@@ -244,6 +248,15 @@ export function LandingEntrance({
 
   if (reduceMotion === true) return null;
 
+  if (reduceMotion === null) {
+    return (
+      <div
+        className="fixed inset-0 z-[250]"
+        style={{ backgroundColor: LANDING_ENTRANCE_COLORS.background }}
+      />
+    );
+  }
+
   return (
     <motion.div
       className="fixed inset-0 z-[250] overflow-hidden"
@@ -285,7 +298,7 @@ export function LandingEntrance({
               isExpand ? "z-30" : "z-10",
             )}
             style={{ transformOrigin: "center center" }}
-            initial={false}
+            initial={{ width: 0, height: 0, scale: 1, borderRadius: RADIUS }}
             animate={{
               width: isTitle ? 0 : splitW,
               height: isTitle ? 0 : splitH,
@@ -311,7 +324,7 @@ export function LandingEntrance({
                 marginTop: viewH ? -(viewH / 2) : undefined,
                 transformOrigin: "center center",
               }}
-              initial={false}
+              initial={{ scale: 1 }}
               animate={{
                 scale: isExpand && coverScale > 0 ? 1 / coverScale : 1,
               }}

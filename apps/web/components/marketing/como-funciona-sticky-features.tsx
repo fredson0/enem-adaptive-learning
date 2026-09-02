@@ -51,10 +51,13 @@ function StickyImageFrame({
         <motion.div
           key={active.image}
           className="absolute inset-0"
-          initial={reduceMotion ? false : { opacity: 0, scale: 1.04 }}
+          initial={{ opacity: 0, scale: 1.04 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={reduceMotion ? undefined : { opacity: 0, scale: 0.98 }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          exit={{ opacity: 0, scale: 0.98 }}
+          transition={{
+            duration: reduceMotion ? 0 : 0.45,
+            ease: [0.22, 1, 0.36, 1],
+          }}
         >
           <Image
             src={active.image}
@@ -92,6 +95,7 @@ function FeaturePanel({
       )}
     >
       <motion.div
+        initial={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         animate={
           reduceMotion
             ? { opacity: isActive ? 1 : 0.25 }

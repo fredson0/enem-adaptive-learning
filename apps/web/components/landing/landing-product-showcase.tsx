@@ -1,6 +1,7 @@
 "use client";
 
 import { LandingArcCarousel } from "@/components/landing/landing-arc-carousel";
+import { motionRevealState } from "@/lib/motion-reveal";
 import { REVEAL_MOTION } from "@/lib/scroll-lenis-config";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
@@ -23,19 +24,16 @@ function BlurRevealInView({
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: IN_VIEW_MARGIN });
   const reduceMotion = useReducedMotion();
-  const animate = isInView && !reduceMotion;
+  const reveal = motionRevealState(reduceMotion, isInView, {
+    y: REVEAL_MOTION.y,
+    opacity: 0,
+  });
 
   return (
     <motion.div
       ref={ref}
-      initial={reduceMotion ? false : { y: REVEAL_MOTION.y, opacity: 0 }}
-      animate={
-        animate
-          ? { y: 0, opacity: 1 }
-          : reduceMotion
-            ? undefined
-            : {}
-      }
+      initial={reveal.initial}
+      animate={reveal.animate}
       transition={{ duration: REVEAL_DURATION, delay, ease: REVEAL_EASE }}
       className={className}
     >
@@ -48,7 +46,10 @@ function ProductShowcaseHeading() {
   const ref = useRef<HTMLHeadingElement>(null);
   const isInView = useInView(ref, { once: true, margin: IN_VIEW_MARGIN });
   const reduceMotion = useReducedMotion();
-  const animate = isInView && !reduceMotion;
+  const reveal = motionRevealState(reduceMotion, isInView, {
+    y: REVEAL_MOTION.y + 16,
+    opacity: 0,
+  });
 
   const transition = {
     duration: REVEAL_DURATION,
@@ -59,14 +60,8 @@ function ProductShowcaseHeading() {
     <div className="flex w-full justify-center px-2">
       <motion.h2
         ref={ref}
-        initial={reduceMotion ? false : { y: REVEAL_MOTION.y + 16, opacity: 0 }}
-        animate={
-          animate
-            ? { y: 0, opacity: 1 }
-            : reduceMotion
-              ? undefined
-              : {}
-        }
+        initial={reveal.initial}
+        animate={reveal.animate}
         transition={transition}
         className="font-display text-center text-[clamp(1.65rem,4.2vw,5.25rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-balance text-[#0b1220] md:text-[clamp(1.85rem,4.4vw,5.25rem)] lg:whitespace-nowrap lg:text-[clamp(2rem,4.6vw,5.25rem)] lg:leading-[0.9] lg:tracking-[-0.055em]"
       >
@@ -74,8 +69,8 @@ function ProductShowcaseHeading() {
         <motion.span
           className="mx-[0.08em] inline-block origin-center align-middle text-[#7c6cff]"
           aria-hidden
-          initial={reduceMotion ? false : { rotate: 0 }}
-          animate={animate ? { rotate: 360 } : reduceMotion ? undefined : {}}
+          initial={{ rotate: 0 }}
+          animate={{ rotate: isInView && !reduceMotion ? 360 : 0 }}
           transition={transition}
         >
           ✦

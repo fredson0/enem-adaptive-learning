@@ -1,5 +1,6 @@
 "use client";
 
+import { motionRevealState } from "@/lib/motion-reveal";
 import { REVEAL_MOTION } from "@/lib/scroll-lenis-config";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useRef, type ReactNode } from "react";
@@ -16,19 +17,16 @@ export function MarketingBlurReveal({
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
   const reduceMotion = useReducedMotion();
-  const animate = isInView && !reduceMotion;
+  const reveal = motionRevealState(reduceMotion, isInView, {
+    y: REVEAL_MOTION.y,
+    opacity: 0,
+  });
 
   return (
     <motion.div
       ref={ref}
-      initial={reduceMotion ? false : { y: REVEAL_MOTION.y, opacity: 0 }}
-      animate={
-        animate
-          ? { y: 0, opacity: 1 }
-          : reduceMotion
-            ? undefined
-            : {}
-      }
+      initial={reveal.initial}
+      animate={reveal.animate}
       transition={{
         duration: REVEAL_MOTION.duration,
         delay,

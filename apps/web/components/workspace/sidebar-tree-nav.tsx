@@ -72,10 +72,10 @@ export function SidebarTree({
   const list = (
     <motion.div
       className="osmo-sidebar-tree__list"
-      variants={reduceMotion ? undefined : TREE_LIST_VARIANTS}
-      initial={reduceMotion ? false : "hidden"}
-      animate={reduceMotion ? undefined : "show"}
-      exit={reduceMotion ? undefined : "exit"}
+      variants={TREE_LIST_VARIANTS}
+      initial={reduceMotion ? "show" : "hidden"}
+      animate="show"
+      exit={reduceMotion ? "show" : "exit"}
     >
       {items.map((child, index) => (
         <motion.div
@@ -85,7 +85,7 @@ export function SidebarTree({
             index === 0 && "osmo-sidebar-tree__item--first",
             index === items.length - 1 && "osmo-sidebar-tree__item--last",
           )}
-          variants={reduceMotion ? undefined : TREE_ITEM_VARIANTS}
+          variants={TREE_ITEM_VARIANTS}
           style={{ transformOrigin: "top center" }}
         >
           {child}

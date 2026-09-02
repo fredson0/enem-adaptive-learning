@@ -13,6 +13,7 @@ type MarketingLoopVideoProps = {
   play?: boolean;
   /** `true` preenche o pai; `false` usa a altura nativa do arquivo (como na home). */
   fill?: boolean;
+  preload?: "none" | "metadata" | "auto";
 };
 
 export function MarketingLoopVideo({
@@ -21,6 +22,7 @@ export function MarketingLoopVideo({
   objectFit = "cover",
   play = true,
   fill = true,
+  preload,
 }: MarketingLoopVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const reduceMotion = useReducedMotion() ?? false;
@@ -31,8 +33,21 @@ export function MarketingLoopVideo({
     if (!video) return;
 
     if (shouldPlay) {
-      void video.play().catch(() => undefined);
-      return;
+      const start = () => {
+        void video.play().catch(() => undefined);
+      };
+
+      if (video.readyState >= 2) {
+        start();
+        return;
+      }
+
+      video.addEventListener("canplay", start, { once: true });
+      video.addEventListener("loadeddata", start, { once: true });
+      return () => {
+        video.removeEventListener("canplay", start);
+        video.removeEventListener("loadeddata", start);
+      };
     }
 
     video.pause();
@@ -40,8 +55,13 @@ export function MarketingLoopVideo({
 
   const paintFirstFrame = () => {
     const video = videoRef.current;
-    if (!video || video.currentTime > 0) return;
-    video.currentTime = 0.05;
+    if (!video) return;
+    if (video.currentTime === 0) {
+      video.currentTime = 0.05;
+    }
+    if (shouldPlay) {
+      void video.play().catch(() => undefined);
+    }
   };
 
   return (
@@ -58,7 +78,7 @@ export function MarketingLoopVideo({
       loop
       muted
       playsInline
-      preload="auto"
+      preload={preload ?? (play ? "auto" : "metadata")}
       onLoadedData={paintFirstFrame}
       aria-hidden
     >

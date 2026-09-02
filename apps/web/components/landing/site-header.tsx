@@ -501,7 +501,7 @@ export function SiteHeader({
           !showChrome && "pointer-events-none",
         )}
         style={{ maxWidth: containerMaxWidth }}
-        initial={false}
+        initial={{ opacity: 0, y: -28, filter: "blur(14px)" }}
         animate={
           showChrome
             ? { opacity: 1, y: 0, filter: "blur(0px)" }
