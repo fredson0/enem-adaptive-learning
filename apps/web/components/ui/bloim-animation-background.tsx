@@ -62,7 +62,7 @@ export function BloimAnimationBackground() {
         height={height}
         lazyLoad
         fps={30}
-        ariaLabel="Animação de fundo da plataforma ENEM+"
+        ariaLabel="Animação de fundo da plataforma ENEM+IA"
       />
     </div>
   );

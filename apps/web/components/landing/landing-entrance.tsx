@@ -1,6 +1,11 @@
 "use client";
 
 import {
+  BRAND_ENTRANCE_LEFT,
+  BRAND_ENTRANCE_RIGHT,
+  BRAND_NAME,
+} from "@/lib/brand";
+import {
   LANDING_ENTRANCE_COLORS,
   LANDING_ENTRANCE_EASE,
   LANDING_ENTRANCE_EXPAND_EASE,
@@ -260,6 +265,7 @@ export function LandingEntrance({
   return (
     <motion.div
       className="fixed inset-0 z-[250] overflow-hidden"
+      aria-label={BRAND_NAME}
       style={{ backgroundColor: LANDING_ENTRANCE_COLORS.background }}
       initial={{ opacity: 1 }}
       animate={{ opacity: isExit ? 0 : 1 }}
@@ -289,7 +295,7 @@ export function LandingEntrance({
             animate={letterFade}
             transition={letterFadeTransition}
           >
-            ENE
+            {BRAND_ENTRANCE_LEFT}
           </motion.span>
 
           <motion.div
@@ -346,7 +352,7 @@ export function LandingEntrance({
             animate={letterFade}
             transition={letterFadeTransition}
           >
-            M+
+            {BRAND_ENTRANCE_RIGHT}
           </motion.span>
         </motion.div>
       </div>

@@ -5,6 +5,7 @@ import { PageTransitionProvider } from "@/components/providers/page-transition-p
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ThemeScript } from "@/components/providers/theme-script";
+import { BRAND_NAME } from "@/lib/brand";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,7 +25,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ENEM+ | Plataforma Educacional Adaptativa",
+  title: `${BRAND_NAME} | Plataforma Educacional Adaptativa`,
   description:
     "Prepare-se para o ENEM com simulados adaptativos, tutor IA e métricas de proficiência. Inclusão digital para estudantes de escolas públicas.",
 };

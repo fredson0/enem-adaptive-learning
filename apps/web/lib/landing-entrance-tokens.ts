@@ -18,7 +18,7 @@ export const LANDING_ENTRANCE_EXPAND_EASE = [0.4, 0.0, 0.18, 1] as const;
 
 /** Durações em milissegundos */
 export const LANDING_ENTRANCE_TIMINGS = {
-  /** Fase 1 — "ENEM+" aparece centralizado */
+  /** Fase 1 — "ENEM+IA" aparece centralizado */
   titleIn: 750,
   /** Fase 2 — título divide e imagem surge no centro */
   split: 950,
@@ -50,4 +50,4 @@ export const LANDING_ENTRANCE_IMAGE = {
 } as const;
 
 export const LANDING_ENTRANCE_TITLE_CLASS =
-  "font-display text-[clamp(3.75rem,18vw,11rem)] leading-[0.88] font-semibold tracking-[-0.05em]";
+  "font-display text-[clamp(2.85rem,14vw,8.5rem)] leading-[0.88] font-semibold tracking-[-0.05em]";

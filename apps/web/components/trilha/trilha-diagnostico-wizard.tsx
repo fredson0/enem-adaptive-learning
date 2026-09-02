@@ -64,7 +64,7 @@ export function TrilhaDiagnosticoWizard() {
     <div className="mx-auto max-w-2xl space-y-8">
       <div className="space-y-3">
         <p className="text-xs uppercase tracking-[0.2em] text-[#b0ff57]">
-          Diagnóstico ENEM+
+          Diagnóstico ENEM+IA
         </p>
         <h2 className="text-3xl font-medium tracking-tight text-white md:text-4xl">
           Vamos montar sua trilha real

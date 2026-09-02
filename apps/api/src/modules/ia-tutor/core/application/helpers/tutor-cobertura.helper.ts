@@ -52,7 +52,7 @@ export function buildCoberturaAssuntosBlock(
 
   return `
 
-Cobertura por assunto no banco ENEM+ (cada questão conta uma vez quando o aluno acerta):
+Cobertura por assunto no banco ENEM+IA (cada questão conta uma vez quando o aluno acerta):
 ${linhas}
 
 Use estes dados ao sugerir o que revisar. Priorize assuntos com menor %. Não invente números.`;
@@ -98,7 +98,7 @@ export function formatarRespostaCobertura(input: {
 
   const tituloArea = input.areaSlug
     ? `Cobertura em ${areas[0]?.label ?? input.areaSlug}:`
-    : 'Cobertura geral no banco ENEM+:';
+    : 'Cobertura geral no banco ENEM+IA:';
 
   return `${tituloArea}
 

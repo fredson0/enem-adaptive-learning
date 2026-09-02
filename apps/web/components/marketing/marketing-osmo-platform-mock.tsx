@@ -5,6 +5,7 @@ import {
   MessageSquare,
   Sparkles,
 } from "lucide-react";
+import { BRAND_NAME } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -64,7 +65,7 @@ export function MarketingOsmoPlatformMock({
           <div className="flex items-center gap-1.5 px-1">
             <Sparkles className="size-3.5 text-[#b0ff57]" />
             <span className="text-[11px] font-semibold tracking-wide text-white">
-              ENEM+
+              {BRAND_NAME}
             </span>
           </div>
           <nav className="mt-4 space-y-0.5">

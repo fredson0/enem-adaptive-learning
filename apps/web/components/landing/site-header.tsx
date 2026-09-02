@@ -2,6 +2,7 @@
 
 import { ScrollingTicker } from "@/components/landing/scrolling-ticker";
 import { SlideHoverButton } from "@/components/landing/slide-hover-button";
+import { BRAND_NAME } from "@/lib/brand";
 import { MARKETING_OSMO_COLORS } from "@/lib/marketing-osmo-tokens";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
@@ -573,7 +574,7 @@ export function SiteHeader({
                 HEADER_LOGO_CLASS,
               )}
             >
-              ENEM+
+              {BRAND_NAME}
             </Link>
 
             <Link
@@ -587,7 +588,7 @@ export function SiteHeader({
               )}
               aria-hidden={!showLogo}
             >
-              ENEM+
+              {BRAND_NAME}
             </Link>
 
             <div className="flex items-center gap-2 sm:gap-3">

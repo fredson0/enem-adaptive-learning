@@ -11,6 +11,7 @@ import { UserAvatar } from "@/components/workspace/user-avatar";
 import { OsmoThemeToggle } from "@/components/workspace/osmo-theme-toggle";
 import { useWorkspaceSidebar } from "@/components/workspace/workspace-sidebar-context";
 import { cn } from "@/lib/utils";
+import { BRAND_NAME } from "@/lib/brand";
 import {
   isActivePath,
   PROFILE_NAV,
@@ -108,9 +109,9 @@ export function WorkspaceSidebar(_props: WorkspaceSidebarProps) {
             goToTutor();
             if (isMobile) close();
           }}
-          className="text-xl font-bold tracking-[0.16em] text-osmo uppercase"
+          className="text-xl font-bold tracking-[0.08em] text-osmo uppercase"
         >
-          ENEM+
+          {BRAND_NAME}
         </Link>
         {isMobile ? (
           <button

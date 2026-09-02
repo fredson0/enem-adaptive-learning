@@ -85,13 +85,13 @@ function montarHtmlResumo(resumo: PdfResumoPayload): string {
 </head>
 <body>
   <header>
-    <div class="marca">ENEM+ · Material de estudo</div>
+    <div class="marca">ENEM+IA · Material de estudo</div>
     <h1>${escapeHtml(resumo.titulo)}</h1>
     ${resumo.subtitulo ? `<p class="subtitulo">${escapeHtml(resumo.subtitulo)}</p>` : ""}
   </header>
   ${secoes}
   ${dica}
-  <footer>Gerado pelo tutor IA do ENEM+ · Uso pessoal para estudos</footer>
+  <footer>Gerado pelo tutor IA do ENEM+IA · Uso pessoal para estudos</footer>
 </body>
 </html>`;
 }

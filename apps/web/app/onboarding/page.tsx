@@ -109,7 +109,7 @@ export default function OnboardingPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-lg rounded-[14px] border border-white/[0.06] bg-[#1e1d1b] p-5 sm:p-8"
       >
-        <h1 className="text-2xl font-medium text-white">Bem-vindo ao ENEM+</h1>
+        <h1 className="text-2xl font-medium text-white">Bem-vindo ao ENEM+IA</h1>
         <p className="mt-2 text-sm text-white/50">
           Conte um pouco sobre você para personalizar o tutor.
         </p>

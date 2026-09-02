@@ -201,13 +201,13 @@ export function montarHtmlQuestoes(payload: PdfQuestoesPayload): string {
 </head>
 <body>
   <header class="doc">
-    <div class="marca">ENEM+ · Banco de questões</div>
+    <div class="marca">ENEM+IA · Banco de questões</div>
     <h1>${escapeHtml(payload.titulo)}</h1>
     <p class="subtitulo">${payload.questoes.length} questão${payload.questoes.length === 1 ? "" : "ões"} oficiais do ENEM${payload.incluirGabarito ? " · gabarito ao final" : ""}</p>
   </header>
   ${questoesHtml}
   ${gabarito}
-  <footer>Material gerado pelo ENEM+ · Uso pessoal para estudos</footer>
+  <footer>Material gerado pelo ENEM+IA · Uso pessoal para estudos</footer>
 </body>
 </html>`;
 }

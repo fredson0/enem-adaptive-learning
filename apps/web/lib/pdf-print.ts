@@ -19,7 +19,7 @@ export function sanitizarNomeArquivo(titulo: string): string {
 }
 
 /** Abre a janela no clique do usuário (antes do await) para evitar bloqueio de pop-up. */
-export function abrirJanelaImpressao(titulo = "ENEM+"): Window | null {
+export function abrirJanelaImpressao(titulo = "ENEM+IA"): Window | null {
   try {
     const janela = window.open("about:blank", "_blank");
     if (janela && !janela.closed) {

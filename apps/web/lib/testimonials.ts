@@ -17,7 +17,7 @@ export const MOCK_TESTIMONIALS: DesignTestimonialItem[] = [
     quote:
       "Simulado + trilha no mesmo lugar economiza tempo. Estudo o que importa em vez de ficar pulando de matéria sem critério.",
     author: "Juliana R.",
-    role: "Cursinho + ENEM+, RJ",
+    role: "Cursinho + ENEM+IA, RJ",
   },
 ];
 

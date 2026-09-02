@@ -1,37 +1,93 @@
 "use client";
 
 import { MARKETING_OSMO_COLORS } from "@/lib/marketing-osmo-tokens";
-import { GoogleLogin } from "@react-oauth/google";
+import { useGoogleOAuth } from "@react-oauth/google";
+import { useEffect, useRef } from "react";
 
 type OsmoGoogleLoginButtonProps = {
   onSuccess: (credential?: string) => void;
   onError: () => void;
 };
 
-/** Visual Osmo (roxo) com o clique real no Google Identity. */
+type GoogleTokenClient = {
+  requestAccessToken: () => void;
+};
+
+type GoogleOAuth2 = {
+  initTokenClient: (config: {
+    client_id: string;
+    scope: string;
+    callback: (response: { access_token?: string; error?: string }) => void;
+    error_callback?: () => void;
+  }) => GoogleTokenClient;
+};
+
+function getGoogleOAuth2(): GoogleOAuth2 | undefined {
+  const google = (window as Window & {
+    google?: { accounts?: { oauth2?: GoogleOAuth2 } };
+  }).google;
+  return google?.accounts?.oauth2;
+}
+
 export function OsmoGoogleLoginButton({
   onSuccess,
   onError,
 }: OsmoGoogleLoginButtonProps) {
+  const { clientId } = useGoogleOAuth();
+  const clientRef = useRef<GoogleTokenClient | null>(null);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  onSuccessRef.current = onSuccess;
+  onErrorRef.current = onError;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const tryInit = () => {
+      const oauth2 = getGoogleOAuth2();
+      if (!oauth2 || cancelled) return false;
+
+      clientRef.current = oauth2.initTokenClient({
+        client_id: clientId,
+        scope: "openid email profile",
+        callback: (response) => {
+          if (response.error || !response.access_token) {
+            onErrorRef.current();
+            return;
+          }
+          onSuccessRef.current(response.access_token);
+        },
+        error_callback: () => onErrorRef.current(),
+      });
+      return true;
+    };
+
+    if (tryInit()) return;
+
+    const intervalId = window.setInterval(() => {
+      if (tryInit()) window.clearInterval(intervalId);
+    }, 200);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [clientId]);
+
   return (
-    <div className="group relative h-12 w-full cursor-pointer overflow-hidden rounded-xl">
-      <div
-        className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center text-sm font-medium text-white transition-colors group-hover:brightness-110"
-        style={{ backgroundColor: MARKETING_OSMO_COLORS.ctaButton }}
-      >
-        Continuar com o Google
-      </div>
-      <div className="absolute inset-0 z-20 flex scale-[1.4] items-center justify-center opacity-[0.01]">
-        <GoogleLogin
-          onSuccess={(response) => onSuccess(response.credential)}
-          onError={onError}
-          theme="filled_black"
-          shape="rectangular"
-          size="large"
-          text="continue_with"
-          width={400}
-        />
-      </div>
-    </div>
+    <button
+      type="button"
+      onClick={() => {
+        if (!clientRef.current) {
+          onError();
+          return;
+        }
+        clientRef.current.requestAccessToken();
+      }}
+      className="flex h-12 w-full items-center justify-center rounded-xl text-sm font-medium text-white transition hover:brightness-110"
+      style={{ backgroundColor: MARKETING_OSMO_COLORS.ctaButton }}
+    >
+      Continuar com o Google
+    </button>
   );
 }

@@ -279,7 +279,7 @@ export function adaptarAreaParaAssunto(
   });
 
   const proximaEtapa = etapas.find((etapa) => !etapa.concluida) ?? null;
-  const perguntaTutor = `Estou estudando ${foco} em ${contexto} no ENEM+. Quais são os tópicos mais importantes de ${foco} e por onde devo começar?`;
+  const perguntaTutor = `Estou estudando ${foco} em ${contexto} no ENEM+IA. Quais são os tópicos mais importantes de ${foco} e por onde devo começar?`;
 
   return {
     ...area,

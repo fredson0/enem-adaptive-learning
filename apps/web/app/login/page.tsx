@@ -93,7 +93,7 @@ function LoginContent() {
         className="relative min-h-screen overflow-hidden"
         style={{ backgroundColor: MARKETING_OSMO_COLORS.osmoCanvas }}
       >
-        <SiteHeader variant="auth" />
+        <SiteHeader />
         <div className="flex min-h-screen items-center justify-center">
           <div className="size-8 animate-pulse rounded-full bg-white/10" />
         </div>
@@ -117,9 +117,9 @@ function LoginContent() {
           />
         </div>
 
-        <SiteHeader variant="auth" />
+        <SiteHeader />
 
-        <div className="relative z-20 flex min-h-svh flex-col items-center justify-center px-5 pt-24 pb-16 sm:px-6 sm:pt-28">
+        <div className="relative z-10 flex min-h-svh flex-col items-center justify-center px-5 pt-28 pb-16 sm:px-6 sm:pt-36">
           <MarketingClipTitle
             as="h1"
             playOnMount
@@ -132,7 +132,7 @@ function LoginContent() {
             <p
               className={`${caveat.className} pointer-events-none absolute -top-7 right-0 hidden text-lg text-[#b0ff57] sm:block`}
             >
-              Try ENEM+
+              Try ENEM+IA
               <span className="ml-1 inline-block rotate-[-12deg]">↑</span>
             </p>
 
@@ -152,7 +152,11 @@ function LoginContent() {
                 {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? (
                   <OsmoGoogleLoginButton
                     onSuccess={handleSuccess}
-                    onError={() => setError("Login com Google cancelado.")}
+                    onError={() =>
+                      setError(
+                        "Não foi possível entrar com o Google. Tente de novo ou recarregue a página.",
+                      )
+                    }
                   />
                 ) : (
                   <p className="text-center text-sm text-amber-400">
@@ -206,7 +210,7 @@ export default function LoginPage() {
           className="relative min-h-screen overflow-hidden"
           style={{ backgroundColor: MARKETING_OSMO_COLORS.osmoCanvas }}
         >
-          <SiteHeader variant="auth" />
+          <SiteHeader />
           <div className="flex min-h-screen items-center justify-center">
             <div className="size-8 animate-pulse rounded-full bg-white/10" />
           </div>

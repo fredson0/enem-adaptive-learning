@@ -49,7 +49,7 @@ describe('avaliarEscopoMensagem', () => {
 describe('respostaForaEscopo', () => {
   it('responde exfiltração sem mencionar detalhes internos', () => {
     const resposta = respostaForaEscopo('exfiltracao');
-    expect(resposta).toContain('ENEM+');
+    expect(resposta).toContain('ENEM+IA');
     expect(resposta.toLowerCase()).not.toContain('system prompt');
   });
 });

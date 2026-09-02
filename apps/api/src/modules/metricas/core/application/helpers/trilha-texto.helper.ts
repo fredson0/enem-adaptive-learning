@@ -12,9 +12,9 @@ export function formatarListaAssuntos(assuntos: string[]): string {
 export function formatarPerguntaTutor(label: string, assuntos: string[]): string {
   const lista = formatarListaAssuntos(assuntos);
   if (assuntos.length <= 1) {
-    return `Estou montando minha trilha no ENEM+. Minha maior dificuldade em ${label} é ${lista}. Por onde devo começar a estudar?`;
+    return `Estou montando minha trilha no ENEM+IA. Minha maior dificuldade em ${label} é ${lista}. Por onde devo começar a estudar?`;
   }
-  return `Estou montando minha trilha no ENEM+. Minhas maiores dificuldades em ${label} são ${lista}. Por onde devo começar a estudar?`;
+  return `Estou montando minha trilha no ENEM+IA. Minhas maiores dificuldades em ${label} são ${lista}. Por onde devo começar a estudar?`;
 }
 
 export function montarMetaSemanalDinamica(input: {

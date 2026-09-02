@@ -1,7 +1,7 @@
 import type { ModoSimuladoSlug } from "@/lib/simulado-modos";
 import { MARKETING_OSMO_COLORS } from "@/lib/marketing-osmo-tokens";
 
-/** Azul de destaque — terceiro modo (cronômetro), alinhado à paleta ENEM+. */
+/** Azul de destaque — terceiro modo (cronômetro), alinhado à paleta ENEM+IA. */
 const ACCENT_BLUE = "#60a5fa";
 
 export type SimuladoModoVisual = {

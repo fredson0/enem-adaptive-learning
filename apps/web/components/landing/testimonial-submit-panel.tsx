@@ -161,7 +161,7 @@ export function TestimonialSubmitPanel({
                       {hasExisting ? "Atualizar depoimento" : "Deixar meu depoimento"}
                     </h2>
                     <p className="mt-1 text-sm text-[#0b1220]/55">
-                      Conte em poucas linhas como o ENEM+ ajudou nos seus estudos.
+                      Conte em poucas linhas como o ENEM+IA ajudou nos seus estudos.
                     </p>
                   </div>
                   <button

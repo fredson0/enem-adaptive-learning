@@ -74,7 +74,7 @@ export class PersonalizarTrilhaUseCase {
       Math.round(trilha.tempoDiarioMinutos / 4),
     );
 
-    const prompt = `Você é o tutor IA do ENEM+. Crie um plano de estudo semanal personalizado para a trilha do aluno.
+    const prompt = `Você é o tutor IA do ENEM+IA. Crie um plano de estudo semanal personalizado para a trilha do aluno.
 
 Dados:
 - Objetivo ENEM: ${trilha.metaEnem ?? 'não informado'}

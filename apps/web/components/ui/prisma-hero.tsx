@@ -15,6 +15,7 @@ import {
   subscribeLandingHeroVideoHandoff,
 } from "@/lib/landing-hero-media";
 import { cn } from "@/lib/utils";
+import { BRAND_NAME } from "@/lib/brand";
 
 const HERO_REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -183,7 +184,7 @@ export const WordsPullUpMultiStyle = ({
   );
 };
 
-/* ---------------- Hero ENEM+ ---------------- */
+/* ---------------- Hero ENEM+IA ---------------- */
 function EnemHero({ revealed = true }: { revealed?: boolean }) {
   const heroVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -251,8 +252,8 @@ function EnemHero({ revealed = true }: { revealed?: boolean }) {
       >
         <div className="grid grid-cols-12 items-end gap-4">
           <div className="col-span-12 lg:col-span-8">
-            <h1 className="font-display text-[22vw] leading-[0.85] font-normal tracking-[-0.06em] text-[#E1E0CC] sm:text-[20vw] md:text-[18vw] lg:text-[16vw] xl:text-[14vw]">
-              <WordsPullUp text="ENEM+" showAsterisk play={revealed} />
+            <h1 className="font-display text-[16vw] leading-[0.85] font-normal tracking-[-0.06em] text-[#E1E0CC] sm:text-[14vw] md:text-[12.5vw] lg:text-[11vw] xl:text-[9.5vw]">
+              <WordsPullUp text={BRAND_NAME} showAsterisk play={revealed} />
             </h1>
           </div>
 

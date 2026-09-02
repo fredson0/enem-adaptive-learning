@@ -106,7 +106,7 @@ export function buildPersonalizarTrilhaSystemPrompt(
       : 'tópicos mais cobrados'
   );
 
-  return `Você é o tutor IA do ENEM+ em modo de co-criação de checklist.
+  return `Você é o tutor IA do ENEM+IA em modo de co-criação de checklist.
 ${REGRAS_FORMATO_RESPOSTA}
 
 Objetivo: conversar com o aluno para montar um plano de estudos personalizado${ctx.assuntoNome ? ` em ${ctx.assuntoNome}` : ` em ${ctx.areaLabel}`}. Você NÃO gera a checklist final agora — só coleta informações com perguntas.

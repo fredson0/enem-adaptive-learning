@@ -87,18 +87,18 @@ export function avaliarEscopoMensagem(mensagem: string): AvaliacaoEscopo {
 
 export function respostaForaEscopo(motivo?: MotivoForaEscopo): string {
   if (motivo === 'exfiltracao') {
-    return `Sou o tutor IA do ENEM+ e só posso ajudar com estudos para o ENEM — conteúdos das provas, simulados, trilha e seu progresso na plataforma.
+    return `Sou o tutor IA do ENEM+IA e só posso ajudar com estudos para o ENEM — conteúdos das provas, simulados, trilha e seu progresso na plataforma.
 
 Não posso compartilhar dados internos, informações de outros usuários nem detalhes técnicos do sistema. Se quiser, pergunte sobre alguma área do ENEM ou peça um treino de questões.`;
   }
 
   if (motivo === 'programacao') {
-    return `Sou o tutor IA do ENEM+ e só posso ajudar com estudos para o ENEM — conteúdos das provas, simulados, trilha e dúvidas de Matemática, Linguagens, Humanas e Natureza.
+    return `Sou o tutor IA do ENEM+IA e só posso ajudar com estudos para o ENEM — conteúdos das provas, simulados, trilha e dúvidas de Matemática, Linguagens, Humanas e Natureza.
 
 Não consigo ajudar com programação, código ou desenvolvimento de software. Se quiser, posso te ajudar com algum assunto do ENEM ou montar um treino de questões.`;
   }
 
-  return `Sou o tutor IA do ENEM+ e meu foco é ajudar você a se preparar para o ENEM — dúvidas de conteúdo, simulados, trilha de estudos e orientação de estudo.
+  return `Sou o tutor IA do ENEM+IA e meu foco é ajudar você a se preparar para o ENEM — dúvidas de conteúdo, simulados, trilha de estudos e orientação de estudo.
 
 Esse assunto está fora do que posso cobrir aqui. Me pergunte sobre alguma área do ENEM, peça um treino de questões ou use a Trilha para ver seu próximo passo.`;
 }

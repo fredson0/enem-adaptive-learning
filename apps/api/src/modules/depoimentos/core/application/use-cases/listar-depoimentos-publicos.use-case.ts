@@ -23,7 +23,7 @@ export class ListarDepoimentosPublicosUseCase {
     const reais: DepoimentoItem[] = registros.map((registro) => ({
       quote: registro.texto,
       author: registro.usuario.nome,
-      role: registro.papel?.trim() || 'Estudante ENEM+',
+      role: registro.papel?.trim() || 'Estudante ENEM+IA',
       isReal: true,
     }));
 

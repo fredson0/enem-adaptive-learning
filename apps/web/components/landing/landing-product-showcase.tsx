@@ -121,7 +121,7 @@ export function LandingProductShowcase() {
       <div className="mx-auto mt-8 max-w-3xl px-2 text-center md:mt-14 md:px-4">
         <BlurRevealInView delay={0.08}>
           <p className="font-display text-[clamp(1.15rem,4.5vw,2rem)] leading-[1.28] font-medium tracking-[-0.03em] text-balance text-[#0b1220]">
-            ENEM+ é uma plataforma que evolui com você — simulados, tutor IA, trilha
+            ENEM+IA é uma plataforma que evolui com você — simulados, tutor IA, trilha
             e métricas no mesmo lugar, sempre ajustados ao que você ainda precisa
             dominar.
           </p>

@@ -15,7 +15,7 @@ export const MARKETING_FAQ_CATEGORIES: MarketingFaqCategory[] = [
     label: "Geral",
     items: [
       {
-        question: "O que é o ENEM+?",
+        question: "O que é o ENEM+IA?",
         answer:
           "É uma plataforma educacional adaptativa para o ENEM: simulados com questões reais, métricas de proficiência, trilha personalizada e tutor com IA. O foco é inclusão digital — especialmente para estudantes de escolas públicas.",
       },

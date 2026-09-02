@@ -98,7 +98,7 @@ function normalizarPlano(raw: Record<string, unknown>): PedidoSimuladoInterpreta
 }
 
 export function buildInterpretarPedidoSimuladoPrompt(pedido: string) {
-  return `Você é o planejador de simulados do ENEM+. Converta o pedido do aluno em filtros para buscar questões REAIS no banco (não invente questões).
+  return `Você é o planejador de simulados do ENEM+IA. Converta o pedido do aluno em filtros para buscar questões REAIS no banco (não invente questões).
 
 Retorne APENAS um JSON válido, sem markdown, com aspas duplas em todos os valores string, neste formato:
 {

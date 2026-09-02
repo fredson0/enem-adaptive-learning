@@ -227,7 +227,7 @@ export function TutorChatView({
 
     setError(null);
     setPdfLoading({ index: assistantIndex, tipo: "resumo" });
-    const janelaImpressao = abrirJanelaImpressao("Material ENEM+");
+    const janelaImpressao = abrirJanelaImpressao("Material ENEM+IA");
 
     try {
       const response = await gerarPdfResumoTutor({
@@ -271,7 +271,7 @@ export function TutorChatView({
 
     setError(null);
     setPdfLoading({ index: assistantIndex, tipo: "questoes" });
-    const janelaImpressao = abrirJanelaImpressao("Questões ENEM+");
+    const janelaImpressao = abrirJanelaImpressao("Questões ENEM+IA");
 
     try {
       const response = await gerarPdfQuestoesTutor({
@@ -473,7 +473,7 @@ export function TutorChatView({
         showHeader
         docked={hasMessages}
         extendLeftPx={0}
-        title="Pergunte ao tutor ENEM+"
+        title="Pergunte ao tutor ENEM+IA"
         subtitle="Dúvidas sobre o ENEM, simulados e trilha. Peça explicações ou treinos — não responde programação ou assuntos fora do ENEM."
         basePlaceholder="Me explica"
         suggestions={sugestoesAnimadas}

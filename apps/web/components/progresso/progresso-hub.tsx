@@ -33,7 +33,7 @@ const HUB_CARDS = [
     title: "Desempenho",
     subtitle: "Média, áreas e evolução",
     image: "/progresso/desempenho.png",
-    imageAlt: "Gráfico de evolução do desempenho no ENEM+",
+    imageAlt: "Gráfico de evolução do desempenho no ENEM+IA",
     icon: BarChart3,
     badgeClass:
       "text-[#3d5a18] dark:text-[#b0ff57] border-[#b0ff57]/30 bg-[#b0ff57]/12 dark:border-[#b0ff57]/25 dark:bg-[#b0ff57]/10",
@@ -46,7 +46,7 @@ const HUB_CARDS = [
     title: "Rotina",
     subtitle: "Ritmo, metas e consistência",
     image: "/progresso/rotina.png",
-    imageAlt: "Painel da semana de estudo no ENEM+",
+    imageAlt: "Painel da semana de estudo no ENEM+IA",
     icon: CalendarDays,
     badgeClass:
       "text-[#4a3db8] dark:text-[#7c6cff] border-[#7c6cff]/30 bg-[#7c6cff]/10 dark:border-[#7c6cff]/25 dark:bg-[#7c6cff]/10",
@@ -59,7 +59,7 @@ const HUB_CARDS = [
     title: "Foco agora",
     subtitle: "Lacunas e próximo passo",
     image: "/progresso/focoAgora.png",
-    imageAlt: "Alvo do próximo passo e da principal lacuna no ENEM+",
+    imageAlt: "Alvo do próximo passo e da principal lacuna no ENEM+IA",
     icon: Target,
     badgeClass:
       "text-[#1e3a8a] dark:text-[#60a5fa] border-[#60a5fa]/30 bg-[#60a5fa]/10 dark:border-[#60a5fa]/25 dark:bg-[#60a5fa]/10",

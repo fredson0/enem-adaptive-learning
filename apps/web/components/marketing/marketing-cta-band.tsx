@@ -104,7 +104,7 @@ export function MarketingCtaBand({
                     <div className="relative h-full min-h-[320px] overflow-hidden rounded-tl-2xl rounded-tr-xl border border-white/10 border-r-0 border-b-0 bg-[#0d0d0d]">
                       <Image
                         src={resolvedImageSrc}
-                        alt="Interface do Tutor IA na plataforma ENEM+"
+                        alt="Interface do Tutor IA na plataforma ENEM+IA"
                         fill
                         sizes="(max-width: 1024px) 100vw, 70vw"
                         quality={92}

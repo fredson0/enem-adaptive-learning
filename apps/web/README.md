@@ -1,4 +1,4 @@
-# ENEM+ — Frontend (`apps/web`)
+# ENEM+IA — Frontend (`apps/web`)
 
 Next.js 16 · Tailwind v4 · Inter · GSAP
 

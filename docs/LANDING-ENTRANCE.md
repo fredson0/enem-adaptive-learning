@@ -38,15 +38,15 @@ http://localhost:3001/?skip-intro=1
 ┌─────────────────────────────────────────────────────────────┐
 │  FASE 1 — TITLE IN (~750ms)                                 │
 │                                                             │
-│              ENEM+                                          │
+│              ENEM+IA                                        │
 │         (fundo #e6e6e6, texto #0b0b0b)                     │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  FASE 2 — SPLIT (~950ms)                                    │
 │                                                             │
-│     ENE  ┌──────────┐  M+                                   │
-│          │  vídeo/  │  (entre o E e o M de ENEM+)           │
+│     ENE  ┌──────────┐  M+IA                                 │
+│          │  vídeo/  │  (entre o E e o M de ENEM+IA)         │
 │          │  imagem  │                                        │
 │          └──────────┘                                        │
 └─────────────────────────────────────────────────────────────┘
@@ -61,7 +61,7 @@ http://localhost:3001/?skip-intro=1
 │  FASE 4 — EXPAND (2200ms)                                   │
 │                                                             │
 │  • Vídeo ancorado no centro da viewport (não no flex)       │
-│  • Spacer no flex empurra "ENE" e "M+" para os lados        │
+│  • Spacer no flex empurra "ENE" e "M+IA" para os lados      │
 │  • Cresce 22vw×16vw → 100vw×100svh sem faixa cinza lateral  │
 └─────────────────────────────────────────────────────────────┘
                           ↓
@@ -135,10 +135,10 @@ app/page.tsx
 ### Fase 1 — título único
 - `ENEM` e `+` já estão no layout (gap 0, vídeo com largura 0)
 - Fade-in do bloco inteiro (`opacity`, `y`, `blur`)
-- Visualmente forma **ENEM+** sem trocar de DOM
+- Visualmente forma **ENEM+IA** sem trocar de DOM
 
 ### Fase 2 — split (empurrão)
-- Título dividido em **ENE** | spacer | **M+** (vídeo entre o E e o M)
+- Título dividido em **ENE** | spacer | **M+IA** (vídeo entre o E e o M)
 - O spacer no flex cresce de 0 → tamanho token e empurra as letras
 - O vídeo real fica em `absolute left-1/2 top-1/2` (centro da viewport), sincronizado com o spacer
 - Vídeo revelado pelo clip do retângulo (conteúdo em tamanho final, centralizado)

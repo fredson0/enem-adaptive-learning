@@ -1,5 +1,6 @@
 "use client";
 
+import { BRAND_FOOTER_LETTERS, BRAND_NAME } from "@/lib/brand";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
@@ -7,16 +8,14 @@ import { useEffect, useRef } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const BRAND_LETTERS = ["E", "N", "E", "M", "+"];
-
 function getLetterOffsets(index: number, total: number) {
   const center = (total - 1) / 2;
   const dist = index - center;
 
   return {
-    rotate: dist * 18,
-    y: Math.abs(dist) * 42 + dist * dist * 14,
-    x: dist * 10,
+    rotate: dist * 12,
+    y: Math.abs(dist) * 32 + dist * dist * 10,
+    x: dist * 8,
   };
 }
 
@@ -38,7 +37,7 @@ export function SiteFooter() {
 
     const ctx = gsap.context(() => {
       letters.forEach((letter, index) => {
-        const { rotate, y, x } = getLetterOffsets(index, BRAND_LETTERS.length);
+        const { rotate, y, x } = getLetterOffsets(index, BRAND_FOOTER_LETTERS.length);
         gsap.set(letter, {
           rotate,
           y,
@@ -78,9 +77,9 @@ export function SiteFooter() {
       <div className="relative left-1/2 flex flex-1 w-screen max-w-[100vw] -translate-x-1/2 items-end justify-center overflow-hidden px-2 pb-6 md:px-4 md:pb-10">
         <p
           className="font-display flex w-full max-w-[min(100vw,1680px)] items-end justify-between leading-[0.72] font-semibold tracking-[-0.05em] text-[#0b1220] select-none"
-          aria-label="ENEM+"
+          aria-label={BRAND_NAME}
         >
-          {BRAND_LETTERS.map((char, index) => (
+          {BRAND_FOOTER_LETTERS.map((char, index) => (
             <span
               key={`${char}-${index}`}
               ref={(el) => {
@@ -88,7 +87,7 @@ export function SiteFooter() {
               }}
               className="inline-block flex-1 text-center will-change-transform"
               style={{
-                fontSize: "clamp(5.5rem, 27vw, 19rem)",
+                fontSize: "clamp(3.25rem, 13vw, 12.5rem)",
               }}
             >
               {char}
@@ -111,7 +110,7 @@ export function SiteFooter() {
         </div>
 
         <p className="font-mono text-[10px] tracking-[0.12em] text-[#0b1220]/45 uppercase">
-          © 2026 ENEM+
+          © 2026 {BRAND_NAME}
         </p>
 
         <p className="text-center text-[10px] tracking-[0.08em] text-[#0b1220]/40 uppercase md:text-right">
