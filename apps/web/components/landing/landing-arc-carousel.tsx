@@ -1,5 +1,7 @@
 "use client";
 
+import { MarketingLoopVideo } from "@/components/marketing/marketing-loop-video";
+import { MARKETING_VIDEOS } from "@/lib/landing-hero-media";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
@@ -46,6 +48,9 @@ export const PRODUCT_FEATURES: ProductFeature[] = [
 
 const CARD_COUNT = PRODUCT_FEATURES.length;
 const LOOP_DURATION = 24;
+/** Uma volta rápida ao aparecer, depois desacelera até o ritmo de cruzeiro. */
+const INTRO_DURATION = 1.5;
+const INTRO_TRAVEL = CARD_COUNT;
 const RAD_TO_DEG = 180 / Math.PI;
 
 const CAROUSEL_LAYOUT = {
@@ -161,135 +166,38 @@ function getCardWidth(
   );
 }
 
+const FEATURE_VIDEO: Record<ProductFeature["preview"], string> = {
+  simulado: MARKETING_VIDEOS.simulados,
+  metricas: MARKETING_VIDEOS.progresso,
+  tutor: MARKETING_VIDEOS.tutor,
+  trilha: MARKETING_VIDEOS.trilha,
+  progresso: MARKETING_VIDEOS.progresso,
+};
+
+const PRELOAD_VIDEO_SRCS = [...new Set(Object.values(FEATURE_VIDEO))];
+
+function CarouselVideoPreloader() {
+  return (
+    <div className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0" aria-hidden>
+      {PRELOAD_VIDEO_SRCS.map((src) => (
+        <MarketingLoopVideo key={src} src={src} play={false} />
+      ))}
+    </div>
+  );
+}
+
 function FeaturePreview({
   type,
-  accent,
+  play,
 }: {
   type: ProductFeature["preview"];
-  accent: string;
+  play: boolean;
 }) {
-  if (type === "simulado") {
-    return (
-      <div
-        className="flex h-full flex-col justify-between p-5 md:p-6"
-        style={{ backgroundColor: accent }}
-      >
-        <p className="text-xs font-semibold tracking-[0.2em] text-[#1a2e12]/70 uppercase md:text-sm">
-          Simulado
-        </p>
-        <div className="grid grid-cols-5 gap-2 md:gap-2.5">
-          {["A", "B", "C", "D", "E"].map((letter, i) => (
-            <div
-              key={letter}
-              className={cn(
-                "flex aspect-square items-center justify-center rounded-md border text-sm font-semibold",
-                i === 2
-                  ? "border-[#1a2e12]/30 bg-[#1a2e12] text-white"
-                  : "border-[#1a2e12]/15 bg-white/55 text-[#1a2e12]/70",
-              )}
-            >
-              {letter}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (type === "metricas") {
-    return (
-      <div className="flex h-full flex-col justify-center gap-3 bg-[#1f1e1c] p-5 md:gap-4 md:p-6">
-        {[
-          { label: "MAT", value: 72 },
-          { label: "LIN", value: 58 },
-          { label: "HUM", value: 81 },
-          { label: "NAT", value: 64 },
-        ].map((area) => (
-          <div key={area.label} className="space-y-1.5">
-            <div className="flex justify-between text-[11px] font-medium tracking-[0.12em] text-white/45 md:text-xs">
-              <span>{area.label}</span>
-              <span>{area.value}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-white/10">
-              <div
-                className="h-full rounded-full bg-[#b0ff57]"
-                style={{ width: `${area.value}%` }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (type === "tutor") {
-    return (
-      <div
-        className="flex h-full flex-col justify-between p-5 md:p-6"
-        style={{ backgroundColor: accent }}
-      >
-        <p className="text-xs font-semibold tracking-[0.2em] text-[#3d3428]/70 uppercase md:text-sm">
-          Tutor IA
-        </p>
-        <div className="space-y-2.5">
-          <div className="max-w-[88%] rounded-xl rounded-bl-sm bg-white/75 px-3 py-2.5 text-[11px] leading-relaxed text-[#3d3428]/75 md:text-xs">
-            Por que errei a questão 12?
-          </div>
-          <div className="max-w-[92%] ml-auto rounded-xl rounded-br-sm bg-[#1e3a8a] px-3 py-2.5 text-[11px] leading-relaxed text-white/90 md:text-xs">
-            Você confundiu velocidade média com aceleração…
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (type === "trilha") {
-    return (
-      <div
-        className="flex h-full flex-col justify-between p-5 md:p-6"
-        style={{ backgroundColor: accent }}
-      >
-        <p className="text-xs font-semibold tracking-[0.2em] text-[#2f2860]/70 uppercase md:text-sm">
-          Trilha
-        </p>
-        <div className="space-y-2.5">
-          {["Funções", "Geometria", "Revisão"].map((item, i) => (
-            <div
-              key={item}
-              className="flex items-center gap-2.5 rounded-lg border border-[#2f2860]/10 bg-white/55 px-3 py-2.5"
-            >
-              <div
-                className={cn(
-                  "size-3.5 rounded-full border",
-                  i === 0
-                    ? "border-[#5b4dff] bg-[#5b4dff]"
-                    : "border-[#2f2860]/20",
-                )}
-              />
-              <span className="text-[11px] font-medium text-[#2f2860]/80 md:text-xs">
-                {item}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const src = FEATURE_VIDEO[type];
 
   return (
-    <div
-      className="flex h-full flex-col items-center justify-center p-5 md:p-6"
-      style={{ backgroundColor: accent }}
-    >
-      <p className="text-4xl font-semibold tracking-tight text-[#12352b] sm:text-5xl md:text-6xl">
-        68%
-      </p>
-      <p className="mt-1 text-[11px] font-medium tracking-[0.12em] text-[#12352b]/45 uppercase md:text-xs">
-        média geral
-      </p>
-      <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-[#12352b]/10">
-        <div className="h-full w-[68%] rounded-full bg-[#12352b]" />
-      </div>
+    <div className="relative h-full overflow-hidden bg-black">
+      <MarketingLoopVideo src={src} play={play} />
     </div>
   );
 }
@@ -304,6 +212,7 @@ export function LandingArcCarousel({
   const [progress, setProgress] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(1440);
   const progressRef = useRef(0);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const updateWidth = () => setViewportWidth(window.innerWidth);
@@ -313,22 +222,62 @@ export function LandingArcCarousel({
   }, []);
 
   useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    if (reducedMotion) return;
+    const cruiseSpeed = CARD_COUNT / LOOP_DURATION;
+    const intro = { value: 0 };
+    let started = false;
+    let tween: gsap.core.Tween | undefined;
 
-    const speed = 1 / (LOOP_DURATION / CARD_COUNT);
-
-    const onTick = (_time: number, deltaTime: number) => {
-      progressRef.current += (deltaTime / 1000) * speed;
-      setProgress(progressRef.current);
+    const syncProgress = () => {
+      setProgress(progressRef.current + intro.value);
     };
 
-    gsap.ticker.add(onTick);
+    const onTick = (_time: number, deltaTime: number) => {
+      progressRef.current += (deltaTime / 1000) * cruiseSpeed;
+      syncProgress();
+    };
+
+    const start = () => {
+      if (started) return;
+      started = true;
+
+      if (!reducedMotion) {
+        tween = gsap.fromTo(
+          intro,
+          { value: 0 },
+          {
+            value: INTRO_TRAVEL,
+            duration: INTRO_DURATION,
+            ease: "power3.out",
+            onUpdate: syncProgress,
+          },
+        );
+      }
+
+      gsap.ticker.add(onTick);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          start();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" },
+    );
+
+    observer.observe(node);
 
     return () => {
+      observer.disconnect();
+      tween?.kill();
       gsap.ticker.remove(onTick);
     };
   }, []);
@@ -353,6 +302,7 @@ export function LandingArcCarousel({
 
   return (
     <div
+      ref={rootRef}
       className={cn(
         isBackground
           ? cn(
@@ -388,6 +338,8 @@ export function LandingArcCarousel({
               : "h-[clamp(300px,40vw,520px)]",
         )}
       >
+        <CarouselVideoPreloader />
+
         {visibleCards.map(({ feature, offset, key }) => {
           const transform = getCardTransform(offset, viewportWidth, layout);
           const cardOpacity = isBackground
@@ -411,7 +363,7 @@ export function LandingArcCarousel({
               }}
             >
               <div style={{ height: previewHeight }}>
-                <FeaturePreview type={feature.preview} accent={feature.accent} />
+                <FeaturePreview type={feature.preview} play />
               </div>
               <div
                 className="flex items-center border-t-2 border-black bg-[#1a1a1a] px-4"

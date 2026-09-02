@@ -165,7 +165,6 @@ export function TutorChatView({
         anexoUrl,
       };
       setMessages([...historico, withUser]);
-      setStreamingText("");
 
       const response = await enviarMensagemTutorStream(
         {
@@ -334,7 +333,8 @@ export function TutorChatView({
                 onDismiss={() => setContextDismissed(true)}
               />
             ) : null}
-            {messages.map((message, index) => (
+            {messages.map((message, index) =>
+              message.role === "assistant" && !message.texto?.trim() ? null : (
               <div
                 key={`${message.role}-${index}`}
                 className={cn(
@@ -347,7 +347,7 @@ export function TutorChatView({
                     "rounded-2xl px-4 py-3 text-sm leading-relaxed sm:text-[15px]",
                     message.role === "user"
                       ? "osmo-surface-dark bg-[#1f3dbc]/90 text-white"
-                      : "border border-[var(--osmo-border)] bg-[var(--osmo-card)] text-osmo backdrop-blur-md",
+                      : "border border-[var(--osmo-border)] bg-[var(--osmo-card)] text-[var(--osmo-text)] backdrop-blur-md",
                   )}
                 >
                   {message.anexoUrl ? (
@@ -435,14 +435,14 @@ export function TutorChatView({
               </div>
             ))}
 
-            {streamingText !== null ? (
+            {streamingText?.trim() ? (
               <div className="mr-auto max-w-3xl">
-                <div className="rounded-2xl border border-[var(--osmo-border)] bg-[var(--osmo-card)] px-4 py-3 text-sm leading-relaxed text-osmo backdrop-blur-md sm:text-[15px]">
+                <div className="rounded-2xl border border-[var(--osmo-border)] bg-[var(--osmo-card)] px-4 py-3 text-sm leading-relaxed text-[var(--osmo-text)] backdrop-blur-md sm:text-[15px]">
                   <p className="whitespace-pre-wrap">{streamingText}</p>
                 </div>
               </div>
             ) : loading ? (
-              <div className="mr-auto inline-flex items-center gap-2 rounded-2xl border border-[var(--osmo-border)] bg-[var(--osmo-card)] px-4 py-3 text-sm text-osmo-muted">
+              <div className="mr-auto inline-flex items-center gap-2 rounded-2xl border border-[var(--osmo-border)] bg-[var(--osmo-card)] px-4 py-3 text-sm text-[var(--osmo-text-muted)]">
                 <Loader2 className="size-4 animate-spin" />
                 O tutor está pensando…
               </div>

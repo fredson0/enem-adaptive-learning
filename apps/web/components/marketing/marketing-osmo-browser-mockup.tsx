@@ -1,10 +1,8 @@
 "use client";
 
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
-import {
-  LANDING_PLATFORM_VIDEO_SRC,
-  LANDING_PLATFORM_VIDEO_TYPE,
-} from "@/lib/landing-hero-media";
+import { MarketingLoopVideo } from "@/components/marketing/marketing-loop-video";
+import { LANDING_PLATFORM_VIDEO_SRC } from "@/lib/landing-hero-media";
 import { cn } from "@/lib/utils";
 import { Play } from "lucide-react";
 
@@ -39,16 +37,7 @@ export function MarketingOsmoBrowserMockup({
       )}
     >
       {hasVideo ? (
-        <video
-          className="block h-auto w-full"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
-        >
-          <source src={videoSrc} type={LANDING_PLATFORM_VIDEO_TYPE} />
-        </video>
+        <MarketingLoopVideo src={videoSrc} fill={false} />
       ) : (
         <div className="relative flex aspect-video w-full flex-col items-center justify-center px-6 text-center">
           <div

@@ -33,6 +33,7 @@ type MarketingOsmoHeroShellProps = {
   titleClassName?: string;
   /** Vídeo da plataforma abaixo do hero (Tutor / Trilha). */
   platformVideo?: boolean;
+  platformVideoSrc?: string;
 };
 
 export function MarketingOsmoHeroShell({
@@ -49,6 +50,7 @@ export function MarketingOsmoHeroShell({
   titleOffset,
   titleClassName,
   platformVideo = false,
+  platformVideoSrc,
 }: MarketingOsmoHeroShellProps) {
   const isLight = variant === "light";
   const reduceMotion = useReducedMotion() ?? false;
@@ -203,7 +205,7 @@ export function MarketingOsmoHeroShell({
             className="mx-auto mt-10 h-16 w-px bg-gradient-to-b from-white/20 to-white/5 md:mt-14 md:h-20"
             aria-hidden
           />
-          <MarketingOsmoBrowserMockup />
+          <MarketingOsmoBrowserMockup videoSrc={platformVideoSrc} />
         </div>
       ) : null}
     </section>

@@ -10,7 +10,6 @@ import {
   resolverModelTier,
 } from '../../../core/application/helpers/ia-model-tier.helper';
 import { GroqIaAdapter } from './groq/groq-ia.adapter';
-import { GeminiIaAdapter } from './gemini/gemini-ia.adapter';
 import { NvidiaIaAdapter } from './nvidia/nvidia-ia.adapter';
 
 function chaveUtilizavel(value?: string): boolean {
@@ -29,6 +28,8 @@ function isFallbackWorthy(error: unknown): boolean {
     message.includes('limite') ||
     message.includes('quota') ||
     message.includes('429') ||
+    message.includes('resourceexhausted') ||
+    message.includes('request limit') ||
     message.includes('não configurada') ||
     message.includes('não foi possível conectar') ||
     message.includes('fetch failed') ||
@@ -47,12 +48,7 @@ export class IaEngineRouter implements IaEnginePort {
     @Inject(ConfigService) private readonly config: ConfigService,
     @Inject(NvidiaIaAdapter) private readonly nvidia: NvidiaIaAdapter,
     @Inject(GroqIaAdapter) private readonly groq: GroqIaAdapter,
-    @Inject(GeminiIaAdapter) private readonly gemini: GeminiIaAdapter,
   ) {}
-
-  private hasGemini(): boolean {
-    return chaveUtilizavel(this.config.get<string>('GEMINI_API_KEY'));
-  }
 
   private hasGroq(): boolean {
     return chaveUtilizavel(this.config.get<string>('GROQ_API_KEY'));
@@ -66,14 +62,6 @@ export class IaEngineRouter implements IaEnginePort {
     );
   }
 
-  /** Gemini só entra no fim — não faz parte da cadeia principal. */
-  private withGeminiLast(chain: IaEnginePort[]): IaEnginePort[] {
-    if (this.hasGemini()) {
-      chain.push(this.gemini);
-    }
-    return chain;
-  }
-
   private getVisionChain(): IaEnginePort[] {
     const chain: IaEnginePort[] = [this.nvidia];
 
@@ -81,12 +69,11 @@ export class IaEngineRouter implements IaEnginePort {
       chain.push(this.groq);
     }
 
-    return this.withGeminiLast(chain);
+    return chain;
   }
 
   /**
-   * Texto: NVIDIA (e Groq em exatas) primeiro.
-   * Gemini só se todos os outros falharem.
+   * Texto: NVIDIA (e Groq em exatas, se configurado). Sem Gemini.
    */
   private getTextChain(input: EnviarMensagemIaInput): IaEnginePort[] {
     const exatas = resolverModelTier(input) === 'exatas';
@@ -97,7 +84,7 @@ export class IaEngineRouter implements IaEnginePort {
           ? [this.nvidia, this.groq]
           : [this.nvidia];
 
-    return this.withGeminiLast(chain);
+    return chain;
   }
 
   private async runWithFallback(

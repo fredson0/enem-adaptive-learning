@@ -1,6 +1,8 @@
 "use client";
 
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
+import { MarketingLoopVideo } from "@/components/marketing/marketing-loop-video";
+import { MARKETING_VIDEOS } from "@/lib/landing-hero-media";
 import {
   MARKETING_OSMO_HERO_TITLE,
   MARKETING_OSMO_HERO_TITLE_OFFSET,
@@ -16,8 +18,7 @@ const caveat = Caveat({
   weight: ["500", "600"],
 });
 
-/** Cole aqui a URL do vídeo da plataforma quando estiver pronto. */
-export const COMO_FUNCIONA_VIDEO_SRC = "";
+export const COMO_FUNCIONA_VIDEO_SRC = MARKETING_VIDEOS.simulados;
 
 type ComoFuncionaOsmoHeroProps = {
   title?: string;
@@ -122,51 +123,26 @@ export function ComoFuncionaOsmoHero({
         />
       </div>
 
-      <div className="mx-auto max-w-[1100px] px-4 pb-20 md:px-8 md:pb-28">
+      <div className="mx-auto w-[min(94vw,1320px)] px-4 pb-20 md:px-8 md:pb-28">
         <MarketingBlurReveal delay={0.22}>
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#161616] shadow-[0_40px_100px_rgba(0,0,0,0.45)] md:rounded-3xl">
-            <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-              <span className="size-2.5 rounded-full bg-[#ff5f57]" />
-              <span className="size-2.5 rounded-full bg-[#febc2e]" />
-              <span className="size-2.5 rounded-full bg-[#28c840]" />
-              <span className="ml-3 font-mono text-[10px] tracking-wide text-white/35">
-                enemplus.app / plataforma
-              </span>
+          {hasVideo ? (
+            <div className="overflow-hidden rounded-[20px] border border-white/10 bg-[#151314] shadow-[0_40px_100px_rgba(0,0,0,0.45)] md:rounded-[28px]">
+              <MarketingLoopVideo src={COMO_FUNCIONA_VIDEO_SRC} fill={false} />
             </div>
-
-            <div className="relative aspect-video w-full bg-[#0d0d0d]">
-              {hasVideo ? (
-                <video
-                  src={COMO_FUNCIONA_VIDEO_SRC}
-                  className="size-full object-cover"
-                  controls
-                  playsInline
-                  preload="metadata"
+          ) : (
+            <div className="relative flex aspect-video w-full flex-col items-center justify-center overflow-hidden rounded-[20px] border border-dashed border-white/10 bg-[#0d0d0d] md:rounded-[28px]">
+              <div className="flex size-16 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">
+                <Play
+                  className="ml-1 size-7 text-white/35"
+                  fill="currentColor"
+                  strokeWidth={0}
                 />
-              ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-6 text-center">
-                  <div className="flex size-16 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">
-                    <Play
-                      className="ml-1 size-7 text-white/35"
-                      fill="currentColor"
-                      strokeWidth={0}
-                    />
-                  </div>
-                  <div>
-                    <p className="font-mono text-[10px] tracking-[0.22em] text-white/30 uppercase">
-                      Vídeo em breve
-                    </p>
-                    <p className="mt-2 max-w-md text-sm text-white/45 md:text-base">
-                      Espaço reservado para o vídeo da plataforma. Substitua em{" "}
-                      <code className="rounded bg-white/5 px-1.5 py-0.5 text-xs text-white/55">
-                        COMO_FUNCIONA_VIDEO_SRC
-                      </code>
-                    </p>
-                  </div>
-                </div>
-              )}
+              </div>
+              <p className="mt-4 font-mono text-[10px] tracking-[0.22em] text-white/30 uppercase">
+                Vídeo em breve
+              </p>
             </div>
-          </div>
+          )}
         </MarketingBlurReveal>
       </div>
     </section>

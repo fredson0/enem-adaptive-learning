@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
 } from '@nestjs/common';
 import { IdempotencyStatus, Prisma } from '@generated/prisma';
@@ -14,7 +15,7 @@ export type IdempotencyBeginResult =
 
 @Injectable()
 export class IdempotencyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   private expiresAt(): Date {
     const date = new Date();

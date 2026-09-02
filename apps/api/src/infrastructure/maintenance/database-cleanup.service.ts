@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../database/prisma.service';
 
@@ -8,7 +8,7 @@ const DIAS_RETENCAO_REFRESH_REVOGADO = 30;
 export class DatabaseCleanupService {
   private readonly logger = new Logger(DatabaseCleanupService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async limparRegistrosExpirados() {

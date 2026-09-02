@@ -7,6 +7,7 @@ import {
 import { MarketingBlurReveal } from "@/components/marketing/marketing-blur-reveal";
 import { MarketingCtaBand } from "@/components/marketing/marketing-cta-band";
 import { MarketingOsmoHeroShell } from "@/components/marketing/marketing-osmo-hero-shell";
+import { MARKETING_VIDEOS } from "@/lib/landing-hero-media";
 import { MARKETING_IMAGES } from "@/lib/marketing-images";
 import { Check, Route } from "lucide-react";
 
@@ -83,6 +84,7 @@ export function TrilhaPersonalizadaContent() {
         description="Após o diagnóstico, a plataforma monta uma trilha sequencial por área ENEM — com etapas, orientações e checklist conversacional com IA para adaptar o ritmo ao seu dia a dia."
         accent="prioridade com dados reais"
         platformVideo
+        platformVideoSrc={MARKETING_VIDEOS.trilha}
       />
 
       <ComoFuncionaStickyFeatures

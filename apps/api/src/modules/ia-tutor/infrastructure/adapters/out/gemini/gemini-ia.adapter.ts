@@ -1,6 +1,7 @@
 import {
   Inject,
   Injectable,
+  Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -18,6 +19,7 @@ import {
 
 /** Modelos estáveis no Google AI Studio (ver docs/ESCOLHA-MODELO-IA.md). */
 const MODEL_FALLBACKS = [
+  'gemini-flash-latest',
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
   'gemini-2.0-flash',
@@ -27,6 +29,7 @@ const REQUEST_TIMEOUT_MS = 45_000;
 
 @Injectable()
 export class GeminiIaAdapter implements IaEnginePort {
+  private readonly logger = new Logger(GeminiIaAdapter.name);
   private client: GoogleGenerativeAI | null = null;
 
   constructor(@Inject(ConfigService) private readonly config: ConfigService) {}
@@ -161,12 +164,15 @@ export class GeminiIaAdapter implements IaEnginePort {
       try {
         return await this.generateWithModel(modelName, input);
       } catch (error) {
-        if (error instanceof ServiceUnavailableException) {
-          throw error;
+    if (error instanceof ServiceUnavailableException) {
+          lastError = error;
+          continue;
         }
 
         const message =
           error instanceof Error ? error.message : 'Erro desconhecido';
+
+        this.logger.warn(`Gemini ${modelName} falhou: ${message}`);
 
         if (this.isRetryableError(message)) {
           lastError = error instanceof Error ? error : new Error(message);
@@ -179,9 +185,8 @@ export class GeminiIaAdapter implements IaEnginePort {
           );
         }
 
-        throw new ServiceUnavailableException(
-          `Falha ao consultar o tutor IA: ${message}`,
-        );
+        lastError = error instanceof Error ? error : new Error(message);
+        continue;
       }
     }
 

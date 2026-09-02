@@ -7,6 +7,7 @@ import {
 import { MarketingCtaBand } from "@/components/marketing/marketing-cta-band";
 import { MarketingIaRouterSection } from "@/components/marketing/marketing-ia-router-section";
 import { MarketingOsmoHeroShell } from "@/components/marketing/marketing-osmo-hero-shell";
+import { MARKETING_VIDEOS } from "@/lib/landing-hero-media";
 import { MARKETING_IMAGES } from "@/lib/marketing-images";
 import { Check } from "lucide-react";
 
@@ -68,6 +69,7 @@ export function TutorIaContent() {
         description="Tire dúvidas, envie fotos de questões, peça explicações de erros e receba orientação alinhada ao seu nível real — powered by NVIDIA NIM com fallback Gemini."
         accent="com contexto real do seu ENEM"
         platformVideo
+        platformVideoSrc={MARKETING_VIDEOS.tutor}
       />
 
       <ComoFuncionaStickyFeatures

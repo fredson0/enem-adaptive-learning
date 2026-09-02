@@ -1,13 +1,13 @@
 "use client";
 
 import { REVEAL_MOTION } from "@/lib/scroll-lenis-config";
-import { MARKETING_IMAGES } from "@/lib/marketing-images";
+import { MarketingLoopVideo } from "@/components/marketing/marketing-loop-video";
+import { MARKETING_VIDEOS } from "@/lib/landing-hero-media";
 import { MARKETING_OSMO_COLORS } from "@/lib/marketing-osmo-tokens";
 import { cn } from "@/lib/utils";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Caveat } from "next/font/google";
-import Image from "next/image";
 import Link from "next/link";
 import { useRef, type ReactNode } from "react";
 
@@ -114,15 +114,9 @@ export function LandingTrilhaShowcase() {
           </BlurReveal>
 
           <BlurReveal delay={0.16}>
-            <div className="overflow-hidden rounded-[24px] border border-black/10 bg-[#f3f3f1] shadow-[0_24px_70px_rgba(0,0,0,0.08)]">
-              <div className="relative aspect-[4/3]">
-                <Image
-                  src={MARKETING_IMAGES.trilhaAreas}
-                  alt="Trilha personalizada por área do ENEM"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
+            <div className="overflow-hidden rounded-[24px] border border-black/10 bg-[#0d0d0d] shadow-[0_24px_70px_rgba(0,0,0,0.08)]">
+              <div className="relative aspect-video">
+                <MarketingLoopVideo src={MARKETING_VIDEOS.trilha} />
               </div>
             </div>
           </BlurReveal>

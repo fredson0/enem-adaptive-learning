@@ -18,17 +18,23 @@ import {
   montarCandidatosModelo,
   resolverModelTier,
 } from '../../../../core/application/helpers/ia-model-tier.helper';
-import { streamOpenAiChatCompletion } from '../openai-stream.helper';
+import {
+  streamOpenAiChatCompletion,
+  stripThinkTags,
+} from '../openai-stream.helper';
 
 const NVIDIA_BASE_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
 /**
- * Primário: Nemotron 3 Nano Omni 30B — único Nemotron hosted que ainda
- * responde após o EOL de 26/08/2026 (Nano 9B/8B, Llama 3.1/3.3 e Super 49B).
+ * Cadeia NVIDIA-only (sem Gemini).
+ * Texto rápido: GPT-OSS 20B (pool separado do Omni, que satura em 16/16).
+ * Exatas: GPT-OSS 120B. Visão: Llama 3.2 Vision.
  */
-const NVIDIA_TEXT_DEFAULT = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
-const NVIDIA_TEXT_FAST_FALLBACK = 'openai/gpt-oss-20b';
+const NVIDIA_TEXT_DEFAULT = 'openai/gpt-oss-20b';
+const NVIDIA_TEXT_FAST_FALLBACK = 'microsoft/phi-4-mini-instruct';
 const NVIDIA_TEXT_EXATAS = 'openai/gpt-oss-120b';
+const NVIDIA_TEXT_EXATAS_ALT = 'qwen/qwen3-next-80b-a3b-instruct';
+const NVIDIA_OMNI = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
 
 /** IDs mortos (410/timeout) → sucessor vivo, para NVIDIA_MODEL antigo no .env. */
 const MODELOS_RETIRADOS: Record<string, string> = {
@@ -37,7 +43,7 @@ const MODELOS_RETIRADOS: Record<string, string> = {
   'nvidia/nvidia-nemotron-nano-9b-v2': NVIDIA_TEXT_DEFAULT,
   'nvidia/llama-3.1-nemotron-nano-8b-v1': NVIDIA_TEXT_DEFAULT,
   'nvidia/nemotron-mini-4b-instruct': NVIDIA_TEXT_DEFAULT,
-  'meta/llama-3.1-8b-instruct': NVIDIA_TEXT_FAST_FALLBACK,
+  'meta/llama-3.1-8b-instruct': NVIDIA_TEXT_DEFAULT,
   'meta/llama-3.3-70b-instruct': NVIDIA_TEXT_EXATAS,
   'nvidia/llama-3.3-nemotron-super-49b-v1': NVIDIA_TEXT_EXATAS,
   'nvidia/llama-3.3-nemotron-super-49b-v1.5': NVIDIA_TEXT_EXATAS,
@@ -46,13 +52,15 @@ const MODELOS_RETIRADOS: Record<string, string> = {
 const TEXT_MODEL_FALLBACKS = [
   NVIDIA_TEXT_DEFAULT,
   NVIDIA_TEXT_FAST_FALLBACK,
+  'mistralai/mistral-nemotron',
   NVIDIA_TEXT_EXATAS,
+  NVIDIA_OMNI,
 ] as const;
 
 const TEXT_MODEL_EXATAS_FALLBACKS = [
   NVIDIA_TEXT_EXATAS,
+  NVIDIA_TEXT_EXATAS_ALT,
   NVIDIA_TEXT_DEFAULT,
-  NVIDIA_TEXT_FAST_FALLBACK,
 ] as const;
 
 const VISION_MODEL_FALLBACKS = [
@@ -60,23 +68,27 @@ const VISION_MODEL_FALLBACKS = [
   'meta/llama-3.2-90b-vision-instruct',
 ] as const;
 
-const TEXT_TIMEOUT_MS = 30_000;
+/** gpt-oss gasta tokens em reasoning — 30s/2048 costuma devolver bolha vazia. */
+const TEXT_TIMEOUT_MS = 90_000;
 const VISION_TIMEOUT_MS = 90_000;
 
 function extrairTextoNvidia(data: {
   choices?: {
-    message?: { content?: string; reasoning_content?: string };
+    message?: {
+      content?: string;
+      reasoning_content?: string;
+      reasoning?: string;
+    };
   }[];
 }): string {
   const message = data.choices?.[0]?.message;
   const bruto =
     message?.content?.trim() ||
     message?.reasoning_content?.trim() ||
+    message?.reasoning?.trim() ||
     '';
 
-  if (!bruto) return '';
-  if (!bruto.includes('</think>')) return bruto;
-  return bruto.split('</think>').pop()?.trim() ?? bruto;
+  return stripThinkTags(bruto);
 }
 
 @Injectable()
@@ -120,6 +132,19 @@ export class NvidiaIaAdapter implements IaEnginePort {
     return [...new Set(raw.map((model) => MODELOS_RETIRADOS[model] ?? model))];
   }
 
+  private isRateLimitError(message: string): boolean {
+    const lower = message.toLowerCase();
+    return (
+      lower.includes('429') ||
+      lower.includes('rate') ||
+      lower.includes('quota') ||
+      lower.includes('resourceexhausted') ||
+      lower.includes('resource exhausted') ||
+      lower.includes('request limit') ||
+      lower.includes('worker local')
+    );
+  }
+
   private isRetryableError(message: string): boolean {
     const lower = message.toLowerCase();
     return (
@@ -152,7 +177,7 @@ export class NvidiaIaAdapter implements IaEnginePort {
       messages,
       temperature: jsonMode ? 0.2 : 0.7,
       top_p: 0.9,
-      max_tokens: 2048,
+      max_tokens: jsonMode ? 2048 : 4096,
       stream,
       ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
     };
@@ -267,15 +292,15 @@ export class NvidiaIaAdapter implements IaEnginePort {
 
         this.logger.warn(`NVIDIA ${modelName} falhou: ${message}`);
 
-        if (this.isRetryableError(message)) {
-          lastError = error instanceof Error ? error : new Error(message);
-          continue;
-        }
-
-        if (message.includes('429') || message.toLowerCase().includes('rate')) {
+        if (this.isRateLimitError(message)) {
           throw new ServiceUnavailableException(
             'Limite da API NVIDIA atingido. Tente novamente em alguns minutos.',
           );
+        }
+
+        if (this.isRetryableError(message)) {
+          lastError = error instanceof Error ? error : new Error(message);
+          continue;
         }
 
         throw new ServiceUnavailableException(
@@ -322,15 +347,15 @@ export class NvidiaIaAdapter implements IaEnginePort {
 
         this.logger.warn(`NVIDIA stream ${modelName} falhou: ${message}`);
 
-        if (this.isRetryableError(message)) {
-          lastError = error instanceof Error ? error : new Error(message);
-          continue;
-        }
-
-        if (message.includes('429') || message.toLowerCase().includes('rate')) {
+        if (this.isRateLimitError(message)) {
           throw new ServiceUnavailableException(
             'Limite da API NVIDIA atingido. Tente novamente em alguns minutos.',
           );
+        }
+
+        if (this.isRetryableError(message)) {
+          lastError = error instanceof Error ? error : new Error(message);
+          continue;
         }
 
         throw new ServiceUnavailableException(
